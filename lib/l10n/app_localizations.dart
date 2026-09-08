@@ -1,21 +1,30 @@
 import 'package:flutter/material.dart';
 
+/// Gestionnaire de la langue active de l'application
 class AppLanguage extends ChangeNotifier {
   Locale _appLocale = const Locale('fr');
 
-  Locale get appLocal => _appLocale;
+  Locale get appLocale => _appLocale;
 
   void changeLanguage(Locale type) {
-    if (_appLocale == type) return;
+    if (_appLocale.languageCode == type.languageCode) return;
     _appLocale = type;
     notifyListeners();
   }
 }
 
+/// Dictionnaire et délégué de traduction multilingue (FR, EN, SW)
 class AppTranslations {
   final Locale locale;
 
   AppTranslations(this.locale);
+
+  static AppTranslations? of(BuildContext context) {
+    return Localizations.of<AppTranslations>(context, AppTranslations);
+  }
+
+  static const LocalizationsDelegate<AppTranslations> delegate =
+      _AppTranslationsDelegate();
 
   static final Map<String, Map<String, String>> _localizedValues = {
     'fr': {
@@ -51,6 +60,33 @@ class AppTranslations {
   };
 
   String translate(String key) {
-    return _localizedValues[locale.languageCode]?[key] ?? key;
+    return _localizedValues[locale.languageCode]?[key] ??
+        _localizedValues['fr']?[key] ??
+        key;
+  }
+}
+
+class _AppTranslationsDelegate
+    extends LocalizationsDelegate<AppTranslations> {
+  const _AppTranslationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) {
+    return ['fr', 'en', 'sw'].contains(locale.languageCode);
+  }
+
+  @override
+  Future<AppTranslations> load(Locale locale) async {
+    return AppTranslations(locale);
+  }
+
+  @override
+  bool shouldReload(_AppTranslationsDelegate old) => false;
+}
+
+/// Extension raccourcie pour appeler les traductions dans l'UI
+extension TranslationX on BuildContext {
+  String tr(String key) {
+    return AppTranslations.of(this)?.translate(key) ?? key;
   }
 }

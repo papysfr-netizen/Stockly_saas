@@ -1,227 +1,267 @@
-import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/journal_entry.dart';
+import '../models/payment_method.dart';
 
-/// Modes de règlement pris en charge
-enum PaymentMethod { cash, bank, mobileMoney, credit }
+/// Service centralisé de génération, nettoyage et synchronisation du journal comptable SYSCOHADA
+class AccountingJournalService {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-/// Modèle d'une ligne d'écriture comptable
-@immutable
-class JournalLine {
-  final String accountCode;
-  final String accountLabel;
-  final double debit;
-  final double credit;
+  /// Flux en temps réel des écritures comptables d'une entreprise
+  Stream<List<JournalEntry>> streamEcritures(String entrepriseId) {
+    if (entrepriseId.isEmpty) {
+      return Stream.value([]);
+    }
 
-  const JournalLine({
-    required this.accountCode,
-    required this.accountLabel,
-    this.debit = 0.0,
-    this.credit = 0.0,
-  });
-
-  Map<String, dynamic> toJson() => {
-        'accountCode': accountCode,
-        'accountLabel': accountLabel,
-        'debit': debit,
-        'credit': credit,
-      };
-}
-
-/// Modèle d'une pièce comptable (Journal)
-@immutable
-class JournalEntry {
-  final String id;
-  final DateTime date;
-  final String reference;
-  final String description;
-  final List<JournalLine> lines;
-
-  JournalEntry({
-    required this.id,
-    required this.date,
-    required this.reference,
-    required this.description,
-    required this.lines,
-  }) {
-    // RÈGLE COMPTABLE CRUCIALE : Équilibre Débit/Crédit
-    assert(
-      isBalanced,
-      'Écriture déséquilibrée pour $reference: Débit ($totalDebit) != Crédit ($totalCredit)',
-    );
+    return _firestore
+        .collection('entreprises')
+        .doc(entrepriseId)
+        .collection('ecritures_comptables')
+        .orderBy('date', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => JournalEntry.fromFirestore(doc))
+            .toList());
   }
 
-  double get totalDebit =>
-      lines.fold(0.0, (sum, line) => sum + line.debit);
+  /// Sauvegarde une écriture comptable unique
+  Future<void> saveJournalEntry(JournalEntry entry) async {
+    if (entry.entrepriseId.isEmpty) return;
 
-  double get totalCredit =>
-      lines.fold(0.0, (sum, line) => sum + line.credit);
+    await _firestore
+        .collection('entreprises')
+        .doc(entry.entrepriseId)
+        .collection('ecritures_comptables')
+        .doc(entry.id)
+        .set(entry.toFirestore());
+  }
 
-  bool get isBalanced => (totalDebit - totalCredit).abs() < 0.001;
+  /// Sauvegarde un lot d'écritures en respectant le plafond de 400 opérations par batch Firestore
+  Future<void> saveJournalEntries(List<JournalEntry> entries) async {
+    if (entries.isEmpty) return;
 
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'date': date.toIso8601String(),
-        'reference': reference,
-        'description': description,
-        'totalAmount': totalDebit,
-        'lines': lines.map((l) => l.toJson()).toList(),
-      };
-}
+    WriteBatch batch = _firestore.batch();
+    int opCount = 0;
 
-/// Service de génération automatique des pièces de journal comptable
-class AccountingJournalService {
-  /// Mappage des modes de paiement vers les comptes SYSCOHADA
+    for (var entry in entries) {
+      if (entry.entrepriseId.isEmpty) continue;
+
+      final docRef = _firestore
+          .collection('entreprises')
+          .doc(entry.entrepriseId)
+          .collection('ecritures_comptables')
+          .doc(entry.id);
+
+      batch.set(docRef, entry.toFirestore());
+      opCount++;
+
+      if (opCount >= 400) {
+        await batch.commit();
+        batch = _firestore.batch();
+        opCount = 0;
+      }
+    }
+
+    if (opCount > 0) {
+      await batch.commit();
+    }
+  }
+
+  /// Enregistrement d'une écriture manuelle / Opération Diverse (OD)
+  Future<void> enregistrerEcritureManuelle({
+    required String entrepriseId,
+    required String description,
+    required DateTime date,
+    required List<Map<String, dynamic>> lines,
+  }) async {
+    if (entrepriseId.isEmpty) return;
+
+    final docRef = _firestore
+        .collection('entreprises')
+        .doc(entrepriseId)
+        .collection('ecritures_comptables')
+        .doc();
+
+    await docRef.set({
+      'id': docRef.id,
+      'entrepriseId': entrepriseId,
+      'description': description,
+      'date': Timestamp.fromDate(date),
+      'reference': 'OD-${docRef.id.substring(0, 6).toUpperCase()}',
+      'lines': lines,
+    });
+  }
+
+  /// Nettoyage des anciennes collections/schémas obsolètes ou corrompus
+  Future<int> cleanAndMigrateEcritures(String entrepriseId) async {
+    if (entrepriseId.isEmpty) return 0;
+
+    int cleanedCount = 0;
+
+    // 1. Purge de l'ancienne sous-collection plate 'journal'
+    final oldJournalRef = _firestore
+        .collection('entreprises')
+        .doc(entrepriseId)
+        .collection('journal');
+    
+    final oldJournalSnap = await oldJournalRef.get();
+    if (oldJournalSnap.docs.isNotEmpty) {
+      WriteBatch oldBatch = _firestore.batch();
+      int batchCount = 0;
+      for (var doc in oldJournalSnap.docs) {
+        oldBatch.delete(doc.reference);
+        cleanedCount++;
+        batchCount++;
+        if (batchCount >= 400) {
+          await oldBatch.commit();
+          oldBatch = _firestore.batch();
+          batchCount = 0;
+        }
+      }
+      if (batchCount > 0) await oldBatch.commit();
+    }
+
+    // 2. Nettoyage des documents sans 'lines' ou avec d'anciens champs plats
+    final ecrituresRef = _firestore
+        .collection('entreprises')
+        .doc(entrepriseId)
+        .collection('ecritures_comptables');
+
+    final querySnapshot = await ecrituresRef.get();
+
+    WriteBatch batch = _firestore.batch();
+    int operationCount = 0;
+
+    for (var doc in querySnapshot.docs) {
+      final data = doc.data();
+
+      final hasFlatFields =
+          data.containsKey('compteDebit') || data.containsKey('compteCredit');
+      final hasNoLines =
+          data['lines'] == null || (data['lines'] as List).isEmpty;
+
+      if (hasFlatFields || hasNoLines) {
+        batch.delete(doc.reference);
+        cleanedCount++;
+        operationCount++;
+
+        if (operationCount >= 400) {
+          await batch.commit();
+          batch = _firestore.batch();
+          operationCount = 0;
+        }
+      }
+    }
+
+    if (operationCount > 0) {
+      await batch.commit();
+    }
+
+    return cleanedCount;
+  }
+
+  /// Obtenir le code de compte de trésorerie selon le mode de paiement
   static String getAccountCodeForPayment(PaymentMethod method) {
     switch (method) {
       case PaymentMethod.cash:
-        return '571000'; // Caisse
+        return '571000';
       case PaymentMethod.bank:
-        return '521000'; // Banque
+        return '521000';
       case PaymentMethod.mobileMoney:
-        return '572000'; // Mobile Money (Airtel / M-Pesa / Orange)
+        return '572000';
       case PaymentMethod.credit:
-        return '411000'; // Client (ou 401000 pour Fournisseur)
+        return '411000';
     }
   }
 
-  /// --------------------------------------------------------------------------
-  /// 1. GÉNÉRATION DES ÉCRITURES POUR UN ACHAT DE STOCK
-  /// --------------------------------------------------------------------------
-  static List<JournalEntry> generatePurchaseEntries({
-    required String transactionId,
-    required DateTime date,
-    required String invoiceRef,
-    required String supplierName,
-    required double amountExclTax, // Montant HT
-    required double taxRate,       // ex: 0.16 pour 16% TVA
-    required PaymentMethod paymentMethod,
-    required double costOfGoodsPurchased, // Montant réel valorisé en stock
-  }) {
-    final taxAmount = amountExclTax * taxRate;
-    final totalAmountTTC = amountExclTax + taxAmount;
-    final entries = <JournalEntry>[];
-
-    // --- Piece A : Écriture de la Facture d'Achat ---
-    final purchaseLines = <JournalLine>[
-      // Débit: 601000 - Achats de marchandises (HT)
-      JournalLine(
-        accountCode: '601000',
-        accountLabel: 'Achats de marchandises',
-        debit: amountExclTax,
-      ),
-    ];
-
-    if (taxAmount > 0) {
-      // Débit: 445200 - TVA récupérable sur achats
-      purchaseLines.add(
-        JournalLine(
-          accountCode: '445200',
-          accountLabel: 'TVA récupérable sur achats',
-          debit: taxAmount,
-        ),
-      );
-    }
-
-    // Crédit: Compte de paiement ou Fournisseur (TTC)
-    final creditCode = paymentMethod == PaymentMethod.credit
-        ? '401000'
-        : getAccountCodeForPayment(paymentMethod);
-
-    final creditLabel = paymentMethod == PaymentMethod.credit
-        ? 'Fournisseur - $supplierName'
-        : _getAccountLabel(creditCode);
-
-    purchaseLines.add(
-      JournalLine(
-        accountCode: creditCode,
-        accountLabel: creditLabel,
-        credit: totalAmountTTC,
-      ),
-    );
-
-    entries.add(
-      JournalEntry(
-        id: 'JE-PUR-$transactionId',
-        date: date,
-        reference: invoiceRef,
-        description: 'Facture d\'achat - $supplierName',
-        lines: purchaseLines,
-      ),
-    );
-
-    // --- Piece B : Écriture de Mouvement de Stock (Inventaire Permanent) ---
-    entries.add(
-      JournalEntry(
-        id: 'JE-STK-IN-$transactionId',
-        date: date,
-        reference: invoiceRef,
-        description: 'Entrée en stock marchandises ($invoiceRef)',
-        lines: [
-          // Débit: 311000 - Stock de marchandises
-          JournalLine(
-            accountCode: '311000',
-            accountLabel: 'Stock de marchandises',
-            debit: costOfGoodsPurchased,
-          ),
-          // Crédit: 603100 - Variation des stocks de marchandises
-          JournalLine(
-            accountCode: '603100',
-            accountLabel: 'Variation des stocks de marchandises',
-            credit: costOfGoodsPurchased,
-          ),
-        ],
-      ),
-    );
-
-    return entries;
+  /// Résolution dynamique des libellés par préfixe de classe du plan SYSCOHADA
+  static String getAccountLabel(String code) {
+    if (code.startsWith('571')) return 'Caisse Principale';
+    if (code.startsWith('521')) return 'Banque';
+    if (code.startsWith('572')) return 'Caisse Mobile Money';
+    if (code.startsWith('411')) return 'Clients (Créances)';
+    if (code.startsWith('419')) return 'Clients - Avances & Acomptes';
+    if (code.startsWith('401')) return 'Fournisseurs (Dettes)';
+    if (code.startsWith('443')) return 'TVA facturée sur ventes';
+    if (code.startsWith('445')) return 'TVA récupérable sur achats';
+    if (code.startsWith('601')) return 'Achats de marchandises';
+    if (code.startsWith('603')) return 'Variation des stocks';
+    if (code.startsWith('311')) return 'Stock de marchandises';
+    if (code.startsWith('701')) return 'Ventes de marchandises';
+    if (code.startsWith('658')) return 'Charges diverses';
+    return 'Compte $code';
   }
 
-  /// --------------------------------------------------------------------------
-  /// 2. GÉNÉRATION DES ÉCRITURES POUR UNE VENTE DE STOCK
-  /// --------------------------------------------------------------------------
+  /// Génération automatique des pièces comptables de vente
   static List<JournalEntry> generateSaleEntries({
+    required String entrepriseId,
     required String transactionId,
     required DateTime date,
     required String invoiceRef,
     required String customerName,
-    required double amountExclTax, // Montant HT
-    required double taxRate,       // ex: 0.16 pour 16% TVA
+    required double amountExclTax,
+    required double taxRate,
     required PaymentMethod paymentMethod,
-    required double costOfGoodsSold, // CUMP total des produits vendus (Coût d'achat)
+    required double costOfGoodsSold,
+    double amountPaid = 0.0,
+    double creditAmount = 0.0,
   }) {
     final taxAmount = amountExclTax * taxRate;
     final totalAmountTTC = amountExclTax + taxAmount;
     final entries = <JournalEntry>[];
+    final saleLines = <JournalLine>[];
 
-    // --- Piece A : Écriture de la Facture de Vente ---
-    final debitCode = paymentMethod == PaymentMethod.credit
-        ? '411000'
-        : getAccountCodeForPayment(paymentMethod);
+    double effectivePaid = amountPaid;
+    double effectiveCredit = creditAmount;
 
-    final debitLabel = paymentMethod == PaymentMethod.credit
-        ? 'Client - $customerName'
-        : _getAccountLabel(debitCode);
+    if (effectivePaid == 0.0 && effectiveCredit == 0.0) {
+      if (paymentMethod == PaymentMethod.credit) {
+        effectiveCredit = totalAmountTTC;
+      } else {
+        effectivePaid = totalAmountTTC;
+      }
+    } else if (effectivePaid > 0.0 &&
+        (effectivePaid + effectiveCredit) < totalAmountTTC) {
+      effectiveCredit = totalAmountTTC - effectivePaid;
+    }
 
-    final saleLines = <JournalLine>[
-      // Débit: Compte de Trésorerie ou Client (TTC)
-      JournalLine(
-        accountCode: debitCode,
-        accountLabel: debitLabel,
-        debit: totalAmountTTC,
-      ),
-      // Crédit: 701000 - Ventes de marchandises (HT)
+    if (effectivePaid > 0.0) {
+      final paidCode = getAccountCodeForPayment(paymentMethod);
+      saleLines.add(
+        JournalLine(
+          accountCode: paidCode,
+          accountLabel: getAccountLabel(paidCode),
+          debit: effectivePaid,
+          credit: 0.0,
+        ),
+      );
+    }
+
+    if (effectiveCredit > 0.0) {
+      saleLines.add(
+        JournalLine(
+          accountCode: '411000',
+          accountLabel: 'Client (Créance) - $customerName',
+          debit: effectiveCredit,
+          credit: 0.0,
+        ),
+      );
+    }
+
+    saleLines.add(
       JournalLine(
         accountCode: '701000',
-        accountLabel: 'Ventes de marchandises',
+        accountLabel: getAccountLabel('701000'),
+        debit: 0.0,
         credit: amountExclTax,
       ),
-    ];
+    );
 
-    if (taxAmount > 0) {
-      // Crédit: 443100 - TVA facturée sur ventes
+    if (taxAmount > 0.0) {
       saleLines.add(
         JournalLine(
           accountCode: '443100',
-          accountLabel: 'TVA facturée sur ventes',
+          accountLabel: getAccountLabel('443100'),
+          debit: 0.0,
           credit: taxAmount,
         ),
       );
@@ -230,54 +270,158 @@ class AccountingJournalService {
     entries.add(
       JournalEntry(
         id: 'JE-SAL-$transactionId',
+        entrepriseId: entrepriseId,
         date: date,
         reference: invoiceRef,
         description: 'Facture de vente - $customerName',
         lines: saleLines,
+        montantEncaisse: effectivePaid,
       ),
     );
 
-    // --- Piece B : Écriture de Déstockage (Coût de Revient / CUMP) ---
-    entries.add(
-      JournalEntry(
-        id: 'JE-STK-OUT-$transactionId',
-        date: date,
-        reference: invoiceRef,
-        description: 'Sortie de stock (Déstockage au CUMP) pour $invoiceRef',
-        lines: [
-          // Débit: 603100 - Variation des stocks de marchandises (Charge)
-          JournalLine(
-            accountCode: '603100',
-            accountLabel: 'Variation des stocks de marchandises',
-            debit: costOfGoodsSold,
-          ),
-          // Crédit: 311000 - Stock de marchandises (Sortie d'actif)
-          JournalLine(
-            accountCode: '311000',
-            accountLabel: 'Stock de marchandises',
-            credit: costOfGoodsSold,
-          ),
-        ],
-      ),
-    );
+    if (costOfGoodsSold > 0.0) {
+      entries.add(
+        JournalEntry(
+          id: 'JE-STK-OUT-$transactionId',
+          entrepriseId: entrepriseId,
+          date: date,
+          reference: invoiceRef,
+          description: 'Sortie de stock (CUMP) pour $invoiceRef',
+          lines: [
+            JournalLine(
+              accountCode: '603100',
+              accountLabel: getAccountLabel('603100'),
+              debit: costOfGoodsSold,
+              credit: 0.0,
+            ),
+            JournalLine(
+              accountCode: '311000',
+              accountLabel: getAccountLabel('311000'),
+              debit: 0.0,
+              credit: costOfGoodsSold,
+            ),
+          ],
+        ),
+      );
+    }
 
     return entries;
   }
 
-  static String _getAccountLabel(String code) {
-    switch (code) {
-      case '571000':
-        return 'Caisse';
-      case '521000':
-        return 'Banque';
-      case '572000':
-        return 'Mobile Money';
-      case '411000':
-        return 'Clients';
-      case '401000':
-        return 'Fournisseurs';
-      default:
-        return 'Compte $code';
+  /// Génération automatique des pièces comptables d'achat
+  static List<JournalEntry> generatePurchaseEntries({
+    required String entrepriseId,
+    required String transactionId,
+    required DateTime date,
+    required String invoiceRef,
+    required String supplierName,
+    required double amountExclTax,
+    required double taxRate,
+    required PaymentMethod paymentMethod,
+    double amountPaid = 0.0,
+    double creditAmount = 0.0,
+    bool updateInventory = true,
+  }) {
+    final taxAmount = amountExclTax * taxRate;
+    final totalAmountTTC = amountExclTax + taxAmount;
+    final entries = <JournalEntry>[];
+    final purchaseLines = <JournalLine>[];
+
+    purchaseLines.add(
+      JournalLine(
+        accountCode: '601000',
+        accountLabel: getAccountLabel('601000'),
+        debit: amountExclTax,
+        credit: 0.0,
+      ),
+    );
+
+    if (taxAmount > 0.0) {
+      purchaseLines.add(
+        JournalLine(
+          accountCode: '445200',
+          accountLabel: getAccountLabel('445200'),
+          debit: taxAmount,
+          credit: 0.0,
+        ),
+      );
     }
+
+    double effectivePaid = amountPaid;
+    double effectiveCredit = creditAmount;
+
+    if (effectivePaid == 0.0 && effectiveCredit == 0.0) {
+      if (paymentMethod == PaymentMethod.credit) {
+        effectiveCredit = totalAmountTTC;
+      } else {
+        effectivePaid = totalAmountTTC;
+      }
+    } else if (effectivePaid > 0.0 &&
+        (effectivePaid + effectiveCredit) < totalAmountTTC) {
+      effectiveCredit = totalAmountTTC - effectivePaid;
+    }
+
+    if (effectivePaid > 0.0) {
+      final paidCode = getAccountCodeForPayment(paymentMethod);
+      purchaseLines.add(
+        JournalLine(
+          accountCode: paidCode,
+          accountLabel: getAccountLabel(paidCode),
+          debit: 0.0,
+          credit: effectivePaid,
+        ),
+      );
+    }
+
+    if (effectiveCredit > 0.0) {
+      purchaseLines.add(
+        JournalLine(
+          accountCode: '401000',
+          accountLabel: 'Fournisseur (Dette) - $supplierName',
+          debit: 0.0,
+          credit: effectiveCredit,
+        ),
+      );
+    }
+
+    entries.add(
+      JournalEntry(
+        id: 'JE-PUR-$transactionId',
+        entrepriseId: entrepriseId,
+        date: date,
+        reference: invoiceRef,
+        description: 'Facture d\'achat - $supplierName',
+        lines: purchaseLines,
+        montantEncaisse: effectivePaid,
+      ),
+    );
+
+    if (updateInventory && amountExclTax > 0.0) {
+      entries.add(
+        JournalEntry(
+          id: 'JE-STK-IN-$transactionId',
+          entrepriseId: entrepriseId,
+          date: date,
+          reference: invoiceRef,
+          description: 'Entrée en stock de marchandises pour $invoiceRef',
+          lines: [
+            JournalLine(
+              accountCode: '311000',
+              accountLabel: getAccountLabel('311000'),
+              debit: amountExclTax,
+              credit: 0.0,
+            ),
+            JournalLine(
+              accountCode: '603100',
+              accountLabel: getAccountLabel('603100'),
+              debit: 0.0,
+              credit: amountExclTax,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return entries;
   }
 }

@@ -17,7 +17,22 @@ class AccountPlanItem {
     required this.normalBalance,
   });
 
-  int get accountClass => int.parse(code[0]);
+  /// Extrait le numéro de classe de façon sécurisée
+  int get accountClass =>
+      int.tryParse(code.isNotEmpty ? code[0] : '0') ?? 0;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AccountPlanItem &&
+          runtimeType == other.runtimeType &&
+          code == other.code;
+
+  @override
+  int get hashCode => code.hashCode;
+
+  @override
+  String toString() => '$code - $label';
 }
 
 /// Modèle du Plan Comptable SYSCOHADA Révisé adapté à la gestion de stock SaaS
@@ -152,15 +167,23 @@ class PlanComptable {
     ),
   ];
 
+  /// Indexation rapide par code $O(1)$
+  static final Map<String, AccountPlanItem> _byCodeMap = {
+    for (var item in items) item.code: item,
+  };
+
   /// Conservation de la Map originale pour rétrocompatibilité directe
   static Map<String, String> get map => {
         for (var item in items) item.code: item.label,
       };
 
-  /// Recherche par code ou libellé
+  /// Recherche rapide d'un compte par son code exact $O(1)$
+  static AccountPlanItem? findByCode(String code) => _byCodeMap[code.trim()];
+
+  /// Recherche par code ou libellé (insensible à la casse)
   static List<AccountPlanItem> search(String query) {
     if (query.isEmpty) return items;
-    final q = query.toLowerCase();
+    final q = query.trim().toLowerCase();
     return items
         .where((e) => e.code.contains(q) || e.label.toLowerCase().contains(q))
         .toList();
@@ -169,6 +192,11 @@ class PlanComptable {
   /// Obtenir la liste des comptes filtrée par classe (ex: 6 pour les charges)
   static List<AccountPlanItem> byClass(int accountClass) {
     return items.where((e) => e.accountClass == accountClass).toList();
+  }
+
+  /// Obtenir la liste des comptes par type comptable
+  static List<AccountPlanItem> byType(AccountType type) {
+    return items.where((e) => e.type == type).toList();
   }
 }
 

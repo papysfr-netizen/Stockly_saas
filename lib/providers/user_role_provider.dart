@@ -1,9 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// 1. Types de rôles
-enum UserRole { owner, admin, caissier }
+// ================= 1. RÔLES ET EXTENSIONS =================
+enum UserRole {
+  owner,
+  admin,
+  caissier;
+
+  static UserRole fromString(String? value) {
+    switch (value?.toLowerCase().trim()) {
+      case 'owner':
+        return UserRole.owner;
+      case 'admin':
+        return UserRole.admin;
+      case 'caissier':
+      default:
+        return UserRole.caissier;
+    }
+  }
+}
 
 extension UserRoleX on UserRole {
   bool get isAdminOrOwner => this == UserRole.admin || this == UserRole.owner;
@@ -11,7 +28,8 @@ extension UserRoleX on UserRole {
   bool get isCaissier => this == UserRole.caissier;
 }
 
-// 2. Modèle de Profil Utilisateur (Contient le rôle, le nom, l'entreprise et les autorisations)
+// ================= 2. MODÈLE DE PROFIL IMMUABLE =================
+@immutable
 class UserProfile {
   final String uid;
   final String nom;
@@ -19,7 +37,7 @@ class UserProfile {
   final String entrepriseId;
   final Map<String, bool> permissions;
 
-  UserProfile({
+  const UserProfile({
     required this.uid,
     required this.nom,
     required this.role,
@@ -27,7 +45,7 @@ class UserProfile {
     required this.permissions,
   });
 
-  factory UserProfile.empty() => UserProfile(
+  factory UserProfile.empty() => const UserProfile(
         uid: '',
         nom: '',
         role: UserRole.caissier,
@@ -35,67 +53,117 @@ class UserProfile {
         permissions: {},
       );
 
-  /// Vérifie si l'utilisateur a le droit d'effectuer une action
-  bool can(String permissionKey) {
-    if (role.isAdminOrOwner) return true; // Le propriétaire et l'admin ont tous les droits
-    return permissions[permissionKey] ?? false;
-  }
-}
-
-// 3. Stream d'état de connexion
-final authStateProvider = StreamProvider<User?>((ref) {
-  return FirebaseAuth.instance.authStateChanges();
-});
-
-// 4. StreamProvider du profil complet réactif
-final userProfileProvider = StreamProvider<UserProfile>((ref) async* {
-  final authAsync = ref.watch(authStateProvider);
-  final user = authAsync.value;
-
-  if (user == null) {
-    yield UserProfile.empty();
-    return;
-  }
-
-  yield* FirebaseFirestore.instance
-      .collection('users')
-      .doc(user.uid)
-      .snapshots()
-      .map((snapshot) {
+  factory UserProfile.fromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> snapshot,
+    User user,
+  ) {
     if (!snapshot.exists || snapshot.data() == null) {
-      return UserProfile.empty();
+      return UserProfile.empty().copyWith(
+        uid: user.uid,
+        nom: user.displayName ?? '',
+      );
     }
 
     final data = snapshot.data()!;
-    final String roleStr = (data['role'] ?? 'caissier').toString().toLowerCase();
-
-    UserRole role;
-    switch (roleStr) {
-      case 'owner':
-        role = UserRole.owner;
-        break;
-      case 'admin':
-        role = UserRole.admin;
-        break;
-      default:
-        role = UserRole.caissier;
-    }
-
-    // Récupération de la Map de permissions
     final rawPermissions = data['permissions'] as Map<String, dynamic>? ?? {};
-    final permissionsMap = rawPermissions.map(
-      (key, value) => MapEntry(key, value is bool ? value : false),
-    );
 
     return UserProfile(
       uid: user.uid,
       nom: data['nom'] ?? data['displayName'] ?? user.displayName ?? '',
-      role: role,
-      entrepriseId: data['entrepriseId'] ?? '',
-      permissions: permissionsMap,
+      role: UserRole.fromString(data['role']?.toString()),
+      entrepriseId: data['entrepriseId']?.toString() ?? '',
+      permissions: rawPermissions.map(
+        (key, value) => MapEntry(key, value is bool ? value : false),
+      ),
     );
-  });
+  }
+
+  bool can(String permissionKey) {
+    if (role.isAdminOrOwner) return true;
+    return permissions[permissionKey] ?? false;
+  }
+
+  UserProfile copyWith({
+    String? uid,
+    String? nom,
+    UserRole? role,
+    String? entrepriseId,
+    Map<String, bool>? permissions,
+  }) {
+    return UserProfile(
+      uid: uid ?? this.uid,
+      nom: nom ?? this.nom,
+      role: role ?? this.role,
+      entrepriseId: entrepriseId ?? this.entrepriseId,
+      permissions: permissions ?? this.permissions,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserProfile &&
+          runtimeType == other.runtimeType &&
+          uid == other.uid &&
+          nom == other.nom &&
+          role == other.role &&
+          entrepriseId == other.entrepriseId &&
+          mapEquals(permissions, other.permissions);
+
+  @override
+  int get hashCode => Object.hash(
+        uid,
+        nom,
+        role,
+        entrepriseId,
+        Object.hashAll(permissions.entries),
+      );
+}
+
+// ================= 3. PROVIDERS D'INJECTION DE DÉPENDANCES =================
+final firebaseAuthProvider = Provider<FirebaseAuth>((ref) {
+  return FirebaseAuth.instance;
 });
 
-// 5. Alias pour éviter l'erreur "Undefined name 'userRoleProvider'"
-final userRoleProvider = userProfileProvider;
+final firestoreProvider = Provider<FirebaseFirestore>((ref) {
+  return FirebaseFirestore.instance;
+});
+
+// ================= 4. FLUX D'AUTHENTIFICATION & PROFIL =================
+final authStateProvider = StreamProvider<User?>((ref) {
+  return ref.watch(firebaseAuthProvider).authStateChanges();
+});
+
+final userProfileProvider = StreamProvider<UserProfile>((ref) {
+  final authAsync = ref.watch(authStateProvider);
+
+  return authAsync.when(
+    data: (user) {
+      if (user == null) {
+        return Stream.value(UserProfile.empty());
+      }
+      return ref
+          .watch(firestoreProvider)
+          .collection('users')
+          .doc(user.uid)
+          .snapshots()
+          .map((doc) => UserProfile.fromFirestore(doc, user));
+    },
+    loading: () => Stream.value(UserProfile.empty()),
+    error: (_, __) => Stream.value(UserProfile.empty()),
+  );
+});
+
+// ================= 5. PROVIDERS CIBLÉS ET TYPÉS =================
+
+/// Extrait uniquement le rôle actif (`AsyncValue<UserRole>`)
+final userRoleProvider = Provider<AsyncValue<UserRole>>((ref) {
+  return ref.watch(userProfileProvider).whenData((profile) => profile.role);
+});
+
+/// Extrait l'ID de l'entreprise avec suppression des re-rendus inutiles
+final entrepriseIdProvider = Provider<String>((ref) {
+  return ref.watch(
+    userProfileProvider.select((async) => async.value?.entrepriseId ?? ''),
+  );
+});

@@ -4,6 +4,7 @@ import 'package:csv/csv.dart';
 import 'package:excel/excel.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+
 import '../models/produit.dart';
 
 class ExcelService {
@@ -15,19 +16,18 @@ class ExcelService {
     dynamic val = cellValue;
     if (val is Data) val = val.value;
     if (val is CellValue) {
-      val = (val as dynamic).value;
+      return val.toString().trim();
     }
-    return val?.toString().trim() ?? '';
+    return val.toString().trim();
   }
 
   static int _extractInt(dynamic cellValue) {
     if (cellValue == null) return 0;
     dynamic raw = cellValue;
     if (raw is Data) raw = raw.value;
-    if (raw is CellValue) raw = (raw as dynamic).value;
 
     if (raw is num) return raw.toInt();
-    String str = raw.toString().trim();
+    String str = _extractString(raw);
     double? parsedDouble = double.tryParse(str.replaceAll(',', '.'));
     return parsedDouble?.toInt() ?? int.tryParse(str) ?? 0;
   }
@@ -36,10 +36,9 @@ class ExcelService {
     if (cellValue == null) return 0.0;
     dynamic raw = cellValue;
     if (raw is Data) raw = raw.value;
-    if (raw is CellValue) raw = (raw as dynamic).value;
 
     if (raw is num) return raw.toDouble();
-    String str = raw.toString().trim().replaceAll(',', '.');
+    String str = _extractString(raw).replaceAll(',', '.');
     return double.tryParse(str) ?? 0.0;
   }
 
@@ -102,16 +101,13 @@ class ExcelService {
 
       if (nom.isNotEmpty && nom.toLowerCase() != 'nom' && nom.toLowerCase() != 'designation') {
         produits.add(Produit.fromJson({
-          'id': '',
           'codeBarre': codeBarre,
-          'code_barre': codeBarre,
           'nom': nom,
           'quantite': quantite,
           'prixAchat': prixAchat,
           'prixVente': prixVente,
-          'prix': prixVente,
           'entrepriseId': entrepriseId,
-        }));
+        }, '')); // Passer la chaîne vide comme ID généré ultérieurement
       }
     }
     return produits;
@@ -121,13 +117,12 @@ class ExcelService {
   // Parsing CSV sécurisé avec détection dynamique de colonnes
   // ------------------------------------------------------------------
   static List<Produit> _importerDepuisCsv(List<int> bytes, String entrepriseId) {
-    // Décodage avec tolérance aux caractères non-UTF8
     String content = utf8.decode(bytes, allowMalformed: true);
     String delimiter = content.contains(';') ? ';' : ',';
 
+    // Suppression de eol: '\n' pour laisser le parser gérer automatiquement \r\n et \n
     List<List<dynamic>> rows = CsvToListConverter(
       fieldDelimiter: delimiter,
-      eol: '\n',
     ).convert(content);
 
     List<Produit> produits = [];
@@ -137,7 +132,6 @@ class ExcelService {
     var headerRow = rows.first;
     bool hasHeader = false;
 
-    // Détection dynamique des colonnes CSV
     for (int col = 0; col < headerRow.length; col++) {
       String val = headerRow[col].toString().trim().toLowerCase();
       if (val.contains('code') || val.contains('ref') || val.contains('barcode')) {
@@ -172,16 +166,13 @@ class ExcelService {
 
       if (nom.isNotEmpty && nom.toLowerCase() != 'nom' && nom.toLowerCase() != 'designation') {
         produits.add(Produit.fromJson({
-          'id': '',
           'codeBarre': codeBarre,
-          'code_barre': codeBarre,
           'nom': nom,
           'quantite': quantite,
           'prixAchat': prixAchat,
           'prixVente': prixVente,
-          'prix': prixVente,
           'entrepriseId': entrepriseId,
-        }));
+        }, ''));
       }
     }
     return produits;
@@ -200,7 +191,6 @@ class ExcelService {
     excel.rename(defaultSheet, 'Stock Actuel');
     Sheet sheetObject = excel['Stock Actuel'];
 
-    // En-têtes de colonnes
     sheetObject.appendRow([
       TextCellValue('codeBarre'),
       TextCellValue('nom'),

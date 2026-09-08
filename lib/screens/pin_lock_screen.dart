@@ -76,62 +76,71 @@ class _PinLockScreenState extends ConsumerState<PinLockScreen> {
     return Scaffold(
       backgroundColor: Colors.blueGrey[50],
       body: Center(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 400),
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.lock_outline, size: 64, color: Colors.blueGrey),
-              const SizedBox(height: 16),
-              const Text(
-                'Caisse Verrouillée',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              const Text('Entrez votre code PIN pour reprendre'),
-              const SizedBox(height: 32),
-              
-              // Indicateurs visuels des chiffres du PIN
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(_pinLength, (index) {
-                  return Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 8.0),
-                    width: 20,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: index < _enteredPin.length
-                          ? (_hasError ? Colors.red : Colors.blueGrey)
-                          : Colors.transparent,
-                      border: Border.all(
-                        color: _hasError ? Colors.red : Colors.blueGrey,
-                        width: 2,
-                      ),
-                    ),
-                  );
-                }),
-              ),
-              
-              const SizedBox(height: 48),
-              
-              // Pavé numérique
-              GridView.count(
-                shrinkWrap: true,
-                crossAxisCount: 3,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: 1.2,
-                physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  for (var i = 1; i <= 9; i++) _buildNumButton(i.toString()),
-                  const SizedBox.shrink(),
-                  _buildNumButton('0'),
-                  _buildDeleteButton(),
-                ],
-              ),
-            ],
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.lock_outline, size: 64, color: Colors.blueGrey),
+                const SizedBox(height: 16),
+                const Text(
+                  'Caisse Verrouillée',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Entrez votre code PIN pour reprendre',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                
+                // Correction du débordement : FittedBox réduit les puces si l'espace horizontal est restreint
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(_pinLength, (index) {
+                      return Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 6.0),
+                        width: 18,
+                        height: 18,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: index < _enteredPin.length
+                              ? (_hasError ? Colors.red : Colors.blueGrey)
+                              : Colors.transparent,
+                          border: Border.all(
+                            color: _hasError ? Colors.red : Colors.blueGrey,
+                            width: 2,
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+                
+                const SizedBox(height: 48),
+                
+                // Pavé numérique
+                GridView.count(
+                  shrinkWrap: true,
+                  crossAxisCount: 3,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  childAspectRatio: 1.2,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    for (var i = 1; i <= 9; i++) _buildNumButton(i.toString()),
+                    const SizedBox.shrink(),
+                    _buildNumButton('0'),
+                    _buildDeleteButton(),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -148,7 +157,7 @@ class _PinLockScreenState extends ConsumerState<PinLockScreen> {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
+              color: Colors.black.withValues(alpha: .1),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -168,7 +177,7 @@ class _PinLockScreenState extends ConsumerState<PinLockScreen> {
       onTap: _onDelete,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        decoration:BoxDecoration(
+        decoration: BoxDecoration(
           color: Colors.grey[300],
           borderRadius: BorderRadius.circular(12),
         ),

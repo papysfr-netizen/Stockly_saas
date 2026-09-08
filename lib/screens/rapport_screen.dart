@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import '../models/rapport_item.dart';
-import '../services/report_export_service.dart';
 import 'package:stockly_saas/screens/rapports/profits_pertes_screen.dart';
 import 'package:stockly_saas/screens/rapports/ventes_date_screen.dart';
+
+import '../models/rapport_item.dart';
+import '../services/report_export_service.dart';
+
 class RapportsScreen extends StatefulWidget {
   const RapportsScreen({super.key});
 
@@ -11,8 +13,8 @@ class RapportsScreen extends StatefulWidget {
 }
 
 class _RapportsScreenState extends State<RapportsScreen> {
-  // Liste des rapports disponibles dans l'application
-  final List<RapportItem> _rapports = [
+  // Liste initiale des rapports (avec constructeurs const)
+  List<RapportItem> _rapports = const [
     RapportItem(id: '1', titre: 'Achats par Fournisseur', type: TypeRapport.dettesFournisseur),
     RapportItem(id: '2', titre: 'Achats par article', type: TypeRapport.ventesArticles),
     RapportItem(id: '3', titre: 'Dettes par client', type: TypeRapport.dettesClient),
@@ -42,6 +44,18 @@ class _RapportsScreenState extends State<RapportsScreen> {
       return a.titre.compareTo(b.titre);
     });
     return list;
+  }
+
+  // --- BASCULER LE STATUT FAVORI (IMMUABLE) ---
+  void _toggleFavori(RapportItem rapport) {
+    setState(() {
+      _rapports = _rapports.map((item) {
+        if (item.id == rapport.id) {
+          return item.copyWith(estFavori: !item.estFavori);
+        }
+        return item;
+      }).toList();
+    });
   }
 
   // --- REDIRECTION VERS LES ÉCRANS DÉTAILLÉS ---
@@ -166,17 +180,13 @@ class _RapportsScreenState extends State<RapportsScreen> {
               ),
             ),
 
-            // Bouton Étoile Favori
+            // Bouton Étoile Favori (Ajusté pour immutabilité)
             leading: IconButton(
               icon: Icon(
                 rapport.estFavori ? Icons.star : Icons.star_border,
                 color: rapport.estFavori ? Colors.amber : Colors.grey,
               ),
-              onPressed: () {
-                setState(() {
-                  rapport.estFavori = !rapport.estFavori;
-                });
-              },
+              onPressed: () => _toggleFavori(rapport),
             ),
 
             // Menu contextuel d'exportation

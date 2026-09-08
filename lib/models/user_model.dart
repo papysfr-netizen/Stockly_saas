@@ -1,13 +1,54 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 /// Rôles utilisateur disponibles dans l'application
 enum UserRole {
-  gerant,
-  chefBoutique,
-  comptable,
-  caissier,
+  gerant('Gérant'),
+  chefBoutique('Chef de Boutique'),
+  comptable('Comptable'),
+  caissier('Caissier');
+
+  final String label;
+
+  const UserRole(this.label);
+
+  /// Helper pour convertir une chaîne Firestore vers l'enum UserRole
+  static UserRole fromString(String? roleStr) {
+    switch (roleStr?.trim().toLowerCase()) {
+      case 'gerant':
+      case 'admin':
+      case 'owner':
+        return UserRole.gerant;
+      case 'chefboutique':
+      case 'chef_boutique':
+      case 'chef':
+        return UserRole.chefBoutique;
+      case 'comptable':
+        return UserRole.comptable;
+      case 'caissier':
+      default:
+        return UserRole.caissier;
+    }
+  }
 }
 
+/// Extension pour vérifier les permissions utilisateur
+extension UserRoleExtension on UserRole {
+  bool get isGerant => this == UserRole.gerant;
+  bool get isOwner => this == UserRole.gerant; // Alias de compatibilité
+  bool get isChefBoutique => this == UserRole.chefBoutique;
+  bool get isComptable => this == UserRole.comptable;
+  bool get isCaissier => this == UserRole.caissier;
+
+  /// Accès d'administration globale ou de gestion des stocks/prix
+  bool get isAdmin => isGerant || isChefBoutique;
+
+  /// Accès aux modules financiers et rapports
+  bool get canAccessFinance => isGerant || isComptable;
+}
+
+/// Modèle immuable représentant un utilisateur
+@immutable
 class UserModel {
   final String uid;
   final String email;
@@ -17,7 +58,7 @@ class UserModel {
   final DateTime? dateCreation;
   final String entrepriseId;
 
-  UserModel({
+  const UserModel({
     required this.uid,
     required this.email,
     required this.nom,
@@ -28,61 +69,47 @@ class UserModel {
   });
 
   // ================= GETTERS DE PERMISSIONS =================
-  bool get isGerant => role == UserRole.gerant;
-  bool get isChefBoutique => role == UserRole.chefBoutique;
-  bool get isComptable => role == UserRole.comptable;
-  bool get isCaissier => role == UserRole.caissier;
+  bool get isGerant => role.isGerant;
+  bool get isOwner => role.isOwner;
+  bool get isChefBoutique => role.isChefBoutique;
+  bool get isComptable => role.isComptable;
+  bool get isCaissier => role.isCaissier;
+  bool get isAdmin => role.isAdmin;
+  bool get canAccessFinance => role.canAccessFinance;
 
-  /// Accès d'administration globale ou de gestion des stocks/prix
-  bool get isAdmin => isGerant || isChefBoutique;
-  
-  /// Accès aux modules financiers et rapports
-  bool get canAccessFinance => isGerant || isComptable;
+  // ================= HELPER DATE =================
+  static DateTime? _parseDate(dynamic value) {
+    if (value is Timestamp) {
+      return value.toDate();
+    } else if (value is String) {
+      return DateTime.tryParse(value);
+    } else if (value is DateTime) {
+      return value;
+    }
+    return null;
+  }
 
   // ================= CONVERSIONS & FACTORIES =================
   factory UserModel.fromMap(Map<String, dynamic> map, [String? id]) {
-    DateTime? parsedDate;
-    if (map['dateCreation'] != null) {
-      if (map['dateCreation'] is Timestamp) {
-        parsedDate = (map['dateCreation'] as Timestamp).toDate();
-      } else if (map['dateCreation'] is String) {
-        parsedDate = DateTime.tryParse(map['dateCreation'] as String);
-      }
-    }
-
-    UserRole parsedRole = UserRole.caissier;
-    switch (map['role']?.toString().toLowerCase()) {
-      case 'gerant':
-      case 'admin':
-      case 'owner':
-        parsedRole = UserRole.gerant;
-        break;
-      case 'chefboutique':
-      case 'chef_boutique':
-        parsedRole = UserRole.chefBoutique;
-        break;
-      case 'comptable':
-        parsedRole = UserRole.comptable;
-        break;
-      case 'caissier':
-      default:
-        parsedRole = UserRole.caissier;
-        break;
-    }
-
     return UserModel(
-      uid: id ?? map['uid'] ?? '',
-      email: map['email'] ?? '',
-      nom: map['nom'] ?? '',
-      role: parsedRole,
-      estActif: map['estActif'] ?? true,
-      dateCreation: parsedDate,
-      entrepriseId: map['entrepriseId'] ?? '',
+      uid: id ?? map['uid']?.toString() ?? '',
+      email: map['email']?.toString() ?? '',
+      nom: map['nom']?.toString() ?? '',
+      role: UserRole.fromString(map['role']?.toString()),
+      estActif: map['estActif'] as bool? ?? true,
+      dateCreation: _parseDate(map['dateCreation']),
+      entrepriseId: map['entrepriseId']?.toString() ?? '',
     );
   }
 
   factory UserModel.fromJson(Map<String, dynamic> json, [String? id]) =>
       UserModel.fromMap(json, id);
+
+  /// Construction directe depuis un DocumentSnapshot Firestore
+  factory UserModel.fromDocument(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>? ?? {};
+    return UserModel.fromMap(data, doc.id);
+  }
 
   Map<String, dynamic> toMap() {
     return {
@@ -118,5 +145,34 @@ class UserModel {
       dateCreation: dateCreation ?? this.dateCreation,
       entrepriseId: entrepriseId ?? this.entrepriseId,
     );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserModel &&
+          runtimeType == other.runtimeType &&
+          uid == other.uid &&
+          email == other.email &&
+          nom == other.nom &&
+          role == other.role &&
+          estActif == other.estActif &&
+          dateCreation == other.dateCreation &&
+          entrepriseId == other.entrepriseId;
+
+  @override
+  int get hashCode => Object.hash(
+        uid,
+        email,
+        nom,
+        role,
+        estActif,
+        dateCreation,
+        entrepriseId,
+      );
+
+  @override
+  String toString() {
+    return 'UserModel(uid: $uid, nom: $nom, email: $email, role: ${role.name}, estActif: $estActif, entrepriseId: $entrepriseId)';
   }
 }

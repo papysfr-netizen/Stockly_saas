@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 enum TypeCompte { actif, passif, capitaux, charge, produit }
 
 class CompteComptable {
@@ -14,17 +16,17 @@ class CompteComptable {
   });
 
   Map<String, dynamic> toMap() => {
-    'code': code,
-    'intitule': intitule,
-    'classe': classe,
-    'type': type.name,
-  };
+        'code': code,
+        'intitule': intitule,
+        'classe': classe,
+        'type': type.name,
+      };
 
   factory CompteComptable.fromMap(Map<String, dynamic> map) {
     return CompteComptable(
       code: map['code'] ?? '',
       intitule: map['intitule'] ?? '',
-      classe: map['classe'] ?? 1,
+      classe: (map['classe'] as num?)?.toInt() ?? 1,
       type: TypeCompte.values.firstWhere(
         (e) => e.name == map['type'],
         orElse: () => TypeCompte.actif,
@@ -47,18 +49,18 @@ class LigneEcriture {
   });
 
   Map<String, dynamic> toMap() => {
-    'compteCode': compteCode,
-    'compteIntitule': compteIntitule,
-    'debit': debit,
-    'credit': credit,
-  };
+        'compteCode': compteCode,
+        'compteIntitule': compteIntitule,
+        'debit': debit,
+        'credit': credit,
+      };
 
   factory LigneEcriture.fromMap(Map<String, dynamic> map) {
     return LigneEcriture(
       compteCode: map['compteCode'] ?? '',
       compteIntitule: map['compteIntitule'] ?? '',
-      debit: (map['debit'] ?? 0.0).toDouble(),
-      credit: (map['credit'] ?? 0.0).toDouble(),
+      debit: (map['debit'] as num?)?.toDouble() ?? 0.0,
+      credit: (map['credit'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }
@@ -80,30 +82,33 @@ class EcritureComptable {
     required this.lignes,
   });
 
-  // Vérification de la partie double
+ // Vérification de la partie double
   bool get estEquilibree {
-    double totalDebit = lignes.fold(0.0, (sum, l) => sum + l.debit);
-    double totalCredit = lignes.fold(0.0, (sum, l) => sum + l.credit);
+    double totalDebit = lignes.fold(0.0, (acc, l) => acc + l.debit);
+    double totalCredit = lignes.fold(0.0, (acc, l) => acc + l.credit);
     return (totalDebit - totalCredit).abs() < 0.001;
   }
 
   Map<String, dynamic> toMap() => {
-    'entrepriseId': entrepriseId,
-    'date': date.toIso8601String(),
-    'libelle': libelle,
-    'pieceRef': pieceRef,
-    'lignes': lignes.map((l) => l.toMap()).toList(),
-  };
+        'entrepriseId': entrepriseId,
+        'date': date.toIso8601String(),
+        'libelle': libelle,
+        'pieceRef': pieceRef,
+        'lignes': lignes.map((l) => l.toMap()).toList(),
+      };
 
   factory EcritureComptable.fromMap(String id, Map<String, dynamic> map) {
     return EcritureComptable(
       id: id,
       entrepriseId: map['entrepriseId'] ?? '',
-      date: DateTime.parse(map['date']),
+      date: map['date'] is Timestamp
+          ? (map['date'] as Timestamp).toDate()
+          : DateTime.tryParse(map['date']?.toString() ?? '') ?? DateTime.now(),
       libelle: map['libelle'] ?? '',
       pieceRef: map['pieceRef'] ?? '',
       lignes: (map['lignes'] as List? ?? [])
-          .map((l) => LigneEcriture.fromMap(l))
+          .map((l) =>
+              LigneEcriture.fromMap(Map<String, dynamic>.from(l as Map)))
           .toList(),
     );
   }

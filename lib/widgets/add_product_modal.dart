@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import '../services/packing_list_service.dart';
 import '../widgets/quick_scanner_widget.dart';
 
 class AddProductModal extends StatefulWidget {
@@ -17,7 +18,6 @@ class AddProductModal extends StatefulWidget {
     this.onProductAdded,
   });
 
-  /// Méthode statique pour ouvrir la modale sous forme de BottomSheet Glassmorphic
   static Future<void> show(
     BuildContext context, {
     required String entrepriseId,
@@ -45,7 +45,6 @@ class AddProductModal extends StatefulWidget {
 class _AddProductModalState extends State<AddProductModal> {
   final _formKey = GlobalKey<FormState>();
 
-  // Contrôleurs de texte
   late TextEditingController _nomController;
   late TextEditingController _codeBarresController;
   late TextEditingController _prixAchatController;
@@ -54,7 +53,6 @@ class _AddProductModalState extends State<AddProductModal> {
   late TextEditingController _seuilAlerteController;
   late TextEditingController _imageUrlController;
 
-  // Catégories
   late String _categorieSelectionnee;
   final List<String> _categories = [
     'Général',
@@ -69,8 +67,7 @@ class _AddProductModalState extends State<AddProductModal> {
 
   bool isLoading = false;
 
-  // Mode Édition ou Création
-  bool get isEditing => widget.id != null;
+  bool get isEditing => widget.id != null && widget.id!.isNotEmpty;
 
   @override
   void initState() {
@@ -94,7 +91,9 @@ class _AddProductModalState extends State<AddProductModal> {
           '',
     );
     _quantiteController = TextEditingController(
-      text: widget.product?['quantite']?.toString() ?? '1',
+      text: widget.product?['quantite']?.toString() ??
+          widget.product?['stock']?.toString() ??
+          '1',
     );
     _seuilAlerteController = TextEditingController(
       text: widget.product?['seuilAlerte']?.toString() ?? '5',
@@ -104,7 +103,10 @@ class _AddProductModalState extends State<AddProductModal> {
     );
 
     final existingCat = widget.product?['categorie']?.toString();
-    if (existingCat != null && _categories.contains(existingCat)) {
+    if (existingCat != null && existingCat.isNotEmpty) {
+      if (!_categories.contains(existingCat)) {
+        _categories.add(existingCat);
+      }
       _categorieSelectionnee = existingCat;
     } else {
       _categorieSelectionnee = 'Général';
@@ -126,37 +128,69 @@ class _AddProductModalState extends State<AddProductModal> {
   Future<void> _sauvegarderProduit() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final currentEntrepriseId = widget.entrepriseId.isNotEmpty
+        ? widget.entrepriseId
+        : 'ent_01';
+
     setState(() => isLoading = true);
 
-    final messenger = ScaffoldMessenger.of(context);
-    final navigator = Navigator.of(context);
-
     try {
+      final codeBarreVal = _codeBarresController.text.trim();
+      final prixVenteVal = double.tryParse(_prixVenteController.text.trim()) ?? 0.0;
+      final quantiteVal = int.tryParse(_quantiteController.text.trim()) ?? 0;
+
       final Map<String, dynamic> productData = {
         'nom': _nomController.text.trim(),
-        'codeBarre': _codeBarresController.text.trim(),
+        'codeBarre': codeBarreVal,
+        'codeBarres': codeBarreVal,
         'categorie': _categorieSelectionnee,
         'prixAchat': double.tryParse(_prixAchatController.text.trim()) ?? 0.0,
-        'prixVente': double.tryParse(_prixVenteController.text.trim()) ?? 0.0,
-        'prix': double.tryParse(_prixVenteController.text.trim()) ?? 0.0,
-        'quantite': int.tryParse(_quantiteController.text.trim()) ?? 0,
+        'prixVente': prixVenteVal,
+        'prix': prixVenteVal,
+        'quantite': quantiteVal,
+        'stock': quantiteVal,
         'seuilAlerte': int.tryParse(_seuilAlerteController.text.trim()) ?? 5,
         'imageUrl': _imageUrlController.text.trim(),
-        'entrepriseId': widget.entrepriseId,
+        'entrepriseId': currentEntrepriseId,
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
-      // Référence vers la collection multi-tenant
-      final produitsCollection = FirebaseFirestore.instance
-          .collection('organizations')
-          .doc(widget.entrepriseId)
-          .collection('produits');
+      final firestore = FirebaseFirestore.instance;
 
       if (isEditing) {
-        await produitsCollection.doc(widget.id).update(productData);
+        // Recherche de l'emplacement réel du document pour la mise à jour
+        final refEntreprises = firestore
+            .collection('entreprises')
+            .doc(currentEntrepriseId)
+            .collection('produits')
+            .doc(widget.id);
+
+        final refOrganizations = firestore
+            .collection('organizations')
+            .doc(currentEntrepriseId)
+            .collection('produits')
+            .doc(widget.id);
+
+        final refRacine = firestore.collection('produits').doc(widget.id);
+
+        final snapEnt = await refEntreprises.get();
+        if (snapEnt.exists) {
+          await refEntreprises.update(productData);
+        } else {
+          final snapOrg = await refOrganizations.get();
+          if (snapOrg.exists) {
+            await refOrganizations.update(productData);
+          } else {
+            await refRacine.update(productData);
+          }
+        }
       } else {
         productData['createdAt'] = FieldValue.serverTimestamp();
-        final docRef = await produitsCollection.add(productData);
+        final docRef = await firestore
+            .collection('entreprises')
+            .doc(currentEntrepriseId)
+            .collection('produits')
+            .add(productData);
         productData['id'] = docRef.id;
       }
 
@@ -164,9 +198,10 @@ class _AddProductModalState extends State<AddProductModal> {
         widget.onProductAdded!(productData);
       }
 
-      // Fermeture de la modale et notification
-      navigator.pop(productData);
-      messenger.showSnackBar(
+      if (!mounted) return;
+
+      Navigator.of(context).pop(productData);
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
             children: [
@@ -187,7 +222,9 @@ class _AddProductModalState extends State<AddProductModal> {
         ),
       );
     } catch (e) {
-      messenger.showSnackBar(
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Erreur lors de l\'enregistrement : $e'),
           behavior: SnackBarBehavior.floating,
@@ -231,7 +268,7 @@ class _AddProductModalState extends State<AddProductModal> {
                   ),
                 ],
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
               child: SingleChildScrollView(
                 child: Form(
                   key: _formKey,
@@ -239,7 +276,6 @@ class _AddProductModalState extends State<AddProductModal> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Poignée de glissement (Drag Handle)
                       Center(
                         child: Container(
                           width: 40,
@@ -251,16 +287,16 @@ class _AddProductModalState extends State<AddProductModal> {
                         ),
                       ),
                       const SizedBox(height: 16),
-
-                      // En-tête
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            isEditing ? 'Modifier le produit' : 'Nouveau Produit',
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: -0.5,
+                          Expanded(
+                            child: Text(
+                              isEditing ? 'Modifier le produit' : 'Nouveau Produit',
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: -0.5,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           IconButton.filledTonal(
@@ -272,220 +308,289 @@ class _AddProductModalState extends State<AddProductModal> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 20),
-
-                      // Aperçu & URL Image
-                      Row(
-                        children: [
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: theme.colorScheme.outline.withValues(alpha: 0.2),
+                      const SizedBox(height: 16),
+                      if (!isEditing) ...[
+                        OutlinedButton.icon(
+                          onPressed: () async {
+                            final currentEnt = widget.entrepriseId.isNotEmpty
+                                ? widget.entrepriseId
+                                : 'ent_01';
+                            Navigator.pop(context);
+                            await PackingListService.importerEtTraiter(
+                              context,
+                              entrepriseId: currentEnt,
+                            );
+                          },
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size(double.infinity, 44),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            side: BorderSide(
+                              color: theme.colorScheme.primary,
+                              width: 1.5,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          icon: Icon(
+                            Icons.file_upload_outlined,
+                            color: theme.colorScheme.primary,
+                            size: 18,
+                          ),
+                          label: Text(
+                            'Importer Packing List (Excel / CSV)',
+                            style: TextStyle(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Divider(
+                                color: theme.colorScheme.outline.withValues(alpha: 0.3),
                               ),
                             ),
-                            child: ValueListenableBuilder<TextEditingValue>(
-                              valueListenable: _imageUrlController,
-                              builder: (context, value, _) {
-                                if (value.text.isNotEmpty &&
-                                    Uri.tryParse(value.text)?.hasAbsolutePath == true) {
-                                  return ClipRRect(
-                                    borderRadius: BorderRadius.circular(15),
-                                    child: Image.network(
-                                      value.text,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => Icon(
-                                        Icons.broken_image_outlined,
-                                        color: theme.colorScheme.error,
-                                      ),
-                                    ),
-                                  );
-                                }
-                                return Icon(
-                                  Icons.add_a_photo_outlined,
-                                  size: 24,
-                                  color: theme.colorScheme.primary.withValues(alpha: 0.7),
-                                );
-                              },
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                              child: Text(
+                                'OU SAISIE MANUELLE',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 10,
+                                ),
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: _buildInputField(
-                              controller: _imageUrlController,
-                              label: "URL de l'image (optionnel)",
-                              hint: "https://exemple.com/image.jpg",
-                              icon: Icons.link_rounded,
+                            Expanded(
+                              child: Divider(
+                                color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+                      ],
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          if (constraints.maxWidth < 280) {
+                            return Column(
+                              children: [
+                                _buildImagePreview(theme),
+                                const SizedBox(height: 10),
+                                _buildInputField(
+                                  controller: _imageUrlController,
+                                  label: "URL de l'image",
+                                  hint: "https://...",
+                                  icon: Icons.link_rounded,
+                                ),
+                              ],
+                            );
+                          }
+                          return Row(
+                            children: [
+                              _buildImagePreview(theme),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: _buildInputField(
+                                  controller: _imageUrlController,
+                                  label: "URL de l'image (optionnel)",
+                                  hint: "https://exemple.com/image.jpg",
+                                  icon: Icons.link_rounded,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
                       const SizedBox(height: 14),
-
-                      // Nom
                       _buildInputField(
                         controller: _nomController,
                         label: 'Nom du produit *',
-                        hint: 'ex: T-Shirt Coton Noir',
+                        hint: 'ex: T-Shirt Coton',
                         icon: Icons.shopping_bag_outlined,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Veuillez saisir un nom de produit';
+                            return 'Nom obligatoire';
                           }
                           return null;
                         },
                       ),
                       const SizedBox(height: 14),
-
-                      // Code-barres & Catégorie
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: _buildInputField(
-                              controller: _codeBarresController,
-                              label: 'Code-barres',
-                              hint: 'Scanner / Saisir',
-                              icon: Icons.qr_code_rounded,
-                              suffixIcon: IconButton(
-                                constraints: const BoxConstraints(),
-                                padding: const EdgeInsets.only(right: 8),
-                                icon: Icon(
-                                  Icons.qr_code_scanner_rounded,
-                                  color: theme.colorScheme.primary,
-                                  size: 20,
-                                ),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (scannerContext) => QuickScannerWidget(
-                                        onCodeScanned: (code) {
-                                          setState(() {
-                                            _codeBarresController.text = code;
-                                          });
-                                          Navigator.pop(scannerContext);
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text('Code scanné : $code'),
-                                              behavior: SnackBarBehavior.floating,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(10),
-                                              ),
-                                              backgroundColor: Colors.green.shade700,
-                                            ),
-                                          );
-                                        },
-                                      ),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final isNarrow = constraints.maxWidth < 300;
+                          final codeField = _buildInputField(
+                            controller: _codeBarresController,
+                            label: 'Code-barres',
+                            hint: 'Scanner / Saisir',
+                            icon: Icons.qr_code_rounded,
+                            suffixIcon: IconButton(
+                              constraints: const BoxConstraints(),
+                              padding: const EdgeInsets.only(right: 6),
+                              icon: Icon(
+                                Icons.qr_code_scanner_rounded,
+                                color: theme.colorScheme.primary,
+                                size: 18,
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (scannerContext) => QuickScannerWidget(
+                                      onCodeScanned: (code) {
+                                        setState(() {
+                                          _codeBarresController.text = code;
+                                        });
+                                        Navigator.pop(scannerContext);
+                                      },
                                     ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              isExpanded: true, // Correction : force l'adaptation à la largeur disponible
-                              initialValue: _categorieSelectionnee,
-                              style: theme.textTheme.bodyMedium,
-                              decoration: _buildInputDecoration(
-                                label: 'Catégorie',
-                                icon: Icons.category_outlined,
-                              ),
-                              items: _categories.map((cat) {
-                                return DropdownMenuItem(
-                                  value: cat,
-                                  child: Text(
-                                    cat,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 );
-                              }).toList(),
-                              onChanged: (val) {
-                                if (val != null) {
-                                  setState(() => _categorieSelectionnee = val);
-                                }
                               },
                             ),
-                          ),
-                        ],
+                          );
+
+                          final catField = DropdownButtonFormField<String>(
+                            isExpanded: true,
+                            initialValue: _categorieSelectionnee,
+                            style: theme.textTheme.bodyMedium,
+                            decoration: _buildInputDecoration(
+                              label: 'Catégorie',
+                              icon: Icons.category_outlined,
+                            ),
+                            items: _categories.map((cat) {
+                              return DropdownMenuItem(
+                                value: cat,
+                                child: Text(cat, overflow: TextOverflow.ellipsis),
+                              );
+                            }).toList(),
+                            onChanged: (val) {
+                              if (val != null) {
+                                setState(() => _categorieSelectionnee = val);
+                              }
+                            },
+                          );
+
+                          if (isNarrow) {
+                            return Column(
+                              children: [
+                                codeField,
+                                const SizedBox(height: 14),
+                                catField,
+                              ],
+                            );
+                          }
+
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(child: codeField),
+                              const SizedBox(width: 8),
+                              Expanded(child: catField),
+                            ],
+                          );
+                        },
                       ),
                       const SizedBox(height: 14),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final isNarrow = constraints.maxWidth < 300;
+                          final prixAchatField = _buildInputField(
+                            controller: _prixAchatController,
+                            label: "Prix d'achat (\$)",
+                            hint: '0.00',
+                            icon: Icons.attach_money_rounded,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          );
 
-                      // Prix d'achat & Prix de vente
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: _buildInputField(
-                              controller: _prixAchatController,
-                              label: "Prix d'achat (\$)",
-                              hint: '0.00',
-                              icon: Icons.attach_money_rounded,
-                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: _buildInputField(
-                              controller: _prixVenteController,
-                              label: 'Prix de vente (\$)*',
-                              hint: '0.00',
-                              icon: Icons.sell_outlined,
-                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Prix requis';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                        ],
+                          final prixVenteField = _buildInputField(
+                            controller: _prixVenteController,
+                            label: 'Prix vente (\$)*',
+                            hint: '0.00',
+                            icon: Icons.sell_outlined,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Prix requis';
+                              }
+                              return null;
+                            },
+                          );
+
+                          if (isNarrow) {
+                            return Column(
+                              children: [
+                                prixAchatField,
+                                const SizedBox(height: 14),
+                                prixVenteField,
+                              ],
+                            );
+                          }
+
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(child: prixAchatField),
+                              const SizedBox(width: 8),
+                              Expanded(child: prixVenteField),
+                            ],
+                          );
+                        },
                       ),
                       const SizedBox(height: 14),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final isNarrow = constraints.maxWidth < 300;
+                          final quantiteField = _buildInputField(
+                            controller: _quantiteController,
+                            label: 'Stock initial *',
+                            hint: '1',
+                            icon: Icons.inventory_2_outlined,
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Stock requis';
+                              }
+                              return null;
+                            },
+                          );
 
-                      // Quantité & Seuil d'alerte
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: _buildInputField(
-                              controller: _quantiteController,
-                              label: 'Stock initial *',
-                              hint: '1',
-                              icon: Icons.inventory_2_outlined,
-                              keyboardType: TextInputType.number,
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Quantité requise';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: _buildInputField(
-                              controller: _seuilAlerteController,
-                              label: "Seuil d'alerte",
-                              hint: '5',
-                              icon: Icons.warning_amber_rounded,
-                              keyboardType: TextInputType.number,
-                            ),
-                          ),
-                        ],
+                          final seuilField = _buildInputField(
+                            controller: _seuilAlerteController,
+                            label: "Seuil d'alerte",
+                            hint: '5',
+                            icon: Icons.warning_amber_rounded,
+                            keyboardType: TextInputType.number,
+                          );
+
+                          if (isNarrow) {
+                            return Column(
+                              children: [
+                                quantiteField,
+                                const SizedBox(height: 14),
+                                seuilField,
+                              ],
+                            );
+                          }
+
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(child: quantiteField),
+                              const SizedBox(width: 8),
+                              Expanded(child: seuilField),
+                            ],
+                          );
+                        },
                       ),
-                      const SizedBox(height: 24),
-
-                      // Bouton Enregistrer
+                      const SizedBox(height: 20),
                       SizedBox(
-                        height: 52,
+                        height: 48,
                         child: FilledButton.icon(
                           onPressed: isLoading ? null : _sauvegarderProduit,
                           style: FilledButton.styleFrom(
@@ -493,26 +598,31 @@ class _AddProductModalState extends State<AddProductModal> {
                                 ? Colors.orange.shade800
                                 : theme.colorScheme.primary,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(14),
                             ),
                             elevation: 0,
                           ),
                           icon: isLoading
                               ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
+                                  width: 18,
+                                  height: 18,
                                   child: CircularProgressIndicator(
-                                    strokeWidth: 2.5,
+                                    strokeWidth: 2.0,
                                     color: Colors.white,
                                   ),
                                 )
-                              : Icon(isEditing ? Icons.check_circle_rounded : Icons.add_shopping_cart_rounded),
+                              : Icon(
+                                  isEditing
+                                      ? Icons.check_circle_rounded
+                                      : Icons.add_shopping_cart_rounded,
+                                  size: 20,
+                                ),
                           label: Text(
                             isLoading
-                                ? 'Enregistrement en cours...'
-                                : (isEditing ? 'Mettre à jour le produit' : 'Enregistrer le produit'),
+                                ? 'Enregistrement...'
+                                : (isEditing ? 'Mettre à jour' : 'Enregistrer le produit'),
                             style: const TextStyle(
-                              fontSize: 15,
+                              fontSize: 14,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -526,6 +636,46 @@ class _AddProductModalState extends State<AddProductModal> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildImagePreview(ThemeData theme) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      width: 50,
+      height: 50,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.2),
+        ),
+      ),
+      child: ValueListenableBuilder<TextEditingValue>(
+        valueListenable: _imageUrlController,
+        builder: (context, value, _) {
+          if (value.text.isNotEmpty &&
+              Uri.tryParse(value.text)?.hasAbsolutePath == true) {
+            return ClipRRect(
+              borderRadius: BorderRadius.circular(11),
+              child: Image.network(
+                value.text,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Icon(
+                  Icons.broken_image_outlined,
+                  color: theme.colorScheme.error,
+                  size: 20,
+                ),
+              ),
+            );
+          }
+          return Icon(
+            Icons.add_a_photo_outlined,
+            size: 20,
+            color: theme.colorScheme.primary.withValues(alpha: 0.7),
+          );
+        },
       ),
     );
   }
@@ -564,33 +714,34 @@ class _AddProductModalState extends State<AddProductModal> {
     return InputDecoration(
       labelText: label,
       hintText: hint,
-      prefixIcon: Icon(icon, size: 18),
-      prefixIconConstraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+      prefixIcon: Icon(icon, size: 16),
+      prefixIconConstraints: const BoxConstraints(minWidth: 28, minHeight: 28),
       suffixIcon: suffixIcon,
-      suffixIconConstraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+      suffixIconConstraints: const BoxConstraints(minWidth: 28, minHeight: 28),
       filled: true,
       fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      isDense: true,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
           color: theme.colorScheme.outline.withValues(alpha: 0.15),
           width: 1,
         ),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
           color: theme.colorScheme.primary,
           width: 1.5,
         ),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
           color: theme.colorScheme.error.withValues(alpha: 0.5),
           width: 1,

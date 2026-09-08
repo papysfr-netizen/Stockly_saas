@@ -5,30 +5,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/user_model.dart';
 import '../providers/currency_provider.dart';
+import '../providers/produit_provider.dart';
 import '../services/packing_list_service.dart';
+import '../views/caisse/caisse_screen.dart';
+import '../views/financial_analysis/financial_analysis_screen.dart';
 import '../widgets/add_product_modal.dart';
-import 'caisse_screen.dart';
 import 'comptabilite_screen.dart';
 import 'debt_management_screen.dart';
 import 'depenses_screen.dart';
-import 'financial_analysis_screen.dart';
 import 'settings_screen.dart';
-
-/// Stream lisant la collection racine 'produits' filtrée par entrepriseId
-final produitsStreamProvider =
-    StreamProvider.family<List<Map<String, dynamic>>, String>((ref, entrepriseId) {
-  if (entrepriseId.isEmpty) return Stream.value([]);
-
-  return FirebaseFirestore.instance
-      .collection('produits')
-      .where('entrepriseId', isEqualTo: entrepriseId)
-      .snapshots()
-      .map((snapshot) => snapshot.docs.map((doc) {
-            final data = doc.data();
-            data['id'] = doc.id;
-            return data;
-          }).toList());
-});
 
 class HomeScreen extends ConsumerStatefulWidget {
   final UserModel currentUser;
@@ -51,10 +36,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _supprimerProduit(String id) async {
-    await FirebaseFirestore.instance
-        .collection('produits')
-        .doc(id)
-        .delete();
+    try {
+      await FirebaseFirestore.instance
+          .collection('produits')
+          .doc(id)
+          .delete();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erreur lors de la suppression : $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Future<void> _importerExcel() async {
@@ -107,8 +102,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final currency = ref.watch(currencyProvider).activeCurrency;
-    final produitsAsync =
-        ref.watch(produitsStreamProvider(widget.currentUser.entrepriseId));
+    final produitsAsync = ref.watch(produitsStreamProvider);
 
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
@@ -293,8 +287,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               data: (produits) {
                 final filteredDocs = produits.where((p) {
-                  final nom = (p['nom'] ?? '').toString().toLowerCase();
-                  return nom.contains(_searchQuery);
+                  final nom = p.nom.toLowerCase();
+                  final code = p.codeBarre.toLowerCase();
+                  return nom.contains(_searchQuery) || code.contains(_searchQuery);
                 }).toList();
 
                 if (filteredDocs.isEmpty) {
@@ -305,9 +300,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 }
 
                 final double valeurTotale = filteredDocs.fold(0.0, (acc, item) {
-                  final qte = (item['quantite'] ?? 0) as num;
-                  final prix = (item['prixVente'] ?? item['prix'] ?? 0.0) as num;
-                  return acc + (prix.toDouble() * qte.toDouble());
+                  return acc + (item.prixVente * item.quantite);
                 });
 
                 return Column(
@@ -336,25 +329,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         itemCount: filteredDocs.length,
                         padding: const EdgeInsets.only(bottom: 80),
                         itemBuilder: (context, index) {
-                          final data = filteredDocs[index];
-                          final docId = data['id']?.toString() ?? '';
-                          final prixAffiche =
-                              (data['prixVente'] ?? data['prix'] ?? 0.0)
-                                  .toDouble();
+                          final produit = filteredDocs[index];
 
                           final produitWidget = ProduitCard(
-                            nom: data['nom'] ?? 'Sans nom',
-                            quantite: (data['quantite'] ?? 0) as int,
-                            prix: prixAffiche,
+                            nom: produit.nom.isNotEmpty ? produit.nom : 'Sans nom',
+                            quantite: produit.quantite,
+                            prix: produit.prixVente.toDouble(),
                             currency: currency,
-                            imageUrl: data['imageUrl']?.toString(),
+                            imageUrl: produit.imageUrl,
                             onEdit: widget.currentUser.isAdmin
                                 ? () {
                                     AddProductModal.show(
                                       context,
                                       entrepriseId: widget.currentUser.entrepriseId,
-                                      product: data,
-                                      id: docId,
+                                      product: produit.toJson(),
+                                      id: produit.id,
                                     );
                                   }
                                 : null,
@@ -362,7 +351,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                           if (widget.currentUser.isAdmin) {
                             return Dismissible(
-                              key: Key(docId),
+                              key: Key(produit.id),
                               direction: DismissDirection.endToStart,
                               background: Container(
                                 color: Colors.red,
@@ -371,7 +360,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 child: const Icon(Icons.delete, color: Colors.white),
                               ),
                               confirmDismiss: (_) async {
-                                return await showDialog<bool>(
+                                final confirm = await showDialog<bool>(
                                   context: context,
                                   builder: (ctx) => AlertDialog(
                                     title: const Text('Supprimer le produit'),
@@ -392,8 +381,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     ],
                                   ),
                                 );
+                                return confirm ?? false;
                               },
-                              onDismissed: (_) => _supprimerProduit(docId),
+                              onDismissed: (_) => _supprimerProduit(produit.id),
                               child: produitWidget,
                             );
                           }
@@ -520,94 +510,98 @@ class ProduitCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: Colors.grey.shade200),
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 20,
-              backgroundColor:
-                  isLowStock ? Colors.orange.shade50 : Colors.blue.shade50,
-              backgroundImage: imageUrl != null && imageUrl!.isNotEmpty
-                  ? NetworkImage(imageUrl!)
-                  : null,
-              child: imageUrl == null || imageUrl!.isEmpty
-                  ? Icon(Icons.inventory_2,
-                      color: isLowStock ? Colors.orange : Colors.blue, size: 20)
-                  : null,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    nom,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 14),
-                  ),
-                  const SizedBox(height: 4),
-                  Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    spacing: 6,
-                    runSpacing: 4,
-                    children: [
-                      Text(
-                        "Stock: $quantite",
-                        style: TextStyle(
-                            fontSize: 12, color: Colors.grey.shade700),
-                      ),
-                      if (isLowStock)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.red.shade50,
-                            borderRadius: BorderRadius.circular(4),
-                            border: Border.all(
-                                color: Colors.red.shade200, width: 0.5),
-                          ),
-                          child: const Text(
-                            'Alerte stock',
-                            style: TextStyle(
-                              color: Colors.red,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 20,
+                backgroundColor:
+                    isLowStock ? Colors.orange.shade50 : Colors.blue.shade50,
+                backgroundImage: imageUrl != null && imageUrl!.isNotEmpty
+                    ? NetworkImage(imageUrl!)
+                    : null,
+                child: imageUrl == null || imageUrl!.isEmpty
+                    ? Icon(Icons.inventory_2,
+                        color: isLowStock ? Colors.orange : Colors.blue, size: 20)
+                    : null,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      nom,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 14),
+                    ),
+                    const SizedBox(height: 4),
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 6,
+                      runSpacing: 4,
+                      children: [
+                        Text(
+                          "Stock: $quantite",
+                          style: TextStyle(
+                              fontSize: 12, color: Colors.grey.shade700),
+                        ),
+                        if (isLowStock)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.red.shade50,
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(
+                                  color: Colors.red.shade200, width: 0.5),
+                            ),
+                            child: const Text(
+                              'Alerte stock',
+                              style: TextStyle(
+                                color: Colors.red,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
-                    ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "$priceText $currency",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue.shade800,
+                      fontSize: 14,
+                    ),
                   ),
+                  if (onEdit != null) ...[
+                    const SizedBox(width: 2),
+                    IconButton(
+                      constraints: const BoxConstraints(),
+                      padding: const EdgeInsets.all(6),
+                      icon: const Icon(Icons.edit, color: Colors.orange, size: 18),
+                      onPressed: onEdit,
+                      tooltip: 'Modifier',
+                    ),
+                  ],
                 ],
               ),
-            ),
-            const SizedBox(width: 8),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  "$priceText $currency",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue.shade800,
-                    fontSize: 14,
-                  ),
-                ),
-                if (onEdit != null) ...[
-                  const SizedBox(width: 2),
-                  IconButton(
-                    constraints: const BoxConstraints(),
-                    padding: const EdgeInsets.all(6),
-                    icon: const Icon(Icons.edit, color: Colors.orange, size: 18),
-                    onPressed: onEdit,
-                    tooltip: 'Modifier',
-                  ),
-                ],
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -77,7 +77,7 @@ class ReportExportService {
     return file;
   }
 
-  /// Exporte et imprimer un rapport au format PDF (A4 Portrait ou Paysage)
+  /// Exporte et imprime un rapport au format PDF (A4 Portrait ou Paysage)
   static Future<void> exporterPDF({
     required String titreRapport,
     required List<String> enTetes,
@@ -92,7 +92,7 @@ class ReportExportService {
 
     final dateGenere = DateTime.now();
     final dateStr =
-        "${dateGenere.day.toString().padLeft(2, '0')}/${dateGenere.month.toString().padLeft(2, '0')}/${dateGenere.year} à ${dateGenere.hour}h${dateGenere.minute.toString().padLeft(2, '0')}";
+        "${dateGenere.day.toString().padLeft(2, '0')}/${dateGenere.month.toString().padLeft(2, '0')}/${dateGenere.year} à ${dateGenere.hour.toString().padLeft(2, '0')}h${dateGenere.minute.toString().padLeft(2, '0')}";
 
     final pageFormat = modePaysage ? PdfPageFormat.a4.landscape : PdfPageFormat.a4;
 
@@ -115,7 +115,7 @@ class ReportExportService {
                     children: [
                       pw.Text(
                         nomBoutique,
-                        style: const pw.TextStyle(
+                        style:const pw.TextStyle(
                           fontSize: 16,
                           fontWeight: pw.FontWeight.bold,
                           color: PdfColors.blue900,
@@ -123,7 +123,7 @@ class ReportExportService {
                       ),
                       pw.Text(
                         titreRapport,
-                        style: const pw.TextStyle(
+                        style:const pw.TextStyle(
                           fontSize: 13,
                           fontWeight: pw.FontWeight.bold,
                           color: PdfColors.grey800,
@@ -156,7 +156,7 @@ class ReportExportService {
               ),
               pw.Text(
                 "Page ${context.pageNumber} / ${context.pagesCount}",
-                style: const pw.TextStyle(
+                style:const pw.TextStyle(
                   fontSize: 8,
                   fontWeight: pw.FontWeight.bold,
                   color: PdfColors.grey700,
@@ -170,10 +170,10 @@ class ReportExportService {
             pw.TableHelper.fromTextArray(
               headers: enTetes,
               data: lignes
-                  .map((row) => row.map((e) => e.toString()).toList())
+                  .map((row) => row.map((e) => e?.toString() ?? '').toList())
                   .toList(),
               border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey300),
-              headerStyle: const pw.TextStyle(
+              headerStyle:const pw.TextStyle(
                 fontWeight: pw.FontWeight.bold,
                 color: PdfColors.white,
                 fontSize: 9,
@@ -182,7 +182,8 @@ class ReportExportService {
               cellStyle: const pw.TextStyle(fontSize: 8),
               cellAlignment: pw.Alignment.centerLeft,
               cellPadding: const pw.EdgeInsets.symmetric(horizontal: 5, vertical: 4),
-              rowDecoration: const pw.BoxDecoration(color: PdfColors.grey50),
+              rowDecoration: const pw.BoxDecoration(color: PdfColors.white),
+              oddRowDecoration: const pw.BoxDecoration(color: PdfColors.grey100),
             ),
           ];
         },

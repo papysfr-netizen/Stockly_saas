@@ -2,40 +2,29 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/currency_provider.dart';
+import 'package:stockly_saas/models/journal_entry.dart';
+import 'package:stockly_saas/models/payment_method.dart';
+import 'package:stockly_saas/providers/currency_provider.dart';
+import 'package:stockly_saas/screens/ecriture_form_screen.dart';
+import 'package:stockly_saas/services/accounting_journal_service.dart';
 
 // ============================================================================
-// HELPER : CONVERSION DE DATE SÉCURISÉE
+// 1. PROVIDERS & STREAMS (RIVERPOD - ISOLATION MULTI-TENANT)
 // ============================================================================
 
-/// Convertit n'importe quelle valeur de date (Timestamp, String ISO, DateTime) en DateTime
-DateTime parseDate(dynamic dateValue) {
-  if (dateValue is Timestamp) {
-    return dateValue.toDate();
-  } else if (dateValue is String) {
-    return DateTime.tryParse(dateValue) ?? DateTime.now();
-  } else if (dateValue is DateTime) {
-    return dateValue;
-  }
-  return DateTime.now();
-}
-
-// ============================================================================
-// 1. PROVIDERS & STREAMS (ISOLATION MULTI-TENANT)
-// ============================================================================
-
-/// Flux en temps réel des écritures comptables sous /organizations/{orgId}/ecritures_comptables
+/// Flux en temps réel des écritures comptables sous /entreprises/{entrepriseId}/ecritures_comptables
 final ecrituresComptablesProvider =
-    StreamProvider.family<List<QueryDocumentSnapshot>, String>((ref, entrepriseId) {
+    StreamProvider.family<List<JournalEntry>, String>((ref, entrepriseId) {
   if (entrepriseId.isEmpty) return Stream.value([]);
 
   return FirebaseFirestore.instance
-      .collection('organizations')
+      .collection('entreprises')
       .doc(entrepriseId)
       .collection('ecritures_comptables')
       .orderBy('date', descending: true)
       .snapshots()
-      .map((snapshot) => snapshot.docs);
+      .map((snapshot) =>
+          snapshot.docs.map((doc) => JournalEntry.fromFirestore(doc)).toList());
 });
 
 /// Controller pour les opérations d'écriture et de synchronisation comptable
@@ -45,12 +34,45 @@ final comptabiliteControllerProvider =
 );
 
 class ComptabiliteController extends FamilyAsyncNotifier<void, String> {
+  final AccountingJournalService _journalService = AccountingJournalService();
+
   @override
-  Future<void> build(String arg) async {
-    // Initialisation
+  Future<void> build(String arg) async {}
+
+  PaymentMethod _parsePaymentMethod(String? method) {
+    if (method == null) return PaymentMethod.cash;
+    switch (method.toLowerCase()) {
+      case 'carte bancaire':
+      case 'virement':
+      case 'banque':
+        return PaymentMethod.bank;
+      case 'mobile money':
+        return PaymentMethod.mobileMoney;
+      case 'dette':
+        return PaymentMethod.credit;
+      case 'cash':
+      default:
+        return PaymentMethod.cash;
+    }
   }
 
-  /// Synchronisation des ventes non comptabilisées dans le journal (SYSCOHADA)
+  /// Nettoyage des anciennes écritures plates/obsolètes
+  Future<int> nettoyerEcrituresObsolescentes() async {
+    final entrepriseId = arg;
+    if (entrepriseId.isEmpty) return 0;
+
+    state = const AsyncValue.loading();
+    try {
+      final count = await _journalService.cleanAndMigrateEcritures(entrepriseId);
+      state = const AsyncValue.data(null);
+      return count;
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      rethrow;
+    }
+  }
+
+  /// Synchronisation des ventes non comptabilisées
   Future<int> synchroniserHistoriqueComptable() async {
     final entrepriseId = arg;
     if (entrepriseId.isEmpty) return 0;
@@ -58,10 +80,10 @@ class ComptabiliteController extends FamilyAsyncNotifier<void, String> {
     state = const AsyncValue.loading();
 
     try {
-      final db = FirebaseFirestore.instance;
-      final orgRef = db.collection('organizations').doc(entrepriseId);
+      await _journalService.cleanAndMigrateEcritures(entrepriseId);
 
-      // Récupération des ventes non comptabilisées de l'organisation
+      final db = FirebaseFirestore.instance;
+      final orgRef = db.collection('entreprises').doc(entrepriseId);
       final ventesSnap = await orgRef.collection('ventes').get();
 
       final uncomptabilizedDocs = ventesSnap.docs.where((doc) {
@@ -79,47 +101,66 @@ class ComptabiliteController extends FamilyAsyncNotifier<void, String> {
 
       for (var doc in uncomptabilizedDocs) {
         final data = doc.data();
-        final String client = data['clientNom'] ?? data['nomClient'] ?? 'Client Divers';
+        final String client =
+            data['clientNom'] ?? data['nomClient'] ?? 'Client Divers';
         final double verse = (data['montantPaye'] as num?)?.toDouble() ?? 0.0;
         final double reste = (data['resteAPayer'] as num?)?.toDouble() ?? 0.0;
+        final double totalVente =
+            (data['montantTotal'] as num?)?.toDouble() ?? (verse + reste);
         final dynamic date = data['date'] ?? FieldValue.serverTimestamp();
+        final String? methodePaiement = data['methodePaiement'];
 
-        // Écriture Caisse (531000 Debit / 701000 Credit)
+        if (totalVente <= 0) continue;
+
+        final refEcriture = orgRef.collection('ecritures_comptables').doc();
+        final List<Map<String, dynamic>> lines = [];
+
         if (verse > 0) {
-          final refEcriture = orgRef.collection('ecritures_comptables').doc();
-          batch.set(refEcriture, {
-            'entrepriseId': entrepriseId,
-            'libelle': 'Vente en caisse - $client',
-            'compteDebit': '531000',
-            'compteCredit': '701000',
-            'montant': verse,
-            'date': date,
-            'pieceRef': doc.id,
+          final pMethod = _parsePaymentMethod(methodePaiement);
+          final codeTresorerie =
+              AccountingJournalService.getAccountCodeForPayment(pMethod);
+          final labelTresorerie =
+              AccountingJournalService.getAccountLabel(codeTresorerie);
+
+          lines.add({
+            'accountCode': codeTresorerie,
+            'accountLabel': labelTresorerie,
+            'debit': verse,
+            'credit': 0.0,
           });
-          operationCount++;
         }
 
-        // Écriture Crédit Client (411000 Debit / 701000 Credit)
         if (reste > 0) {
-          final refEcriture = orgRef.collection('ecritures_comptables').doc();
-          batch.set(refEcriture, {
-            'entrepriseId': entrepriseId,
-            'libelle': 'Créance vente - Client : $client',
-            'compteDebit': '411000',
-            'compteCredit': '701000',
-            'montant': reste,
-            'date': date,
-            'pieceRef': doc.id,
+          lines.add({
+            'accountCode': '411000',
+            'accountLabel': 'Clients - $client',
+            'debit': reste,
+            'credit': 0.0,
           });
-          operationCount++;
         }
 
-        // Marquer la vente comme comptabilisée dans la sous-collection
+        lines.add({
+          'accountCode': '701000',
+          'accountLabel': AccountingJournalService.getAccountLabel('701000'),
+          'debit': 0.0,
+          'credit': totalVente,
+        });
+
+        batch.set(refEcriture, {
+          'id': refEcriture.id,
+          'entrepriseId': entrepriseId,
+          'description': 'Vente - $client',
+          'date': date,
+          'reference': doc.id,
+          'lines': lines,
+          'montantEncaisse': verse,
+        });
+        operationCount++;
+
         batch.update(doc.reference, {'comptabilise': true});
         operationCount++;
 
-        // Subdivisions de batch (limite Firestore de 500 opérations)
-        if (operationCount >= 450) {
+        if (operationCount >= 400) {
           await batch.commit();
           batch = db.batch();
           operationCount = 0;
@@ -137,250 +178,627 @@ class ComptabiliteController extends FamilyAsyncNotifier<void, String> {
       rethrow;
     }
   }
+
+  /// Extourne (Annulation) d'une écriture comptable
+  Future<void> extournerEcriture(JournalEntry entry) async {
+    final entrepriseId = arg;
+    if (entrepriseId.isEmpty) return;
+
+    state = const AsyncValue.loading();
+    try {
+      final db = FirebaseFirestore.instance;
+      final refEcriture = db
+          .collection('entreprises')
+          .doc(entrepriseId)
+          .collection('ecritures_comptables')
+          .doc();
+
+      final reversedLines = entry.lines.map((l) {
+        return {
+          'accountCode': l.accountCode,
+          'accountLabel': l.accountLabel,
+          'debit': l.credit,
+          'credit': l.debit,
+        };
+      }).toList();
+
+      await refEcriture.set({
+        'id': refEcriture.id,
+        'entrepriseId': entrepriseId,
+        'description': 'Extourne / Annulation : ${entry.description}',
+        'date': FieldValue.serverTimestamp(),
+        'reference': 'EXT-${entry.id}',
+        'lines': reversedLines,
+      });
+
+      state = const AsyncValue.data(null);
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      rethrow;
+    }
+  }
+
+  /// Suppression d'une écriture comptable
+  Future<void> supprimerEcriture(String ecritureId) async {
+    final entrepriseId = arg;
+    if (entrepriseId.isEmpty) return;
+
+    state = const AsyncValue.loading();
+    try {
+      await FirebaseFirestore.instance
+          .collection('entreprises')
+          .doc(entrepriseId)
+          .collection('ecritures_comptables')
+          .doc(ecritureId)
+          .delete();
+
+      state = const AsyncValue.data(null);
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      rethrow;
+    }
+  }
 }
 
 // ============================================================================
 // 2. ÉCRAN DE COMPTABILITÉ (PRESENTATION LAYER)
 // ============================================================================
 
-class ComptabiliteScreen extends ConsumerWidget {
+class ComptabiliteScreen extends ConsumerStatefulWidget {
   final String entrepriseId;
 
   const ComptabiliteScreen({super.key, required this.entrepriseId});
 
-  Future<void> _handleSync(BuildContext context, WidgetRef ref) async {
+  @override
+  ConsumerState<ComptabiliteScreen> createState() => _ComptabiliteScreenState();
+}
+
+class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  String _searchQuery = '';
+  String? _selectedAccountFilter;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleSync() async {
     try {
       final count = await ref
-          .read(comptabiliteControllerProvider(entrepriseId).notifier)
+          .read(comptabiliteControllerProvider(widget.entrepriseId).notifier)
           .synchroniserHistoriqueComptable();
 
-      if (!context.mounted) return;
+      if (!mounted) return;
 
       final message = count > 0
           ? '$count ventes rattrapées avec succès !'
-          : 'Toutes les ventes sont déjà comptabilisées.';
+          : 'Journal nettoyé et à jour.';
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
+        SnackBar(content: Text(message), backgroundColor: Colors.teal),
       );
     } catch (e) {
-      if (!context.mounted) return;
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur lors de la synchronisation : $e')),
       );
     }
   }
 
+  Future<void> _handleClean() async {
+    try {
+      final count = await ref
+          .read(comptabiliteControllerProvider(widget.entrepriseId).notifier)
+          .nettoyerEcrituresObsolescentes();
+
+      if (!mounted) return;
+
+      final message = count > 0
+          ? 'Nettoyage terminé : $count écriture(s) obsolète(s) supprimée(s).'
+          : 'Aucune écriture obsolète trouvée.';
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: Colors.teal),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur lors du nettoyage : $e')),
+      );
+    }
+  }
+
+  void _exporterPDF() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Exportation du Grand Livre PDF en cours...')),
+    );
+  }
+
+  void _exporterCSV() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Exportation CSV / Excel en cours...')),
+    );
+  }
+
+  Future<void> _extourner(JournalEntry entry) async {
+    try {
+      await ref
+          .read(comptabiliteControllerProvider(widget.entrepriseId).notifier)
+          .extournerEcriture(entry);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Écriture extournée avec succès.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur lors de l\'extourne : $e')),
+      );
+    }
+  }
+
+  Future<void> _supprimer(String entryId) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirmer la suppression'),
+        content: const Text(
+            'Voulez-vous vraiment supprimer cette écriture comptable ?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Supprimer', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      await ref
+          .read(comptabiliteControllerProvider(widget.entrepriseId).notifier)
+          .supprimerEcriture(entryId);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Écriture supprimée.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur lors de la suppression : $e')),
+      );
+    }
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final ecrituresAsync = ref.watch(ecrituresComptablesProvider(entrepriseId));
-    final controllerState = ref.watch(comptabiliteControllerProvider(entrepriseId));
-    final currency = ref.watch(currencyProvider).activeCurrency;
+  Widget build(BuildContext context) {
+    final ecrituresAsync =
+        ref.watch(ecrituresComptablesProvider(widget.entrepriseId));
+    final controllerState =
+        ref.watch(comptabiliteControllerProvider(widget.entrepriseId));
+    final currencyState = ref.watch(currencyProvider);
 
     final isSyncing = controllerState.isLoading;
 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Comptabilité', style: TextStyle(fontWeight: FontWeight.bold)),
-          backgroundColor: Colors.teal.shade800,
-          foregroundColor: Colors.white,
-          actions: [
-            isSyncing
-                ? const Padding(
-                    padding: EdgeInsets.all(12.0),
-                    child: SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                    ),
-                  )
-                : IconButton(
-                    icon: const Icon(Icons.sync),
-                    tooltip: 'Synchroniser l\'historique',
-                    onPressed: () => _handleSync(context, ref),
-                  ),
-          ],
-          bottom: const TabBar(
-            indicatorColor: Colors.amber,
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.white70,
-            tabs: [
-              Tab(icon: Icon(Icons.receipt_long), text: 'Journal'),
-              Tab(icon: Icon(Icons.account_balance), text: 'Bilan & Synthèse'),
-            ],
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Comptabilité SYSCOHADA',
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        body: ecrituresAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, stack) => Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'Erreur de chargement : $err',
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.red),
-              ),
-            ),
+        backgroundColor: Colors.teal.shade800,
+        foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.picture_as_pdf),
+            tooltip: 'Exporter Grand Livre PDF',
+            onPressed: _exporterPDF,
           ),
-          data: (docs) {
-            if (docs.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+          IconButton(
+            icon: const Icon(Icons.sync),
+            tooltip: 'Synchroniser / Rattraper Ventes',
+            onPressed: isSyncing ? null : _handleSync,
+          ),
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'clean') {
+                _handleClean();
+              } else if (value == 'export_csv') {
+                _exporterCSV();
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'clean',
+                child: Row(
                   children: [
-                    const Icon(Icons.menu_book, size: 64, color: Colors.grey),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'Aucune écriture comptable trouvée.',
-                      style: TextStyle(color: Colors.grey, fontSize: 16),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.teal.shade800),
-                      onPressed: isSyncing ? null : () => _handleSync(context, ref),
-                      icon: const Icon(Icons.sync, color: Colors.white),
-                      label: const Text('Rattraper les ventes passées',
-                          style: TextStyle(color: Colors.white)),
-                    ),
+                    Icon(Icons.cleaning_services, color: Colors.teal, size: 20),
+                    SizedBox(width: 8),
+                    Text('Nettoyer les doublons'),
                   ],
                 ),
-              );
-            }
-
-            // Agrégation SYSCOHADA
-            double totalCaisse = 0.0;     // Compte 531000
-            double totalCreances = 0.0;   // Compte 411000
-            double totalVentes = 0.0;     // Compte 701000
-            double totalAchats = 0.0;     // Compte 601000
-
-            for (var doc in docs) {
-              final data = doc.data() as Map<String, dynamic>;
-              final montant = ((data['montant'] ?? 0.0) as num).toDouble();
-              final cDebit = data['compteDebit']?.toString() ?? '';
-              final cCredit = data['compteCredit']?.toString() ?? '';
-
-              if (cDebit.startsWith('531')) totalCaisse += montant;
-              if (cCredit.startsWith('531')) totalCaisse -= montant;
-
-              if (cDebit.startsWith('411')) totalCreances += montant;
-              if (cCredit.startsWith('411')) totalCreances -= montant;
-
-              if (cCredit.startsWith('701')) totalVentes += montant;
-              if (cDebit.startsWith('601')) totalAchats += montant;
-            }
-
-            return TabBarView(
-              children: [
-                _buildJournalTab(docs, currency),
-                _buildBilanTab(
-                  caisse: totalCaisse,
-                  creances: totalCreances,
-                  ventes: totalVentes,
-                  achats: totalAchats,
-                  currency: currency,
+              ),
+              const PopupMenuItem(
+                value: 'export_csv',
+                child: Row(
+                  children: [
+                    Icon(Icons.table_chart, color: Colors.teal, size: 20),
+                    SizedBox(width: 8),
+                    Text('Exporter CSV / Excel'),
+                  ],
                 ),
-              ],
-            );
-          },
+              ),
+            ],
+          ),
+        ],
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: Colors.amber,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          tabs: const [
+            Tab(icon: Icon(Icons.receipt_long), text: 'Journal'),
+            Tab(icon: Icon(Icons.account_balance), text: 'Bilan & Synthèse'),
+          ],
         ),
+      ),
+      body: ecrituresAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Erreur de chargement : $err',
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
+        ),
+        data: (ecritures) {
+          return TabBarView(
+            controller: _tabController,
+            children: [
+              _buildJournalTab(ecritures, currencyState, isSyncing),
+              _buildBilanSyntheseTab(ecritures, currencyState),
+            ],
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  EcritureFormScreen(entrepriseId: widget.entrepriseId),
+            ),
+          );
+        },
+        backgroundColor: Colors.teal.shade800,
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text('Saisie OD / Manuelle',
+            style: TextStyle(color: Colors.white)),
       ),
     );
   }
 
-  Widget _buildJournalTab(List<QueryDocumentSnapshot> docs, String currency) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(12),
-      itemCount: docs.length,
-      itemBuilder: (context, index) {
-        final data = docs[index].data() as Map<String, dynamic>;
-        final libelle = data['libelle'] ?? 'Écriture sans nom';
-        final compteDebit = data['compteDebit'] ?? '531000';
-        final compteCredit = data['compteCredit'] ?? '701000';
-        final montant = ((data['montant'] ?? 0.0) as num).toDouble();
+  // --- ONGLET 1 : JOURNAL AVEC FILTRES, RECHERCHE ET ACTIONS ---
+  Widget _buildJournalTab(
+      List<JournalEntry> ecritures, CurrencyState currencyState, bool isSyncing) {
+    final filtered = ecritures.where((entry) {
+      final queryLower = _searchQuery.toLowerCase();
 
-        // Utilisation sécurisée de parseDate() pour éviter les erreurs de type String/Timestamp
-        final rawDate = data['date'];
-        final DateTime date = parseDate(rawDate);
-        final dateStr = rawDate != null
-            ? "${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}"
-            : "";
+      final matchesSearch = entry.description.toLowerCase().contains(queryLower) ||
+          entry.lines.any((l) =>
+              l.accountLabel.toLowerCase().contains(queryLower) ||
+              l.accountCode.toLowerCase().contains(queryLower));
 
-        return Card(
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-            side: BorderSide(color: Colors.grey.shade200),
+      final matchesAccount = _selectedAccountFilter == null ||
+          entry.lines.any((l) => l.accountCode.startsWith(_selectedAccountFilter!));
+
+      return matchesSearch && matchesAccount;
+    }).toList();
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Rechercher libellé, compte...',
+                    prefixIcon: const Icon(Icons.search),
+                    contentPadding:
+                        const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                  ),
+                  onChanged: (val) => setState(() => _searchQuery = val),
+                ),
+              ),
+              const SizedBox(width: 8),
+              DropdownButton<String?>(
+                value: _selectedAccountFilter,
+                hint: const Text('Compte'),
+                items: const [
+                  DropdownMenuItem(value: null, child: Text('Tous')),
+                  DropdownMenuItem(value: '701', child: Text('701 Ventes')),
+                  DropdownMenuItem(value: '411', child: Text('411 Clients')),
+                  DropdownMenuItem(value: '419', child: Text('419 Avances')),
+                  DropdownMenuItem(value: '571', child: Text('571 Caisse')),
+                  DropdownMenuItem(value: '521', child: Text('521 Banque')),
+                  DropdownMenuItem(value: '6', child: Text('Classe 6 Charges')),
+                ],
+                onChanged: (val) => setState(() => _selectedAccountFilter = val),
+              ),
+            ],
           ),
-          margin: const EdgeInsets.symmetric(vertical: 4),
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.teal.shade50,
-              child: Icon(Icons.swap_horiz, color: Colors.teal.shade800, size: 20),
-            ),
-            title: Text(libelle, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-            subtitle: Text(
-              'D: $compteDebit | C: $compteCredit${dateStr.isNotEmpty ? " • $dateStr" : ""}',
-              style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
-            ),
-            trailing: Text(
-              "${montant.toStringAsFixed(2)} $currency",
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.teal.shade900, fontSize: 14),
-            ),
-          ),
-        );
-      },
+        ),
+
+        Expanded(
+          child: filtered.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.menu_book, size: 64, color: Colors.grey),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Aucune écriture ne correspond aux critères.',
+                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                      ),
+                      const SizedBox(height: 16),
+                      if (ecritures.isEmpty)
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.teal.shade800),
+                          onPressed: isSyncing ? null : _handleSync,
+                          icon: const Icon(Icons.sync, color: Colors.white),
+                          label: const Text('Rattraper les ventes passées',
+                              style: TextStyle(color: Colors.white)),
+                        ),
+                    ],
+                  ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  itemCount: filtered.length,
+                  itemBuilder: (context, index) {
+                    final entry = filtered[index];
+                    return _buildEcritureCard(entry, currencyState);
+                  },
+                ),
+        ),
+      ],
     );
   }
 
-  Widget _buildBilanTab({
-    required double caisse,
-    required double creances,
-    required double ventes,
-    required double achats,
-    required String currency,
-  }) {
-    final double resultatNivel = ventes - achats;
+  Widget _buildEcritureCard(JournalEntry entry, CurrencyState currencyState) {
+    final date = entry.date;
+    final dateStr =
+        "${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}";
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade200),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha(10),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
+    final hasLines = entry.lines.isNotEmpty;
+    final firstDebitCode = hasLines
+        ? entry.lines
+            .firstWhere((l) => l.debit > 0, orElse: () => entry.lines.first)
+            .accountCode
+        : 'N/A';
+    final firstCreditCode = hasLines
+        ? entry.lines
+            .firstWhere((l) => l.credit > 0, orElse: () => entry.lines.last)
+            .accountCode
+        : 'N/A';
+
+    final isExtourne = entry.description.startsWith('Extourne');
+
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      child: ExpansionTile(
+        leading: CircleAvatar(
+          backgroundColor:
+              isExtourne ? Colors.orange.shade100 : Colors.teal.shade50,
+          child: Icon(
+            isExtourne ? Icons.hourglass_top : Icons.swap_horiz,
+            color: isExtourne ? Colors.orange.shade800 : Colors.teal.shade800,
+            size: 20,
+          ),
+        ),
+        title: Text(
+          entry.description,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        ),
+        subtitle: Text(
+          'D: $firstDebitCode | C: $firstCreditCode • $dateStr',
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              currencyState.formatPrice(entry.totalDebit),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.teal.shade900,
+                fontSize: 14,
+              ),
+            ),
+            PopupMenuButton<String>(
+              onSelected: (action) {
+                if (action == 'reverse') {
+                  _extourner(entry);
+                } else if (action == 'delete') {
+                  _supprimer(entry.id);
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'reverse',
+                  child: Text('Extourner (Annuler)'),
+                ),
+                const PopupMenuItem(
+                  value: 'delete',
+                  child: Text('Supprimer', style: TextStyle(color: Colors.red)),
                 ),
               ],
             ),
-            child: Column(
+          ],
+        ),
+        children: entry.lines.map((line) {
+          return Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildStatColumn('Trésorerie (Caisse)', '${caisse.toStringAsFixed(2)} $currency', Colors.green.shade700),
-                    Container(width: 1, height: 40, color: Colors.grey.shade300),
-                    _buildStatColumn('Créances Clients', '${creances.toStringAsFixed(2)} $currency', Colors.orange.shade800),
-                  ],
+                Expanded(
+                  child: Text(
+                    '${line.accountCode} - ${line.accountLabel}',
+                    style: const TextStyle(fontSize: 12),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                const Divider(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildStatColumn('Chiffre d\'Affaires (Ventes)', '${ventes.toStringAsFixed(2)} $currency', Colors.blue.shade700),
-                    Container(width: 1, height: 40, color: Colors.grey.shade300),
-                    _buildStatColumn('Résultat Estimé', '${resultatNivel.toStringAsFixed(2)} $currency', resultatNivel >= 0 ? Colors.teal.shade800 : Colors.red.shade700),
-                  ],
+                Text(
+                  line.debit > 0
+                      ? 'D: ${currencyState.formatPrice(line.debit)}'
+                      : 'C: ${currencyState.formatPrice(line.credit)}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: line.debit > 0
+                        ? Colors.green.shade800
+                        : Colors.blue.shade800,
+                  ),
                 ),
               ],
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  // --- ONGLET 2 : BILAN & SYNTHÈSE ENRICHI ---
+  Widget _buildBilanSyntheseTab(List<JournalEntry> ecritures, CurrencyState currencyState) {
+    double totalTresorerie = 0.0;
+    double totalCreances = 0.0;
+    double totalVentes = 0.0;
+    double totalCharges = 0.0;
+    double totalAvances = 0.0;
+
+    for (var entry in ecritures) {
+      for (var line in entry.lines) {
+        final code = line.accountCode;
+
+        if (code.startsWith('571') ||
+            code.startsWith('531') ||
+            code.startsWith('521') ||
+            code.startsWith('572')) {
+          totalTresorerie += (line.debit - line.credit);
+        }
+
+        if (code.startsWith('411')) {
+          totalCreances += (line.debit - line.credit);
+        }
+
+        if (code.startsWith('419')) {
+          totalAvances += (line.credit - line.debit);
+        }
+
+        if (code.startsWith('7')) {
+          totalVentes += (line.credit - line.debit);
+        }
+
+        if (code.startsWith('6')) {
+          totalCharges += (line.debit - line.credit);
+        }
+      }
+    }
+
+    final double resultat = totalVentes - totalCharges;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(12.0),
+      child: Column(
+        children: [
+          Card(
+            elevation: 2,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Synthèse Générale',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const Divider(height: 20),
+                  _buildSummaryRow(
+                    'Trésorerie Globale (571/521)',
+                    currencyState.formatPrice(totalTresorerie),
+                    Colors.green.shade700,
+                  ),
+                  const Divider(),
+                  _buildSummaryRow(
+                    'Chiffre d\'Affaires / Ventes (701)',
+                    currencyState.formatPrice(totalVentes),
+                    Colors.blue.shade700,
+                  ),
+                  const Divider(),
+                  _buildSummaryRow(
+                    'Avances & Acomptes Reçus (419)',
+                    currencyState.formatPrice(totalAvances),
+                    Colors.orange.shade800,
+                  ),
+                  const Divider(),
+                  _buildSummaryRow(
+                    'Créances Clients (411)',
+                    currencyState.formatPrice(totalCreances),
+                    Colors.red.shade700,
+                  ),
+                  const Divider(),
+                  _buildSummaryRow(
+                    'Charges & Achats (Classe 6)',
+                    currencyState.formatPrice(totalCharges),
+                    Colors.purple.shade700,
+                  ),
+                  const Divider(thickness: 1.5),
+                  _buildSummaryRow(
+                    'Résultat Estimé (Ventes - Charges)',
+                    currencyState.formatPrice(resultat),
+                    resultat >= 0 ? Colors.teal.shade800 : Colors.red.shade900,
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -388,13 +806,25 @@ class ComptabiliteScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatColumn(String label, String value, Color color) {
-    return Column(
-      children: [
-        Text(label, style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
-        const SizedBox(height: 4),
-        Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: color)),
-      ],
+  Widget _buildSummaryRow(String title, String value, Color color) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+                fontWeight: FontWeight.bold, color: color, fontSize: 15),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/comptabilite_models.dart';
+import 'package:stockly_saas/models/dette.dart';
 
 final comptaServiceProvider = Provider<ComptaService>((ref) {
   return ComptaService();
@@ -28,16 +29,14 @@ class LigneBalance {
 class ComptaService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// Helpers pour l'isolation Multi-Tenant /organizations/{orgId}
-  static DocumentReference _orgRef(String orgId) {
-    return _firestore.collection('organizations').doc(orgId);
+  static CollectionReference _getEcrituresRef(String entrepriseId) {
+    return _firestore
+        .collection('entreprises')
+        .doc(entrepriseId)
+        .collection('ecritures_comptables');
   }
 
-  static CollectionReference _ecrituresRef(String orgId) {
-    return _orgRef(orgId).collection('ecritures_comptables');
-  }
-
-  /// Plan comptable standard (SYSCOHADA / PCG)
+  // Plan comptable standard SYSCOHADA
   static final Map<String, String> planComptableStandard = {
     '101000': 'Capital social',
     '120000': 'Résultat de l\'exercice',
@@ -46,18 +45,142 @@ class ComptaService {
     '401000': 'Fournisseurs',
     '411000': 'Clients (Créances)',
     '512000': 'Banque',
-    '531000': 'Caisse principale',
+    '571000': 'Caisse principale',
     '601000': 'Achats de marchandises',
     '607000': 'Achats / Charges d\'exploitation',
     '620000': 'Services extérieurs & Dépenses',
     '701000': 'Ventes de marchandises',
   };
 
+  static double _parseDouble(dynamic val) {
+    if (val is num) return val.toDouble();
+    if (val is String) return double.tryParse(val) ?? 0.0;
+    return 0.0;
+  }
+
+  static DateTime _parseDate(dynamic dateVal) {
+    if (dateVal is Timestamp) return dateVal.toDate();
+    if (dateVal is String) return DateTime.tryParse(dateVal) ?? DateTime.now();
+    return DateTime.now();
+  }
+
   // ==========================================
-  // 1. ÉCRITURES & TRANSACTIONS (ATOMIQUES)
+  // 1. ÉCRITURES & TRANSACTIONS
   // ==========================================
 
-  /// Enregistre une écriture unique en base
+  /// Enregistre une écriture multi-lignes équilibrée (SYSCOHADA)
+  static Future<void> ajouterEcritureMultiLignes({
+    required String entrepriseId,
+    required String libelle,
+    required List<LigneEcriture> lignes,
+    required DateTime date,
+    String pieceRef = '',
+    String userId = 'SYSTEM',
+  }) async {
+    if (entrepriseId.isEmpty || lignes.isEmpty) return;
+
+    final docRef = _getEcrituresRef(entrepriseId).doc();
+
+    final ecriture = EcritureComptable(
+      id: docRef.id,
+      entrepriseId: entrepriseId,
+      date: date,
+      libelle: libelle,
+      pieceRef: pieceRef,
+      lignes: lignes,
+    );
+
+    if (ecriture.estEquilibree) {
+      final data = ecriture.toMap();
+      data['createdAt'] = FieldValue.serverTimestamp();
+      data['createdBy'] = userId;
+      await docRef.set(data);
+    }
+  }
+
+  /// Ajoute une écriture multi-lignes dans un WriteBatch
+  static void ajouterEcritureMultiLignesDansBatch({
+    required WriteBatch batch,
+    required String entrepriseId,
+    required String libelle,
+    required List<LigneEcriture> lignes,
+    required DateTime date,
+    String pieceRef = '',
+    String userId = 'SYSTEM',
+  }) {
+    if (entrepriseId.isEmpty || lignes.isEmpty) return;
+
+    final docRef = _getEcrituresRef(entrepriseId).doc();
+
+    final ecriture = EcritureComptable(
+      id: docRef.id,
+      entrepriseId: entrepriseId,
+      date: date,
+      libelle: libelle,
+      pieceRef: pieceRef,
+      lignes: lignes,
+    );
+
+    if (ecriture.estEquilibree) {
+      final data = ecriture.toMap();
+      data['createdAt'] = FieldValue.serverTimestamp();
+      data['createdBy'] = userId;
+      batch.set(docRef, data);
+    }
+  }
+
+  /// Helper spécialisé pour enregistrer une VENTE en UNE SEULE écriture SYSCOHADA
+  static void ajouterEcritureVenteDansBatch({
+    required WriteBatch batch,
+    required String entrepriseId,
+    required String venteId,
+    required String clientNom,
+    required double montantTotal,
+    required double montantPaye,
+    required double montantReste,
+    required DateTime date,
+  }) {
+    final List<LigneEcriture> lignes = [];
+
+    // 1. Débit Caisse (571000) si versement
+    if (montantPaye > 0) {
+      lignes.add(LigneEcriture(
+        compteCode: '571000',
+        compteIntitule: planComptableStandard['571000'] ?? 'Caisse principale',
+        debit: montantPaye,
+        credit: 0.0,
+      ));
+    }
+
+    // 2. Débit Créance Client (411000) si reste à payer
+    if (montantReste > 0) {
+      lignes.add(LigneEcriture(
+        compteCode: '411000',
+        compteIntitule: 'Clients - $clientNom',
+        debit: montantReste,
+        credit: 0.0,
+      ));
+    }
+
+    // 3. Crédit Ventes (701000) du montant TOTAL
+    lignes.add(LigneEcriture(
+      compteCode: '701000',
+      compteIntitule: planComptableStandard['701000'] ?? 'Ventes de marchandises',
+      debit: 0.0,
+      credit: montantTotal > 0 ? montantTotal : (montantPaye + montantReste),
+    ));
+
+    ajouterEcritureMultiLignesDansBatch(
+      batch: batch,
+      entrepriseId: entrepriseId,
+      libelle: 'Vente - $clientNom',
+      lignes: lignes,
+      date: date,
+      pieceRef: venteId,
+    );
+  }
+
+  /// Méthode simple 1 Débit / 1 Crédit (Rétrocompatibilité)
   static Future<void> ajouterEcriture({
     required String entrepriseId,
     required String libelle,
@@ -70,109 +193,67 @@ class ComptaService {
   }) async {
     if (montant <= 0 || entrepriseId.isEmpty) return;
 
-    final docRef = _ecrituresRef(entrepriseId).doc();
-
-    final ecriture = EcritureComptable(
-      id: docRef.id,
+    await ajouterEcritureMultiLignes(
       entrepriseId: entrepriseId,
-      date: date,
       libelle: libelle,
+      date: date,
       pieceRef: pieceRef,
+      userId: userId,
       lignes: [
         LigneEcriture(
           compteCode: compteDebit,
-          compteIntitule: planComptableStandard[compteDebit] ??
-              'Compte débit ($compteDebit)',
+          compteIntitule: planComptableStandard[compteDebit] ?? 'Compte ($compteDebit)',
           debit: montant,
           credit: 0.0,
         ),
         LigneEcriture(
           compteCode: compteCredit,
-          compteIntitule: planComptableStandard[compteCredit] ??
-              'Compte crédit ($compteCredit)',
+          compteIntitule: planComptableStandard[compteCredit] ?? 'Compte ($compteCredit)',
           debit: 0.0,
           credit: montant,
         ),
       ],
     );
-
-    if (ecriture.estEquilibree) {
-      final data = ecriture.toMap();
-      data['createdAt'] = FieldValue.serverTimestamp();
-      data['createdBy'] = userId;
-      await docRef.set(data);
-    }
   }
 
-  /// Inserer une écriture dans un WriteBatch existant (Offline-First)
-  static void ajouterEcritureDansBatch({
-    required WriteBatch batch,
-    required String entrepriseId,
-    required String libelle,
-    required String compteDebit,
-    required String compteCredit,
-    required double montant,
-    required DateTime date,
-    String pieceRef = '',
-    String userId = 'SYSTEM',
-  }) {
-    if (montant <= 0 || entrepriseId.isEmpty) return;
+  static Stream<List<EcritureComptable>> getEcrituresStream(String entrepriseId) {
+    if (entrepriseId.isEmpty) return Stream.value([]);
 
-    final docRef = _ecrituresRef(entrepriseId).doc();
-
-    final ecriture = EcritureComptable(
-      id: docRef.id,
-      entrepriseId: entrepriseId,
-      date: date,
-      libelle: libelle,
-      pieceRef: pieceRef,
-      lignes: [
-        LigneEcriture(
-          compteCode: compteDebit,
-          compteIntitule: planComptableStandard[compteDebit] ??
-              'Compte débit ($compteDebit)',
-          debit: montant,
-          credit: 0.0,
-        ),
-        LigneEcriture(
-          compteCode: compteCredit,
-          compteIntitule: planComptableStandard[compteCredit] ??
-              'Compte crédit ($compteCredit)',
-          debit: 0.0,
-          credit: montant,
-        ),
-      ],
-    );
-
-    if (ecriture.estEquilibree) {
-      final data = ecriture.toMap();
-      data['createdAt'] = FieldValue.serverTimestamp();
-      data['createdBy'] = userId;
-      batch.set(docRef, data);
-    }
-  }
-
-  /// Flux réactif du Journal des Écritures
-  static Stream<List<EcritureComptable>> getEcrituresStream(
-      String entrepriseId) {
-    if (entrepriseId.isEmpty) {
-      return Stream.value([]);
-    }
-
-    return _ecrituresRef(entrepriseId)
-        .orderBy('date', descending: true)
-        .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => EcritureComptable.fromMap(
-                doc.id, doc.data() as Map<String, dynamic>))
-            .toList());
+    return _getEcrituresRef(entrepriseId).snapshots().map((snapshot) {
+      final list = snapshot.docs
+          .map((doc) => EcritureComptable.fromMap(doc.id, doc.data() as Map<String, dynamic>))
+          .toList();
+      list.sort((a, b) => b.date.compareTo(a.date));
+      return list;
+    });
   }
 
   // ==========================================
-  // 2. SYNCHRONISATION SÉCURISÉE AVEC BATCH AUTO-COMMIT
+  // 2. NETTOYAGE & SYNCHRONISATION
   // ==========================================
 
-  /// Synchronise l'historique sous /organizations/{orgId}
+  /// Supprime les anciennes écritures obsolètes (schéma avec compteCredit/compteDebit plats)
+  static Future<int> nettoyerEcrituresObsolescentes(String entrepriseId) async {
+    if (entrepriseId.isEmpty) return 0;
+
+    final query = await _getEcrituresRef(entrepriseId).get();
+    WriteBatch batch = _firestore.batch();
+    int count = 0;
+
+    for (var doc in query.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      if (data.containsKey('compteCredit') || data.containsKey('compteDebit')) {
+        batch.delete(doc.reference);
+        count++;
+      }
+    }
+
+    if (count > 0) {
+      await batch.commit();
+    }
+    return count;
+  }
+
   static Future<int> synchroniserHistorique(String entrepriseId) async {
     if (entrepriseId.isEmpty) return 0;
 
@@ -188,45 +269,34 @@ class ComptaService {
       }
     }
 
-    // A. Synchronisation des Ventes non comptabilisées
-    final ventesSnap =
-        await _orgRef(entrepriseId).collection('ventes').get();
+    final entrepriseRef = _firestore.collection('entreprises').doc(entrepriseId);
+
+    // A. Synchronisation des Ventes (1 seule écriture SYSCOHADA par vente)
+    final ventesSnap = await entrepriseRef
+        .collection('ventes')
+        .where('comptabilise', isEqualTo: false)
+        .get();
 
     for (var doc in ventesSnap.docs) {
       final data = doc.data();
-      if (data['comptabilise'] == true) continue;
-
-      final String client =
-          data['clientNom'] ?? data['nomClient'] ?? 'Client Divers';
-      final double verse =
-          ((data['montantPaye'] ?? data['total']) ?? 0.0).toDouble();
-      final double reste = (data['resteAPayer'] ?? 0.0).toDouble();
+      final String client = data['clientNom'] ?? data['nomClient'] ?? 'Client Divers';
+      final double verse = _parseDouble(data['montantPaye']);
+      final double reste = _parseDouble(data['resteAPayer']);
+      final double total = _parseDouble(data['total']) > 0 
+          ? _parseDouble(data['total']) 
+          : (verse + reste);
       final DateTime date = _parseDate(data['date'] ?? data['createdAt']);
 
-      if (verse > 0) {
-        ajouterEcritureDansBatch(
+      if (total > 0) {
+        ajouterEcritureVenteDansBatch(
           batch: batch,
           entrepriseId: entrepriseId,
-          libelle: 'Vente en caisse - $client',
-          compteDebit: '531000',
-          compteCredit: '701000',
-          montant: verse,
+          venteId: doc.id,
+          clientNom: client,
+          montantTotal: total,
+          montantPaye: verse,
+          montantReste: reste,
           date: date,
-          pieceRef: doc.id,
-        );
-        opCount++;
-      }
-
-      if (reste > 0) {
-        ajouterEcritureDansBatch(
-          batch: batch,
-          entrepriseId: entrepriseId,
-          libelle: 'Créance vente - Client : $client',
-          compteDebit: '411000',
-          compteCredit: '701000',
-          montant: reste,
-          date: date,
-          pieceRef: doc.id,
         );
         opCount++;
       }
@@ -241,29 +311,39 @@ class ComptaService {
       await verifierEtValiderBatch();
     }
 
-    // B. Synchronisation des Dépenses non comptabilisées
-    final depensesSnap =
-        await _orgRef(entrepriseId).collection('depenses').get();
+    // B. Synchronisation des Dépenses
+    final depensesSnap = await entrepriseRef
+        .collection('depenses')
+        .where('comptabilise', isEqualTo: false)
+        .get();
 
     for (var doc in depensesSnap.docs) {
       final data = doc.data();
-      if (data['comptabilise'] == true) continue;
-
-      final double montant = (data['montant'] ?? 0.0).toDouble();
-      final String motif =
-          data['motif'] ?? data['categorie'] ?? 'Dépense diverse';
+      final double montant = _parseDouble(data['montant']);
+      final String motif = data['motif'] ?? data['categorie'] ?? 'Dépense diverse';
       final DateTime date = _parseDate(data['date'] ?? data['createdAt']);
 
       if (montant > 0) {
-        ajouterEcritureDansBatch(
+        ajouterEcritureMultiLignesDansBatch(
           batch: batch,
           entrepriseId: entrepriseId,
           libelle: 'Dépense : $motif',
-          compteDebit: '607000',
-          compteCredit: '531000',
-          montant: montant,
           date: date,
           pieceRef: doc.id,
+          lignes: [
+            LigneEcriture(
+              compteCode: '607000',
+              compteIntitule: planComptableStandard['607000'] ?? 'Charges d\'exploitation',
+              debit: montant,
+              credit: 0.0,
+            ),
+            LigneEcriture(
+              compteCode: '571000',
+              compteIntitule: planComptableStandard['571000'] ?? 'Caisse principale',
+              debit: 0.0,
+              credit: montant,
+            ),
+          ],
         );
         opCount++;
       }
@@ -278,32 +358,41 @@ class ComptaService {
       await verifierEtValiderBatch();
     }
 
-    // C. Synchronisation des Dettes non comptabilisées
-    final dettesSnap =
-        await _orgRef(entrepriseId).collection('dettes').get();
+    // C. Synchronisation des Dettes
+    final dettesSnap = await entrepriseRef
+        .collection('dettes')
+        .where('comptabilise', isEqualTo: false)
+        .get();
 
     for (var doc in dettesSnap.docs) {
       final data = doc.data();
-      if (data['comptabilise'] == true) continue;
+      final dette = Dette.fromMap(doc.id, data);
+      final bool isClient = dette.type == TypeDette.client;
+      final DateTime date = _parseDate(data['createdAt'] ?? data['dateCreation'] ?? data['date']);
 
-      final double reste =
-          (data['montantRestant'] ?? data['montant'] ?? 0.0).toDouble();
-      final String client = data['nomClient'] ?? 'Client';
-      final String typeDette = data['type'] ?? 'CLIENT';
-      final DateTime date = _parseDate(data['date'] ?? data['createdAt']);
-
-      if (reste > 0) {
-        ajouterEcritureDansBatch(
+      if (dette.montantReste > 0) {
+        ajouterEcritureMultiLignesDansBatch(
           batch: batch,
           entrepriseId: entrepriseId,
-          libelle: typeDette == 'CLIENT'
-              ? 'Créance enregistrée - $client'
-              : 'Dette fournisseur enregistrée - $client',
-          compteDebit: typeDette == 'CLIENT' ? '411000' : '601000',
-          compteCredit: typeDette == 'CLIENT' ? '701000' : '401000',
-          montant: reste,
+          libelle: isClient
+              ? 'Créance enregistrée - ${dette.nomTiers}'
+              : 'Dette fournisseur enregistrée - ${dette.nomTiers}',
           date: date,
           pieceRef: doc.id,
+          lignes: [
+            LigneEcriture(
+              compteCode: isClient ? '411000' : '601000',
+              compteIntitule: isClient ? 'Clients - ${dette.nomTiers}' : 'Achats de marchandises',
+              debit: dette.montantReste,
+              credit: 0.0,
+            ),
+            LigneEcriture(
+              compteCode: isClient ? '701000' : '401000',
+              compteIntitule: isClient ? 'Ventes de marchandises' : 'Fournisseurs - ${dette.nomTiers}',
+              debit: 0.0,
+              credit: dette.montantReste,
+            ),
+          ],
         );
         opCount++;
       }
@@ -325,17 +414,8 @@ class ComptaService {
     return totalTraite;
   }
 
-  static DateTime _parseDate(dynamic dateVal) {
-    if (dateVal is Timestamp) {
-      return dateVal.toDate();
-    } else if (dateVal is String) {
-      return DateTime.tryParse(dateVal) ?? DateTime.now();
-    }
-    return DateTime.now();
-  }
-
   // ==========================================
-  // 3. CALCULS FINANCIERS (GRAND LIVRE / BALANCE / BILAN)
+  // 3. GENERATION DE LA BALANCE ET DU BILAN
   // ==========================================
 
   static Map<String, List<LigneEcriture>> genererGrandLivre(
@@ -357,10 +437,8 @@ class ComptaService {
 
     for (var ecriture in ecritures) {
       for (var ligne in ecriture.lignes) {
-        debits[ligne.compteCode] =
-            (debits[ligne.compteCode] ?? 0.0) + ligne.debit;
-        credits[ligne.compteCode] =
-            (credits[ligne.compteCode] ?? 0.0) + ligne.credit;
+        debits[ligne.compteCode] = (debits[ligne.compteCode] ?? 0.0) + ligne.debit;
+        credits[ligne.compteCode] = (credits[ligne.compteCode] ?? 0.0) + ligne.credit;
       }
     }
 
@@ -379,7 +457,6 @@ class ComptaService {
       ..sort((a, b) => a.compteCode.compareTo(b.compteCode));
   }
 
-  /// Génère le Bilan avec équilibre automatique Actif = Passif
   static Map<String, List<LigneBalance>> genererBilan(
       List<LigneBalance> balance) {
     final List<LigneBalance> actif = [];
@@ -391,23 +468,17 @@ class ComptaService {
     for (var ligne in balance) {
       int classe = int.tryParse(ligne.compteCode.substring(0, 1)) ?? 0;
 
-      // Comptes de bilan (1 à 5)
-      if ([2, 3, 5].contains(classe) ||
-          (classe == 4 && ligne.soldeDebiteur > 0)) {
+      if ([2, 3, 5].contains(classe) || (classe == 4 && ligne.soldeDebiteur > 0)) {
         actif.add(ligne);
-      } else if ([1].contains(classe) ||
-          (classe == 4 && ligne.soldeCrediteur > 0)) {
+      } else if ([1].contains(classe) || (classe == 4 && ligne.soldeCrediteur > 0)) {
         passif.add(ligne);
-      }
-      // Comptes de gestion (6 & 7) pour calcul du résultat
-      else if (classe == 6) {
+      } else if (classe == 6) {
         totalCharges += ligne.soldeDebiteur;
       } else if (classe == 7) {
         totalProduits += ligne.soldeCrediteur;
       }
     }
 
-    // Intégration du Résultat (Compte 120000) dans les Capitaux Propres
     final double resultat = totalProduits - totalCharges;
     if (resultat != 0) {
       passif.add(LigneBalance(

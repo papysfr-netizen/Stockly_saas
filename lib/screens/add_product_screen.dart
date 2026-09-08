@@ -32,7 +32,7 @@ class AddProductController extends FamilyAsyncNotifier<void, String> {
     state = const AsyncValue.loading();
     try {
       final docRef = FirebaseFirestore.instance
-          .collection('organizations')
+          .collection('entreprises') // 👈 Correction : 'entreprises' au lieu de 'organizations'
           .doc(entrepriseId)
           .collection('produits')
           .doc();
@@ -47,6 +47,7 @@ class AddProductController extends FamilyAsyncNotifier<void, String> {
         'quantite': quantite,
         'entrepriseId': entrepriseId,
         'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
       });
 
       state = const AsyncValue.data(null);
@@ -87,33 +88,50 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     super.dispose();
   }
 
+  // Helper pour parser les doubles en supportant la virgule ','
+  double _parseDouble(String text) {
+    final cleaned = text.trim().replaceAll(',', '.');
+    return double.tryParse(cleaned) ?? 0.0;
+  }
+
   void _soumettreProduit(String entrepriseId) async {
     if (!_formKey.currentState!.validate()) return;
 
     final nom = nomController.text;
     final codeBarre = codeBarreController.text;
-    final prixAchat = double.tryParse(prixAchatController.text) ?? 0.0;
-    final prixVente = double.tryParse(prixVenteController.text) ?? 0.0;
-    final quantite = int.tryParse(quantiteController.text) ?? 0;
+    final prixAchat = _parseDouble(prixAchatController.text);
+    final prixVente = _parseDouble(prixVenteController.text);
+    final quantite = int.tryParse(quantiteController.text.trim()) ?? 0;
 
-    await ref
-        .read(addProductControllerProvider(entrepriseId).notifier)
-        .addProduct(
-          nom: nom,
-          codeBarre: codeBarre,
-          prixAchat: prixAchat,
-          prixVente: prixVente,
-          quantite: quantite,
+    try {
+      await ref
+          .read(addProductControllerProvider(entrepriseId).notifier)
+          .addProduct(
+            nom: nom,
+            codeBarre: codeBarre,
+            prixAchat: prixAchat,
+            prixVente: prixVente,
+            quantite: quantite,
+          );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Produit ajouté avec succès !'),
+            backgroundColor: Colors.green,
+          ),
         );
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Produit ajouté avec succès !'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      Navigator.pop(context);
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de l\'ajout : $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -187,7 +205,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Champ Prix d'Achat (pour l'analyse financière & P&L)
+                  // Champ Prix d'Achat
                   TextFormField(
                     controller: prixAchatController,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -212,7 +230,8 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                       if (value == null || value.trim().isEmpty) {
                         return 'Veuillez entrer un prix de vente';
                       }
-                      if (double.tryParse(value) == null) {
+                      final cleaned = value.trim().replaceAll(',', '.');
+                      if (double.tryParse(cleaned) == null) {
                         return 'Prix invalide';
                       }
                       return null;
@@ -233,7 +252,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                       if (value == null || value.trim().isEmpty) {
                         return 'Veuillez entrer une quantité';
                       }
-                      if (int.tryParse(value) == null) {
+                      if (int.tryParse(value.trim()) == null) {
                         return 'Quantité invalide';
                       }
                       return null;

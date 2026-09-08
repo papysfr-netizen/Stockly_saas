@@ -15,6 +15,7 @@ import 'providers/locale_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/pin_lock_screen.dart';
+import 'widgets/app_initializer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +25,7 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
 
+    // Configuration avancée de la persistance Firestore Hors-Ligne
     if (!kIsWeb) {
       FirebaseFirestore.instance.settings = const Settings(
         persistenceEnabled: true,
@@ -36,13 +38,15 @@ void main() async {
 
   runApp(
     const ProviderScope(
-      child: MyApp(),
+      child: AppInitializer(
+        child: MyApp(),
+      ),
     ),
   );
 }
 
 // ============================================================================
-// DÉLÉGUÉS DE SECOURS (FALLBACK) POUR LES LANGUES NON SUPPORTÉES PAR FLUTTER
+// DÉLÉGUÉS DE SECOURS (FALLBACK) POUR LES LANGUES NON SUPPORTÉES
 // ============================================================================
 class FallbackMaterialLocalizationsDelegate
     extends LocalizationsDelegate<MaterialLocalizations> {
@@ -139,7 +143,7 @@ class MyApp extends ConsumerWidget {
 }
 
 // ============================================================================
-// PASSERELLE D'AUTHENTIFICATION SÉCURISÉE MULTI-RÔLES
+// PASSERELLE D'AUTHENTIFICATION OPTIMISÉE POUR LE MODE HORS-LIGNE
 // ============================================================================
 class AuthWrapper extends ConsumerWidget {
   const AuthWrapper({super.key});
@@ -159,7 +163,8 @@ class AuthWrapper extends ConsumerWidget {
           );
         }
 
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        // En mode hors-ligne, FirebaseAuth conserve le dernier utilisateur dans le cache local.
+        if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
@@ -172,11 +177,53 @@ class AuthWrapper extends ConsumerWidget {
         final firebaseUser = snapshot.data!;
 
         return StreamBuilder<DocumentSnapshot>(
+          // includeMetadataChanges: true force l'émission immédiate des données du cache SQLite local
           stream: FirebaseFirestore.instance
               .collection('users')
               .doc(firebaseUser.uid)
-              .snapshots(),
+              .snapshots(includeMetadataChanges: true),
           builder: (context, userSnapshot) {
+            // Priorité absolue aux données disponibles (Cache ou Réseau)
+            if (userSnapshot.hasData && userSnapshot.data != null) {
+              final doc = userSnapshot.data!;
+              final rawData = doc.data() as Map<String, dynamic>? ?? {};
+
+              // Décodage du modèle utilisateur
+              final currentUser = UserModel.fromMap(
+                {
+                  ...rawData,
+                  'email': rawData['email'] ?? firebaseUser.email ?? '',
+                  'nom': rawData['nom'] ??
+                      firebaseUser.displayName ??
+                      'Utilisateur',
+                },
+                firebaseUser.uid,
+              );
+
+              final String expectedPin = rawData['pinCode']?.toString() ?? '0000';
+
+              return switch (posAuthState) {
+                PosUnauthenticated() => PinLockScreen(
+                    expectedPin: expectedPin,
+                    userRole: currentUser.role.name,
+                  ),
+                PosLocked() => PinLockScreen(
+                    expectedPin: expectedPin,
+                    userRole: currentUser.role.name,
+                  ),
+                PosUnlocked() => Listener(
+                    onPointerDown: (_) {
+                      ref
+                          .read(authControllerProvider.notifier)
+                          .registerUserActivity();
+                    },
+                    child: HomeScreen(
+                      currentUser: currentUser,
+                    ),
+                  ),
+              };
+            }
+
             if (userSnapshot.hasError) {
               return Scaffold(
                 body: Center(
@@ -191,49 +238,10 @@ class AuthWrapper extends ConsumerWidget {
               );
             }
 
-            if (userSnapshot.connectionState == ConnectionState.waiting) {
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
-            }
-
-            final rawData =
-                userSnapshot.data?.data() as Map<String, dynamic>? ?? {};
-
-            // Décodage typé via UserModel.fromMap pour garantir les 4 rôles
-            final currentUser = UserModel.fromMap(
-              {
-                ...rawData,
-                'email': rawData['email'] ?? firebaseUser.email ?? '',
-                'nom': rawData['nom'] ??
-                    firebaseUser.displayName ??
-                    'Utilisateur',
-              },
-              firebaseUser.uid,
+            // Chargement uniquement si aucune donnée locale n'est encore disponible
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
             );
-
-            final String expectedPin = rawData['pinCode']?.toString() ?? '0000';
-
-            return switch (posAuthState) {
-              PosUnauthenticated() => PinLockScreen(
-                  expectedPin: expectedPin,
-                  userRole: currentUser.role.name,
-                ),
-              PosLocked() => PinLockScreen(
-                  expectedPin: expectedPin,
-                  userRole: currentUser.role.name,
-                ),
-              PosUnlocked() => Listener(
-                  onPointerDown: (_) {
-                    ref
-                        .read(authControllerProvider.notifier)
-                        .registerUserActivity();
-                  },
-                  child: HomeScreen(
-                    currentUser: currentUser,
-                  ),
-                ),
-            };
           },
         );
       },
