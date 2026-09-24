@@ -9,7 +9,7 @@ import '../../core/providers/user_role_provider.dart';
 import '../../features/debts/repositories/vente_repository.dart';
 import '../../core/services/report_export_service.dart';
 import '../../core/utils/currency_extension.dart';
-import '../../features/debts/screens/settings_screen.dart';
+import 'package:stockly_saas/screens/settings_screen.dart';
 import 'dialogs/nouveau_produit_dialog.dart';
 import 'dialogs/paiement_dialog.dart';
 import 'widgets/panier_view.dart';

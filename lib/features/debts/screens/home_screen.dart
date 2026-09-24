@@ -13,7 +13,7 @@ import '../../../core/widgets/add_product_modal.dart';
 import 'comptabilite_screen.dart';
 import 'debt_management_screen.dart';
 import 'depenses_screen.dart';
-import 'settings_screen.dart';
+import 'package:stockly_saas/screens/settings_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   final UserModel currentUser;
