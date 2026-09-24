@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/currency_provider.dart';
-import '../providers/produit_provider.dart';
-import '../providers/user_role_provider.dart';
-import '../services/packing_list_service.dart';
-import '../widgets/add_product_modal.dart';
+import '../core/providers/currency_provider.dart';
+import '../core/providers/produit_provider.dart';
+import '../core/providers/user_role_provider.dart';
+import '../core/services/packing_list_service.dart';
+import '../core/widgets/add_product_modal.dart';
 
 // ============================================================================
 // 1. CONTROLLER & LOGIQUE D'IMPORTATION (ISOLATION MULTI-TENANT)

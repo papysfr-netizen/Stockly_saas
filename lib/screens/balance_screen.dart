@@ -1,9 +1,9 @@
 // lib/screens/balance_screen.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../models/journal_entry.dart';
-import '../services/accounting_journal_service.dart';
-import '../services/accounting_report_service.dart';
+import 'package:stockly_saas/features/accounting/models/journal_entry.dart';
+import '../core/services/accounting_journal_service.dart';
+import '../core/services/accounting_report_service.dart';
 
 class BalanceScreen extends StatelessWidget {
   final String entrepriseId;

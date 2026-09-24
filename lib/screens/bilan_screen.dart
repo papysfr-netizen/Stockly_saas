@@ -1,6 +1,4 @@
-// lib/services/accounting_report_service.dart
-
-import '../models/journal_entry.dart';
+import 'package:stockly_saas/features/accounting/models/journal_entry.dart';
 
 /// Modèle pour un compte du Grand Livre
 class AccountBalance {

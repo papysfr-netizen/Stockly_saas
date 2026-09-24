@@ -2,11 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:stockly_saas/models/journal_entry.dart';
-import 'package:stockly_saas/models/payment_method.dart';
-import 'package:stockly_saas/providers/currency_provider.dart';
+import 'package:stockly_saas/features/accounting/models/journal_entry.dart';
+import 'package:stockly_saas/core/models/payment_method.dart';
+import 'package:stockly_saas/core/providers/currency_provider.dart';
 import 'package:stockly_saas/screens/ecriture_form_screen.dart';
-import 'package:stockly_saas/services/accounting_journal_service.dart';
+import 'package:stockly_saas/core/services/accounting_journal_service.dart';
 
 // ============================================================================
 // 1. PROVIDERS & STREAMS (RIVERPOD - ISOLATION MULTI-TENANT)

@@ -2,8 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../providers/journal_provider.dart';
-import '../services/accounting_report_service.dart';
+import '../core/providers/journal_provider.dart';
+import '../core/providers/currency_provider.dart';
+import '../core/services/accounting_report_service.dart';
 
 class BalanceSheetScreen extends ConsumerWidget {
   final String entrepriseId;
@@ -16,9 +17,12 @@ class BalanceSheetScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final trialBalance = ref.watch(trialBalanceProvider(entrepriseId));
+    
+    // Récupération propre et dynamique de la devise active avec .toString()
+    final currencyCode = ref.watch(currencyProvider).toString();
     final currencyFormat = NumberFormat.currency(
       locale: 'fr_FR',
-      symbol: 'FCFA',
+      symbol: currencyCode,
       decimalDigits: 2,
     );
 
@@ -64,8 +68,12 @@ class BalanceSheetScreen extends ConsumerWidget {
     final totalPassif = totalCapitaux + totalDettes + totalTresorPassif;
 
     return Scaffold(
+      backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
-        title: const Text('Bilan Comptable (SYSCOHADA)'),
+        title: const Text('Bilan Comptable (SYSCOHADA)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        backgroundColor: const Color(0xFF1E293B),
+        foregroundColor: Colors.white,
+        elevation: 0,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -74,7 +82,7 @@ class BalanceSheetScreen extends ConsumerWidget {
             // Actif
             _buildSectionCard(
               title: 'ACTIF (Emplois)',
-              color: Colors.blue.shade900,
+              color: Colors.teal.shade800,
               total: totalActif,
               format: currencyFormat,
               children: [
@@ -93,7 +101,7 @@ class BalanceSheetScreen extends ConsumerWidget {
             // Passif
             _buildSectionCard(
               title: 'PASSIF (Ressources)',
-              color: Colors.teal.shade900,
+              color: Colors.orange.shade800,
               total: totalPassif,
               format: currencyFormat,
               children: [
@@ -122,17 +130,25 @@ class BalanceSheetScreen extends ConsumerWidget {
     required NumberFormat format,
     required List<Widget> children,
   }) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: color,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(12)),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -155,7 +171,7 @@ class BalanceSheetScreen extends ConsumerWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.all(8.0),
             child: Column(children: children),
           ),
         ],
@@ -169,13 +185,13 @@ class BalanceSheetScreen extends ConsumerWidget {
     return ExpansionTile(
       title: Text(
         label,
-        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Color(0xFF1E293B)),
       ),
       children: accounts.map((b) {
         return ListTile(
           dense: true,
-          title: Text('${b.accountCode} - ${b.accountLabel}'),
-          trailing: Text(format.format(b.netBalance.abs())),
+          title: Text('${b.accountCode} - ${b.accountLabel}', style: const TextStyle(fontSize: 13)),
+          trailing: Text(format.format(b.netBalance.abs()), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
         );
       }).toList(),
     );

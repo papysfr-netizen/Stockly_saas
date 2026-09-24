@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:stockly_saas/providers/currency_provider.dart';
+import 'package:stockly_saas/core/providers/currency_provider.dart';
 
 extension CurrencyFormattingExtension on WidgetRef {
   /// Formate directement un prix USD selon la devise active configurée

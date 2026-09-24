@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stockly_saas/providers/currency_provider.dart';
+import 'package:stockly_saas/core/providers/currency_provider.dart';
 
 void main() {
   late ProviderContainer container;

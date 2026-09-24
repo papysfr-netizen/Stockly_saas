@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../providers/journal_provider.dart';
+import '../core/providers/journal_provider.dart';
 
 class IncomeStatementScreen extends ConsumerWidget {
   final String entrepriseId;

@@ -1,15 +1,20 @@
+// lib/views/caisse/dialogs/paiement_dialog.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:stockly_saas/models/payment_method.dart';
-import 'package:stockly_saas/providers/cart_provider.dart';
-import 'package:stockly_saas/providers/currency_provider.dart';
-import 'package:stockly_saas/providers/entreprise_provider.dart';
-import 'package:stockly_saas/services/accounting_journal_service.dart';
-import 'package:stockly_saas/services/receipt_service.dart';
-import 'package:stockly_saas/utils/payment_calculator.dart';
+import 'package:stockly_saas/core/models/payment_method.dart';
+import 'package:stockly_saas/core/providers/cart_provider.dart';
+import 'package:stockly_saas/core/providers/currency_provider.dart';
+import 'package:stockly_saas/core/providers/entreprise_provider.dart';
+import 'package:stockly_saas/core/services/accounting_journal_service.dart';
+import 'package:stockly_saas/core/services/receipt_service.dart';
+import 'package:stockly_saas/core/utils/payment_calculator.dart';
+
+// Import de ton écran de Bon de Livraison professionnel
+import '../../../screens/bon_livraison_screen.dart';
 
 class PaiementDialog extends ConsumerStatefulWidget {
   final double total;
@@ -47,7 +52,11 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _preremplirMontant());
+    // CORRECTIF 1 : setState pour que l'écran ET le calcul utilisent
+    // le montant pré-rempli (avant, seul le texte changeait à l'écran).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(_preremplirMontant);
+    });
   }
 
   @override
@@ -501,7 +510,9 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(
-                    onPressed: isLoading ? null : () => _validerVente(calc),
+                    // CORRECTIF 2 : on n'envoie plus un calcul périmé,
+                    // la fonction recalcule elle-même à la validation.
+                    onPressed: isLoading ? null : _validerVente,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.teal.shade800,
                       foregroundColor: Colors.white,
@@ -525,8 +536,18 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
   }
 
   // ================= ENREGISTREMENT ET COMPTABILISATION =================
-  Future<void> _validerVente(PaymentResult calc) async {
+  Future<void> _validerVente() async {
     setState(() => isLoading = true);
+
+    // CORRECTIF 3 : on recalcule le paiement à partir de ce qui est
+    // réellement saisi dans les champs au moment de la validation.
+    final activeInfoValidation = ref.read(currencyProvider).activeCurrencyInfo;
+    final calc = PaymentResult(
+      totalUSD: widget.total,
+      paidUSD: double.tryParse(_verseUSDController.text.trim()) ?? 0.0,
+      paidLocal: double.tryParse(_verseLocalController.text.trim()) ?? 0.0,
+      localRate: activeInfoValidation.rateToUSD,
+    );
 
     try {
       final double totalVente = widget.total;
@@ -737,7 +758,23 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
 
       if (!mounted) return;
 
+      // 7. Fermeture du dialogue de paiement
       Navigator.pop(context);
+
+      // 8. Ouverture automatique du Bon de Livraison professionnel
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BonLivraisonScreen(
+            entrepriseId: widget.entrepriseId,
+            nomClient: client,
+            adresseClient: '',
+            telephoneClient: telephone,
+            articles: widget.cart,
+          ),
+        ),
+      );
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Vente enregistrée avec succès !'),
@@ -746,6 +783,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
       );
     } catch (e) {
       if (!mounted) return;
+      setState(() => isLoading = false);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -753,8 +791,6 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
           backgroundColor: Colors.red,
         ),
       );
-    } finally {
-      if (mounted) setState(() => isLoading = false);
     }
   }
 }

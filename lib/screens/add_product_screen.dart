@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/user_role_provider.dart';
-import '../widgets/quick_scanner_widget.dart';
+import '../core/providers/user_role_provider.dart';
+import '../core/widgets/quick_scanner_widget.dart';
 
 // ============================================================================
 // 1. CONTROLLER & LOGIQUE MÉTIER (ISOLATION MULTI-TENANT)
@@ -32,7 +32,7 @@ class AddProductController extends FamilyAsyncNotifier<void, String> {
     state = const AsyncValue.loading();
     try {
       final docRef = FirebaseFirestore.instance
-          .collection('entreprises') // 👈 Correction : 'entreprises' au lieu de 'organizations'
+          .collection('entreprises')
           .doc(entrepriseId)
           .collection('produits')
           .doc();
@@ -168,7 +168,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Champ Code-barres avec Scanner
+                  // Champ Code-barres avec Scanner Corrigé
                   TextFormField(
                     controller: codeBarreController,
                     decoration: InputDecoration(
@@ -177,28 +177,29 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                       prefixIcon: const Icon(Icons.qr_code),
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.qr_code_scanner, color: Colors.blue),
-                        onPressed: () {
-                          Navigator.push(
+                        onPressed: () async {
+                          final scannedCode = await Navigator.push<String>(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => QuickScannerWidget(
-                                onCodeScanned: (code) {
-                                  setState(() {
-                                    codeBarreController.text = code;
-                                  });
-
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Code scanné : $code'),
-                                        backgroundColor: Colors.green,
-                                      ),
-                                    );
-                                  }
-                                },
-                              ),
+                              builder: (context) => const QuickScannerWidget(),
                             ),
                           );
+
+                          if (!mounted) return;
+
+                          if (scannedCode != null && scannedCode.trim().isNotEmpty) {
+                            setState(() {
+                              codeBarreController.text = scannedCode.trim();
+                            });
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Code scanné : $scannedCode'),
+                                backgroundColor: Colors.green,
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
+                          }
                         },
                       ),
                     ),

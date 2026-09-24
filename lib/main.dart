@@ -8,14 +8,14 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'firebase_options.dart';
-import 'models/auth_state.dart';
-import 'models/user_model.dart';
-import 'providers/auth_controller.dart';
-import 'providers/locale_provider.dart';
-import 'screens/home_screen.dart';
-import 'screens/login_screen.dart';
-import 'screens/pin_lock_screen.dart';
-import 'widgets/app_initializer.dart';
+import 'core/models/auth_state.dart';
+import 'core/models/user_model.dart';
+import 'features/debts/screens/providers/auth_controller.dart';
+import 'core/providers/locale_provider.dart';
+import 'features/debts/screens/home_screen.dart';
+import 'features/debts/screens/login_screen.dart';
+import 'features/debts/screens/pin_lock_screen.dart';
+import 'core/widgets/app_initializer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

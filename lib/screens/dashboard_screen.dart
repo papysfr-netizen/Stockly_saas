@@ -1,13 +1,13 @@
-// lib/screens/dashboard_screen.dart
+// lib/features/accounting/screens/dashboard_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../models/journal_entry.dart';
-import '../services/accounting_journal_service.dart';
-import '../services/accounting_report_service.dart';
-import 'accounting_reports_screen.dart';
-import 'ecriture_form_screen.dart';
-import 'journal_list_screen.dart';
+import 'package:stockly_saas/features/accounting/models/journal_entry.dart';
+import 'package:stockly_saas/features/accounting/services/accounting_journal_service.dart';
+import 'package:stockly_saas/core/services/accounting_report_service.dart';
+import 'package:stockly_saas/features/accounting/screens/accounting_reports_screen.dart';
+import 'package:stockly_saas/features/accounting/screens/ecriture_form_screen.dart';
+import 'package:stockly_saas/features/accounting/screens/journal_list_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   final String entrepriseId;

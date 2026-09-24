@@ -1,17 +1,19 @@
+// lib/screens/home_screen.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../models/user_model.dart';
-import '../providers/currency_provider.dart';
-import '../providers/produit_provider.dart';
-import '../services/packing_list_service.dart';
-import '../views/caisse/caisse_screen.dart';
-import '../views/financial_analysis/financial_analysis_screen.dart';
-import '../widgets/add_product_modal.dart';
-import 'comptabilite_screen.dart';
-import 'debt_management_screen.dart';
+import 'package:stockly_saas/core/models/user_model.dart';
+import 'package:stockly_saas/core/providers/currency_provider.dart';
+import 'package:stockly_saas/core/providers/produit_provider.dart';
+import 'package:stockly_saas/core/services/packing_list_service.dart';
+import 'package:stockly_saas/views/caisse/caisse_screen.dart';
+import 'package:stockly_saas/views/financial_analysis/financial_analysis_screen.dart';
+import 'package:stockly_saas/core/widgets/add_product_modal.dart';
+import 'package:stockly_saas/features/accounting/screens/comptabilite_screen.dart';
+import 'package:stockly_saas/features/debts/screens/debt_management_screen.dart';
 import 'depenses_screen.dart';
 import 'settings_screen.dart';
 
@@ -175,78 +177,75 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       body: Column(
         children: [
-          // ================= 1. MENU ACCÈS RAPIDE =================
+          // ================= 1. MENU ACCÈS RAPIDE CORRIGÉ (WRAP) =================
           Container(
             color: Colors.blue.shade800,
-            padding: const EdgeInsets.only(left: 12, right: 12, bottom: 16),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildNavBtn(
-                    icon: Icons.point_of_sale,
-                    label: 'Caisse POS',
-                    bgColor: Colors.white,
-                    fgColor: Colors.blue.shade800,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const CaisseScreen()),
-                    ),
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+            width: double.infinity,
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              alignment: WrapAlignment.center,
+              children: [
+                _buildNavBtn(
+                  icon: Icons.point_of_sale,
+                  label: 'Caisse POS',
+                  bgColor: Colors.white,
+                  fgColor: Colors.blue.shade800,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CaisseScreen()),
                   ),
-                  const SizedBox(width: 8),
-                  _buildNavBtn(
-                    icon: Icons.account_balance_wallet,
-                    label: 'Dépenses',
-                    bgColor: Colors.redAccent.shade100,
-                    fgColor: Colors.red.shade900,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const DepensesScreen()),
-                    ),
+                ),
+                _buildNavBtn(
+                  icon: Icons.account_balance_wallet,
+                  label: 'Dépenses',
+                  bgColor: Colors.redAccent.shade100,
+                  fgColor: Colors.red.shade900,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const DepensesScreen()),
                   ),
-                  const SizedBox(width: 8),
+                ),
+                _buildNavBtn(
+                  icon: Icons.menu_book,
+                  label: 'Dettes',
+                  bgColor: Colors.orange.shade100,
+                  fgColor: Colors.orange.shade900,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const DebtManagementScreen()),
+                  ),
+                ),
+                if (widget.currentUser.isAdmin) ...[
                   _buildNavBtn(
-                    icon: Icons.menu_book,
-                    label: 'Dettes',
-                    bgColor: Colors.orange.shade100,
-                    fgColor: Colors.orange.shade900,
+                    icon: Icons.analytics,
+                    label: 'P&L Net',
+                    bgColor: Colors.indigo.shade100,
+                    fgColor: Colors.indigo.shade900,
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const DebtManagementScreen()),
+                          builder: (context) => const FinancialAnalysisScreen()),
                     ),
                   ),
-                  if (widget.currentUser.isAdmin) ...[
-                    const SizedBox(width: 8),
-                    _buildNavBtn(
-                      icon: Icons.analytics,
-                      label: 'P&L Net',
-                      bgColor: Colors.indigo.shade100,
-                      fgColor: Colors.indigo.shade900,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const FinancialAnalysisScreen()),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    _buildNavBtn(
-                      icon: Icons.calculate,
-                      label: 'Comptabilité',
-                      bgColor: Colors.teal.shade100,
-                      fgColor: Colors.teal.shade900,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ComptabiliteScreen(
-                            entrepriseId: widget.currentUser.entrepriseId,
-                          ),
+                  _buildNavBtn(
+                    icon: Icons.calculate,
+                    label: 'Comptabilité',
+                    bgColor: Colors.teal.shade100,
+                    fgColor: Colors.teal.shade900,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ComptabiliteScreen(
+                          entrepriseId: widget.currentUser.entrepriseId,
                         ),
                       ),
                     ),
-                  ],
+                  ),
                 ],
-              ),
+              ],
             ),
           ),
 

@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/user_role_provider.dart';
+import '../core/providers/user_role_provider.dart';
 
 // ============================================================================
 // 1. PROVIDERS & STREAMS (ISOLATION MULTI-TENANT)

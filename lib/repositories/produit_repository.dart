@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
-import '../models/produit.dart';
+import '../core/models/produit.dart';
 
 class ProduitRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

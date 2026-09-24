@@ -2,11 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../models/journal_entry.dart';
-import '../services/accounting_closure_service.dart';
-import '../services/accounting_journal_service.dart';
-import '../services/accounting_report_service.dart';
-
+import 'package:stockly_saas/features/accounting/models/journal_entry.dart';
+import 'package:stockly_saas/core/services/accounting_closure_service.dart';
+import 'package:stockly_saas/features/accounting/services/accounting_journal_service.dart';
+import 'package:stockly_saas/core/services/accounting_report_service.dart';
 class AccountingClosureScreen extends StatefulWidget {
   final String entrepriseId;
   final String entrepriseNom;

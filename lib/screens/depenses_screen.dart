@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../models/depense.dart';
-import '../providers/currency_provider.dart';
-import '../providers/depense_provider.dart';
-import '../providers/user_role_provider.dart';
-import '../services/report_export_service.dart';
+import '../core/models/depense.dart';
+import '../core/providers/currency_provider.dart';
+import '../core/providers/depense_provider.dart';
+import '../core/providers/user_role_provider.dart';
+import '../core/services/report_export_service.dart';
 
 class DepensesScreen extends ConsumerStatefulWidget {
   const DepensesScreen({super.key});

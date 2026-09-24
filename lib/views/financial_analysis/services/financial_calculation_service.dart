@@ -1,3 +1,5 @@
+// lib/views/financial_analysis/services/financial_calculation_service.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -28,6 +30,31 @@ class FinancialCalculationResult {
 }
 
 class FinancialCalculationService {
+  /// Lecture sécurisée d'un nombre (num, ou texte avec virgule/point).
+  static double _num(dynamic value, [double defaut = 0.0]) {
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString().trim().replaceAll(',', '.') ?? '') ??
+        defaut;
+  }
+
+  /// Lecture sécurisée d'une date (Timestamp, DateTime, texte ISO, millisecondes).
+  static DateTime? _date(dynamic raw) {
+    if (raw is Timestamp) return raw.toDate();
+    if (raw is DateTime) return raw;
+    if (raw is String) return DateTime.tryParse(raw);
+    if (raw is int) return DateTime.fromMillisecondsSinceEpoch(raw);
+    return null;
+  }
+
+  /// Total d'une ligne d'article : accepte les champs écrits par la caisse
+  /// ("totalItem", "prixUnitaire") et les anciens ("total", "prix").
+  static double _totalLigne(Map item) {
+    final direct = item['totalItem'] ?? item['total'];
+    if (direct != null) return _num(direct);
+    final qte = _num(item['quantite'] ?? item['quantity'] ?? item['qte'], 1.0);
+    return _num(item['prixUnitaire'] ?? item['prix'] ?? item['price']) * qte;
+  }
+
   static FinancialCalculationResult computePL({
     required List<dynamic> toutesLesDepenses,
     required List<QueryDocumentSnapshot> produitsDocs,
@@ -35,41 +62,51 @@ class FinancialCalculationService {
     required DateTimeRange dateRange,
     required String entrepriseId,
   }) {
-    // 1. Filtrage et cumul des dépenses
-    final depensesFiltrees = toutesLesDepenses.where((d) {
-      return d.date.isAfter(dateRange.start.subtract(const Duration(seconds: 1))) &&
-          d.date.isBefore(dateRange.end.add(const Duration(seconds: 1)));
-    }).toList();
+    // PÉRIODE EN JOURS ENTIERS : du 1er jour à 00:00 jusqu'à la fin du dernier jour.
+    // (Un sélecteur de dates renvoie des dates à minuit : sans cela, "Aujourd'hui"
+    // ne comptait que les ventes faites entre 00:00:00 et 00:00:01.)
+    final DateTime debut = DateTime(
+        dateRange.start.year, dateRange.start.month, dateRange.start.day);
+    final DateTime finExclusive = DateTime(
+        dateRange.end.year, dateRange.end.month, dateRange.end.day + 1);
 
+    bool dansLaPeriode(DateTime? d) =>
+        d != null && !d.isBefore(debut) && d.isBefore(finExclusive);
+
+    // 1. Filtrage et cumul des dépenses
     double totalDepenses = 0.0;
     final Map<String, double> depensesParCategorie = {};
 
-    for (var depense in depensesFiltrees) {
-      final montant = (depense.montant as num).toDouble();
+    for (final depense in toutesLesDepenses) {
+      final dateDepense = _date(depense.date);
+      if (!dansLaPeriode(dateDepense)) continue;
+
+      final montant = _num(depense.montant);
       totalDepenses += montant;
-      depensesParCategorie[depense.categorie.toString()] =
-          (depensesParCategorie[depense.categorie.toString()] ?? 0.0) + montant;
+      final categorie = depense.categorie.toString();
+      depensesParCategorie[categorie] =
+          (depensesParCategorie[categorie] ?? 0.0) + montant;
     }
 
     // 2. Mapping des prix d'achat produits
     final Map<String, double> prixAchatParId = {};
     final Map<String, double> prixAchatParNom = {};
 
-    for (var prodDoc in produitsDocs) {
+    for (final prodDoc in produitsDocs) {
       final pData = prodDoc.data() as Map<String, dynamic>;
       final pId = prodDoc.id;
       final pCustomId = pData['id']?.toString();
-      final pNom = (pData['nom'] ?? pData['name'] ?? '').toString().trim().toLowerCase();
+      final pNom =
+          (pData['nom'] ?? pData['name'] ?? '').toString().trim().toLowerCase();
 
-      final pAchat = (pData['prixAchat'] ??
-              pData['prix_achat'] ??
-              pData['achat'] ??
-              pData['cost'] ??
-              0.0) as num;
+      final pAchat = _num(pData['prixAchat'] ??
+          pData['prix_achat'] ??
+          pData['achat'] ??
+          pData['cost']);
 
-      prixAchatParId[pId] = pAchat.toDouble();
-      if (pCustomId != null) prixAchatParId[pCustomId] = pAchat.toDouble();
-      if (pNom.isNotEmpty) prixAchatParNom[pNom] = pAchat.toDouble();
+      prixAchatParId[pId] = pAchat;
+      if (pCustomId != null) prixAchatParId[pCustomId] = pAchat;
+      if (pNom.isNotEmpty) prixAchatParNom[pNom] = pAchat;
     }
 
     // 3. Traitement des ventes et calcul des coûts
@@ -80,7 +117,7 @@ class FinancialCalculationService {
     final List<Map<String, dynamic>> detailsCoutAchatList = [];
     final List<Map<String, dynamic>> detailsMargeList = [];
 
-    for (var doc in ventesDocs) {
+    for (final doc in ventesDocs) {
       final data = doc.data() as Map<String, dynamic>;
 
       final docEntrepriseId = data['entrepriseId']?.toString();
@@ -91,91 +128,88 @@ class FinancialCalculationService {
         continue;
       }
 
-      double totalVente = 0.0;
-      final items = (data['produits'] ?? data['items'] ?? []) as List;
+      // CORRECTIF : la caisse enregistre les lignes sous "articles"
+      // (l'ancien code cherchait seulement "produits" / "items" : le coût
+      // d'achat des ventes de la caisse était donc toujours 0).
+      final dynamic rawItems = data['produits'] ?? data['articles'] ?? data['items'];
+      final List<dynamic> items = rawItems is List ? rawItems : const [];
 
-      if (data['total'] != null) {
-        totalVente = (data['total'] as num).toDouble();
-      } else if (data['montantTotal'] != null) {
-        totalVente = (data['montantTotal'] as num).toDouble();
-      } else if (data['montantPaye'] != null) {
-        totalVente = (data['montantPaye'] as num).toDouble();
+      // Total de la vente : total déclaré, sinon somme des lignes,
+      // et en tout dernier recours le montant payé.
+      double totalVente;
+      final declare = data['total'] ?? data['montantTotal'];
+      if (declare != null) {
+        totalVente = _num(declare);
       } else {
-        for (var item in items) {
-          totalVente += (item['total'] ??
-              ((item['prix'] ?? 0.0) * (item['quantite'] ?? 1))).toDouble();
+        double somme = 0.0;
+        for (final item in items) {
+          if (item is Map) somme += _totalLigne(item);
         }
+        totalVente = somme > 0 ? somme : _num(data['montantPaye']);
       }
 
-      DateTime? dateVente;
-      final rawDate = data['date'] ?? data['createdAt'];
-      if (rawDate is Timestamp) {
-        dateVente = rawDate.toDate();
-      } else if (rawDate is String) {
-        dateVente = DateTime.tryParse(rawDate);
-      }
+      // Une vente sans date valide n'est rattachée à aucune période
+      // (avant, elle était comptée dans TOUTES les périodes).
+      final DateTime? dateVente = _date(data['date'] ?? data['createdAt']);
+      if (!dansLaPeriode(dateVente)) continue;
 
-      bool dansLaPeriode = true;
-      if (dateVente != null) {
-        dansLaPeriode = dateVente.isAfter(dateRange.start.subtract(const Duration(seconds: 1))) &&
-            dateVente.isBefore(dateRange.end.add(const Duration(seconds: 1)));
-      }
+      chiffreAffaires += totalVente;
 
-      if (dansLaPeriode) {
-        chiffreAffaires += totalVente;
+      for (final rawItem in items) {
+        if (rawItem is! Map) continue;
+        final item = rawItem;
 
-        for (var item in items) {
-          final qte = (item['quantite'] ?? item['quantity'] ?? 1) as num;
-          final nom = (item['nom'] ?? item['name'] ?? item['produit'] ?? 'Produit').toString();
-          final prixVenteTotal = (item['total'] ??
-                  ((item['prix'] ?? 0.0) * qte))
-              .toDouble();
+        final double qteBrute =
+            _num(item['quantite'] ?? item['quantity'] ?? item['qte'], 1.0);
+        final num qte =
+            qteBrute == qteBrute.roundToDouble() ? qteBrute.toInt() : qteBrute;
+        final nom =
+            (item['nom'] ?? item['name'] ?? item['produit'] ?? 'Produit').toString();
+        final double prixVenteTotal = _totalLigne(item);
 
-          double prixAchatItem = ((item['prixAchat'] ??
-                  item['prix_achat'] ??
-                  item['achat'] ??
-                  0.0) as num).toDouble();
+        double prixAchatItem = _num(
+            item['prixAchat'] ?? item['prix_achat'] ?? item['achat']);
 
-          if (prixAchatItem == 0) {
-            final pId = (item['produitId'] ?? item['productId'] ?? item['id'])?.toString();
-            if (pId != null && prixAchatParId.containsKey(pId)) {
-              prixAchatItem = prixAchatParId[pId]!;
-            }
+        if (prixAchatItem == 0) {
+          final pId =
+              (item['produitId'] ?? item['productId'] ?? item['id'])?.toString();
+          if (pId != null && prixAchatParId.containsKey(pId)) {
+            prixAchatItem = prixAchatParId[pId]!;
           }
-
-          if (prixAchatItem == 0) {
-            final pNom = nom.trim().toLowerCase();
-            if (pNom.isNotEmpty && prixAchatParNom.containsKey(pNom)) {
-              prixAchatItem = prixAchatParNom[pNom]!;
-            }
-          }
-
-          final double totalCoutItem = (prixAchatItem * qte).toDouble();
-          coutAchatStockVendu += totalCoutItem;
-
-          detailsVentesList.add({
-            'nom': nom,
-            'qte': qte,
-            'total': prixVenteTotal,
-            'date': dateVente,
-          });
-
-          detailsCoutAchatList.add({
-            'nom': nom,
-            'qte': qte,
-            'prixAchatUnit': prixAchatItem,
-            'total': totalCoutItem,
-            'date': dateVente,
-          });
-
-          detailsMargeList.add({
-            'nom': nom,
-            'qte': qte,
-            'totalVente': prixVenteTotal,
-            'totalAchat': totalCoutItem,
-            'marge': prixVenteTotal - totalCoutItem,
-          });
         }
+
+        if (prixAchatItem == 0) {
+          final pNom = nom.trim().toLowerCase();
+          if (pNom.isNotEmpty && prixAchatParNom.containsKey(pNom)) {
+            prixAchatItem = prixAchatParNom[pNom]!;
+          }
+        }
+
+        final double totalCoutItem = prixAchatItem * qteBrute;
+        coutAchatStockVendu += totalCoutItem;
+
+        detailsVentesList.add({
+          'nom': nom,
+          'qte': qte,
+          'total': prixVenteTotal,
+          'date': dateVente,
+        });
+
+        detailsCoutAchatList.add({
+          'nom': nom,
+          'qte': qte,
+          'prixAchatUnit': prixAchatItem,
+          'total': totalCoutItem,
+          'date': dateVente,
+        });
+
+        detailsMargeList.add({
+          'nom': nom,
+          'qte': qte,
+          'totalVente': prixVenteTotal,
+          'totalAchat': totalCoutItem,
+          'marge': prixVenteTotal - totalCoutItem,
+        });
       }
     }
 

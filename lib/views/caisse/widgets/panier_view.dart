@@ -1,8 +1,10 @@
+// lib/views/caisse/panier_view.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../providers/cart_provider.dart';
-import '../../../providers/currency_provider.dart';
+import '../../../core/providers/cart_provider.dart';
+import '../../../core/providers/currency_provider.dart';
 import '../dialogs/paiement_dialog.dart';
 
 class PanierView extends ConsumerWidget {
@@ -75,9 +77,9 @@ class PanierView extends ConsumerWidget {
       color: Colors.grey.shade50,
       child: Column(
         children: [
-          // 1. En-tête : Changement de devise & Taux du jour
+          // 1. En-tête : Changement de devise & Taux du jour (Corrigé avec Flexible)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
             color: Colors.indigo.shade50,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -87,11 +89,11 @@ class PanierView extends ConsumerWidget {
                   segments: const [
                     ButtonSegment(
                       value: 'USD',
-                      label: Text('USD (\$)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                      label: Text('USD', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
                     ),
                     ButtonSegment(
                       value: 'CDF',
-                      label: Text('FC', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                      label: Text('FC', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
                     ),
                   ],
                   selected: {activeInfo.code},
@@ -103,34 +105,44 @@ class PanierView extends ConsumerWidget {
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                 ),
+                const SizedBox(width: 4),
 
-                // Taux d'échange interactif
-                InkWell(
-                  onTap: () => _afficherDialogTauxChange(context, ref),
-                  borderRadius: BorderRadius.circular(6),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                    child: Row(
-                      children: [
-                        Text(
-                          '1\$ = ${currencyState.bccCdfRate.toStringAsFixed(0)} FC',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.indigo.shade900,
+                // Taux d'échange interactif flexible
+                Flexible(
+                  child: InkWell(
+                    onTap: () => _afficherDialogTauxChange(context, ref),
+                    borderRadius: BorderRadius.circular(6),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              '1\$ = ${currencyState.bccCdfRate.toStringAsFixed(0)} FC',
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.indigo.shade900,
+                              ),
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(Icons.edit, size: 14, color: Colors.indigo),
-                      ],
+                          const SizedBox(width: 2),
+                          const Icon(Icons.edit, size: 12, color: Colors.indigo),
+                        ],
+                      ),
                     ),
                   ),
                 ),
 
                 if (cart.isNotEmpty)
                   IconButton(
-                    icon: const Icon(Icons.delete_sweep, color: Colors.redAccent, size: 22),
+                    icon: const Icon(Icons.delete_sweep, color: Colors.redAccent, size: 20),
                     tooltip: 'Vider le panier',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
                     onPressed: () => ref.read(cartProvider.notifier).clearCart(),
                   ),
               ],

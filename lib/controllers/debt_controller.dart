@@ -2,10 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../models/dette.dart';
-import '../models/journal_entry.dart';
-import '../models/payment_method.dart';
-import '../services/accounting_journal_service.dart';
+import 'package:stockly_saas/core/models/dette.dart';
+import 'package:stockly_saas/features/accounting/models/journal_entry.dart';
+import '../core/models/payment_method.dart';
+import '../core/services/accounting_journal_service.dart';
 
 // ============================================================================
 // PROVIDERS RIVERPOD
@@ -38,13 +38,17 @@ final dettesStreamProvider =
           .map((doc) => Dette.fromDocument(doc))
           .toList());
 
-  // Fusion des deux collections et tri dynamique par date de création décroissante
+  // Fusion et tri dynamique sécurisé contre les valeurs nulles
   return Rx.combineLatest2<List<Dette>, List<Dette>, List<Dette>>(
     creancesStream,
     dettesStream,
     (creances, dettes) {
       final combined = [...creances, ...dettes];
-      combined.sort((a, b) => b.dateCreation.compareTo(a.dateCreation));
+      combined.sort((a, b) {
+        final bDate = b.dateCreation;
+        final aDate = a.dateCreation;
+        return bDate.compareTo(aDate);
+      });
       return combined;
     },
   );
@@ -64,7 +68,10 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
   @override
   Future<void> build(String arg) async {}
 
-  /// Sélectionne la bonne sous-collection selon le type (creances vs dettes)
+  /// Arrondi financier à 2 décimales pour éviter les imprécisions de calcul des doubles
+  double _roundMoney(double value) => (value * 100).roundToDouble() / 100;
+
+  /// Sélectionne la collection cible selon le type
   CollectionReference _getTargetRef(String entrepriseId, TypeDette type) {
     final collectionName = type == TypeDette.client ? 'creances' : 'dettes';
     return FirebaseFirestore.instance
@@ -92,17 +99,26 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
     PaymentMethod paymentMethod = PaymentMethod.cash,
   }) async {
     final entrepriseId = arg;
-    if (entrepriseId.isEmpty || montantTotal <= 0) return;
 
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
+      if (entrepriseId.isEmpty) {
+        throw ArgumentError("L'identifiant de l'entreprise est manquant.");
+      }
+      if (montantTotal <= 0) {
+        throw ArgumentError('Le montant total doit être supérieur à zéro.');
+      }
+
       final db = FirebaseFirestore.instance;
       final batch = db.batch();
       final targetRef = _getTargetRef(entrepriseId, type).doc();
       final now = DateTime.now();
 
-      final double pureAcompte = acompte > montantTotal ? montantTotal : (acompte < 0 ? 0.0 : acompte);
-      final double montantReste = montantTotal - pureAcompte;
+      final double totalArrondi = _roundMoney(montantTotal);
+      final double pureAcompte = _roundMoney(
+        acompte > totalArrondi ? totalArrondi : (acompte < 0 ? 0.0 : acompte),
+      );
+      final double montantReste = _roundMoney(totalArrondi - pureAcompte);
 
       String statutInitial = 'non_paye';
       if (montantReste <= 0) {
@@ -118,9 +134,9 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
         id: targetRef.id,
         nomTiers: nomTiers,
         numeroFacture: numeroFacture,
-        montantInitial: montantTotal,
+        montantInitial: totalArrondi,
         acomptePaye: pureAcompte,
-        montantReste: montantReste < 0 ? 0.0 : montantReste,
+        montantReste: montantReste,
         type: type,
         statut: statutInitial,
         note: note,
@@ -156,21 +172,21 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
           JournalLine(
             accountCode: codeDebit,
             accountLabel: labelDebit,
-            debit: montantTotal,
+            debit: totalArrondi,
             credit: 0.0,
           ),
           JournalLine(
             accountCode: codeCredit,
             accountLabel: labelCredit,
             debit: 0.0,
-            credit: montantTotal,
+            credit: totalArrondi,
           ),
         ],
       );
 
       batch.set(ecritureEngagementRef, engagementEntry.toFirestore());
 
-      // 3. Écriture d'acompte comptable (si versé à la création)
+      // 3. Écriture d'acompte comptable (si versé immédiatement)
       if (pureAcompte > 0) {
         final ecritureAcompteRef = _ecrituresRef(entrepriseId).doc();
         final String codeTresorerie =
@@ -218,103 +234,113 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
     });
   }
 
-  /// Enregistre un règlement partiel ou solde complet
+  /// Enregistre un règlement partiel ou total de manière atomique (Transaction)
   Future<void> enregistrerPaiement({
     required String detteId,
     required double montantPaye,
+    TypeDette? type,
     PaymentMethod paymentMethod = PaymentMethod.cash,
   }) async {
     final entrepriseId = arg;
-    if (entrepriseId.isEmpty || detteId.isEmpty || montantPaye <= 0) return;
 
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
+      if (entrepriseId.isEmpty || detteId.isEmpty) {
+        throw ArgumentError("Paramètres d'identification invalides.");
+      }
+      if (montantPaye <= 0) {
+        throw ArgumentError('Le montant payé doit être strictement positif.');
+      }
+
       final db = FirebaseFirestore.instance;
 
-      // 1. Recherche du document dans 'creances' puis 'dettes'
-      DocumentReference docRef = db
-          .collection('entreprises')
-          .doc(entrepriseId)
-          .collection('creances')
-          .doc(detteId);
-
-      DocumentSnapshot snapshot = await docRef.get();
-      if (!snapshot.exists) {
-        docRef = db
-            .collection('entreprises')
-            .doc(entrepriseId)
-            .collection('dettes')
-            .doc(detteId);
-        snapshot = await docRef.get();
+      // 1. Résolution de la référence de document si le type n'est pas fourni
+      DocumentReference docRef;
+      if (type != null) {
+        docRef = _getTargetRef(entrepriseId, type).doc(detteId);
+      } else {
+        final creanceRef = _getTargetRef(entrepriseId, TypeDette.client).doc(detteId);
+        final creanceSnap = await creanceRef.get();
+        if (creanceSnap.exists) {
+          docRef = creanceRef;
+        } else {
+          docRef = _getTargetRef(entrepriseId, TypeDette.fournisseur).doc(detteId);
+        }
       }
 
-      if (!snapshot.exists) {
-        throw Exception('Dette ou Créance introuvable dans Firestore.');
-      }
+      // 2. Transaction Firestore : atomicité des calculs de solde et de l'écriture
+      await db.runTransaction((transaction) async {
+        final snapshot = await transaction.get(docRef);
 
-      final dette = Dette.fromDocument(snapshot);
-      final bool isClient = dette.type == TypeDette.client;
+        if (!snapshot.exists) {
+          throw StateError('Dette ou Créance introuvable dans Firestore.');
+        }
 
-      // Détermination du montant effectif pour éviter le solde négatif
-      final double montantEffectif =
-          montantPaye > dette.montantReste ? dette.montantReste : montantPaye;
-      final double nouveauReste = dette.montantReste - montantEffectif;
-      final String nouveauStatut = nouveauReste <= 0 ? 'paye' : 'partiel';
-      final double acompteCumule = dette.acomptePaye + montantEffectif;
-      final DateTime now = DateTime.now();
+        final dette = Dette.fromDocument(snapshot);
 
-      final batch = db.batch();
+        if (dette.montantReste <= 0) {
+          throw StateError('Cette créance/dette est déjà entièrement soldée.');
+        }
 
-      // Mise à jour de la dette / créance
-      batch.update(docRef, {
-        'montantReste': nouveauReste < 0 ? 0.0 : nouveauReste,
-        'montantRestant': nouveauReste < 0 ? 0.0 : nouveauReste,
-        'acomptePaye': acompteCumule,
-        'statut': nouveauStatut,
-        'dernierPaiement': FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
+        // Calcul du montant effectif plafonné au restant dû
+        final double montantEffectif = _roundMoney(
+          montantPaye > dette.montantReste ? dette.montantReste : montantPaye,
+        );
+        final double nouveauReste = _roundMoney(dette.montantReste - montantEffectif);
+        final double acompteCumule = _roundMoney(dette.acomptePaye + montantEffectif);
+        final String nouveauStatut = nouveauReste <= 0 ? 'paye' : 'partiel';
+        final now = DateTime.now();
+        final bool isClient = dette.type == TypeDette.client;
+
+        // Mise à jour de la dette / créance
+        transaction.update(docRef, {
+          'montantReste': nouveauReste,
+          'montantRestant': nouveauReste, // Compatibilité schémas
+          'acomptePaye': acompteCumule,
+          'statut': nouveauStatut,
+          'dernierPaiement': FieldValue.serverTimestamp(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+
+        // 3. Écriture comptable du règlement
+        final ecritureRef = _ecrituresRef(entrepriseId).doc();
+        final String codeTresorerie =
+            AccountingJournalService.getAccountCodeForPayment(paymentMethod);
+
+        final String debitCode = isClient ? codeTresorerie : '401000';
+        final String creditCode = isClient ? '411000' : codeTresorerie;
+
+        final journalEntry = JournalEntry(
+          id: ecritureRef.id,
+          entrepriseId: entrepriseId,
+          date: now,
+          reference: detteId,
+          description: isClient
+              ? 'Règlement créance client : ${dette.nomTiers}'
+              : 'Règlement dette fournisseur : ${dette.nomTiers}',
+          lines: [
+            JournalLine(
+              accountCode: debitCode,
+              accountLabel: isClient
+                  ? AccountingJournalService.getAccountLabel(codeTresorerie)
+                  : 'Fournisseurs - ${dette.nomTiers}',
+              debit: montantEffectif,
+              credit: 0.0,
+            ),
+            JournalLine(
+              accountCode: creditCode,
+              accountLabel: isClient
+                  ? 'Clients - ${dette.nomTiers}'
+                  : AccountingJournalService.getAccountLabel(codeTresorerie),
+              debit: 0.0,
+              credit: montantEffectif,
+            ),
+          ],
+          montantEncaisse: isClient ? montantEffectif : 0.0,
+        );
+
+        transaction.set(ecritureRef, journalEntry.toFirestore());
       });
-
-      // 2. Écriture comptable du règlement
-      final ecritureRef = _ecrituresRef(entrepriseId).doc();
-      final String codeTresorerie =
-          AccountingJournalService.getAccountCodeForPayment(paymentMethod);
-
-      final String debitCode = isClient ? codeTresorerie : '401000';
-      final String creditCode = isClient ? '411000' : codeTresorerie;
-
-      final journalEntry = JournalEntry(
-        id: ecritureRef.id,
-        entrepriseId: entrepriseId,
-        date: now,
-        reference: detteId,
-        description: isClient
-            ? 'Règlement créance client : ${dette.nomTiers}'
-            : 'Règlement dette fournisseur : ${dette.nomTiers}',
-        lines: [
-          JournalLine(
-            accountCode: debitCode,
-            accountLabel: isClient
-                ? AccountingJournalService.getAccountLabel(codeTresorerie)
-                : 'Fournisseurs - ${dette.nomTiers}',
-            debit: montantEffectif,
-            credit: 0.0,
-          ),
-          JournalLine(
-            accountCode: creditCode,
-            accountLabel: isClient
-                ? 'Clients - ${dette.nomTiers}'
-                : AccountingJournalService.getAccountLabel(codeTresorerie),
-            debit: 0.0,
-            credit: montantEffectif,
-          ),
-        ],
-        montantEncaisse: isClient ? montantEffectif : 0.0,
-      );
-
-      batch.set(ecritureRef, journalEntry.toFirestore());
-
-      await batch.commit();
     });
   }
 }

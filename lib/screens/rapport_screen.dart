@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:stockly_saas/screens/rapports/profits_pertes_screen.dart';
-import 'package:stockly_saas/screens/rapports/ventes_date_screen.dart';
+import 'package:stockly_saas/features/rapports/profits_pertes_screen.dart';
+import 'package:stockly_saas/features/rapports/ventes_date_screen.dart';
 
-import '../models/rapport_item.dart';
-import '../services/report_export_service.dart';
+import '../core/models/rapport_item.dart';
+import '../core/services/report_export_service.dart';
 
 class RapportsScreen extends StatefulWidget {
   const RapportsScreen({super.key});

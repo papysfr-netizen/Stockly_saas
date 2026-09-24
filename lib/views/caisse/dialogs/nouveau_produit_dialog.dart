@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../models/produit.dart';
-import '../../../providers/produit_provider.dart';
+import '../../../core/models/produit.dart';
+import '../../../core/providers/produit_provider.dart';
 
 class NouveauProduitDialog extends ConsumerStatefulWidget {
   final String entrepriseId;

@@ -1,10 +1,16 @@
+// lib/features/sales/repositories/vente_repository.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/dette.dart';
-import '../models/journal_entry.dart';
-import '../models/payment_method.dart';
-import '../models/vente.dart';
-import '../providers/cart_provider.dart';
-import '../services/accounting_journal_service.dart';
+
+// Core & Providers
+import 'package:stockly_saas/core/models/vente.dart';
+
+// Feature Accounting
+import 'package:stockly_saas/features/accounting/models/journal_entry.dart';
+import 'package:stockly_saas/core/models/payment_method.dart';
+import 'package:stockly_saas/features/accounting/services/accounting_journal_service.dart';
+
+import 'package:stockly_saas/core/models/dette.dart';
 
 class VenteRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -37,7 +43,7 @@ class VenteRepository {
   /// Enregistre une vente avec décrémentation de stock, création de créance et comptabilisation atomique
   Future<void> enregistrerVente({
     required Vente vente,
-    required List<CartItem> cartItems,
+    required List<dynamic> cartItems, // Corrigé en List<dynamic> pour correspondre au provider
     required String entrepriseId,
     required String userId,
   }) async {
@@ -62,14 +68,17 @@ class VenteRepository {
 
     batch.set(venteDocRef, venteData);
 
-    // 2. Décrémentation du stock dans /entreprises/{entrepriseId}/produits
+    // 2. Décrémentation du stock dans /entreprises/{entrepriseId}/produits (Supporte Map ou objet CartItem)
     for (final item in cartItems) {
-      final produitRef = _produitsRef(entrepriseId).doc(item.id);
+      final String produitId = (item is Map ? item['id'] : item.id).toString();
+      final int qteItem = (item is Map ? (item['quantite'] ?? item['qte'] ?? 1) : item.quantite) as int;
+
+      final produitRef = _produitsRef(entrepriseId).doc(produitId);
 
       batch.set(
         produitRef,
         {
-          'quantite': FieldValue.increment(-item.quantite),
+          'quantite': FieldValue.increment(-qteItem),
           'updatedAt': FieldValue.serverTimestamp(),
         },
         SetOptions(merge: true),
@@ -114,7 +123,7 @@ class VenteRepository {
       lines.add(
         JournalLine(
           accountCode: codeTresorerie,
-          accountLabel: AccountingJournalService.getAccountLabel(codeTresorerie),
+          accountLabel: JournalEntry.getAccountLabel(codeTresorerie),
           debit: vente.montantPaye,
           credit: 0.0,
         ),
@@ -137,7 +146,7 @@ class VenteRepository {
     lines.add(
       JournalLine(
         accountCode: '701000',
-        accountLabel: AccountingJournalService.getAccountLabel('701000'),
+        accountLabel: JournalEntry.getAccountLabel('701000'),
         debit: 0.0,
         credit: vente.total,
       ),
@@ -258,7 +267,7 @@ class VenteRepository {
       lines: [
         JournalLine(
           accountCode: codeTresorerie,
-          accountLabel: AccountingJournalService.getAccountLabel(codeTresorerie),
+          accountLabel: JournalEntry.getAccountLabel(codeTresorerie),
           debit: montantAcompte,
           credit: 0.0,
         ),
@@ -282,7 +291,7 @@ class VenteRepository {
     switch (method.toLowerCase()) {
       case 'bank':
       case 'banque':
-        return PaymentMethod.bank;
+        return PaymentMethod.bankTransfer;
       case 'mobilemoney':
       case 'mobile_money':
       case 'm-pesa':

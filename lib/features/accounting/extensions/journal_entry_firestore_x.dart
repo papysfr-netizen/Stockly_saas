@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../models/comptabilite_models.dart';
+import 'package:stockly_saas/features/accounting/models/comptabilite_models.dart';
 
 extension EcritureComptableFirestoreX on EcritureComptable {
   /// Conversion adaptée pour Cloud Firestore

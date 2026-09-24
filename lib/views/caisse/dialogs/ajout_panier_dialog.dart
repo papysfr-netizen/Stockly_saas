@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../models/produit.dart';
-import '../../../providers/cart_provider.dart';
-import '../../../providers/currency_provider.dart';
+import '../../../core/models/produit.dart';
+import '../../../core/providers/cart_provider.dart';
+import '../../../core/providers/currency_provider.dart';
 
 class AjoutPanierDialog extends ConsumerStatefulWidget {
   final Produit produit;

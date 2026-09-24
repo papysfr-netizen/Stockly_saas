@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/currency_provider.dart';
+import '../core/providers/currency_provider.dart';
 import 'exchange_rate_history_view.dart';
 import 'update_exchange_rate_dialog.dart';
 

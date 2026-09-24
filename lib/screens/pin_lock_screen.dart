@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/auth_controller.dart';
+import '../core/providers/auth_controller.dart';
 
 class PinLockScreen extends ConsumerStatefulWidget {
   /// Le PIN stocké dans Firestore pour l'utilisateur actuel

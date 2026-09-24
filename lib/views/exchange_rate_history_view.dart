@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../providers/currency_provider.dart';
+import '../core/providers/currency_provider.dart';
 
 /// Vue complète de l'historique d'audit des taux de change avec filtres
 class ExchangeRateHistoryView extends ConsumerStatefulWidget {

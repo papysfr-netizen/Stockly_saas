@@ -1,0 +1,132 @@
+== accounting_closure_screen.dart
+   1 fichier(s) l'importent -> lib/screens/accounting_closure_screen.dart
+   0 fichier(s) l'importent -> lib/features/debts/screens/accounting_closure_screen.dart
+   1 fichier(s) l'importent -> lib/features/accounting/screens/accounting_closure_screen.dart
+== accounting_closure_service.dart
+   1 fichier(s) l'importent -> lib/core/services/accounting_closure_service.dart
+   2 fichier(s) l'importent -> lib/features/accounting/services/accounting_closure_service.dart
+== accounting_dashboard_screen.dart
+   1 fichier(s) l'importent -> lib/screens/accounting_dashboard_screen.dart
+   0 fichier(s) l'importent -> lib/features/debts/screens/accounting_dashboard_screen.dart
+   0 fichier(s) l'importent -> lib/features/accounting/screens/accounting_dashboard_screen.dart
+== accounting_journal_service.dart
+   6 fichier(s) l'importent -> lib/core/services/accounting_journal_service.dart
+   26 fichier(s) l'importent -> lib/features/accounting/services/accounting_journal_service.dart
+== accounting_reports_screen.dart
+   3 fichier(s) l'importent -> lib/screens/accounting_reports_screen.dart
+   0 fichier(s) l'importent -> lib/features/debts/screens/accounting_reports_screen.dart
+   3 fichier(s) l'importent -> lib/features/accounting/screens/accounting_reports_screen.dart
+== add_journal_entry_screen.dart
+   2 fichier(s) l'importent -> lib/screens/add_journal_entry_screen.dart
+   0 fichier(s) l'importent -> lib/features/debts/screens/add_journal_entry_screen.dart
+   2 fichier(s) l'importent -> lib/features/accounting/screens/add_journal_entry_screen.dart
+== add_product_screen.dart
+   0 fichier(s) l'importent -> lib/screens/add_product_screen.dart
+   0 fichier(s) l'importent -> lib/features/debts/screens/add_product_screen.dart
+== auth_controller.dart
+   1 fichier(s) l'importent -> lib/core/providers/auth_controller.dart
+   2 fichier(s) l'importent -> lib/features/debts/screens/providers/auth_controller.dart
+   0 fichier(s) l'importent -> lib/features/debts/providers/auth_controller.dart
+== balance_screen.dart
+   2 fichier(s) l'importent -> lib/screens/balance_screen.dart
+   0 fichier(s) l'importent -> lib/features/debts/screens/balance_screen.dart
+   2 fichier(s) l'importent -> lib/features/accounting/screens/balance_screen.dart
+== balance_sheet_screen.dart
+   2 fichier(s) l'importent -> lib/screens/balance_sheet_screen.dart
+   0 fichier(s) l'importent -> lib/features/debts/screens/balance_sheet_screen.dart
+   1 fichier(s) l'importent -> lib/features/accounting/screens/balance_sheet_screen.dart
+== bilan_screen.dart
+   0 fichier(s) l'importent -> lib/screens/bilan_screen.dart
+   0 fichier(s) l'importent -> lib/features/debts/screens/bilan_screen.dart
+   0 fichier(s) l'importent -> lib/features/accounting/screens/bilan_screen.dart
+== caisse_screen.dart
+   2 fichier(s) l'importent -> lib/views/caisse/caisse_screen.dart
+   0 fichier(s) l'importent -> lib/screens/caisse_screen.dart
+== closing_service.dart
+   1 fichier(s) l'importent -> lib/core/services/closing_service.dart
+   0 fichier(s) l'importent -> lib/features/accounting/services/closing_service.dart
+== comptabilite_screen.dart
+   1 fichier(s) l'importent -> lib/screens/comptabilite_screen.dart
+   0 fichier(s) l'importent -> lib/features/debts/screens/comptabilite_screen.dart
+   1 fichier(s) l'importent -> lib/features/accounting/screens/comptabilite_screen.dart
+== compta_service.dart
+   0 fichier(s) l'importent -> lib/core/services/compta_service.dart
+   0 fichier(s) l'importent -> lib/features/accounting/services/compta_service.dart
+== currency_extension.dart
+   1 fichier(s) l'importent -> lib/core/utils/currency_extension.dart
+   0 fichier(s) l'importent -> lib/features/accounting/extensions/currency_extension.dart
+== dashboard_screen.dart
+   1 fichier(s) l'importent -> lib/screens/dashboard_screen.dart
+   0 fichier(s) l'importent -> lib/features/debts/screens/dashboard_screen.dart
+== debt_controller.dart
+   3 fichier(s) l'importent -> lib/controllers/debt_controller.dart
+   1 fichier(s) l'importent -> lib/features/debts/controllers/debt_controller.dart
+== depenses_screen.dart
+   1 fichier(s) l'importent -> lib/screens/depenses_screen.dart
+   0 fichier(s) l'importent -> lib/features/debts/screens/depenses_screen.dart
+== dette_provider.dart
+   0 fichier(s) l'importent -> lib/core/providers/dette_provider.dart
+   0 fichier(s) l'importent -> lib/features/debts/providers/dette_provider.dart
+== ecriture_form_screen.dart
+   7 fichier(s) l'importent -> lib/screens/ecriture_form_screen.dart
+   0 fichier(s) l'importent -> lib/features/debts/screens/ecriture_form_screen.dart
+   7 fichier(s) l'importent -> lib/features/accounting/screens/ecriture_form_screen.dart
+== gestion_equipe_screen.dart
+   0 fichier(s) l'importent -> lib/screens/gestion_equipe_screen.dart
+   0 fichier(s) l'importent -> lib/features/debts/screens/gestion_equipe_screen.dart
+== grand_livre_screen.dart
+   2 fichier(s) l'importent -> lib/screens/grand_livre_screen.dart
+   0 fichier(s) l'importent -> lib/features/debts/screens/grand_livre_screen.dart
+   2 fichier(s) l'importent -> lib/features/accounting/screens/grand_livre_screen.dart
+== home_screen.dart
+   2 fichier(s) l'importent -> lib/screens/home_screen.dart
+   2 fichier(s) l'importent -> lib/features/debts/screens/home_screen.dart
+== income_statement_screen.dart
+   3 fichier(s) l'importent -> lib/screens/income_statement_screen.dart
+   0 fichier(s) l'importent -> lib/features/debts/screens/income_statement_screen.dart
+   1 fichier(s) l'importent -> lib/features/accounting/screens/income_statement_screen.dart
+== journal_list_screen.dart
+   4 fichier(s) l'importent -> lib/screens/journal_list_screen.dart
+   0 fichier(s) l'importent -> lib/features/debts/screens/journal_list_screen.dart
+   2 fichier(s) l'importent -> lib/features/accounting/screens/journal_list_screen.dart
+== journal_screen.dart
+   2 fichier(s) l'importent -> lib/screens/journal_screen.dart
+   0 fichier(s) l'importent -> lib/features/debts/screens/journal_screen.dart
+   3 fichier(s) l'importent -> lib/features/accounting/screens/journal_screen.dart
+== login_screen.dart
+   2 fichier(s) l'importent -> lib/screens/login_screen.dart
+   2 fichier(s) l'importent -> lib/features/debts/screens/login_screen.dart
+== pin_lock_screen.dart
+   2 fichier(s) l'importent -> lib/screens/pin_lock_screen.dart
+   2 fichier(s) l'importent -> lib/features/debts/screens/pin_lock_screen.dart
+== produit_repository.dart
+   1 fichier(s) l'importent -> lib/repositories/produit_repository.dart
+   0 fichier(s) l'importent -> lib/features/debts/repositories/produit_repository.dart
+== profits_pertes_screen.dart
+   1 fichier(s) l'importent -> lib/features/debts/screens/profits_pertes_screen.dart
+   1 fichier(s) l'importent -> lib/features/rapports/profits_pertes_screen.dart
+   1 fichier(s) l'importent -> lib/features/accounting/screens/profits_pertes_screen.dart
+== rapport_screen.dart
+   0 fichier(s) l'importent -> lib/screens/rapport_screen.dart
+   0 fichier(s) l'importent -> lib/features/debts/screens/rapport_screen.dart
+== receipt_service.dart
+   1 fichier(s) l'importent -> lib/core/services/receipt_service.dart
+   0 fichier(s) l'importent -> lib/features/sales/services/receipt_service.dart
+== register_screen.dart
+   1 fichier(s) l'importent -> lib/screens/register_screen.dart
+   0 fichier(s) l'importent -> lib/features/debts/screens/register_screen.dart
+== sale_service.dart
+   0 fichier(s) l'importent -> lib/core/services/sale_service.dart
+   0 fichier(s) l'importent -> lib/features/sales/services/sale_service.dart
+== settings_screen.dart
+   1 fichier(s) l'importent -> lib/screens/settings_screen.dart
+   1 fichier(s) l'importent -> lib/features/debts/screens/settings_screen.dart
+== stock_screen.dart
+   0 fichier(s) l'importent -> lib/screens/stock_screen.dart
+   0 fichier(s) l'importent -> lib/features/debts/screens/stock_screen.dart
+== vente_repository.dart
+   3 fichier(s) l'importent -> lib/repositories/vente_repository.dart
+   1 fichier(s) l'importent -> lib/features/debts/repositories/vente_repository.dart
+== ventes_date_screen.dart
+   1 fichier(s) l'importent -> lib/features/debts/screens/ventes_date_screen.dart
+   1 fichier(s) l'importent -> lib/features/rapports/ventes_date_screen.dart

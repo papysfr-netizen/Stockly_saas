@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:stockly_saas/widgets/currency_selector_widget.dart';
-import '../../providers/cart_provider.dart';
-import '../../providers/currency_provider.dart';
-import '../../providers/produit_provider.dart';
-import '../../providers/user_role_provider.dart';
-import '../../repositories/vente_repository.dart';
-import '../../screens/settings_screen.dart';
-import '../../services/report_export_service.dart';
-import '../../utils/currency_extension.dart';
+import 'package:stockly_saas/core/widgets/currency_selector_widget.dart';
+import '../../core/providers/cart_provider.dart';
+import '../../core/providers/currency_provider.dart';
+import '../../core/providers/produit_provider.dart';
+import '../../core/providers/user_role_provider.dart';
+import '../../features/debts/repositories/vente_repository.dart';
+import '../../core/services/report_export_service.dart';
+import '../../core/utils/currency_extension.dart';
+import '../../features/debts/screens/settings_screen.dart';
 import 'dialogs/nouveau_produit_dialog.dart';
 import 'dialogs/paiement_dialog.dart';
 import 'widgets/panier_view.dart';
@@ -58,17 +58,29 @@ class CaisseScreen extends ConsumerWidget {
             return Scaffold(
               appBar: AppBar(
                 title: const Text('Caisse / POS'),
+                // Utilisation de titleSpacing et d'une disposition optimisée pour éviter les superpositions
                 actions: [
-                  const CurrencySelectorWidget(),
+                  // On donne une largeur contrôlée ou on laisse le widget s'adapter proprement
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: 180),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 4.0),
+                        child: CurrencySelectorWidget(),
+                      ),
+                    ),
+                  ),
                   if (canAddProduct)
                     IconButton(
-                      icon: const Icon(Icons.add_box, size: 26),
+                      icon: const Icon(Icons.add_box, size: 24),
                       tooltip: 'Nouveau Produit en Stock',
                       onPressed: () =>
                           _afficherDialogNouveauProduit(context, entrepriseId),
                     ),
                   IconButton(
-                    icon: const Icon(Icons.settings, size: 26),
+                    icon: const Icon(Icons.settings, size: 24),
                     tooltip: 'Paramètres',
                     onPressed: () {
                       Navigator.push(
@@ -80,7 +92,7 @@ class CaisseScreen extends ConsumerWidget {
                     },
                   ),
                   PopupMenuButton<String>(
-                    icon: const Icon(Icons.more_vert, size: 26),
+                    icon: const Icon(Icons.more_vert, size: 24),
                     tooltip: 'Options d\'exportation',
                     onSelected: (value) async {
                       final produits =
@@ -322,7 +334,6 @@ class CaisseScreen extends ConsumerWidget {
     String entrepriseId,
     String userId,
   ) {
-    // 1. Validation préventive du stock
     final stockInsuffisant = cart.where((item) => item.quantite > item.stock);
     if (stockInsuffisant.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -336,7 +347,6 @@ class CaisseScreen extends ConsumerWidget {
       return;
     }
 
-    // 2. Ouverture du dialogue de paiement
     showDialog(
       context: context,
       barrierDismissible: false,

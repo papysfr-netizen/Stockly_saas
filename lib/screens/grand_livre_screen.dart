@@ -1,9 +1,9 @@
-// lib/screens/grand_livre_screen.dart
+// lib/features/accounting/screens/grand_livre_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../models/journal_entry.dart';
-import '../services/accounting_journal_service.dart';
+import 'package:stockly_saas/features/accounting/models/journal_entry.dart';
+import 'package:stockly_saas/features/accounting/services/accounting_journal_service.dart';
 
 class GrandLivreRow {
   final DateTime date;
@@ -185,19 +185,19 @@ class _GrandLivreScreenState extends State<GrandLivreScreen> {
                         children: [
                           _buildBadge(
                             'Total Débit',
-                            '${totalDebit.toStringAsFixed(2)} \$',
+                            '${totalDebit.toStringAsFixed(2)} FCFA',
                             Colors.green,
                           ),
                           const SizedBox(width: 8),
                           _buildBadge(
                             'Total Crédit',
-                            '${totalCredit.toStringAsFixed(2)} \$',
+                            '${totalCredit.toStringAsFixed(2)} FCFA',
                             Colors.orange,
                           ),
                           const SizedBox(width: 8),
                           _buildBadge(
                             'Solde Final',
-                            '${soldeFinal.abs().toStringAsFixed(2)} \$ ${soldeFinal >= 0 ? "(D)" : "(C)"}',
+                            '${soldeFinal.abs().toStringAsFixed(2)} FCFA ${soldeFinal >= 0 ? "(D)" : "(C)"}',
                             soldeFinal >= 0 ? Colors.blue : Colors.red,
                           ),
                         ],
@@ -233,20 +233,20 @@ class _GrandLivreScreenState extends State<GrandLivreScreen> {
                                     DataCell(
                                       Text(
                                         row.debit > 0
-                                            ? '${row.debit.toStringAsFixed(2)} \$'
+                                            ? '${row.debit.toStringAsFixed(2)} FCFA'
                                             : '-',
                                       ),
                                     ),
                                     DataCell(
                                       Text(
                                         row.credit > 0
-                                            ? '${row.credit.toStringAsFixed(2)} \$'
+                                            ? '${row.credit.toStringAsFixed(2)} FCFA'
                                             : '-',
                                       ),
                                     ),
                                     DataCell(
                                       Text(
-                                        '${row.soldeCumule.toStringAsFixed(2)} \$',
+                                        '${row.soldeCumule.toStringAsFixed(2)} FCFA',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: row.soldeCumule >= 0

@@ -1,5 +1,7 @@
+// lib/screens/register_screen.dart
+
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
+import 'package:stockly_saas/features/auth/services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -35,324 +37,182 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  // Traitement de la création de compte
-  Future<void> _handleRegister() async {
+  Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
+
+    if (_passwordController.text != _confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Les mots de passe ne correspondent pas."),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     setState(() => _isLoading = true);
 
     try {
-      // Appel au service d'authentification qu'on a créé
+      // Appel de la méthode registerEnterprise définie dans l'AuthService
       await _authService.registerEnterprise(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
         nomEntreprise: _nomEntrepriseController.text.trim(),
         nomGerant: _nomGerantController.text.trim(),
-        email: _emailController.text.trim(),
         telephone: _telephoneController.text.trim(),
-        password: _passwordController.text,
       );
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Row(
-              children: [
-                Icon(Icons.check_circle_outline, color: Colors.white),
-                SizedBox(width: 10),
-                Expanded(
-                  child: Text('Entreprise et compte créés avec succès !'),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.green.shade700,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        );
-
-        // Fermer l'écran d'inscription (le wrapper d'authentification gère la redirection)
-        Navigator.pop(context);
-      }
+      if (!mounted) return;
+      Navigator.pop(context);
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur lors de l\'inscription : $e'),
-            backgroundColor: Colors.red.shade700,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Erreur d'inscription : $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Créer mon entreprise'),
-        centerTitle: true,
-        elevation: 0,
+        title: const Text("Créer un compte entreprise"),
+        backgroundColor: Colors.blue.shade800,
+        foregroundColor: Colors.white,
       ),
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Icone d'en-tête
-                  Icon(
-                    Icons.storefront_rounded,
-                    size: 64,
-                    color: theme.colorScheme.primary,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextFormField(
+                  controller: _nomEntrepriseController,
+                  decoration: const InputDecoration(
+                    labelText: "Nom de l'entreprise",
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.business),
                   ),
-                  const SizedBox(height: 12),
-
-                  // Titre principal
-                  Text(
-                    'Rejoignez Stockly',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: -0.5,
+                  validator: (value) => value == null || value.isEmpty
+                      ? "Veuillez entrer le nom de l'entreprise"
+                      : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _nomGerantController,
+                  decoration: const InputDecoration(
+                    labelText: "Nom du gérant",
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.person),
+                  ),
+                  validator: (value) => value == null || value.isEmpty
+                      ? "Veuillez entrer le nom du gérant"
+                      : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(
+                    labelText: "Adresse email",
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.email),
+                  ),
+                  validator: (value) => value == null || value.isEmpty
+                      ? "Veuillez entrer un email valide"
+                      : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _telephoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(
+                    labelText: "Téléphone",
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.phone),
+                  ),
+                  validator: (value) => value == null || value.isEmpty
+                      ? "Veuillez entrer un numéro de téléphone"
+                      : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: _obscurePassword,
+                  decoration: InputDecoration(
+                    labelText: "Mot de passe",
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.lock),
+                    suffixIcon: IconButton(
+                      icon: Icon(_obscurePassword
+                          ? Icons.visibility
+                          : Icons.visibility_off),
+                      onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword),
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Configurez votre entreprise et gérez votre stock en toute simplicité.',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                  validator: (value) => value != null && value.length < 6
+                      ? "Le mot de passe doit contenir au moins 6 caractères"
+                      : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _confirmPasswordController,
+                  obscureText: _obscureConfirmPassword,
+                  decoration: InputDecoration(
+                    labelText: "Confirmer le mot de passe",
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    suffixIcon: IconButton(
+                      icon: Icon(_obscureConfirmPassword
+                          ? Icons.visibility
+                          : Icons.visibility_off),
+                      onPressed: () => setState(() =>
+                          _obscureConfirmPassword = !_obscureConfirmPassword),
                     ),
                   ),
-                  const SizedBox(height: 28),
-
-                  // 1. Nom de l'entreprise
-                  TextFormField(
-                    controller: _nomEntrepriseController,
-                    decoration: _buildInputDecoration(
-                      label: 'Nom de l\'entreprise *',
-                      hint: 'ex: Pharmacie La Grâce',
-                      icon: Icons.business_rounded,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Veuillez saisir le nom de votre entreprise';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // 2. Nom du gérant
-                  TextFormField(
-                    controller: _nomGerantController,
-                    decoration: _buildInputDecoration(
-                      label: 'Nom complet du gérant *',
-                      hint: 'ex: Jean Dupont',
-                      icon: Icons.person_outline_rounded,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Veuillez saisir votre nom';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // 3. Numéro de téléphone
-                  TextFormField(
-                    controller: _telephoneController,
-                    keyboardType: TextInputType.phone,
-                    decoration: _buildInputDecoration(
-                      label: 'Téléphone (optionnel)',
-                      hint: 'ex: +243 990 000 000',
-                      icon: Icons.phone_outlined,
+                  validator: (value) => value == null || value.isEmpty
+                      ? "Veuillez confirmer votre mot de passe"
+                      : null,
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue.shade800,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  const SizedBox(height: 16),
-
-                  // 4. Email
-                  TextFormField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: _buildInputDecoration(
-                      label: 'Adresse email *',
-                      hint: 'gerant@entreprise.com',
-                      icon: Icons.email_outlined,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Veuillez saisir une adresse email';
-                      }
-                      if (!value.contains('@') || !value.contains('.')) {
-                        return 'Veuillez saisir une adresse email valide';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // 5. Mot de passe
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    decoration: _buildInputDecoration(
-                      label: 'Mot de passe *',
-                      hint: '••••••••',
-                      icon: Icons.lock_outline_rounded,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
+                  onPressed: _isLoading ? null : _register,
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text(
+                          "S'inscrire",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
                         ),
-                        onPressed: () {
-                          setState(() => _obscurePassword = !_obscurePassword);
-                        },
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.length < 6) {
-                        return 'Le mot de passe doit contenir au moins 6 caractères';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // 6. Confirmation du mot de passe
-                  TextFormField(
-                    controller: _confirmPasswordController,
-                    obscureText: _obscureConfirmPassword,
-                    decoration: _buildInputDecoration(
-                      label: 'Confirmer le mot de passe *',
-                      hint: '••••••••',
-                      icon: Icons.lock_reset_rounded,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscureConfirmPassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                        ),
-                        onPressed: () {
-                          setState(() =>
-                              _obscureConfirmPassword = !_obscureConfirmPassword);
-                        },
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value != _passwordController.text) {
-                        return 'Les mots de passe ne correspondent pas';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 28),
-
-                  // Bouton d'inscription
-                  SizedBox(
-                    height: 52,
-                    child: FilledButton.icon(
-                      onPressed: _isLoading ? null : _handleRegister,
-                      style: FilledButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      icon: _isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Icon(Icons.arrow_forward_rounded),
-                      label: Text(
-                        _isLoading
-                            ? 'Création du compte...'
-                            : 'Créer mon entreprise',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Redirection vers Connexion
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text('Vous avez déjà un compte ?'),
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text(
-                          'Se connecter',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  // Style personnalisé réutilisable pour les inputs
-  InputDecoration _buildInputDecoration({
-    required String label,
-    String? hint,
-    required IconData icon,
-    Widget? suffixIcon,
-  }) {
-    final theme = Theme.of(context);
-    return InputDecoration(
-      labelText: label,
-      hintText: hint,
-      prefixIcon: Icon(icon, size: 22),
-      suffixIcon: suffixIcon,
-      filled: true,
-      fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(
-          color: theme.colorScheme.outline.withValues(alpha: 0.15),
-          width: 1,
-        ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(
-          color: theme.colorScheme.primary,
-          width: 1.5,
-        ),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(
-          color: theme.colorScheme.error.withValues(alpha: 0.5),
-          width: 1,
         ),
       ),
     );

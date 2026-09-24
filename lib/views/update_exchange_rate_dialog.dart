@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/currency_provider.dart';
+import '../core/providers/currency_provider.dart';
 
 class UpdateExchangeRateDialog extends ConsumerStatefulWidget {
   final String currencyCode;

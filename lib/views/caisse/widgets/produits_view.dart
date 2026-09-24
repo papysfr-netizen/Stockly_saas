@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:stockly_saas/models/produit.dart';
-import 'package:stockly_saas/providers/auth_provider.dart';
-import 'package:stockly_saas/providers/cart_provider.dart';
-import 'package:stockly_saas/providers/currency_provider.dart';
-import 'package:stockly_saas/providers/entreprise_provider.dart';
-import 'package:stockly_saas/providers/produit_provider.dart';
+import 'package:stockly_saas/core/models/produit.dart';
+import 'package:stockly_saas/core/providers/auth_provider.dart';
+import 'package:stockly_saas/core/providers/cart_provider.dart';
+import 'package:stockly_saas/core/providers/currency_provider.dart';
+import 'package:stockly_saas/core/providers/entreprise_provider.dart';
+import 'package:stockly_saas/core/providers/produit_provider.dart';
 import 'package:stockly_saas/views/caisse/dialogs/ajout_panier_dialog.dart';
 import 'package:stockly_saas/views/caisse/dialogs/paiement_dialog.dart';
-import 'package:stockly_saas/widgets/quick_scanner_widget.dart';
+import 'package:stockly_saas/core/widgets/quick_scanner_widget.dart';
 
 class ProduitsView extends ConsumerStatefulWidget {
   const ProduitsView({super.key});

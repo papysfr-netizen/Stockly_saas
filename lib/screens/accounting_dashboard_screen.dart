@@ -1,9 +1,9 @@
 // lib/screens/accounting_dashboard_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/journal_provider.dart';
-import '../services/csv_export_service.dart';
-import '../services/excel_export_service.dart';
+import '../core/providers/journal_provider.dart';
+import '../core/services/csv_export_service.dart';
+import '../core/services/excel_export_service.dart';
 import 'add_journal_entry_screen.dart';
 import 'balance_screen.dart';
 import 'balance_sheet_screen.dart';

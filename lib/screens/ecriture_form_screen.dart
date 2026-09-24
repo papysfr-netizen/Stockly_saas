@@ -1,8 +1,8 @@
-// lib/screens/ecriture_form_screen.dart
+// lib/features/accounting/screens/ecriture_form_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../models/journal_entry.dart';
+import 'package:stockly_saas/features/accounting/models/journal_entry.dart';
 
 class JournalLineInput {
   TextEditingController accountCodeController;

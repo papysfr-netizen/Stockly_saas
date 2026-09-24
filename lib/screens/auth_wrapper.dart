@@ -3,12 +3,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../models/auth_state.dart';
-import '../models/user_model.dart';
-import '../providers/auth_controller.dart';
-import 'home_screen.dart';
-import 'login_screen.dart';
-import 'pin_lock_screen.dart';
+import '../core/models/auth_state.dart';
+import '../core/models/user_model.dart';
+import '../features/debts/screens/providers/auth_controller.dart';
+import '../features/debts/screens/home_screen.dart';
+import '../features/debts/screens/login_screen.dart';
+import '../features/debts/screens/pin_lock_screen.dart';
 
 /// Passerelle d'authentification sécurisée, multi-tenant et basée sur les rôles (RBAC)
 class AuthWrapper extends ConsumerWidget {
