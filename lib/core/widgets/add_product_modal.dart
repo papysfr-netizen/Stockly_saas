@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -125,118 +126,170 @@ class _AddProductModalState extends State<AddProductModal> {
     super.dispose();
   }
 
+  // ================= OUTILS DE LECTURE DES NOMBRES =================
+
+  /// Accepte "12,5", "12.5" et "1 500" (virgule et espaces tolérés).
+  double? _lireDecimal(String texte) {
+    final nettoye = texte.trim().replaceAll(' ', '').replaceAll(',', '.');
+    if (nettoye.isEmpty) return null;
+    return double.tryParse(nettoye);
+  }
+
+  int? _lireEntier(String texte) {
+    final nettoye = texte.trim().replaceAll(' ', '');
+    if (nettoye.isEmpty) return null;
+    return int.tryParse(nettoye);
+  }
+
+  void _afficherMessage(
+    ScaffoldMessengerState messenger,
+    String texte,
+    Color couleur,
+    IconData icone,
+  ) {
+    messenger.showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(icone, color: Colors.white),
+            const SizedBox(width: 10),
+            Expanded(child: Text(texte)),
+          ],
+        ),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        backgroundColor: couleur,
+      ),
+    );
+  }
+
+  // ================= ENREGISTREMENT (RÉSISTANT AUX COUPURES) =================
+
   Future<void> _sauvegarderProduit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final currentEntrepriseId = widget.entrepriseId.isNotEmpty
-        ? widget.entrepriseId
-        : 'ent_01';
+    // On récupère ces outils AVANT toute attente, pour pouvoir
+    // les utiliser même après la fermeture du formulaire.
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
+    final entrepriseId = widget.entrepriseId.trim();
+    if (entrepriseId.isEmpty) {
+      _afficherMessage(
+        messenger,
+        'Entreprise introuvable. Déconnectez-vous puis reconnectez-vous.',
+        Colors.red.shade700,
+        Icons.error_outline,
+      );
+      return;
+    }
 
     setState(() => isLoading = true);
 
     try {
       final codeBarreVal = _codeBarresController.text.trim();
-      final prixVenteVal = double.tryParse(_prixVenteController.text.trim()) ?? 0.0;
-      final quantiteVal = int.tryParse(_quantiteController.text.trim()) ?? 0;
+      final prixVenteVal = _lireDecimal(_prixVenteController.text) ?? 0.0;
+      final quantiteVal = _lireEntier(_quantiteController.text) ?? 0;
 
       final Map<String, dynamic> productData = {
         'nom': _nomController.text.trim(),
         'codeBarre': codeBarreVal,
         'codeBarres': codeBarreVal,
         'categorie': _categorieSelectionnee,
-        'prixAchat': double.tryParse(_prixAchatController.text.trim()) ?? 0.0,
+        'prixAchat': _lireDecimal(_prixAchatController.text) ?? 0.0,
         'prixVente': prixVenteVal,
         'prix': prixVenteVal,
         'quantite': quantiteVal,
         'stock': quantiteVal,
-        'seuilAlerte': int.tryParse(_seuilAlerteController.text.trim()) ?? 5,
+        'seuilAlerte': _lireEntier(_seuilAlerteController.text) ?? 5,
         'imageUrl': _imageUrlController.text.trim(),
-        'entrepriseId': currentEntrepriseId,
+        'entrepriseId': entrepriseId,
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
-      final firestore = FirebaseFirestore.instance;
+      // Un seul emplacement : entreprises/{id}/produits
+      final produitsRef = FirebaseFirestore.instance
+          .collection('entreprises')
+          .doc(entrepriseId)
+          .collection('produits');
 
-      if (isEditing) {
-        // Recherche de l'emplacement réel du document pour la mise à jour
-        final refEntreprises = firestore
-            .collection('entreprises')
-            .doc(currentEntrepriseId)
-            .collection('produits')
-            .doc(widget.id);
+      // L'identifiant est créé sur le téléphone : pas besoin d'internet.
+      final docRef = isEditing ? produitsRef.doc(widget.id!) : produitsRef.doc();
 
-        final refOrganizations = firestore
-            .collection('organizations')
-            .doc(currentEntrepriseId)
-            .collection('produits')
-            .doc(widget.id);
-
-        final refRacine = firestore.collection('produits').doc(widget.id);
-
-        final snapEnt = await refEntreprises.get();
-        if (snapEnt.exists) {
-          await refEntreprises.update(productData);
-        } else {
-          final snapOrg = await refOrganizations.get();
-          if (snapOrg.exists) {
-            await refOrganizations.update(productData);
-          } else {
-            await refRacine.update(productData);
-          }
-        }
-      } else {
+      if (!isEditing) {
         productData['createdAt'] = FieldValue.serverTimestamp();
-        final docRef = await firestore
-            .collection('entreprises')
-            .doc(currentEntrepriseId)
-            .collection('produits')
-            .add(productData);
-        productData['id'] = docRef.id;
       }
 
-      if (widget.onProductAdded != null) {
-        widget.onProductAdded!(productData);
+      final Future<void> ecriture = isEditing
+          ? docRef.set(productData, SetOptions(merge: true))
+          : docRef.set(productData);
+
+      // Firestore garde l'écriture sur le téléphone tout de suite.
+      // Si le serveur ne répond pas en 5 s (coupure réseau), on n'attend
+      // pas : l'envoi se fera automatiquement quand internet reviendra.
+      bool enAttenteReseau = false;
+      try {
+        await ecriture.timeout(const Duration(seconds: 5));
+      } on TimeoutException {
+        enAttenteReseau = true;
+        debugPrint(
+          '[Stockly] Produit ${docRef.id} enregistré sur le téléphone, '
+          'envoi au serveur en attente du réseau',
+        );
       }
+
+      productData['id'] = docRef.id;
+      widget.onProductAdded?.call(productData);
 
       if (!mounted) return;
 
-      Navigator.of(context).pop(productData);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.check_circle_outline, color: Colors.white),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  isEditing
-                      ? 'Produit mis à jour avec succès !'
-                      : 'Produit ajouté avec succès !',
-                ),
-              ),
-            ],
-          ),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          backgroundColor: Colors.green.shade700,
-        ),
-      );
+      navigator.pop(productData);
+
+      if (enAttenteReseau) {
+        _afficherMessage(
+          messenger,
+          'Enregistré sur le téléphone. Il sera envoyé dès que internet revient.',
+          Colors.orange.shade800,
+          Icons.cloud_off_rounded,
+        );
+      } else {
+        _afficherMessage(
+          messenger,
+          isEditing
+              ? 'Produit mis à jour avec succès !'
+              : 'Produit ajouté avec succès !',
+          Colors.green.shade700,
+          Icons.check_circle_outline,
+        );
+      }
     } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erreur lors de l\'enregistrement : $e'),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          backgroundColor: Colors.red.shade700,
-        ),
+      debugPrint('[Stockly] Erreur enregistrement produit : $e');
+      _afficherMessage(
+        messenger,
+        'Erreur lors de l\'enregistrement : $e',
+        Colors.red.shade700,
+        Icons.error_outline,
       );
     } finally {
       if (mounted) setState(() => isLoading = false);
     }
   }
+  // ================= SCANNER =================
 
+  /// Ouvre le scanner et attend le code.
+  /// Le scanner se ferme TOUT SEUL en renvoyant le code :
+  /// ici on ne ferme rien, sinon on fermerait aussi le formulaire.
+  Future<void> _ouvrirScanner() async {
+    final code = await Navigator.of(context).push<String>(
+      MaterialPageRoute<String>(
+        builder: (_) => const QuickScannerWidget(),
+      ),
+    );
+
+    if (!mounted || code == null || code.trim().isEmpty) return;
+
+    setState(() => _codeBarresController.text = code.trim());
+  }
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -312,13 +365,20 @@ class _AddProductModalState extends State<AddProductModal> {
                       if (!isEditing) ...[
                         OutlinedButton.icon(
                           onPressed: () async {
-                            final currentEnt = widget.entrepriseId.isNotEmpty
-                                ? widget.entrepriseId
-                                : 'ent_01';
+                            final entId = widget.entrepriseId.trim();
+                            if (entId.isEmpty) {
+                              _afficherMessage(
+                                ScaffoldMessenger.of(context),
+                                'Entreprise introuvable. Déconnectez-vous puis reconnectez-vous.',
+                                Colors.red.shade700,
+                                Icons.error_outline,
+                              );
+                              return;
+                            }
                             Navigator.pop(context);
                             await PackingListService.importerEtTraiter(
                               context,
-                              entrepriseId: currentEnt,
+                              entrepriseId: entId,
                             );
                           },
                           style: OutlinedButton.styleFrom(
@@ -437,21 +497,7 @@ class _AddProductModalState extends State<AddProductModal> {
                                 color: theme.colorScheme.primary,
                                 size: 18,
                               ),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (scannerContext) => QuickScannerWidget(
-                                      onCodeScanned: (code) {
-                                        setState(() {
-                                          _codeBarresController.text = code;
-                                        });
-                                        Navigator.pop(scannerContext);
-                                      },
-                                    ),
-                                  ),
-                                );
-                              },
+                              onPressed: _ouvrirScanner,
                             ),
                           );
 
@@ -506,6 +552,15 @@ class _AddProductModalState extends State<AddProductModal> {
                             hint: '0.00',
                             icon: Icons.attach_money_rounded,
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return null; // optionnel
+                              }
+                              if (_lireDecimal(value) == null) {
+                                return 'Prix invalide';
+                              }
+                              return null;
+                            },
                           );
 
                           final prixVenteField = _buildInputField(
@@ -517,6 +572,9 @@ class _AddProductModalState extends State<AddProductModal> {
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return 'Prix requis';
+                              }
+                              if (_lireDecimal(value) == null) {
+                                return 'Prix invalide';
                               }
                               return null;
                             },
@@ -555,6 +613,9 @@ class _AddProductModalState extends State<AddProductModal> {
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return 'Stock requis';
+                              }
+                              if (_lireEntier(value) == null) {
+                                return 'Nombre entier';
                               }
                               return null;
                             },
