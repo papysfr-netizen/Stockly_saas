@@ -9,16 +9,41 @@ enum UserRole {
   admin,
   caissier;
 
+  /// Convertit la valeur Firestore en rôle.
+  /// Accepte les variantes françaises, avec ou sans accents/majuscules,
+  /// car user_model.dart enregistre "gerant" pour le propriétaire.
   static UserRole fromString(String? value) {
-    switch (value?.toLowerCase().trim()) {
+    switch (_normaliser(value)) {
       case 'owner':
+      case 'gerant':
+      case 'proprietaire':
+      case 'patron':
         return UserRole.owner;
       case 'admin':
+      case 'administrateur':
         return UserRole.admin;
       case 'caissier':
       default:
         return UserRole.caissier;
     }
+  }
+
+  /// Met en minuscules, enlève les espaces et les accents.
+  static String _normaliser(String? value) {
+    if (value == null) return '';
+    var v = value.toLowerCase().trim();
+    const accents = {
+      'é': 'e', 'è': 'e', 'ê': 'e', 'ë': 'e',
+      'à': 'a', 'â': 'a',
+      'î': 'i', 'ï': 'i',
+      'ô': 'o',
+      'û': 'u', 'ù': 'u',
+      'ç': 'c',
+    };
+    accents.forEach((avec, sans) {
+      v = v.replaceAll(avec, sans);
+    });
+    return v;
   }
 }
 
@@ -58,6 +83,10 @@ class UserProfile {
     User user,
   ) {
     if (!snapshot.exists || snapshot.data() == null) {
+      debugPrint(
+        '[Stockly] Profil introuvable dans users/${user.uid} '
+        '-> rôle caissier par défaut',
+      );
       return UserProfile.empty().copyWith(
         uid: user.uid,
         nom: user.displayName ?? '',
@@ -66,11 +95,17 @@ class UserProfile {
 
     final data = snapshot.data()!;
     final rawPermissions = data['permissions'] as Map<String, dynamic>? ?? {};
+    final role = UserRole.fromString(data['role']?.toString());
+
+    debugPrint(
+      '[Stockly] Rôle Firestore brut : "${data['role']}" '
+      '-> rôle appli : ${role.name}',
+    );
 
     return UserProfile(
       uid: user.uid,
       nom: data['nom'] ?? data['displayName'] ?? user.displayName ?? '',
-      role: UserRole.fromString(data['role']?.toString()),
+      role: role,
       entrepriseId: data['entrepriseId']?.toString() ?? '',
       permissions: rawPermissions.map(
         (key, value) => MapEntry(key, value is bool ? value : false),
