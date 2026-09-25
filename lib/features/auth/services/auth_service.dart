@@ -21,7 +21,7 @@ class AuthService {
     final String uid = userCredential.user!.uid;
 
     try {
-      // 2. PRÉ-GÉNÉRATION DESRÉFÉRENCES (Sans encore écrire dans Firestore)
+      // 2. PRÉ-GÉNÉRATION DES RÉFÉRENCES (Sans encore écrire dans Firestore)
       // Reference Entreprise
       DocumentReference entrepriseRef = _firestore.collection('entreprises').doc();
       final String entrepriseId = entrepriseRef.id;
@@ -60,7 +60,7 @@ class AuthService {
         'email': email.trim(),
         'telephone': telephone.trim(),
         'entrepriseId': entrepriseId, // 🛡️ Clé d'isolation SaaS Multi-Tenant
-        'role': 'admin', // Ou 'owner' selon votre nomenclature
+        'role': 'owner', // Le créateur de l'entreprise est le propriétaire
         'createdAt': FieldValue.serverTimestamp(),
       });
 
