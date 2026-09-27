@@ -5,7 +5,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stockly_saas/core/models/dette.dart';
 import 'package:stockly_saas/features/accounting/models/journal_entry.dart';
 import '../core/models/payment_method.dart';
-import '../core/services/accounting_journal_service.dart';
+import 'package:stockly_saas/features/accounting/services/accounting_journal_service.dart';
 
 // ============================================================================
 // PROVIDERS RIVERPOD

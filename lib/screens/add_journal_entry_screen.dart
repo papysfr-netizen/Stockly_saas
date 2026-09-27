@@ -1,7 +1,7 @@
 // lib/screens/add_journal_entry_screen.dart
 import 'package:flutter/material.dart';
 import 'package:stockly_saas/features/accounting/models/journal_entry.dart';
-import '../core/services/accounting_journal_service.dart';
+import 'package:stockly_saas/features/accounting/services/accounting_journal_service.dart';
 
 class AddJournalEntryScreen extends StatefulWidget {
   final String entrepriseId;

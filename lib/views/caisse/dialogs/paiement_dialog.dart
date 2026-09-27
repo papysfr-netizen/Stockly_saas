@@ -9,7 +9,7 @@ import 'package:stockly_saas/core/models/payment_method.dart';
 import 'package:stockly_saas/core/providers/cart_provider.dart';
 import 'package:stockly_saas/core/providers/currency_provider.dart';
 import 'package:stockly_saas/core/providers/entreprise_provider.dart';
-import 'package:stockly_saas/core/services/accounting_journal_service.dart';
+import 'package:stockly_saas/features/accounting/services/accounting_journal_service.dart';
 import 'package:stockly_saas/core/services/receipt_service.dart';
 import 'package:stockly_saas/core/utils/payment_calculator.dart';
 

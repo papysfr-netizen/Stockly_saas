@@ -2,7 +2,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stockly_saas/core/models/payment_method.dart';
-import 'package:stockly_saas/core/services/accounting_journal_service.dart';
+import 'package:stockly_saas/features/accounting/services/accounting_journal_service.dart';
 import 'package:stockly_saas/core/services/accounting_report_service.dart';
 
 void main() {

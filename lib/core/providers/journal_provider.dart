@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stockly_saas/features/accounting/models/journal_entry.dart';
-import '../services/accounting_journal_service.dart';
+import 'package:stockly_saas/features/accounting/services/accounting_journal_service.dart';
 import '../services/accounting_report_service.dart';
 
 /// Provider du service comptable

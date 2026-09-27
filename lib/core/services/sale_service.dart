@@ -1,7 +1,7 @@
 // lib/services/sale_service.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/payment_method.dart';
-import 'accounting_journal_service.dart';
+import 'package:stockly_saas/features/accounting/services/accounting_journal_service.dart';
 
 class SaleService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
