@@ -52,4 +52,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get mergeDuplicates => 'Fusionner les doublons';
+
+  @override
+  String get teamManagement => 'Gestion de l\'équipe & permissions';
+
+  @override
+  String get teamManagementSubtitle =>
+      'Ajouter des collaborateurs et gérer leurs droits';
 }

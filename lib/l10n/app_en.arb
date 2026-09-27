@@ -14,5 +14,7 @@
   "reportsExport": "Data export",
   "exportExcel": "Export stock to Excel",
   "dbMaintenance": "Maintenance",
-  "mergeDuplicates": "Merge duplicates"
+  "mergeDuplicates": "Merge duplicates",
+  "teamManagement": "Team & permissions",
+  "teamManagementSubtitle": "Add collaborators and manage their rights"
 }

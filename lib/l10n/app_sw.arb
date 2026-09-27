@@ -14,5 +14,7 @@
   "reportsExport": "Kuhamisha data",
   "exportExcel": "Hamisha bidhaa kwenda Excel",
   "dbMaintenance": "Matengenezo",
-  "mergeDuplicates": "Unganisha bidhaa zilizorudiwa"
+  "mergeDuplicates": "Unganisha bidhaa zilizorudiwa",
+  "teamManagement": "Timu na ruhusa",
+  "teamManagementSubtitle": "Ongeza washirika na usimamie haki zao"
 }

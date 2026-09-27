@@ -52,4 +52,10 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get mergeDuplicates => 'Unganisha bidhaa zilizorudiwa';
+
+  @override
+  String get teamManagement => 'Timu na ruhusa';
+
+  @override
+  String get teamManagementSubtitle => 'Ongeza washirika na usimamie haki zao';
 }

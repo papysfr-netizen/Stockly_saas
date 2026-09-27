@@ -52,4 +52,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mergeDuplicates => 'Merge duplicates';
+
+  @override
+  String get teamManagement => 'Team & permissions';
+
+  @override
+  String get teamManagementSubtitle =>
+      'Add collaborators and manage their rights';
 }

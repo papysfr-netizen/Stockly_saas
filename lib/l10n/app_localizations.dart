@@ -191,6 +191,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Fusionner les doublons'**
   String get mergeDuplicates;
+
+  /// No description provided for @teamManagement.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gestion de l\'équipe & permissions'**
+  String get teamManagement;
+
+  /// No description provided for @teamManagementSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter des collaborateurs et gérer leurs droits'**
+  String get teamManagementSubtitle;
 }
 
 class _AppLocalizationsDelegate

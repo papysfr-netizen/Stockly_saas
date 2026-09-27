@@ -14,5 +14,7 @@
   "reportsExport": "Exportation des données",
   "exportExcel": "Exporter le stock vers Excel",
   "dbMaintenance": "Maintenance",
-  "mergeDuplicates": "Fusionner les doublons"
+  "mergeDuplicates": "Fusionner les doublons",
+  "teamManagement": "Gestion de l'équipe & permissions",
+  "teamManagementSubtitle": "Ajouter des collaborateurs et gérer leurs droits"
 }

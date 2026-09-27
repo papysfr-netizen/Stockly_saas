@@ -14,5 +14,7 @@
   "reportsExport": "Kobimisa ba données",
   "exportExcel": "Bimisa biloko na Excel",
   "dbMaintenance": "Kobongisa",
-  "mergeDuplicates": "Sangisa biloko oyo ezali mbala mibale"
+  "mergeDuplicates": "Sangisa biloko oyo ezali mbala mibale",
+  "teamManagement": "Ekipi mpe ba ndingisa",
+  "teamManagementSubtitle": "Bakisa basali mpe bongisa makoki na bango"
 }

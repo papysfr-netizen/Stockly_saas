@@ -52,4 +52,11 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get mergeDuplicates => 'Sangisa biloko oyo ezali mbala mibale';
+
+  @override
+  String get teamManagement => 'Ekipi mpe ba ndingisa';
+
+  @override
+  String get teamManagementSubtitle =>
+      'Bakisa basali mpe bongisa makoki na bango';
 }
