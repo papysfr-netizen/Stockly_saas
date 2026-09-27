@@ -1,0 +1,18 @@
+{
+  "@@locale": "sw",
+  "appTitle": "Stockly Pro",
+  "settings": "Mipangilio",
+  "storeInfo": "Taarifa za duka",
+  "storeName": "Jina la duka",
+  "address": "Anwani",
+  "phone": "Simu",
+  "saveInfo": "Hifadhi taarifa",
+  "bccSection": "Kiwango cha BCC na sarafu",
+  "bccRate": "Kiwango cha kubadilisha fedha (BCC)",
+  "activeCurrency": "Sarafu kuu",
+  "appLanguage": "Lugha ya programu",
+  "reportsExport": "Kuhamisha data",
+  "exportExcel": "Hamisha bidhaa kwenda Excel",
+  "dbMaintenance": "Matengenezo",
+  "mergeDuplicates": "Unganisha bidhaa zilizorudiwa"
+}

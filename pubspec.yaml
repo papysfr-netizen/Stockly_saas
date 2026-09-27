@@ -63,6 +63,5 @@ dependency_overrides:
 
 flutter:
   uses-material-design: true
-
-  assets:
-    - assets/translations/
+  # Génère automatiquement le code des traductions (fichiers lib/l10n/*.arb)
+  generate: true

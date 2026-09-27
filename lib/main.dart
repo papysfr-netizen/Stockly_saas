@@ -8,6 +8,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'firebase_options.dart';
+import 'l10n/app_localizations.dart';
 import 'core/models/auth_state.dart';
 import 'core/models/user_model.dart';
 import 'features/debts/screens/providers/auth_controller.dart';
@@ -46,7 +47,9 @@ void main() async {
 }
 
 // ============================================================================
-// DÉLÉGUÉS DE SECOURS (FALLBACK) POUR LES LANGUES NON SUPPORTÉES
+// DÉLÉGUÉS DE SECOURS (FALLBACK) POUR LES LANGUES NON SUPPORTÉES PAR FLUTTER
+// (ex : lingala). Ils ne servent QUE si Flutter ne connaît pas la langue ;
+// sinon les délégués officiels (placés avant dans la liste) sont utilisés.
 // ============================================================================
 class FallbackMaterialLocalizationsDelegate
     extends LocalizationsDelegate<MaterialLocalizations> {
@@ -78,6 +81,22 @@ class FallbackCupertinoLocalizationsDelegate
 
   @override
   bool shouldReload(FallbackCupertinoLocalizationsDelegate old) => false;
+}
+
+class FallbackWidgetsLocalizationsDelegate
+    extends LocalizationsDelegate<WidgetsLocalizations> {
+  const FallbackWidgetsLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<WidgetsLocalizations> load(Locale locale) async {
+    return await GlobalWidgetsLocalizations.delegate.load(const Locale('fr'));
+  }
+
+  @override
+  bool shouldReload(FallbackWidgetsLocalizationsDelegate old) => false;
 }
 
 // ============================================================================
@@ -131,10 +150,15 @@ class MyApp extends ConsumerWidget {
           .map((lang) => Locale(lang.code))
           .toList(),
       localizationsDelegates: const [
+        // Nos traductions (fichiers lib/l10n/*.arb)
+        AppLocalizations.delegate,
+        // Traductions officielles de Flutter (boutons, calendriers...)
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
+        // Secours pour les langues que Flutter ne connaît pas (lingala)
         FallbackMaterialLocalizationsDelegate(),
+        FallbackWidgetsLocalizationsDelegate(),
         FallbackCupertinoLocalizationsDelegate(),
       ],
       home: const AuthWrapper(),

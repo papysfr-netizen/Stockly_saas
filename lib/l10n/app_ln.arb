@@ -1,0 +1,18 @@
+{
+  "@@locale": "ln",
+  "appTitle": "Stockly Pro",
+  "settings": "Bibongisi",
+  "storeInfo": "Sango ya magazini",
+  "storeName": "Nkombo ya magazini",
+  "address": "Adresi",
+  "phone": "Telefone",
+  "saveInfo": "Bomba sango",
+  "bccSection": "Motuya ya BCC mpe mbongo",
+  "bccRate": "Motuya ya mbongo (BCC)",
+  "activeCurrency": "Mbongo ya liboso",
+  "appLanguage": "Lokota ya programe",
+  "reportsExport": "Kobimisa ba données",
+  "exportExcel": "Bimisa biloko na Excel",
+  "dbMaintenance": "Kobongisa",
+  "mergeDuplicates": "Sangisa biloko oyo ezali mbala mibale"
+}

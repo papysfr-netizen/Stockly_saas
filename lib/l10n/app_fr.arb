@@ -1,0 +1,18 @@
+{
+  "@@locale": "fr",
+  "appTitle": "Stockly Pro",
+  "settings": "Paramètres",
+  "storeInfo": "Informations du magasin",
+  "storeName": "Nom de la boutique",
+  "address": "Adresse",
+  "phone": "Téléphone",
+  "saveInfo": "Enregistrer les informations",
+  "bccSection": "Taux BCC & devise active",
+  "bccRate": "Taux de change (BCC)",
+  "activeCurrency": "Devise principale",
+  "appLanguage": "Langue de l'application",
+  "reportsExport": "Exportation des données",
+  "exportExcel": "Exporter le stock vers Excel",
+  "dbMaintenance": "Maintenance",
+  "mergeDuplicates": "Fusionner les doublons"
+}

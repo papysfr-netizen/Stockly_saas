@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/locale_provider.dart';
+import '../../l10n/app_localizations.dart';
 
 class LanguageCard extends ConsumerWidget {
   const LanguageCard({super.key});
@@ -8,7 +9,7 @@ class LanguageCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentLocale = ref.watch(localeProvider);
-    final tr = ref.watch(trProvider);
+    final t = AppLocalizations.of(context);
 
     return Card(
       elevation: 2,
@@ -24,7 +25,7 @@ class LanguageCard extends ConsumerWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    tr('app_language'),
+                    t.appLanguage,
                     style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),

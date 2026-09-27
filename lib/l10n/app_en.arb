@@ -1,0 +1,18 @@
+{
+  "@@locale": "en",
+  "appTitle": "Stockly Pro",
+  "settings": "Settings",
+  "storeInfo": "Store information",
+  "storeName": "Store name",
+  "address": "Address",
+  "phone": "Phone",
+  "saveInfo": "Save information",
+  "bccSection": "BCC rate & active currency",
+  "bccRate": "Exchange rate (BCC)",
+  "activeCurrency": "Main currency",
+  "appLanguage": "App language",
+  "reportsExport": "Data export",
+  "exportExcel": "Export stock to Excel",
+  "dbMaintenance": "Maintenance",
+  "mergeDuplicates": "Merge duplicates"
+}
