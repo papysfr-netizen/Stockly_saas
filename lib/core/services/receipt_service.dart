@@ -1,9 +1,15 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:stockly_saas/core/models/vente.dart';
+import 'package:stockly_saas/core/providers/settings_provider.dart';
 
 class ReceiptService {
   // Cache des polices Google Fonts pour éviter les re-téléchargements
@@ -21,6 +27,53 @@ class ReceiptService {
   static String _formatPrice(double amount, String currency) {
     return '${amount.toStringAsFixed(2)} $currency';
   }
+
+  // ================= INFOS DU MAGASIN (LUES DANS FIRESTORE) =================
+
+  /// Lit un document : réseau d'abord (3 s max), sinon copie du téléphone.
+  static Future<DocumentSnapshot<Map<String, dynamic>>> _lireDoc(
+    DocumentReference<Map<String, dynamic>> ref,
+  ) async {
+    try {
+      return await ref.get().timeout(const Duration(seconds: 3));
+    } catch (_) {
+      return await ref.get(const GetOptions(source: Source.cache));
+    }
+  }
+
+  /// Récupère les infos du magasin enregistrées dans Paramètres
+  /// (entreprises/{id}, champ 'infosBoutique').
+  /// Renvoie null si rien n'est disponible : le reçu garde alors
+  /// les valeurs passées en paramètre.
+  static Future<ShopSettings?> _chargerInfosBoutique() async {
+    try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) return null;
+
+      final firestore = FirebaseFirestore.instance;
+      final userDoc = await _lireDoc(firestore.collection('users').doc(uid));
+      final entrepriseId = userDoc.data()?['entrepriseId']?.toString() ?? '';
+      if (entrepriseId.isEmpty) return null;
+
+      final entDoc =
+          await _lireDoc(firestore.collection('entreprises').doc(entrepriseId));
+      final data = entDoc.data();
+      if (data == null) return null;
+
+      return ShopSettings.fromEntreprise(data);
+    } catch (e) {
+      debugPrint('[Stockly] Infos boutique indisponibles pour le reçu : $e');
+      return null;
+    }
+  }
+
+  /// Garde la valeur enregistrée si elle existe, sinon celle de secours.
+  static String _choisir(String? enregistre, String secours) {
+    final valeur = enregistre?.trim() ?? '';
+    return valeur.isNotEmpty ? valeur : secours;
+  }
+
+  // ================= POINTS D'ENTRÉE =================
 
   /// Impression directe à partir d'un objet Vente
   static Future<void> imprimerRecu({
@@ -76,8 +129,14 @@ class ReceiptService {
     final String cleanPhone = telephone.replaceAll(RegExp(r'[^\d+]'), '');
     if (cleanPhone.isEmpty) return false;
 
+    final infos = await _chargerInfosBoutique();
+    final nomMagasin = _choisir(infos?.nomBoutique, 'Stockly');
+
     final buffer = StringBuffer();
-    buffer.writeln('📄 *REÇU DE VENTE - Stockly*');
+    buffer.writeln('📄 *REÇU DE VENTE - $nomMagasin*');
+    if (infos != null && infos.telephone.trim().isNotEmpty) {
+      buffer.writeln('Tél : ${infos.telephone.trim()}');
+    }
     buffer.writeln('--------------------------------');
 
     for (final dynamic item in vente.produits) {
@@ -136,6 +195,22 @@ class ReceiptService {
   }) async {
     await _loadFonts();
 
+    // Les infos enregistrées dans Paramètres priment sur les valeurs
+    // écrites en dur par les écrans (ex : 'Stockly Pro').
+    final infos = await _chargerInfosBoutique();
+    final String nomFinal = _choisir(infos?.nomBoutique, nomMagasin);
+    final String adresseFinale = _choisir(infos?.adresse, adresseMagasin);
+    final String phoneFinal = _choisir(infos?.telephone, phoneMagasin);
+    final String rccm = infos?.rccm.trim() ?? '';
+    final String idNat = infos?.idNat.trim() ?? '';
+    final String nif = infos?.nif.trim() ?? '';
+
+    final List<String> mentionsLegales = [
+      if (rccm.isNotEmpty) 'RCCM : $rccm',
+      if (idNat.isNotEmpty) 'ID.NAT : $idNat',
+      if (nif.isNotEmpty) 'NIF : $nif',
+    ];
+
     final pdf = pw.Document();
     final now = DateTime.now();
     final formattedDate =
@@ -161,27 +236,37 @@ class ReceiptService {
                 // En-tête Magasin
                 pw.Center(
                   child: pw.Text(
-                    nomMagasin.toUpperCase(),
-                    style: const pw.TextStyle(
+                    nomFinal.toUpperCase(),
+                    style: pw.TextStyle(
                         fontWeight: pw.FontWeight.bold, fontSize: 12),
                     textAlign: pw.TextAlign.center,
                   ),
                 ),
-                if (adresseMagasin.isNotEmpty) ...[
+                if (adresseFinale.isNotEmpty) ...[
                   pw.SizedBox(height: 1),
                   pw.Center(
                     child: pw.Text(
-                      adresseMagasin,
+                      adresseFinale,
                       style: const pw.TextStyle(fontSize: 8),
                       textAlign: pw.TextAlign.center,
                     ),
                   ),
                 ],
-                if (phoneMagasin.isNotEmpty) ...[
+                if (phoneFinal.isNotEmpty) ...[
                   pw.SizedBox(height: 1),
                   pw.Center(
-                    child: pw.Text('Tél: $phoneMagasin',
+                    child: pw.Text('Tél: $phoneFinal',
                         style: const pw.TextStyle(fontSize: 8)),
+                  ),
+                ],
+                if (mentionsLegales.isNotEmpty) ...[
+                  pw.SizedBox(height: 1),
+                  pw.Center(
+                    child: pw.Text(
+                      mentionsLegales.join('  |  '),
+                      style: const pw.TextStyle(fontSize: 7),
+                      textAlign: pw.TextAlign.center,
+                    ),
                   ),
                 ],
                 pw.SizedBox(height: 4),
@@ -213,7 +298,7 @@ class ReceiptService {
                             ),
                           ),
                           child: pw.Text('Désignation',
-                              style: const pw.TextStyle(
+                              style: pw.TextStyle(
                                   fontWeight: pw.FontWeight.bold, fontSize: 8)),
                         ),
                         pw.Container(
@@ -226,7 +311,7 @@ class ReceiptService {
                           ),
                           child: pw.Text('Qté',
                               textAlign: pw.TextAlign.center,
-                              style: const pw.TextStyle(
+                              style: pw.TextStyle(
                                   fontWeight: pw.FontWeight.bold, fontSize: 8)),
                         ),
                         pw.Container(
@@ -239,7 +324,7 @@ class ReceiptService {
                           ),
                           child: pw.Text('Total',
                               textAlign: pw.TextAlign.right,
-                              style: const pw.TextStyle(
+                              style: pw.TextStyle(
                                   fontWeight: pw.FontWeight.bold, fontSize: 8)),
                         ),
                       ],
@@ -283,10 +368,10 @@ class ReceiptService {
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     pw.Text('TOTAL :',
-                        style: const pw.TextStyle(
+                        style: pw.TextStyle(
                             fontWeight: pw.FontWeight.bold, fontSize: 9)),
                     pw.Text(_formatPrice(total, currency),
-                        style: const pw.TextStyle(
+                        style: pw.TextStyle(
                             fontWeight: pw.FontWeight.bold, fontSize: 9)),
                   ],
                 ),
@@ -325,7 +410,7 @@ class ReceiptService {
                 pw.Center(
                   child: pw.Text(
                     'Merci pour votre confiance !',
-                    style: const pw.TextStyle(
+                    style: pw.TextStyle(
                         fontStyle: pw.FontStyle.italic, fontSize: 8),
                   ),
                 ),
@@ -333,7 +418,7 @@ class ReceiptService {
                 pw.Center(
                   child: pw.Text(
                     'Stockly SaaS | Conçu par PAPY SAFARI (+243 97 34 14 587)',
-                    style: const pw.TextStyle(
+                    style: pw.TextStyle(
                         fontWeight: pw.FontWeight.bold, fontSize: 6),
                     textAlign: pw.TextAlign.center,
                   ),
