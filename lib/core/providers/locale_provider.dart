@@ -1,52 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LanguageInfo {
   final String code;
   final String name;
   final String flag;
-  final String category; // 'Régionale' ou 'Mondiale'
+  final String category; // gardé pour compatibilité, plus affiché
 
   const LanguageInfo({
     required this.code,
     required this.name,
     required this.flag,
-    required this.category,
+    this.category = '',
   });
 }
 
 class LocaleNotifier extends StateNotifier<Locale> {
-  LocaleNotifier() : super(const Locale('fr')); // Français par défaut
-
-  void setLanguage(String languageCode) {
-    state = Locale(languageCode);
+  LocaleNotifier() : super(const Locale('fr')) {
+    _chargerLangueSauvegardee();
   }
 
-  static const List<LanguageInfo> supportedLanguages = [
-    // --- 10 LANGUES RÉGIONALES (Afrique Centrale, Est & Corne de l'Afrique) ---
-    LanguageInfo(code: 'fr', name: 'Français', flag: '🇫🇷', category: 'Régionale'),
-    LanguageInfo(code: 'sw', name: 'Kiswahili', flag: '🇨🇩', category: 'Régionale'),
-    LanguageInfo(code: 'ln', name: 'Lingála', flag: '🇨🇩', category: 'Régionale'),
-    LanguageInfo(code: 'lua', name: 'Tshiluba', flag: '🇨🇩', category: 'Régionale'),
-    LanguageInfo(code: 'kg', name: 'Kikongo', flag: '🇨🇩', category: 'Régionale'),
-    LanguageInfo(code: 'rw', name: 'Kinyarwanda', flag: '🇷🇼', category: 'Régionale'),
-    LanguageInfo(code: 'rn', name: 'Kirundi', flag: '🇧🇮', category: 'Régionale'),
-    LanguageInfo(code: 'lg', name: 'Luganda', flag: '🇺🇬', category: 'Régionale'),
-    LanguageInfo(code: 'am', name: 'አማርኛ (Amharique)', flag: '🇪🇹', category: 'Régionale'),
-    LanguageInfo(code: 'om', name: 'Afaan Oromoo', flag: '🇪🇹', category: 'Régionale'),
+  /// Nom sous lequel le choix est gardé sur le téléphone.
+  static const String _cleStockage = 'langue_app';
 
-    // --- 10 LANGUES LES PLUS PARLÉES AU MONDE ---
-    LanguageInfo(code: 'en', name: 'English', flag: '🇬🇧', category: 'Mondiale'),
-    LanguageInfo(code: 'es', name: 'Español', flag: '🇪🇸', category: 'Mondiale'),
-    LanguageInfo(code: 'zh', name: '中文 (Mandarin)', flag: '🇨🇳', category: 'Mondiale'),
-    LanguageInfo(code: 'ar', name: 'العربية (Arabe)', flag: '🇸🇦', category: 'Mondiale'),
-    LanguageInfo(code: 'hi', name: 'हिन्दी (Hindi)', flag: '🇮🇳', category: 'Mondiale'),
-    LanguageInfo(code: 'pt', name: 'Português', flag: '🇵🇹', category: 'Mondiale'),
-    LanguageInfo(code: 'ru', name: 'Русский (Russe)', flag: '🇷🇺', category: 'Mondiale'),
-    LanguageInfo(code: 'bn', name: 'বাংলা (Bengali)', flag: '🇧🇩', category: 'Mondiale'),
-    LanguageInfo(code: 'de', name: 'Deutsch', flag: '🇩🇪', category: 'Mondiale'),
-    LanguageInfo(code: 'ja', name: '日本語 (Japonais)', flag: '🇯🇵', category: 'Mondiale'),
+  /// Langues proposées : seulement celles qui sont vraiment traduites.
+  static const List<LanguageInfo> supportedLanguages = [
+    LanguageInfo(code: 'fr', name: 'Français', flag: '🇫🇷'),
+    LanguageInfo(code: 'sw', name: 'Kiswahili', flag: '🇨🇩'),
+    LanguageInfo(code: 'ln', name: 'Lingála', flag: '🇨🇩'),
+    LanguageInfo(code: 'en', name: 'English', flag: '🇬🇧'),
   ];
+
+  static bool estSupportee(String code) =>
+      supportedLanguages.any((langue) => langue.code == code);
+
+  /// Au démarrage : relit la langue choisie la dernière fois.
+  Future<void> _chargerLangueSauvegardee() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final code = prefs.getString(_cleStockage);
+      if (code != null && estSupportee(code) && mounted) {
+        state = Locale(code);
+      }
+    } catch (e) {
+      debugPrint('[Stockly] Lecture de la langue impossible : $e');
+    }
+  }
+
+  /// Change la langue ET la garde en mémoire sur le téléphone.
+  Future<void> setLanguage(String languageCode) async {
+    if (!estSupportee(languageCode)) return;
+    state = Locale(languageCode);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_cleStockage, languageCode);
+    } catch (e) {
+      debugPrint('[Stockly] Sauvegarde de la langue impossible : $e');
+    }
+  }
 }
 
 final localeProvider = StateNotifierProvider<LocaleNotifier, Locale>((ref) {
@@ -54,6 +66,8 @@ final localeProvider = StateNotifierProvider<LocaleNotifier, Locale>((ref) {
 });
 
 // ================= DICTIONNAIRE DE TRADUCTIONS =================
+// Provisoire : sera remplacé par les fichiers de traduction officiels
+// de Flutter (étape 2). Kiswahili et lingala à faire relire.
 final Map<String, Map<String, String>> appTranslations = {
   // Français
   'fr': {
@@ -65,8 +79,8 @@ final Map<String, Map<String, String>> appTranslations = {
     'save_info': 'ENREGISTRER LES INFOS',
     'bcc_section': 'Banque Centrale du Congo (BCC) & Devises',
     'bcc_rate': 'Taux Officiel BCC (1 USD = X FC)',
-    'active_currency': 'Devise d\'affichage active (20 disponibles)',
-    'app_language': 'Langue de l\'application (20 Langues)',
+    'active_currency': 'Devise d\'affichage active',
+    'app_language': 'Langue de l\'application',
     'reports_export': 'Rapports & Exports',
     'export_excel': 'EXPORTER L\'INVENTAIRE EN EXCEL',
     'db_maintenance': 'Maintenance de la Base de données',
@@ -74,61 +88,42 @@ final Map<String, Map<String, String>> appTranslations = {
     'clear_stock': 'VIDER TOUT LE STOCK',
   },
 
-  // Kinyarwanda 🇷🇼
-  'rw': {
-    'settings': 'Igenamiterere & Imiterere',
-    'store_info': 'Amakuru y\'Iduka (Inyemezabwishyu)',
-    'store_name': 'Izina ry\'Iduka',
-    'address': 'Aderesi y\'Iduka (Akarorero: Goma, Nord-Kivu)',
-    'phone': 'Telefoni y\'Iduka',
-    'save_info': 'BIKA AMAKURU',
-    'bcc_section': 'Banki Nkuru ya Kongo (BCC) & Amafaranga',
-    'bcc_rate': 'Igipimo Cyemewe cya BCC (1 USD = X FC)',
-    'active_currency': 'Amafaranga Akoreshwa (20 ahari)',
-    'app_language': 'Ururimi rwa Porogaramu (Ndimo 20)',
-    'reports_export': 'Iraporo & Kohereza',
-    'export_excel': 'KOHEREZA STOKE MURI EXCEL',
-    'db_maintenance': 'Kubungabunga Ububiko bw\'Amakuru',
-    'merge_duplicates': 'GUHUZA IBIFITE IZINA RIMO',
-    'clear_stock': 'GUSIBA STOKE YOSE',
-  },
-
-  // Kiswahili
+  // Kiswahili (à faire relire)
   'sw': {
-    'settings': 'Mipangilio na Usanidi',
+    'settings': 'Mipangilio',
     'store_info': 'Taarifa za Duka (Risiti)',
     'store_name': 'Jina la Duka',
-    'address': 'Anwani ya Eneo (Mfano: Goma, Nord-Kivu)',
+    'address': 'Anwani (Mfano: Goma, Kivu Kaskazini)',
     'phone': 'Nambari ya Simu ya Duka',
     'save_info': 'HIFADHI TAARIFA',
-    'bcc_section': 'Benki Kuu ya Congo (BCC) na Fedha',
+    'bcc_section': 'Benki Kuu ya Kongo (BCC) na Sarafu',
     'bcc_rate': 'Kiwango Rasmi cha BCC (1 USD = X FC)',
-    'active_currency': 'Matazo Inayoonyeshwa (20 zilizopo)',
-    'app_language': 'Lugha ya Programu (Lugha 20)',
-    'reports_export': 'Ripoti na Usafirishaji',
-    'export_excel': 'PAKUA INVENTORY KWA EXCEL',
-    'db_maintenance': 'Ukarabati wa Hifadhidata',
-    'merge_duplicates': 'UNGANISHA ZAIDI YA MOJA',
-    'clear_stock': 'FUTA HISA ZOTE',
+    'active_currency': 'Sarafu inayotumika',
+    'app_language': 'Lugha ya programu',
+    'reports_export': 'Ripoti na Kupakua',
+    'export_excel': 'PAKUA BIDHAA KWA EXCEL',
+    'db_maintenance': 'Matengenezo ya Hifadhidata',
+    'merge_duplicates': 'UNGANISHA BIDHAA ZILIZORUDIWA',
+    'clear_stock': 'FUTA BIDHAA ZOTE',
   },
 
-  // Lingála
+  // Lingála (à faire relire)
   'ln': {
-    'settings': 'Bipamboli mpe Bobongisi',
+    'settings': 'Bibongisi',
     'store_info': 'Sango ya Magazini (Tiké)',
-    'store_name': 'Kombo ya Magazini',
-    'address': 'Adresi ya Magazini (Ndakisa: Goma, Nord-Kivu)',
-    'phone': 'Nimero ya Telefon ya Magazini',
+    'store_name': 'Nkombo ya Magazini',
+    'address': 'Adresi (Ndakisa: Goma, Nord-Kivu)',
+    'phone': 'Nimero ya Telefone ya Magazini',
     'save_info': 'BOMBA SANGO',
     'bcc_section': 'Banque Centrale du Congo (BCC) mpe Mbongo',
-    'bcc_rate': 'Talo ya Leta BCC (1 USD = X FC)',
-    'active_currency': 'Mbongo ezali kosalela (20 ezali)',
-    'app_language': 'Lokota ya Programe (Nkota 20)',
-    'reports_export': 'Rapports mpe Kobimisa',
-    'export_excel': 'BIMISA INVENTAIRE NA EXCEL',
-    'db_maintenance': 'Bobongisi ya Hifadhidata',
-    'merge_duplicates': 'SANGISA BILOKO BIKOKANI',
-    'clear_stock': 'LONGOLA BILOKO BIONSO',
+    'bcc_rate': 'Motuya ya BCC (1 USD = X FC)',
+    'active_currency': 'Mbongo oyo ezali kosalela',
+    'app_language': 'Lokota ya programe',
+    'reports_export': 'Ba rapport mpe Kobimisa',
+    'export_excel': 'BIMISA BILOKO NA EXCEL',
+    'db_maintenance': 'Kobongisa ba données',
+    'merge_duplicates': 'SANGISA BILOKO OYO EZALI MBALA MIBALE',
+    'clear_stock': 'LONGOLA BILOKO NYONSO',
   },
 
   // English
@@ -141,8 +136,8 @@ final Map<String, Map<String, String>> appTranslations = {
     'save_info': 'SAVE INFORMATION',
     'bcc_section': 'Central Bank of Congo (BCC) & Currencies',
     'bcc_rate': 'Official BCC Rate (1 USD = X CDF)',
-    'active_currency': 'Active Display Currency (20 available)',
-    'app_language': 'Application Language (20 Languages)',
+    'active_currency': 'Active Display Currency',
+    'app_language': 'App language',
     'reports_export': 'Reports & Exports',
     'export_excel': 'EXPORT INVENTORY TO EXCEL',
     'db_maintenance': 'Database Maintenance',
@@ -157,10 +152,11 @@ final trProvider = Provider<String Function(String key)>((ref) {
   final langCode = currentLocale.languageCode;
 
   return (String key) {
-    if (appTranslations.containsKey(langCode) && appTranslations[langCode]!.containsKey(key)) {
+    if (appTranslations.containsKey(langCode) &&
+        appTranslations[langCode]!.containsKey(key)) {
       return appTranslations[langCode]![key]!;
     }
-    // Sécurité : Fallback vers le Français si la traduction n'est pas encore saisie
+    // Sécurité : retour au français si la traduction manque
     return appTranslations['fr']?[key] ?? key;
   };
 });

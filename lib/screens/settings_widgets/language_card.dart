@@ -8,6 +8,7 @@ class LanguageCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentLocale = ref.watch(localeProvider);
+    final tr = ref.watch(trProvider);
 
     return Card(
       elevation: 2,
@@ -17,14 +18,14 @@ class LanguageCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(Icons.language, color: Colors.green),
-                SizedBox(width: 10),
+                const Icon(Icons.language, color: Colors.green),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Langue de l\'application',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    tr('app_language'),
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -32,8 +33,13 @@ class LanguageCard extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
+              // La clé force l'affichage à se mettre à jour quand la
+              // langue sauvegardée est relue au démarrage.
+              key: ValueKey(currentLocale.languageCode),
               isExpanded: true,
-              initialValue: currentLocale.languageCode, // Remplacé value par initialValue
+              initialValue: LocaleNotifier.estSupportee(currentLocale.languageCode)
+                  ? currentLocale.languageCode
+                  : 'fr',
               decoration: InputDecoration(
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
@@ -45,12 +51,6 @@ class LanguageCard extends ConsumerWidget {
                       Text(lang.flag, style: const TextStyle(fontSize: 18)),
                       const SizedBox(width: 8),
                       Flexible(child: Text(lang.name, overflow: TextOverflow.ellipsis)),
-                      const SizedBox(width: 6),
-                      Text(
-                        '(${lang.category})',
-                        style: const TextStyle(fontSize: 11, color: Colors.grey),
-                        overflow: TextOverflow.ellipsis,
-                      ),
                     ],
                   ),
                 );
