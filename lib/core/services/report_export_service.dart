@@ -6,6 +6,8 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
 
+import 'boutique_info_service.dart';
+
 class ReportExportService {
   /// Exporte et partage un rapport au format Excel (.xlsx)
   static Future<File> exporterExcel({
@@ -90,6 +92,17 @@ class ReportExportService {
     final fontRegular = await PdfGoogleFonts.robotoRegular();
     final fontBold = await PdfGoogleFonts.robotoBold();
 
+    // Infos du magasin enregistrées dans Paramètres (priment sur
+    // le nom passé par l'écran, souvent 'Stockly Pro' écrit en dur).
+    final infos = await BoutiqueInfoService.charger();
+    final String nomFinal =
+        BoutiqueInfoService.choisir(infos?.nomBoutique, nomBoutique);
+    final List<String> coordonnees = [
+      if ((infos?.adresse.trim() ?? '').isNotEmpty) infos!.adresse.trim(),
+      if ((infos?.telephone.trim() ?? '').isNotEmpty)
+        'Tél : ${infos!.telephone.trim()}',
+    ];
+
     final dateGenere = DateTime.now();
     final dateStr =
         "${dateGenere.day.toString().padLeft(2, '0')}/${dateGenere.month.toString().padLeft(2, '0')}/${dateGenere.year} à ${dateGenere.hour.toString().padLeft(2, '0')}h${dateGenere.minute.toString().padLeft(2, '0')}";
@@ -109,21 +122,31 @@ class ReportExportService {
             children: [
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Text(
-                        nomBoutique,
-                        style:const pw.TextStyle(
+                        nomFinal,
+                        style: pw.TextStyle(
                           fontSize: 16,
                           fontWeight: pw.FontWeight.bold,
                           color: PdfColors.blue900,
                         ),
                       ),
+                      if (coordonnees.isNotEmpty)
+                        pw.Text(
+                          coordonnees.join('  |  '),
+                          style: const pw.TextStyle(
+                            fontSize: 8,
+                            color: PdfColors.grey700,
+                          ),
+                        ),
+                      pw.SizedBox(height: 2),
                       pw.Text(
                         titreRapport,
-                        style:const pw.TextStyle(
+                        style: pw.TextStyle(
                           fontSize: 13,
                           fontWeight: pw.FontWeight.bold,
                           color: PdfColors.grey800,
@@ -151,12 +174,12 @@ class ReportExportService {
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
               pw.Text(
-                "Document généré par $nomBoutique",
+                "$nomFinal · Généré avec Stockly Pro",
                 style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500),
               ),
               pw.Text(
                 "Page ${context.pageNumber} / ${context.pagesCount}",
-                style:const pw.TextStyle(
+                style: pw.TextStyle(
                   fontSize: 8,
                   fontWeight: pw.FontWeight.bold,
                   color: PdfColors.grey700,
@@ -173,7 +196,7 @@ class ReportExportService {
                   .map((row) => row.map((e) => e?.toString() ?? '').toList())
                   .toList(),
               border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey300),
-              headerStyle:const pw.TextStyle(
+              headerStyle: pw.TextStyle(
                 fontWeight: pw.FontWeight.bold,
                 color: PdfColors.white,
                 fontSize: 9,
