@@ -1,5 +1,10 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'user_role_provider.dart';
 
 /// Configuration immuable de la boutique
 @immutable
@@ -14,8 +19,8 @@ class ShopSettings {
 
   const ShopSettings({
     this.nomBoutique = 'Ma Boutique',
-    this.adresse = 'Goma, Nord-Kivu',
-    this.telephone = '+243...',
+    this.adresse = '',
+    this.telephone = '',
     this.currency = '\$',
     this.rccm = '',
     this.idNat = '',
@@ -57,12 +62,26 @@ class ShopSettings {
   factory ShopSettings.fromMap(Map<String, dynamic> map) {
     return ShopSettings(
       nomBoutique: map['nomBoutique']?.toString() ?? 'Ma Boutique',
-      adresse: map['adresse']?.toString() ?? 'Goma, Nord-Kivu',
-      telephone: map['telephone']?.toString() ?? '+243...',
+      adresse: map['adresse']?.toString() ?? '',
+      telephone: map['telephone']?.toString() ?? '',
       currency: map['currency']?.toString() ?? '\$',
       rccm: map['rccm']?.toString() ?? '',
       idNat: map['idNat']?.toString() ?? '',
       nif: map['nif']?.toString() ?? '',
+    );
+  }
+
+  /// Lit le document entreprises/{id}.
+  /// Priorité au champ 'infosBoutique' ; sinon, reprend le nom et le
+  /// téléphone saisis à la création de l'entreprise.
+  factory ShopSettings.fromEntreprise(Map<String, dynamic> data) {
+    final infos = data['infosBoutique'];
+    if (infos is Map<String, dynamic>) {
+      return ShopSettings.fromMap(infos);
+    }
+    return ShopSettings(
+      nomBoutique: data['nom']?.toString() ?? 'Ma Boutique',
+      telephone: data['telephone']?.toString() ?? '',
     );
   }
 
@@ -95,13 +114,38 @@ class ShopSettings {
       'ShopSettings(nomBoutique: $nomBoutique, adresse: $adresse, telephone: $telephone, currency: $currency, rccm: $rccm, idNat: $idNat, nif: $nif)';
 }
 
-/// Controller de gestion des paramètres du magasin (Riverpod 2.x)
+/// Paramètres du magasin, synchronisés avec Firestore
+/// (entreprises/{entrepriseId}, champ 'infosBoutique').
+/// Fonctionne hors ligne grâce au cache Firestore.
 class SettingsNotifier extends Notifier<ShopSettings> {
   @override
-  ShopSettings build() => const ShopSettings();
+  ShopSettings build() {
+    final entrepriseId = ref.watch(entrepriseIdProvider);
+    if (entrepriseId.isEmpty) return const ShopSettings();
 
-  /// Met à jour les informations de la boutique et les mentions légales
-  void updateSettings({
+    final abonnement = FirebaseFirestore.instance
+        .collection('entreprises')
+        .doc(entrepriseId)
+        .snapshots()
+        .listen(
+      (doc) {
+        final data = doc.data();
+        if (data != null) {
+          state = ShopSettings.fromEntreprise(data);
+        }
+      },
+      onError: (e) =>
+          debugPrint('[Stockly] Lecture des infos boutique impossible : $e'),
+    );
+    ref.onDispose(abonnement.cancel);
+
+    return const ShopSettings();
+  }
+
+  /// Enregistre les infos du magasin dans Firestore.
+  /// Renvoie true si c'est enregistré (sur le serveur, ou sur le
+  /// téléphone en attendant le réseau), false en cas d'échec.
+  Future<bool> updateSettings({
     required String nom,
     required String adresse,
     required String phone,
@@ -109,16 +153,40 @@ class SettingsNotifier extends Notifier<ShopSettings> {
     required String rccm,
     required String idNat,
     required String nif,
-  }) {
-    state = state.copyWith(
-      nomBoutique: nom,
-      adresse: adresse,
-      telephone: phone,
+  }) async {
+    final nouveau = state.copyWith(
+      nomBoutique: nom.trim(),
+      adresse: adresse.trim(),
+      telephone: phone.trim(),
       currency: currency,
-      rccm: rccm,
-      idNat: idNat,
-      nif: nif,
+      rccm: rccm.trim(),
+      idNat: idNat.trim(),
+      nif: nif.trim(),
     );
+    state = nouveau;
+
+    final entrepriseId = ref.read(entrepriseIdProvider);
+    if (entrepriseId.isEmpty) {
+      debugPrint('[Stockly] Infos boutique non enregistrées : entreprise inconnue');
+      return false;
+    }
+
+    try {
+      final ecriture = FirebaseFirestore.instance
+          .collection('entreprises')
+          .doc(entrepriseId)
+          .set({'infosBoutique': nouveau.toMap()}, SetOptions(merge: true));
+
+      // Hors ligne : Firestore garde l'écriture sur le téléphone
+      // et l'enverra dès que le réseau revient.
+      await ecriture.timeout(const Duration(seconds: 5));
+    } on TimeoutException {
+      debugPrint('[Stockly] Infos boutique gardées sur le téléphone, envoi en attente du réseau');
+    } catch (e) {
+      debugPrint('[Stockly] Erreur enregistrement infos boutique : $e');
+      return false;
+    }
+    return true;
   }
 }
 
