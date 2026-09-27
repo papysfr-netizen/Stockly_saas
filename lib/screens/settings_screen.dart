@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/providers/user_role_provider.dart';
 import '../core/services/excel_service.dart';
+import '../l10n/app_localizations.dart';
 import 'gestion_equipe_screen.dart';
 
 // Importation des widgets modulaires
@@ -32,7 +33,6 @@ class SettingsMaintenanceController extends FamilyAsyncNotifier<void, String> {
 
     state = const AsyncValue.loading();
     try {
-      // CORRIGÉ : 'entreprises' (et non 'organizations')
       final snapshot = await FirebaseFirestore.instance
           .collection('entreprises')
           .doc(entrepriseId)
@@ -49,13 +49,15 @@ class SettingsMaintenanceController extends FamilyAsyncNotifier<void, String> {
     }
   }
 
+  // ⚠️ À REVOIR (tâche I) : fusionne les produits PAR NOM.
+  // Deux articles différents portant le même nom seraient fusionnés
+  // et l'un d'eux supprimé. À baser sur le code-barres avant usage.
   Future<void> nettoyerDoublonsFirestore() async {
     final entrepriseId = arg;
     if (entrepriseId.isEmpty) return;
 
     state = const AsyncValue.loading();
     try {
-      // CORRIGÉ : 'entreprises' (et non 'organizations')
       final snapshot = await FirebaseFirestore.instance
           .collection('entreprises')
           .doc(entrepriseId)
@@ -117,42 +119,6 @@ class SettingsMaintenanceController extends FamilyAsyncNotifier<void, String> {
       rethrow;
     }
   }
-
-  // ATTENTION : volontairement laissé sur l'ancien chemin 'organizations'
-  // (qui ne contient aucune donnée) pour que ce bouton ne puisse RIEN
-  // supprimer tant qu'on n'a pas sécurisé la confirmation dans
-  // maintenance_card.dart.
-  Future<void> viderStock() async {
-    final entrepriseId = arg;
-    if (entrepriseId.isEmpty) return;
-
-    state = const AsyncValue.loading();
-    try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('organizations')
-          .doc(entrepriseId)
-          .collection('produits')
-          .get();
-
-      const int batchSize = 450;
-      for (var i = 0; i < snapshot.docs.length; i += batchSize) {
-        final batch = FirebaseFirestore.instance.batch();
-        final end = (i + batchSize < snapshot.docs.length)
-            ? i + batchSize
-            : snapshot.docs.length;
-
-        for (var j = i; j < end; j++) {
-          batch.delete(snapshot.docs[j].reference);
-        }
-        await batch.commit();
-      }
-
-      state = const AsyncValue.data(null);
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
-      rethrow;
-    }
-  }
 }
 
 // ============================================================================
@@ -164,6 +130,7 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context);
     final userProfile = ref.watch(userProfileProvider).value;
     final entrepriseId = userProfile?.entrepriseId ?? '';
     final controllerState =
@@ -171,8 +138,10 @@ class SettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Paramètres',
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          t.settings,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.blue.shade700,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -217,6 +186,8 @@ class _TeamCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -227,12 +198,11 @@ class _TeamCard extends StatelessWidget {
           backgroundColor: Colors.blueAccent,
           child: Icon(Icons.people, color: Colors.white),
         ),
-        title: const Text(
-          'Gestion de l\'Équipe & Permissions',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        title: Text(
+          t.teamManagement,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
-        subtitle:
-            const Text('Ajouter des collaborateurs et gérer leurs droits'),
+        subtitle: Text(t.teamManagementSubtitle),
         trailing: const Icon(Icons.chevron_right),
         onTap: () {
           Navigator.push(
