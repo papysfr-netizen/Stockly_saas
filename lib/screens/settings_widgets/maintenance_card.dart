@@ -54,55 +54,6 @@ class MaintenanceCard extends ConsumerWidget {
     );
   }
 
-  Future<void> _confirmerEtViderStock(BuildContext context, WidgetRef ref) async {
-    final bool? confirmer = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Attention - Vider le stock'),
-        content: const Text(
-          'Voulez-vous vraiment supprimer TOUS les produits de votre entreprise ? Cette action est irréversible.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Annuler'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Tout supprimer', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmer == true) {
-      try {
-        await ref
-            .read(settingsMaintenanceControllerProvider(entrepriseId).notifier)
-            .viderStock();
-
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Le stock a été entièrement vidé avec succès !'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Erreur lors du nettoyage : $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Card(
@@ -148,21 +99,6 @@ class MaintenanceCard extends ConsumerWidget {
                 onPressed: entrepriseId.isEmpty
                     ? null
                     : () => _confirmerEtNettoyerDoublons(context, ref),
-              ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.delete_forever),
-                label: const Text('Vider tout le stock'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red.shade700,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                onPressed: entrepriseId.isEmpty ? null : () => _confirmerEtViderStock(context, ref),
               ),
             ),
           ],
