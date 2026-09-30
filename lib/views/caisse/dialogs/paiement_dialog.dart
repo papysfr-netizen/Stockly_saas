@@ -1,5 +1,7 @@
 // lib/views/caisse/dialogs/paiement_dialog.dart
 
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -535,6 +537,46 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
     );
   }
 
+  // ================= LECTURE DES PRIX D'ACHAT =================
+
+  /// Lit un document : réseau d'abord (3 s max), sinon copie du téléphone.
+  Future<DocumentSnapshot<Map<String, dynamic>>?> _lireDoc(
+    DocumentReference<Map<String, dynamic>> ref,
+  ) async {
+    try {
+      return await ref.get().timeout(const Duration(seconds: 3));
+    } catch (_) {
+      try {
+        return await ref.get(const GetOptions(source: Source.cache));
+      } catch (_) {
+        return null;
+      }
+    }
+  }
+
+  /// Renvoie le prix d'achat unitaire de chaque produit du panier
+  /// (0 si inconnu).
+  Future<Map<String, double>> _chargerPrixAchat(FirebaseFirestore firestore) async {
+    final Map<String, double> prixAchat = {};
+    for (final item in widget.cart) {
+      if (prixAchat.containsKey(item.id)) continue;
+      final doc = await _lireDoc(
+        firestore
+            .collection('entreprises')
+            .doc(widget.entrepriseId)
+            .collection('produits')
+            .doc(item.id),
+      );
+      final valeur = doc?.data()?['prixAchat'];
+      final double prix = valeur is num ? valeur.toDouble() : 0.0;
+      if (prix <= 0) {
+        debugPrint('[Stockly] Prix d\'achat inconnu pour "${item.nom}" : coût compté à 0');
+      }
+      prixAchat[item.id] = prix;
+    }
+    return prixAchat;
+  }
+
   // ================= ENREGISTREMENT ET COMPTABILISATION =================
   Future<void> _validerVente() async {
     setState(() => isLoading = true);
@@ -562,8 +604,15 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
       final String telephone = _telephoneController.text.trim();
 
       final firestore = FirebaseFirestore.instance;
-      final batch = firestore.batch();
 
+      // 0. Prix d'achat des produits vendus (pour le coût des marchandises)
+      final prixAchat = await _chargerPrixAchat(firestore);
+      double coutMarchandises = 0.0;
+      for (final item in widget.cart) {
+        coutMarchandises += (prixAchat[item.id] ?? 0.0) * item.quantite;
+      }
+
+      final batch = firestore.batch();
       final Timestamp now = Timestamp.now();
 
       // 1. Enregistrement de la Vente
@@ -593,11 +642,13 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         'vendeurId': widget.userId,
         'entrepriseId': widget.entrepriseId,
         'comptabilise': true,
+        'coutMarchandises': coutMarchandises,
         'articles': widget.cart
             .map((item) => {
                   'produitId': item.id,
                   'nom': item.nom,
                   'prixUnitaire': item.prix,
+                  'prixAchat': prixAchat[item.id] ?? 0.0,
                   'quantite': item.quantite,
                   'totalItem': item.prix * item.quantite,
                 })
@@ -606,7 +657,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         'date': now,
       });
 
-      // 2. Écriture Comptable (SYSCOHADA)
+      // 2. Écriture Comptable de la vente (SYSCOHADA)
       final ecritureRef = firestore
           .collection('entreprises')
           .doc(widget.entrepriseId)
@@ -653,6 +704,39 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         'montantEncaisse': verseEffective,
       });
 
+      // 2 bis. Écriture du coût des marchandises vendues
+      // Débit 603100 (charge) / Crédit 311000 (stock)
+      if (coutMarchandises > 0) {
+        final coutRef = firestore
+            .collection('entreprises')
+            .doc(widget.entrepriseId)
+            .collection('ecritures_comptables')
+            .doc('STK-${venteRef.id}');
+
+        batch.set(coutRef, {
+          'id': coutRef.id,
+          'entrepriseId': widget.entrepriseId,
+          'reference': venteRef.id,
+          'description': 'Sortie de stock (coût des marchandises) - $client',
+          'date': now,
+          'lines': [
+            {
+              'accountCode': '603100',
+              'accountLabel': AccountingJournalService.getAccountLabel('603100'),
+              'debit': coutMarchandises,
+              'credit': 0.0,
+            },
+            {
+              'accountCode': '311000',
+              'accountLabel': AccountingJournalService.getAccountLabel('311000'),
+              'debit': 0.0,
+              'credit': coutMarchandises,
+            },
+          ],
+          'montantEncaisse': 0.0,
+        });
+      }
+
       // 3. Enregistrement Créance (si reste > 0)
       if (resteEffective > 0) {
         final creanceRef = firestore
@@ -695,9 +779,21 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         });
       }
 
-      await batch.commit();
+      // Hors ligne : Firestore garde tout sur le téléphone et l'enverra
+      // au retour d'internet. On n'attend pas plus de 5 s le serveur.
+      bool enAttenteReseau = false;
+      try {
+        await batch.commit().timeout(const Duration(seconds: 5));
+      } on TimeoutException {
+        enAttenteReseau = true;
+        debugPrint('[Stockly] Vente ${venteRef.id} gardée sur le téléphone, envoi en attente du réseau');
+      }
 
       if (!mounted) return;
+
+      // Outils récupérés AVANT de fermer le dialogue
+      final messenger = ScaffoldMessenger.of(context);
+      final navigator = Navigator.of(context);
 
       ref.read(cartProvider.notifier).clearCart();
       final entreprise = ref.read(entrepriseProvider);
@@ -759,11 +855,10 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
       if (!mounted) return;
 
       // 7. Fermeture du dialogue de paiement
-      Navigator.pop(context);
+      navigator.pop();
 
       // 8. Ouverture automatique du Bon de Livraison professionnel
-      Navigator.push(
-        context,
+      navigator.push(
         MaterialPageRoute(
           builder: (context) => BonLivraisonScreen(
             entrepriseId: widget.entrepriseId,
@@ -775,10 +870,14 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         ),
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vente enregistrée avec succès !'),
-          backgroundColor: Colors.teal,
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            enAttenteReseau
+                ? 'Vente enregistrée sur le téléphone. Elle sera envoyée dès que internet revient.'
+                : 'Vente enregistrée avec succès !',
+          ),
+          backgroundColor: enAttenteReseau ? Colors.orange.shade800 : Colors.teal,
         ),
       );
     } catch (e) {
