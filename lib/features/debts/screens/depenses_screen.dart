@@ -1,4 +1,4 @@
-// lib/features/depenses/presentation/screens/depenses_screen.dart
+// lib/features/debts/screens/depenses_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,7 +40,6 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
   @override
   void initState() {
     super.initState();
-    // 2 onglets principaux pour structurer comme la gestion des dettes (ex: Vue Globale / Par Catégories)
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
@@ -88,11 +87,36 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
     }).toList();
   }
 
+  /// Ouvre le formulaire : vide pour un ajout, pré-rempli pour une modification.
+  void _ouvrirFormulaire({
+    required String entrepriseId,
+    required String userNom,
+    Depense? depenseExistante,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => _AjoutDepenseBottomSheet(
+        categories: _categories.where((c) => c != 'Toutes').toList(),
+        entrepriseId: entrepriseId,
+        userNom: userNom,
+        getCategoryIcon: _getCategoryIcon,
+        depenseExistante: depenseExistante,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final depensesAsync = ref.watch(depensesStreamProvider);
     final currency = ref.watch(currencyProvider);
     final profile = ref.watch(userProfileProvider).value;
+    final entrepriseId = profile?.entrepriseId ?? '';
+    final userNom = profile?.nom ?? '';
 
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
@@ -118,7 +142,7 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
                 'Charges & Dépenses',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-        backgroundColor: const Color(0xFF1E293B), // Thème bleu nuit élégant identique aux dettes
+        backgroundColor: const Color(0xFF1E293B),
         foregroundColor: Colors.white,
         elevation: 0,
         bottom: TabBar(
@@ -216,12 +240,11 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
 
           return Column(
             children: [
-              // ================= CARTE DE RÉSUMÉ PRINCIPALE (Style Dettes) =================
+              // ================= CARTE DE RÉSUMÉ PRINCIPALE =================
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    // Carte blanche du haut indiquant le total général
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
@@ -250,7 +273,6 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
                             ),
                           ),
                           const SizedBox(height: 10),
-                          // Bandeau coloré en orange vif (identique aux créances)
                           Container(
                             width: double.infinity,
                             padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
@@ -260,10 +282,10 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
                             ),
                             child: Row(
                               children: [
-                                CircleAvatar(
+                                const CircleAvatar(
                                   backgroundColor: Colors.white24,
                                   radius: 18,
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.arrow_downward_rounded,
                                     color: Colors.white,
                                     size: 20,
@@ -288,7 +310,6 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
                       ),
                     ),
 
-                    // Si on est dans l'onglet "Par Catégorie", affichage d'un menu déroulant ou de puces de choix
                     if (_tabController.index == 1) ...[
                       const SizedBox(height: 12),
                       SizedBox(
@@ -318,7 +339,7 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
                 ),
               ),
 
-              // ================= LISTE DES DÉPENSES (Cartes épurées) =================
+              // ================= LISTE DES DÉPENSES =================
               Expanded(
                 child: depensesFiltrees.isEmpty
                     ? Center(
@@ -414,17 +435,34 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
                                   ],
                                   if (profile?.role.isOwner == true) ...[
                                     const Divider(height: 20),
-                                    Align(
-                                      alignment: Alignment.centerRight,
-                                      child: TextButton.icon(
-                                        style: TextButton.styleFrom(
-                                          foregroundColor: Colors.red.shade400,
-                                          padding: EdgeInsets.zero,
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        // ---- NOUVEAU : bouton Modifier ----
+                                        TextButton.icon(
+                                          style: TextButton.styleFrom(
+                                            foregroundColor: Colors.indigo.shade400,
+                                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                                          ),
+                                          icon: const Icon(Icons.edit_outlined, size: 18),
+                                          label: const Text('Modifier', style: TextStyle(fontSize: 12)),
+                                          onPressed: () => _ouvrirFormulaire(
+                                            entrepriseId: entrepriseId,
+                                            userNom: userNom,
+                                            depenseExistante: depense,
+                                          ),
                                         ),
-                                        icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                                        label: const Text('Supprimer', style: TextStyle(fontSize: 12)),
-                                        onPressed: () => _confirmerSuppression(context, depense.id),
-                                      ),
+                                        const SizedBox(width: 8),
+                                        TextButton.icon(
+                                          style: TextButton.styleFrom(
+                                            foregroundColor: Colors.red.shade400,
+                                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                                          ),
+                                          icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                                          label: const Text('Supprimer', style: TextStyle(fontSize: 12)),
+                                          onPressed: () => _confirmerSuppression(context, depense.id),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ],
@@ -446,22 +484,10 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
           'Ajouter une dépense',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            backgroundColor: Colors.white,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-            ),
-            builder: (ctx) => _AjoutDepenseBottomSheet(
-              categories: _categories.where((c) => c != 'Toutes').toList(),
-              entrepriseId: profile?.entrepriseId ?? '',
-              userNom: profile?.nom ?? '',
-              getCategoryIcon: _getCategoryIcon,
-            ),
-          );
-        },
+        onPressed: () => _ouvrirFormulaire(
+          entrepriseId: entrepriseId,
+          userNom: userNom,
+        ),
       ),
     );
   }
@@ -492,18 +518,22 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
   }
 }
 
-// ================= MODAL DE NOUVELLE DÉPENSE =================
+// ================= FORMULAIRE : NOUVELLE DÉPENSE / MODIFICATION =================
 class _AjoutDepenseBottomSheet extends ConsumerStatefulWidget {
   final List<String> categories;
   final String entrepriseId;
   final String userNom;
   final IconData Function(String) getCategoryIcon;
 
+  /// Si renseignée : on modifie cette dépense au lieu d'en créer une.
+  final Depense? depenseExistante;
+
   const _AjoutDepenseBottomSheet({
     required this.categories,
     required this.entrepriseId,
     required this.userNom,
     required this.getCategoryIcon,
+    this.depenseExistante,
   });
 
   @override
@@ -517,13 +547,33 @@ class _AjoutDepenseBottomSheetState extends ConsumerState<_AjoutDepenseBottomShe
   final _noteController = TextEditingController();
 
   late String _categorieSelectionnee;
+  late List<String> _categoriesAffichees;
   DateTime _dateSelectionnee = DateTime.now();
   bool _isLoading = false;
+
+  bool get _estModification => widget.depenseExistante != null;
 
   @override
   void initState() {
     super.initState();
+    _categoriesAffichees = List<String>.from(widget.categories);
     _categorieSelectionnee = widget.categories.first;
+
+    final existante = widget.depenseExistante;
+    if (existante != null) {
+      _titreController.text = existante.titre;
+      _montantController.text = existante.montant == existante.montant.roundToDouble()
+          ? existante.montant.toInt().toString()
+          : existante.montant.toString();
+      _noteController.text = existante.note ?? '';
+      _dateSelectionnee = existante.date;
+
+      // Une ancienne catégorie absente de la liste est conservée telle quelle.
+      if (!_categoriesAffichees.contains(existante.categorie)) {
+        _categoriesAffichees.add(existante.categorie);
+      }
+      _categorieSelectionnee = existante.categorie;
+    }
   }
 
   @override
@@ -537,11 +587,14 @@ class _AjoutDepenseBottomSheetState extends ConsumerState<_AjoutDepenseBottomShe
   Future<void> _soumettre() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final parseableMontant = _montantController.text.replaceAll(',', '.');
+    final parseableMontant = _montantController.text.trim().replaceAll(',', '.');
     final montant = double.tryParse(parseableMontant);
 
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
     if (montant == null || montant <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(content: Text('Veuillez saisir un montant valide (> 0)')),
       );
       return;
@@ -549,29 +602,95 @@ class _AjoutDepenseBottomSheetState extends ConsumerState<_AjoutDepenseBottomShe
 
     setState(() => _isLoading = true);
 
+    final note = _noteController.text.trim().isEmpty ? null : _noteController.text.trim();
+    final repo = ref.read(depenseRepositoryProvider);
+
     try {
-      final nouvelleDepense = Depense(
-        id: '',
-        entrepriseId: widget.entrepriseId,
-        titre: _titreController.text.trim(),
-        montant: montant,
-        categorie: _categorieSelectionnee,
-        date: _dateSelectionnee,
-        note: _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
-        enregistrePar: widget.userNom,
-      );
+      final existante = widget.depenseExistante;
 
-      await ref.read(depenseRepositoryProvider).ajouterDepense(nouvelleDepense);
-
-      if (mounted) Navigator.pop(context);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur lors de l\'enregistrement : $e')),
+      if (existante != null) {
+        // ---- MODIFICATION : même id, même auteur, même moyen de paiement ----
+        final modifiee = existante.copyWith(
+          entrepriseId: existante.entrepriseId.isNotEmpty
+              ? existante.entrepriseId
+              : widget.entrepriseId,
+          titre: _titreController.text.trim(),
+          montant: montant,
+          categorie: _categorieSelectionnee,
+          date: _dateSelectionnee,
+          note: note,
         );
+        await repo.modifierDepense(modifiee);
+      } else {
+        // ---- AJOUT ----
+        final nouvelleDepense = Depense(
+          id: '',
+          entrepriseId: widget.entrepriseId,
+          titre: _titreController.text.trim(),
+          montant: montant,
+          categorie: _categorieSelectionnee,
+          date: _dateSelectionnee,
+          note: note,
+          enregistrePar: widget.userNom,
+        );
+        await repo.ajouterDepense(nouvelleDepense);
       }
+
+      navigator.pop();
+      messenger.showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.green,
+          content: Text(_estModification ? 'Dépense modifiée !' : 'Dépense enregistrée !'),
+        ),
+      );
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text('Erreur lors de l\'enregistrement : $e'),
+        ),
+      );
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _choisirDate() async {
+    final maintenant = DateTime.now();
+    final finAujourdhui =
+        DateTime(maintenant.year, maintenant.month, maintenant.day, 23, 59);
+    final initiale =
+        _dateSelectionnee.isAfter(finAujourdhui) ? maintenant : _dateSelectionnee;
+
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: initiale,
+      firstDate: DateTime(2020),
+      lastDate: finAujourdhui,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Colors.orange.shade800,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (pickedDate != null) {
+      setState(() {
+        // On garde l'heure d'origine (sinon elle repasse à minuit).
+        _dateSelectionnee = DateTime(
+          pickedDate.year,
+          pickedDate.month,
+          pickedDate.day,
+          _dateSelectionnee.hour,
+          _dateSelectionnee.minute,
+        );
+      });
     }
   }
 
@@ -602,9 +721,9 @@ class _AjoutDepenseBottomSheetState extends ConsumerState<_AjoutDepenseBottomShe
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Enregistrer une Dépense',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              Text(
+                _estModification ? 'Modifier la dépense' : 'Enregistrer une Dépense',
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -623,7 +742,7 @@ class _AjoutDepenseBottomSheetState extends ConsumerState<_AjoutDepenseBottomShe
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) return 'Le montant est requis';
-                  final parsed = double.tryParse(val.replaceAll(',', '.'));
+                  final parsed = double.tryParse(val.trim().replaceAll(',', '.'));
                   if (parsed == null || parsed <= 0) return 'Montant invalide';
                   return null;
                 },
@@ -642,7 +761,7 @@ class _AjoutDepenseBottomSheetState extends ConsumerState<_AjoutDepenseBottomShe
               Wrap(
                 spacing: 8,
                 runSpacing: 4,
-                children: widget.categories.map((cat) {
+                children: _categoriesAffichees.map((cat) {
                   final isSelected = _categorieSelectionnee == cat;
                   return ChoiceChip(
                     avatar: Icon(
@@ -667,31 +786,7 @@ class _AjoutDepenseBottomSheetState extends ConsumerState<_AjoutDepenseBottomShe
               ),
               const SizedBox(height: 16),
               InkWell(
-                onTap: () async {
-                  final pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: _dateSelectionnee,
-                    firstDate: DateTime(2020),
-                    lastDate: DateTime.now(),
-                    builder: (context, child) {
-                      return Theme(
-                        data: Theme.of(context).copyWith(
-                          colorScheme: ColorScheme.light(
-                            primary: Colors.orange.shade800,
-                            onPrimary: Colors.white,
-                            onSurface: Colors.black,
-                          ),
-                        ),
-                        child: child!,
-                      );
-                    },
-                  );
-                  if (pickedDate != null) {
-                    setState(() {
-                      _dateSelectionnee = pickedDate;
-                    });
-                  }
-                },
+                onTap: _choisirDate,
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                   decoration: BoxDecoration(
@@ -734,9 +829,11 @@ class _AjoutDepenseBottomSheetState extends ConsumerState<_AjoutDepenseBottomShe
                   onPressed: _isLoading ? null : _soumettre,
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          'Enregistrer la dépense',
-                          style: TextStyle(
+                      : Text(
+                          _estModification
+                              ? 'Enregistrer les modifications'
+                              : 'Enregistrer la dépense',
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
