@@ -1,36 +1,204 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/depense.dart';
 import 'user_role_provider.dart';
 
-/// Repository gérant les opérations CRUD Firestore pour les dépenses
+/// Repository gérant les opérations Firestore pour les dépenses.
+/// Chaque dépense crée aussi son écriture comptable (SYSCOHADA) :
+///   Débit  : compte de charge (classe 6) selon la catégorie
+///   Crédit : caisse 571000 (ou banque 521000)
 class DepenseRepository {
   final FirebaseFirestore _firestore;
+
+  /// Délai au-delà duquel on considère que l'on est hors ligne :
+  /// Firestore garde alors l'écriture et l'envoie au retour du réseau.
+  static const Duration _delai = Duration(seconds: 5);
 
   DepenseRepository({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
-  /// Ajoute une nouvelle dépense et lui assigne l'ID généré par Firestore
+  // ---------------------------------------------------------------------------
+  // Outils internes
+  // ---------------------------------------------------------------------------
+
+  /// Référence de l'écriture comptable liée à une dépense : DEP-{idDepense}
+  DocumentReference<Map<String, dynamic>> _refEcriture(
+      String entrepriseId, String depenseId) {
+    return _firestore
+        .collection('entreprises')
+        .doc(entrepriseId)
+        .collection('ecritures_comptables')
+        .doc('DEP-$depenseId');
+  }
+
+  /// Met un texte en minuscules et retire les accents (pour comparer).
+  static String _simplifier(String texte) {
+    const avec = 'àâäáãéèêëíìîïóòôöõúùûüçñ';
+    const sans = 'aaaaaeeeeiiiiooooouuuucn';
+    var resultat = texte.toLowerCase();
+    for (var i = 0; i < avec.length; i++) {
+      resultat = resultat.replaceAll(avec[i], sans[i]);
+    }
+    return resultat;
+  }
+
+  /// Compte de charge (classe 6) selon la catégorie de la dépense.
+  static MapEntry<String, String> _compteCharge(String categorie) {
+    final c = _simplifier(categorie);
+    if (c.contains('electric') || c.contains('eau') || c.contains('energie')) {
+      return const MapEntry('605000', 'Autres achats (eau, électricité)');
+    }
+    if (c.contains('transport') || c.contains('carbur')) {
+      return const MapEntry('618000', 'Autres frais de transport');
+    }
+    if (c.contains('loyer') || c.contains('location')) {
+      return const MapEntry('622000', 'Locations et charges locatives');
+    }
+    if (c.contains('salaire') || c.contains('personnel') || c.contains('paie')) {
+      return const MapEntry('661000', 'Rémunérations du personnel');
+    }
+    if (c.contains('telephon') ||
+        c.contains('internet') ||
+        c.contains('communication')) {
+      return const MapEntry('628000', 'Frais de télécommunications');
+    }
+    if (c.contains('entretien') ||
+        c.contains('reparation') ||
+        c.contains('maintenance')) {
+      return const MapEntry('624000', 'Entretien, réparations et maintenance');
+    }
+    if (c.contains('impot') || c.contains('taxe')) {
+      return const MapEntry('640000', 'Impôts et taxes');
+    }
+    return const MapEntry('638000', 'Autres charges externes');
+  }
+
+  /// Compte de trésorerie selon le moyen de paiement.
+  static MapEntry<String, String> _compteTresorerie(String methodePaiement) {
+    final m = _simplifier(methodePaiement);
+    if (m.contains('banq') ||
+        m.contains('bank') ||
+        m.contains('virement') ||
+        m.contains('cheque')) {
+      return const MapEntry('521000', 'Banques');
+    }
+    return const MapEntry('571000', 'Caisse');
+  }
+
+  /// Contenu de l'écriture comptable d'une dépense
+  /// (même format que les écritures de la caisse).
+  static Map<String, dynamic> _ecriture(Depense d) {
+    final charge = _compteCharge(d.categorie);
+    final tresorerie = _compteTresorerie(d.methodePaiement);
+    return {
+      'id': 'DEP-${d.id}',
+      'entrepriseId': d.entrepriseId,
+      'reference': d.id,
+      'type': 'depense',
+      'description': 'Dépense : ${d.titre} (${d.categorie})',
+      'date': d.date,
+      'lines': [
+        {
+          'accountCode': charge.key,
+          'accountLabel': charge.value,
+          'debit': d.montant,
+          'credit': 0.0,
+        },
+        {
+          'accountCode': tresorerie.key,
+          'accountLabel': tresorerie.value,
+          'debit': 0.0,
+          'credit': d.montant,
+        },
+      ],
+      'montantEncaisse': 0.0,
+    };
+  }
+
+  /// Une dépense peut être comptabilisée si elle a une entreprise et un montant.
+  static bool _peutComptabiliser(Depense d) =>
+      d.entrepriseId.isNotEmpty && d.montant > 0;
+
+  /// Envoie le lot d'écritures. Hors ligne : enregistré sur le téléphone,
+  /// envoyé automatiquement au retour du réseau.
+  Future<void> _valider(WriteBatch batch) async {
+    try {
+      await batch.commit().timeout(_delai);
+    } on TimeoutException {
+      debugPrint(
+          '[Stockly] Hors ligne : dépense gardée sur le téléphone, envoi au retour du réseau.');
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Opérations publiques
+  // ---------------------------------------------------------------------------
+
+  /// Ajoute une nouvelle dépense + son écriture comptable.
   Future<void> ajouterDepense(Depense depense) async {
     final docRef = _firestore.collection('depenses').doc();
-    final nouvelleDepense = depense.copyWith(id: docRef.id);
-    
-    await docRef.set(nouvelleDepense.toJson());
+    final avecId = depense.copyWith(id: docRef.id);
+    final comptabiliser = _peutComptabiliser(avecId);
+    final nouvelleDepense = avecId.copyWith(comptabilise: comptabiliser);
+
+    final batch = _firestore.batch();
+    batch.set(docRef, nouvelleDepense.toJson());
+    if (comptabiliser) {
+      batch.set(
+        _refEcriture(nouvelleDepense.entrepriseId, nouvelleDepense.id),
+        _ecriture(nouvelleDepense),
+      );
+    }
+    await _valider(batch);
   }
 
-  /// Met à jour une dépense existante
+  /// Met à jour une dépense existante + son écriture comptable.
   Future<void> modifierDepense(Depense depense) async {
     if (depense.id.isEmpty) return;
-    await _firestore
-        .collection('depenses')
-        .doc(depense.id)
-        .update(depense.toJson());
+
+    final comptabiliser = _peutComptabiliser(depense);
+    final maj = depense.copyWith(comptabilise: comptabiliser);
+
+    final batch = _firestore.batch();
+    batch.update(_firestore.collection('depenses').doc(maj.id), maj.toJson());
+
+    if (comptabiliser) {
+      batch.set(_refEcriture(maj.entrepriseId, maj.id), _ecriture(maj));
+    } else if (maj.entrepriseId.isNotEmpty) {
+      batch.delete(_refEcriture(maj.entrepriseId, maj.id));
+    }
+    await _valider(batch);
   }
 
-  /// Supprime une dépense via son identifiant
+  /// Supprime une dépense + son écriture comptable.
   Future<void> supprimerDepense(String id) async {
     if (id.isEmpty) return;
-    await _firestore.collection('depenses').doc(id).delete();
+    final depenseRef = _firestore.collection('depenses').doc(id);
+
+    // On lit la dépense pour connaître son entreprise (serveur, sinon cache).
+    String entrepriseId = '';
+    try {
+      final snap = await depenseRef.get().timeout(_delai);
+      entrepriseId = snap.data()?['entrepriseId']?.toString() ?? '';
+    } catch (_) {
+      try {
+        final snap =
+            await depenseRef.get(const GetOptions(source: Source.cache));
+        entrepriseId = snap.data()?['entrepriseId']?.toString() ?? '';
+      } catch (_) {
+        // Introuvable : on supprime au moins la dépense.
+      }
+    }
+
+    final batch = _firestore.batch();
+    batch.delete(depenseRef);
+    if (entrepriseId.isNotEmpty) {
+      batch.delete(_refEcriture(entrepriseId, id));
+    }
+    await _valider(batch);
   }
 }
 
@@ -41,8 +209,8 @@ final depenseRepositoryProvider = Provider<DepenseRepository>((ref) {
 
 /// StreamProvider écoutant en temps réel les dépenses de l'entreprise courante
 final depensesStreamProvider = StreamProvider<List<Depense>>((ref) {
-  // Optimisation Riverpod : On écoute uniquement la propriété 'entrepriseId'.
-  // Le flux ne sera pas réinitialisé si d'autres champs non pertinents du profil changent.
+  // On écoute uniquement 'entrepriseId' : le flux ne se relance pas
+  // si d'autres champs du profil changent.
   final entrepriseId = ref.watch(
     userProfileProvider.select(
       (asyncProfile) => asyncProfile.value?.entrepriseId ?? '',
