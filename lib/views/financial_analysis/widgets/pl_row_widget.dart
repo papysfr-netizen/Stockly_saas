@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+/// Une ligne du Compte de résultat (Ventes, Coût d'achat, Marge, Dépenses).
+/// Les couleurs suivent le thème : lisibles sur fond clair comme sur fond sombre.
 class PLRowWidget extends StatelessWidget {
   final IconData icon;
   final Color color;
@@ -24,6 +26,22 @@ class PLRowWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final sombre = Theme.of(context).brightness == Brightness.dark;
+
+    // Couleur du texte principal : foncé sur fond clair, clair sur fond sombre.
+    final couleurTexte = scheme.onSurface;
+
+    // Couleur du montant
+    final Color couleurMontant;
+    if (isNegative) {
+      couleurMontant = sombre ? Colors.redAccent : Colors.red.shade700;
+    } else if (isBold) {
+      couleurMontant = sombre ? Colors.tealAccent : Colors.teal.shade700;
+    } else {
+      couleurMontant = couleurTexte;
+    }
+
     return ListTile(
       onTap: onTap,
       leading: CircleAvatar(
@@ -33,7 +51,7 @@ class PLRowWidget extends StatelessWidget {
       title: Text(
         title,
         style: TextStyle(
-          color: Colors.white,
+          color: couleurTexte,
           fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
           fontSize: 14,
         ),
@@ -46,12 +64,15 @@ class PLRowWidget extends StatelessWidget {
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 14,
-              color: isNegative
-                  ? Colors.redAccent
-                  : (isBold ? Colors.tealAccent : Colors.white),
+              color: couleurMontant,
             ),
           ),
-          if (onTap != null) const Icon(Icons.chevron_right, color: Colors.white38, size: 18),
+          if (onTap != null)
+            Icon(
+              Icons.chevron_right,
+              color: couleurTexte.withValues(alpha: 0.4),
+              size: 18,
+            ),
         ],
       ),
     );

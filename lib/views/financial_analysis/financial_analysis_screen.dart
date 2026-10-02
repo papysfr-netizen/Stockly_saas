@@ -483,17 +483,17 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                                                     leading: const Icon(Icons.shopping_bag, color: Colors.teal),
                                                     title: Text(
                                                       '${item['nom']} (x${item['qte']})',
-                                                      style: const TextStyle(color: Color(0xFF1E293B)),
+                                                      style: const TextStyle(color: Colors.white),
                                                     ),
                                                     subtitle: item['date'] != null
                                                         ? Text(
                                                             '${(item['date'] as DateTime).day}/${(item['date'] as DateTime).month}/${(item['date'] as DateTime).year}',
-                                                            style: TextStyle(color: Colors.grey.shade600),
+                                                            style: TextStyle(color: Colors.grey.shade400),
                                                           )
                                                         : null,
                                                     trailing: Text(
                                                       '${fmt(item['total'] as double)} $currency',
-                                                      style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                                                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
                                                     ),
                                                   );
                                                 }).toList(),
@@ -521,11 +521,11 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                                                     leading: Icon(Icons.inventory, color: Colors.orange.shade800),
                                                     title: Text(
                                                       '${item['nom']} (x${item['qte']})',
-                                                      style: const TextStyle(color: Color(0xFF1E293B)),
+                                                      style: const TextStyle(color: Colors.white),
                                                     ),
                                                     subtitle: Text(
                                                       'Prix d\'achat unitaire : ${fmt(unitCost)} $currency',
-                                                      style: TextStyle(color: Colors.grey.shade600),
+                                                      style: TextStyle(color: Colors.grey.shade400),
                                                     ),
                                                     trailing: Text(
                                                       '-${fmt(item['total'] as double)} $currency',
@@ -560,11 +560,11 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                                                     ),
                                                     title: Text(
                                                       '${item['nom']} (x${item['qte']})',
-                                                      style: const TextStyle(color: Color(0xFF1E293B)),
+                                                      style: const TextStyle(color: Colors.white),
                                                     ),
                                                     subtitle: Text(
                                                       'Vente: ${fmt((item['totalVente'] as num).toDouble())} | Achat: ${fmt((item['totalAchat'] as num).toDouble())}',
-                                                      style: TextStyle(color: Colors.grey.shade600),
+                                                      style: TextStyle(color: Colors.grey.shade400),
                                                     ),
                                                     trailing: Text(
                                                       '${fmt(m)} $currency',
@@ -598,7 +598,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                                                     leading: const Icon(Icons.money_off, color: Colors.redAccent),
                                                     title: Text(
                                                       entry.key,
-                                                      style: const TextStyle(color: Color(0xFF1E293B)),
+                                                      style: const TextStyle(color: Colors.white),
                                                     ),
                                                     trailing: Text(
                                                       '-${fmt(entry.value)} $currency',
