@@ -4,24 +4,30 @@ service cloud.firestore {
 
     // ---------- Fonctions utiles ----------
 
-    // L'utilisateur est connecté
     function estConnecte() {
       return request.auth != null;
     }
 
-    // Le profil users/{uid} de l'utilisateur existe
     function profilExiste() {
       return exists(/databases/$(database)/documents/users/$(request.auth.uid));
     }
 
-    // L'entreprise à laquelle l'utilisateur appartient
-    function monEntreprise() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.entrepriseId;
+    function monProfil() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
 
-    // L'utilisateur est membre de cette entreprise
+    function monEntreprise() {
+      return monProfil().entrepriseId;
+    }
+
     function estMembre(entId) {
       return estConnecte() && profilExiste() && monEntreprise() == entId;
+    }
+
+    // L'utilisateur est le propriétaire (ownerId) de cette entreprise
+    function estProprietaireDe(entId) {
+      return estConnecte()
+        && get(/databases/$(database)/documents/entreprises/$(entId)).data.ownerId == request.auth.uid;
     }
 
     // L'entreprise est en train d'être créée par cet utilisateur (inscription)
@@ -32,14 +38,42 @@ service cloud.firestore {
 
     // ---------- Profils utilisateurs ----------
     match /users/{userId} {
-      // Chacun ne lit que son propre profil
-      allow read: if estConnecte() && request.auth.uid == userId;
-      // Création seulement lors de l'inscription de sa propre entreprise
-      allow create: if estConnecte() && request.auth.uid == userId
-        && creeParMoi(request.resource.data.entrepriseId);
-      // Personne ne peut changer lui-même son rôle ou son entreprise
-      allow update: if estConnecte() && request.auth.uid == userId
-        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'entrepriseId', 'uid']);
+
+      // Lire : son propre profil, ou les membres de SA boutique s'il en est le propriétaire
+      allow read: if estConnecte() && (
+        request.auth.uid == userId
+        || estProprietaireDe(resource.data.entrepriseId)
+      );
+
+      // Créer :
+      //  - son propre profil lors de l'inscription de sa boutique ;
+      //  - OU (propriétaire) le profil d'un Gérant / Caissier de SA boutique.
+      allow create: if estConnecte() && (
+        (request.auth.uid == userId && creeParMoi(request.resource.data.entrepriseId))
+        || (
+          estProprietaireDe(request.resource.data.entrepriseId)
+          && request.resource.data.role in ['gerant', 'caissier']
+        )
+      );
+
+      // Modifier :
+      //  - son propre profil, sans toucher au rôle ni à l'entreprise ;
+      //  - OU (propriétaire) un membre de SA boutique : jamais en Propriétaire,
+      //    jamais vers une autre boutique, jamais le compte du propriétaire.
+      allow update: if estConnecte() && (
+        (
+          request.auth.uid == userId
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'entrepriseId', 'uid'])
+        )
+        || (
+          estProprietaireDe(resource.data.entrepriseId)
+          && resource.data.role != 'owner'
+          && request.resource.data.entrepriseId == resource.data.entrepriseId
+          && request.resource.data.role in ['gerant', 'caissier']
+        )
+      );
+
+      // Supprimer : jamais (on désactive un employé à la place)
       allow delete: if false;
     }
 
@@ -47,11 +81,9 @@ service cloud.firestore {
     match /entreprises/{entId} {
       allow read: if estMembre(entId);
       allow create: if estConnecte() && request.resource.data.ownerId == request.auth.uid;
-      // On ne peut pas changer le propriétaire
       allow update: if estMembre(entId) && request.resource.data.ownerId == resource.data.ownerId;
       allow delete: if false;
 
-      // Produits, ventes, créances, écritures, boutiques...
       match /{sousDocument=**} {
         allow read: if estMembre(entId);
         allow write: if estMembre(entId) || creeParMoi(entId);
@@ -67,11 +99,9 @@ service cloud.firestore {
       allow delete: if estConnecte() && resource.data.entrepriseId == monEntreprise();
     }
 
-    // ---------- Ancien chemin (écran Équipe) ----------
+    // ---------- Ancien chemin (écran Équipe de démonstration) ----------
     match /organizations/{entId}/{document=**} {
       allow read, write: if estMembre(entId);
     }
-
-    // Tout le reste est refusé par défaut
   }
 }
