@@ -316,7 +316,6 @@ class _AddProductModalState extends State<AddProductModal> {
         'prixVente': prixVenteVal,
         'prix': prixVenteVal,
         'quantite': quantiteVal,
-        'stock': quantiteVal,
         'seuilAlerte': _lireEntier(_seuilAlerteController.text) ?? 5,
         'imageUrl': _imageUrlController.text.trim(),
         'entrepriseId': entrepriseId,
