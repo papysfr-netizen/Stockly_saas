@@ -5,6 +5,14 @@ import 'package:flutter/material.dart';
 import '../services/packing_list_service.dart';
 import 'quick_scanner_widget.dart';
 
+/// Résultat renvoyé quand l'utilisateur choisit d'ouvrir un produit
+/// qui possède déjà le code-barres scanné ou saisi.
+class _ProduitExistant {
+  final String id;
+  final Map<String, dynamic> donnees;
+  const _ProduitExistant(this.id, this.donnees);
+}
+
 class AddProductModal extends StatefulWidget {
   final String entrepriseId;
   final Map<String, dynamic>? product;
@@ -26,7 +34,7 @@ class AddProductModal extends StatefulWidget {
     String? id,
     Function(Map<String, dynamic> productData)? onProductAdded,
   }) async {
-    await showModalBottomSheet(
+    final resultat = await showModalBottomSheet<Object?>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -37,6 +45,21 @@ class AddProductModal extends StatefulWidget {
         onProductAdded: onProductAdded,
       ),
     );
+
+    // L'utilisateur a choisi d'ouvrir le produit qui a déjà ce code-barres :
+    // on rouvre le formulaire en mode « Modifier ».
+    if (resultat is _ProduitExistant && context.mounted) {
+      // CORRECTIF : on attend que l'ancien formulaire ait fini de se fermer.
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (!context.mounted) return;
+      await show(
+        context,
+        entrepriseId: entrepriseId,
+        product: resultat.donnees,
+        id: resultat.id,
+        onProductAdded: onProductAdded,
+      );
+    }
   }
 
   @override
@@ -163,13 +186,95 @@ class _AddProductModalState extends State<AddProductModal> {
     );
   }
 
+  // ================= CODE-BARRES DÉJÀ CONNU ? =================
+
+  /// Cherche un AUTRE produit de l'entreprise qui a déjà ce code-barres.
+  /// En ligne : serveur (5 s max). Hors ligne : mémoire du téléphone.
+  Future<QueryDocumentSnapshot<Map<String, dynamic>>?> _chercherProduitParCode(
+      String code) async {
+    final entId = widget.entrepriseId.trim();
+    final codePropre = code.trim();
+    if (entId.isEmpty || codePropre.isEmpty) return null;
+
+    final requete = FirebaseFirestore.instance
+        .collection('entreprises')
+        .doc(entId)
+        .collection('produits')
+        .where('codeBarre', isEqualTo: codePropre)
+        .limit(5);
+
+    QuerySnapshot<Map<String, dynamic>> resultat;
+    try {
+      resultat = await requete.get().timeout(const Duration(seconds: 5));
+    } catch (_) {
+      try {
+        resultat = await requete.get(const GetOptions(source: Source.cache));
+      } catch (e) {
+        debugPrint('[Stockly] Vérification du code-barres impossible : $e');
+        return null;
+      }
+    }
+
+    for (final doc in resultat.docs) {
+      // En modification, le produit lui-même n'est pas un doublon.
+      if (isEditing && doc.id == widget.id) continue;
+      return doc;
+    }
+    return null;
+  }
+
+  /// Affiche « Code-barres déjà utilisé ».
+  /// Renvoie true si l'utilisateur a choisi d'ouvrir le produit existant.
+  Future<bool> _proposerProduitExistant(
+      QueryDocumentSnapshot<Map<String, dynamic>> doc) async {
+    final data = doc.data();
+    final nom = (data['nom'] ?? 'Produit sans nom').toString();
+    final stock = data['quantite'] ?? data['stock'] ?? 0;
+    final prixBrut = data['prixVente'] ?? data['prix'] ?? 0;
+    final prix = prixBrut is num ? prixBrut.toStringAsFixed(2) : prixBrut.toString();
+
+    final ouvrir = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: Icon(Icons.info_outline_rounded, color: Colors.orange.shade800, size: 36),
+        title: const Text('Code-barres déjà utilisé'),
+        content: Text(
+          'Ce code appartient déjà à :\n\n'
+          '« $nom »\n'
+          'Stock : $stock  •  Prix : $prix \$\n\n'
+          'Voulez-vous ouvrir ce produit pour le modifier '
+          '(par exemple ajouter du stock) ?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton.icon(
+            onPressed: () => Navigator.pop(ctx, true),
+            icon: const Icon(Icons.edit_rounded, size: 18),
+            label: const Text('Ouvrir ce produit'),
+          ),
+        ],
+      ),
+    );
+
+    if (ouvrir == true && mounted) {
+      // CORRECTIF : on laisse la fenêtre finir de se fermer
+      // avant de fermer le formulaire.
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (!mounted) return false;
+      Navigator.of(context).pop(_ProduitExistant(doc.id, data));
+      return true;
+    }
+    return false;
+  }
+
   // ================= ENREGISTREMENT (RÉSISTANT AUX COUPURES) =================
 
   Future<void> _sauvegarderProduit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // On récupère ces outils AVANT toute attente, pour pouvoir
-    // les utiliser même après la fermeture du formulaire.
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
 
@@ -186,8 +291,19 @@ class _AddProductModalState extends State<AddProductModal> {
 
     setState(() => isLoading = true);
 
+    // Anti-doublon : ce code-barres appartient-il déjà à un autre produit ?
+    final codeBarreVal = _codeBarresController.text.trim();
+    if (codeBarreVal.isNotEmpty) {
+      final existant = await _chercherProduitParCode(codeBarreVal);
+      if (!mounted) return;
+      if (existant != null) {
+        setState(() => isLoading = false);
+        await _proposerProduitExistant(existant);
+        return; // rien n'est enregistré
+      }
+    }
+
     try {
-      final codeBarreVal = _codeBarresController.text.trim();
       final prixVenteVal = _lireDecimal(_prixVenteController.text) ?? 0.0;
       final quantiteVal = _lireEntier(_quantiteController.text) ?? 0;
 
@@ -207,13 +323,11 @@ class _AddProductModalState extends State<AddProductModal> {
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
-      // Un seul emplacement : entreprises/{id}/produits
       final produitsRef = FirebaseFirestore.instance
           .collection('entreprises')
           .doc(entrepriseId)
           .collection('produits');
 
-      // L'identifiant est créé sur le téléphone : pas besoin d'internet.
       final docRef = isEditing ? produitsRef.doc(widget.id!) : produitsRef.doc();
 
       if (!isEditing) {
@@ -224,9 +338,6 @@ class _AddProductModalState extends State<AddProductModal> {
           ? docRef.set(productData, SetOptions(merge: true))
           : docRef.set(productData);
 
-      // Firestore garde l'écriture sur le téléphone tout de suite.
-      // Si le serveur ne répond pas en 5 s (coupure réseau), on n'attend
-      // pas : l'envoi se fera automatiquement quand internet reviendra.
       bool enAttenteReseau = false;
       try {
         await ecriture.timeout(const Duration(seconds: 5));
@@ -274,11 +385,11 @@ class _AddProductModalState extends State<AddProductModal> {
       if (mounted) setState(() => isLoading = false);
     }
   }
+
   // ================= SCANNER =================
 
-  /// Ouvre le scanner et attend le code.
-  /// Le scanner se ferme TOUT SEUL en renvoyant le code :
-  /// ici on ne ferme rien, sinon on fermerait aussi le formulaire.
+  /// Ouvre le scanner et attend le code (le scanner se ferme tout seul).
+  /// Si le code appartient déjà à un produit, on propose de l'ouvrir.
   Future<void> _ouvrirScanner() async {
     final code = await Navigator.of(context).push<String>(
       MaterialPageRoute<String>(
@@ -288,8 +399,23 @@ class _AddProductModalState extends State<AddProductModal> {
 
     if (!mounted || code == null || code.trim().isEmpty) return;
 
-    setState(() => _codeBarresController.text = code.trim());
+    // CORRECTIF : on attend que le scanner ait fini de se fermer.
+    await Future.delayed(const Duration(milliseconds: 350));
+    if (!mounted) return;
+
+    final codePropre = code.trim();
+    setState(() => _codeBarresController.text = codePropre);
+
+    final existant = await _chercherProduitParCode(codePropre);
+    if (!mounted || existant == null) return;
+
+    final ouvert = await _proposerProduitExistant(existant);
+    if (!ouvert && mounted) {
+      // L'utilisateur a refusé : on retire le code pour éviter un doublon.
+      setState(() => _codeBarresController.clear());
+    }
   }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -606,7 +732,7 @@ class _AddProductModalState extends State<AddProductModal> {
                           final isNarrow = constraints.maxWidth < 300;
                           final quantiteField = _buildInputField(
                             controller: _quantiteController,
-                            label: 'Stock initial *',
+                            label: isEditing ? 'Stock *' : 'Stock initial *',
                             hint: '1',
                             icon: Icons.inventory_2_outlined,
                             keyboardType: TextInputType.number,

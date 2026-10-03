@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -35,15 +36,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.dispose();
   }
 
-  Future<void> _supprimerProduit(String id) async {
+  /// Supprime un produit de l'entreprise : entreprises/{id}/produits/{produitId}.
+  /// Hors ligne : la suppression est gardée sur le téléphone
+  /// et envoyée automatiquement au retour du réseau.
+  Future<void> _supprimerProduit(String id, String nom) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final entrepriseId = widget.currentUser.entrepriseId;
+    if (entrepriseId.isEmpty || id.isEmpty) return;
+
     try {
       await FirebaseFirestore.instance
+          .collection('entreprises')
+          .doc(entrepriseId)
           .collection('produits')
           .doc(id)
-          .delete();
+          .delete()
+          .timeout(const Duration(seconds: 5));
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('« $nom » supprimé.'),
+          backgroundColor: Colors.green.shade700,
+        ),
+      );
+    } on TimeoutException {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('« $nom » supprimé sur le téléphone. Envoi dès le retour d\'internet.'),
+          backgroundColor: Colors.orange.shade800,
+        ),
+      );
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: Text('Erreur lors de la suppression : $e'),
           backgroundColor: Colors.red,
@@ -366,26 +389,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   context: context,
                                   builder: (ctx) => AlertDialog(
                                     title: const Text('Supprimer le produit'),
-                                    content: const Text(
-                                        'Voulez-vous vraiment supprimer ce produit ?'),
+                                    content: Text(
+                                        'Voulez-vous vraiment supprimer « ${produit.nom} » ?\n\nCette action est définitive.'),
                                     actions: [
                                       TextButton(
                                         onPressed: () => Navigator.pop(ctx, false),
                                         child: const Text('Annuler'),
                                       ),
                                       ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.red),
+                                        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                                         onPressed: () => Navigator.pop(ctx, true),
-                                        child: const Text('Supprimer',
-                                            style: TextStyle(color: Colors.white)),
+                                        child: const Text('Supprimer', style: TextStyle(color: Colors.white)),
                                       ),
                                     ],
                                   ),
                                 );
-                                return confirm ?? false;
+                                if (confirm == true) {
+                                  await _supprimerProduit(produit.id, produit.nom);
+                                }
+                                // On ne retire jamais la carte nous-mêmes : la liste se met à jour
+                                // toute seule quand la suppression est faite (plus d'écran rouge).
+                                return false;
                               },
-                              onDismissed: (_) => _supprimerProduit(produit.id),
                               child: produitWidget,
                             );
                           }
