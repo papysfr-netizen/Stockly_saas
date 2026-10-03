@@ -557,23 +557,38 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
   /// Renvoie le prix d'achat unitaire de chaque produit du panier
   /// (0 si inconnu).
   Future<Map<String, double>> _chargerPrixAchat(FirebaseFirestore firestore) async {
-    final Map<String, double> prixAchat = {};
-    for (final item in widget.cart) {
-      if (prixAchat.containsKey(item.id)) continue;
-      final doc = await _lireDoc(
-        firestore
-            .collection('entreprises')
-            .doc(widget.entrepriseId)
-            .collection('produits')
-            .doc(item.id),
-      );
+    // RAPIDE : 1) mémoire du téléphone (instantané) ;
+    // 2) serveur seulement si le produit n'y est pas ;
+    // tous les produits sont lus EN MÊME TEMPS.
+    final ids = widget.cart.map((item) => item.id).toSet().toList();
+
+    Future<MapEntry<String, double>> lirePrix(String id) async {
+      final ref = firestore
+          .collection('entreprises')
+          .doc(widget.entrepriseId)
+          .collection('produits')
+          .doc(id);
+
+      DocumentSnapshot<Map<String, dynamic>>? doc;
+      try {
+        doc = await ref.get(const GetOptions(source: Source.cache));
+      } catch (_) {
+        doc = null;
+      }
+      if (doc == null || !doc.exists) {
+        doc = await _lireDoc(ref);
+      }
+
       final valeur = doc?.data()?['prixAchat'];
       final double prix = valeur is num ? valeur.toDouble() : 0.0;
       if (prix <= 0) {
-        debugPrint('[Stockly] Prix d\'achat inconnu pour "${item.nom}" : coût compté à 0');
+        debugPrint('[Stockly] Prix d\'achat inconnu pour le produit $id : coût compté à 0');
       }
-      prixAchat[item.id] = prix;
+      return MapEntry(id, prix);
     }
+
+    final resultats = await Future.wait(ids.map(lirePrix));
+    final Map<String, double> prixAchat = Map.fromEntries(resultats);
     return prixAchat;
   }
 
@@ -779,15 +794,13 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         });
       }
 
-      // Hors ligne : Firestore garde tout sur le téléphone et l'enverra
-      // au retour d'internet. On n'attend pas plus de 5 s le serveur.
-      bool enAttenteReseau = false;
-      try {
-        await batch.commit().timeout(const Duration(seconds: 5));
-      } on TimeoutException {
-        enAttenteReseau = true;
-        debugPrint('[Stockly] Vente ${venteRef.id} gardée sur le téléphone, envoi en attente du réseau');
-      }
+      // RAPIDE : la vente est enregistrée sur le téléphone tout de suite.
+      // L'envoi au serveur se fait en arrière-plan (en ligne comme hors ligne).
+      batch.commit().then((_) {
+        debugPrint('[Stockly] Vente ${venteRef.id} envoyée au serveur');
+      }).catchError((Object e) {
+        debugPrint('[Stockly] Envoi de la vente ${venteRef.id} : $e');
+      });
 
       if (!mounted) return;
 
@@ -804,6 +817,8 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
       final double payeAffiche = calc.totalPaidInUSD * activeInfo.rateToUSD;
       final double resteAffiche = resteEffective * activeInfo.rateToUSD;
 
+      Future<void> Function()? impressionEnAttente;
+
       // 5. Impression Reçu Thermique (avec conversion préalable des articles)
       if (imprimerRecu) {
         final articlesConvertis = widget.cart.map((item) {
@@ -816,7 +831,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
           );
         }).toList();
 
-        await ReceiptService.imprimerTicket(
+        impressionEnAttente = () => ReceiptService.imprimerTicket(
           nomBoutique: entreprise.nom,
           adresseBoutique: entreprise.adresse,
           phoneBoutique: entreprise.telephone,
@@ -871,15 +886,17 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
       );
 
       messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            enAttenteReseau
-                ? 'Vente enregistrée sur le téléphone. Elle sera envoyée dès que internet revient.'
-                : 'Vente enregistrée avec succès !',
-          ),
-          backgroundColor: enAttenteReseau ? Colors.orange.shade800 : Colors.teal,
+        const SnackBar(
+          content: Text('Vente enregistrée avec succès !'),
+          backgroundColor: Colors.teal,
         ),
       );
+
+      // 9. Impression du reçu APRÈS la fermeture (ne bloque plus la caisse)
+      final impression = impressionEnAttente;
+      if (impression != null) {
+        unawaited(impression());
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() => isLoading = false);
