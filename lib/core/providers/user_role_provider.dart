@@ -3,25 +3,37 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// ================= 1. RÔLES ET EXTENSIONS =================
+// ================= 1. RÔLES (SYSTÈME UNIQUE) =================
+/// Les 3 rôles de Stockly :
+///  - owner    : Propriétaire (tout)
+///  - gerant   : Gérant (stock, ventes, dépenses, dettes, rapports)
+///  - caissier : Caissier (caisse + consultation du stock)
 enum UserRole {
-  owner,
-  admin,
-  caissier;
+  owner('Propriétaire'),
+  gerant('Gérant'),
+  caissier('Caissier');
+
+  /// Nom affiché à l'écran
+  final String label;
+
+  const UserRole(this.label);
 
   /// Convertit la valeur Firestore en rôle.
-  /// Accepte les variantes françaises, avec ou sans accents/majuscules,
-  /// car user_model.dart enregistre "gerant" pour le propriétaire.
+  /// Accepte les anciennes valeurs et les variantes (accents, majuscules).
   static UserRole fromString(String? value) {
     switch (_normaliser(value)) {
       case 'owner':
-      case 'gerant':
       case 'proprietaire':
       case 'patron':
         return UserRole.owner;
+      case 'gerant':
       case 'admin':
       case 'administrateur':
-        return UserRole.admin;
+      case 'chefboutique':
+      case 'chef_boutique':
+      case 'chef':
+      case 'comptable':
+        return UserRole.gerant;
       case 'caissier':
       default:
         return UserRole.caissier;
@@ -48,9 +60,21 @@ enum UserRole {
 }
 
 extension UserRoleX on UserRole {
-  bool get isAdminOrOwner => this == UserRole.admin || this == UserRole.owner;
   bool get isOwner => this == UserRole.owner;
+  bool get isGerant => this == UserRole.gerant;
   bool get isCaissier => this == UserRole.caissier;
+
+  /// Propriétaire ou Gérant (ancien nom conservé pour compatibilité)
+  bool get isAdminOrOwner => isOwner || isGerant;
+
+  /// Ajouter / modifier des produits, gérer le stock
+  bool get peutGererStock => isOwner || isGerant;
+
+  /// Voir la comptabilité, les bénéfices, les dépenses et les rapports
+  bool get peutVoirFinances => isOwner || isGerant;
+
+  /// Gérer l'équipe et les paramètres sensibles (Propriétaire seulement)
+  bool get peutGererEquipe => isOwner;
 }
 
 // ================= 2. MODÈLE DE PROFIL IMMUABLE =================
@@ -113,6 +137,8 @@ class UserProfile {
     );
   }
 
+  /// Le Propriétaire et le Gérant ont toutes les permissions fines ;
+  /// le Caissier seulement celles cochées par le Propriétaire.
   bool can(String permissionKey) {
     if (role.isAdminOrOwner) return true;
     return permissions[permissionKey] ?? false;

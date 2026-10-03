@@ -1,51 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
-/// Rôles utilisateur disponibles dans l'application
-enum UserRole {
-  gerant('Gérant'),
-  chefBoutique('Chef de Boutique'),
-  comptable('Comptable'),
-  caissier('Caissier');
+import '../providers/user_role_provider.dart';
 
-  final String label;
-
-  const UserRole(this.label);
-
-  /// Helper pour convertir une chaîne Firestore vers l'enum UserRole
-  static UserRole fromString(String? roleStr) {
-    switch (roleStr?.trim().toLowerCase()) {
-      case 'gerant':
-      case 'admin':
-      case 'owner':
-        return UserRole.gerant;
-      case 'chefboutique':
-      case 'chef_boutique':
-      case 'chef':
-        return UserRole.chefBoutique;
-      case 'comptable':
-        return UserRole.comptable;
-      case 'caissier':
-      default:
-        return UserRole.caissier;
-    }
-  }
-}
-
-/// Extension pour vérifier les permissions utilisateur
-extension UserRoleExtension on UserRole {
-  bool get isGerant => this == UserRole.gerant;
-  bool get isOwner => this == UserRole.gerant; // Alias de compatibilité
-  bool get isChefBoutique => this == UserRole.chefBoutique;
-  bool get isComptable => this == UserRole.comptable;
-  bool get isCaissier => this == UserRole.caissier;
-
-  /// Accès d'administration globale ou de gestion des stocks/prix
-  bool get isAdmin => isGerant || isChefBoutique;
-
-  /// Accès aux modules financiers et rapports
-  bool get canAccessFinance => isGerant || isComptable;
-}
+// Les rôles sont définis à UN SEUL endroit : user_role_provider.dart.
+// On les ré-exporte pour les fichiers qui importent seulement ce modèle.
+export '../providers/user_role_provider.dart' show UserRole, UserRoleX;
 
 /// Modèle immuable représentant un utilisateur
 @immutable
@@ -69,13 +29,18 @@ class UserModel {
   });
 
   // ================= GETTERS DE PERMISSIONS =================
-  bool get isGerant => role.isGerant;
   bool get isOwner => role.isOwner;
-  bool get isChefBoutique => role.isChefBoutique;
-  bool get isComptable => role.isComptable;
+  bool get isGerant => role.isGerant;
   bool get isCaissier => role.isCaissier;
-  bool get isAdmin => role.isAdmin;
-  bool get canAccessFinance => role.canAccessFinance;
+
+  /// Propriétaire ou Gérant : gestion du stock et des prix
+  bool get isAdmin => role.peutGererStock;
+
+  /// Propriétaire ou Gérant : comptabilité, bénéfices, rapports
+  bool get canAccessFinance => role.peutVoirFinances;
+
+  /// Propriétaire seulement : équipe et paramètres sensibles
+  bool get canManageTeam => role.peutGererEquipe;
 
   // ================= HELPER DATE =================
   static DateTime? _parseDate(dynamic value) {
