@@ -34,7 +34,7 @@ class PLRowWidget extends StatelessWidget {
 
     // Couleur du montant
     final Color couleurMontant;
-    if (isNegative) {
+    if (isNegative && montant.abs() >= 0.005) {
       couleurMontant = sombre ? Colors.redAccent : Colors.red.shade700;
     } else if (isBold) {
       couleurMontant = sombre ? Colors.tealAccent : Colors.teal.shade700;
@@ -60,7 +60,7 @@ class PLRowWidget extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            '${montant.toStringAsFixed(2)} $currency',
+            '${(montant.abs() < 0.005 ? 0.0 : montant).toStringAsFixed(2)} $currency',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 14,
