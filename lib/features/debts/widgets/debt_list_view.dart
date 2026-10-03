@@ -204,7 +204,7 @@ class DebtListView extends ConsumerWidget {
                             'Total initial : ${dette.montantInitial.toStringAsFixed(2)} $currency'),
                         if (dette.acomptePaye > 0)
                           Text(
-                              'Acompte versé : ${dette.acomptePaye.toStringAsFixed(2)} $currency',
+                              'Déjà payé : ${dette.acomptePaye.toStringAsFixed(2)} $currency',
                               style: const TextStyle(color: Colors.blueGrey)),
                         
                         // CORRECTION : Enveloppement dans un Expanded pour éviter le débordement

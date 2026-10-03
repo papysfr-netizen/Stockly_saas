@@ -73,7 +73,7 @@ class DebtDialogs {
                     keyboardType:
                         const TextInputType.numberWithOptions(decimal: true),
                     decoration: const InputDecoration(
-                      labelText: 'Acompte Versé (Si crédit partiel)',
+                      labelText: 'Montant déjà payé (paiement partiel)',
                       prefixIcon: Icon(Icons.payments),
                       hintText: '0.0',
                     ),

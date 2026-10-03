@@ -289,7 +289,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                               items: ['Payé', 'Dette', 'Acompte']
                                   .map((s) => DropdownMenuItem(
                                         value: s,
-                                        child: Text(s, style: const TextStyle(fontSize: 12), overflow: TextOverflow.ellipsis),
+                                        child: Text(s == 'Acompte' ? 'Paiement partiel' : s, style: const TextStyle(fontSize: 12), overflow: TextOverflow.ellipsis),
                                       ))
                                   .toList(),
                               onChanged: (val) {

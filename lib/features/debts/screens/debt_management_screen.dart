@@ -36,7 +36,7 @@ class DebtManagementScreen extends ConsumerWidget {
       'Tiers / Nom',
       'N° Facture',
       'Total Initial',
-      'Acompte',
+      'Déjà payé',
       'Reste à Payer',
       'Statut',
       'Échéance'

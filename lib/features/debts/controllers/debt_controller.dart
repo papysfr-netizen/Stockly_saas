@@ -232,8 +232,8 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
           reference: targetRef.id,
           journalCode: _getJournalCodeForPayment(paymentMethod),
           description: isClient
-              ? 'Acompte créance client : $cleanNom (Facture $cleanFacture)'
-              : 'Acompte dette fournisseur : $cleanNom (Facture $cleanFacture)',
+              ? 'Paiement partiel client : $cleanNom (Facture $cleanFacture)'
+              : 'Paiement partiel fournisseur : $cleanNom (Facture $cleanFacture)',
           lines: [
             JournalEntryLine(
               accountCode: acompteDebit,
