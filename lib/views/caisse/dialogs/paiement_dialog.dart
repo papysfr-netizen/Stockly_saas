@@ -44,6 +44,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
 
   String statutPaiement = 'Payé';
   String methodePaiement = 'Cash';
+  // 🚚 Valeurs enregistrées : 'Livré' ou 'Non livré' (affichées autrement à l'écran)
   String statutLivraison = 'Livré';
 
   bool imprimerRecu = true;
@@ -447,19 +448,37 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                       ),
                       const SizedBox(height: 10),
 
-                      // STATUT LIVRAISON
+                      // 🚚 STATUT LIVRAISON (textes clairs, valeurs inchangées)
                       DropdownButtonFormField<String>(
                         initialValue: statutLivraison,
                         isExpanded: true,
                         decoration: InputDecoration(
                           labelText: 'Livraison',
-                          prefixIcon: const Icon(Icons.local_shipping_outlined, size: 18),
+                          prefixIcon: Icon(
+                            statutLivraison == 'Livré'
+                                ? Icons.check_circle_outline
+                                : Icons.local_shipping_outlined,
+                            size: 18,
+                            color: statutLivraison == 'Livré' ? Colors.teal : Colors.orange.shade800,
+                          ),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                          helperText: statutLivraison == 'Non livré'
+                              ? 'Le client reviendra chercher sa marchandise (liste « À livrer »).'
+                              : null,
+                          helperMaxLines: 2,
+                          helperStyle: TextStyle(color: Colors.orange.shade800, fontSize: 11),
                         ),
-                        items: ['Livré', 'Non livré']
-                            .map((s) => DropdownMenuItem(value: s, child: Text(s, style: const TextStyle(fontSize: 13))))
-                            .toList(),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'Livré',
+                            child: Text('Livré maintenant', style: TextStyle(fontSize: 13)),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Non livré',
+                            child: Text('À livrer plus tard', style: TextStyle(fontSize: 13)),
+                          ),
+                        ],
                         onChanged: (val) {
                           if (val != null) setState(() => statutLivraison = val);
                         },
@@ -618,6 +637,9 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
           : _clientController.text.trim();
       final String telephone = _telephoneController.text.trim();
 
+      // 🚚 Livré maintenant ou à livrer plus tard ?
+      final bool estLivre = statutLivraison == 'Livré';
+
       final firestore = FirebaseFirestore.instance;
 
       // 0. Prix d'achat des produits vendus (pour le coût des marchandises)
@@ -653,6 +675,9 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
             ? 'Payé'
             : (verseEffective > 0 ? 'Acompte' : 'Dette'),
         'statutLivraison': statutLivraison,
+        // 🚚 Date et auteur de la livraison (vides si à livrer plus tard)
+        'dateLivraison': estLivre ? now : null,
+        'livrePar': estLivre ? widget.userId : null,
         'methodePaiement': methodePaiement,
         'vendeurId': widget.userId,
         'entrepriseId': widget.entrepriseId,
@@ -781,6 +806,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
       }
 
       // 4. Décrémentation directe des stocks en Batch
+      //    (même si à livrer plus tard : la marchandise est réservée au client)
       for (final item in widget.cart) {
         final prodRef = firestore
             .collection('entreprises')
@@ -847,9 +873,12 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
       if (!mounted) return;
 
       // 6. Notifications WhatsApp / SMS
+      final String msgLivraison = estLivre
+          ? ''
+          : ' Votre marchandise vous attend à la boutique.';
       final String msgText =
           "Bonjour $client, votre achat chez ${entreprise.nom} s'élève à ${currencyState.formatPrice(totalVente)}. "
-          "Payé: ${currencyState.formatPrice(verseEffective)}. Reste: ${currencyState.formatPrice(resteEffective)}. Merci !";
+          "Payé: ${currencyState.formatPrice(verseEffective)}. Reste: ${currencyState.formatPrice(resteEffective)}.$msgLivraison Merci !";
 
       if (envoyerWhatsApp && telephone.isNotEmpty) {
         await _envoyerNotificationMessage(
@@ -872,23 +901,27 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
       // 7. Fermeture du dialogue de paiement
       navigator.pop();
 
-      // 8. Ouverture automatique du Bon de Livraison professionnel
-      navigator.push(
-        MaterialPageRoute(
-          builder: (context) => BonLivraisonScreen(
-            entrepriseId: widget.entrepriseId,
-            nomClient: client,
-            adresseClient: '',
-            telephoneClient: telephone,
-            articles: widget.cart,
+      // 8. 🚚 Bon de Livraison : seulement si la marchandise part maintenant
+      if (estLivre) {
+        navigator.push(
+          MaterialPageRoute(
+            builder: (context) => BonLivraisonScreen(
+              entrepriseId: widget.entrepriseId,
+              nomClient: client,
+              adresseClient: '',
+              telephoneClient: telephone,
+              articles: widget.cart,
+            ),
           ),
-        ),
-      );
+        );
+      }
 
       messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Vente enregistrée avec succès !'),
-          backgroundColor: Colors.teal,
+        SnackBar(
+          content: Text(estLivre
+              ? 'Vente enregistrée avec succès !'
+              : 'Vente enregistrée — à livrer plus tard (liste « À livrer »).'),
+          backgroundColor: estLivre ? Colors.teal : Colors.orange.shade800,
         ),
       );
 
