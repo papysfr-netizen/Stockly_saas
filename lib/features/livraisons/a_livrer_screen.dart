@@ -7,11 +7,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/providers/cart_provider.dart';
+import '../../core/providers/entreprise_provider.dart';
 import '../../core/utils/currency_extension.dart';
 import '../../screens/bon_livraison_screen.dart';
 
 // ============================================================================
-// 🚚 VENTES À LIVRER (statutLivraison == 'Non livré'), les plus anciennes d'abord
+// 🚚 VENTES À LIVRER (statutLivraison == 'Non livré')
+// Tri : les retards d'abord, puis par date limite la plus proche.
 // ============================================================================
 final ventesALivrerProvider = StreamProvider.family<
     List<QueryDocumentSnapshot<Map<String, dynamic>>>, String>((ref, entrepriseId) {
@@ -26,7 +28,7 @@ final ventesALivrerProvider = StreamProvider.family<
       .snapshots()
       .map((snap) {
     final docs = snap.docs.toList();
-    docs.sort((a, b) => _dateDe(a.data()).compareTo(_dateDe(b.data())));
+    docs.sort((a, b) => _dateLimite(a.data()).compareTo(_dateLimite(b.data())));
     return docs;
   });
 });
@@ -37,15 +39,47 @@ DateTime _dateDe(Map<String, dynamic> data) {
   return DateTime.now();
 }
 
+/// Date limite de retrait. Anciennes ventes sans date limite : 7 jours après la vente.
+DateTime _dateLimite(Map<String, dynamic> data) {
+  final v = data['dateLimiteLivraison'];
+  if (v is Timestamp) return v.toDate();
+  final d = _dateDe(data).add(const Duration(days: 7));
+  return DateTime(d.year, d.month, d.day, 23, 59, 59);
+}
+
+bool _estEnRetard(Map<String, dynamic> data) =>
+    DateTime.now().isAfter(_dateLimite(data));
+
 String _deuxChiffres(int n) => n.toString().padLeft(2, '0');
 
 String _formatDate(DateTime d) =>
     '${_deuxChiffres(d.day)}/${_deuxChiffres(d.month)}/${d.year} à ${_deuxChiffres(d.hour)}:${_deuxChiffres(d.minute)}';
 
+String _formatJour(DateTime d) =>
+    '${_deuxChiffres(d.day)}/${_deuxChiffres(d.month)}/${d.year}';
+
 double _nombre(dynamic v) => v is num ? v.toDouble() : 0.0;
 
+/// Nom de l'utilisateur connecté (lu dans son profil : téléphone d'abord, puis serveur).
+Future<String> _nomUtilisateurConnecte() async {
+  final uid = FirebaseAuth.instance.currentUser?.uid;
+  if (uid == null) return '';
+  final ref = FirebaseFirestore.instance.collection('users').doc(uid);
+  try {
+    final d = await ref.get(const GetOptions(source: Source.cache));
+    final n = d.data()?['nom'];
+    if (n is String && n.trim().isNotEmpty) return n.trim();
+  } catch (_) {}
+  try {
+    final d = await ref.get().timeout(const Duration(seconds: 3));
+    final n = d.data()?['nom'];
+    if (n is String) return n.trim();
+  } catch (_) {}
+  return '';
+}
+
 // ============================================================================
-// 🚚 BOUTON « À LIVRER » POUR L'ACCUEIL (avec pastille du nombre en attente)
+// 🚚 BOUTON « À LIVRER » POUR L'ACCUEIL (pastille + rouge si retard)
 // ============================================================================
 class ALivrerNavButton extends ConsumerWidget {
   final String entrepriseId;
@@ -53,15 +87,22 @@ class ALivrerNavButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final nb = ref
+    final docs = ref
             .watch(ventesALivrerProvider(entrepriseId))
-            .whenOrNull(data: (docs) => docs.length) ??
-        0;
+            .whenOrNull(data: (d) => d) ??
+        const <QueryDocumentSnapshot<Map<String, dynamic>>>[];
+    final nb = docs.length;
+    final nbRetard = docs.where((d) => _estEnRetard(d.data())).length;
+
+    final Color fond = nbRetard > 0
+        ? Colors.red.shade300
+        : (nb > 0 ? Colors.amber.shade200 : Colors.blueGrey.shade50);
+    final Color texte = nbRetard > 0 ? Colors.white : Colors.brown.shade900;
 
     return ElevatedButton.icon(
       style: ElevatedButton.styleFrom(
-        backgroundColor: nb > 0 ? Colors.amber.shade200 : Colors.blueGrey.shade50,
-        foregroundColor: Colors.brown.shade900,
+        backgroundColor: fond,
+        foregroundColor: texte,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
       ),
@@ -70,9 +111,9 @@ class ALivrerNavButton extends ConsumerWidget {
         label: Text('$nb'),
         child: const Icon(Icons.local_shipping, size: 18),
       ),
-      label: const Text(
-        'À livrer',
-        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+      label: Text(
+        nbRetard > 0 ? 'À livrer ($nbRetard en retard)' : 'À livrer',
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
       ),
       onPressed: () => Navigator.push(
         context,
@@ -128,16 +169,20 @@ class ALivrerScreen extends ConsumerWidget {
             );
           }
 
+          final nbRetard = docs.where((d) => _estEnRetard(d.data())).length;
+
           return ListView(
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
             children: [
               Padding(
                 padding: const EdgeInsets.only(bottom: 8, left: 4),
                 child: Text(
-                  '${docs.length} client(s) attendent leur marchandise',
+                  nbRetard > 0
+                      ? '${docs.length} client(s) en attente — dont $nbRetard en retard'
+                      : '${docs.length} client(s) attendent leur marchandise',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: Colors.brown.shade800,
+                    color: nbRetard > 0 ? Colors.red : Colors.brown.shade800,
                   ),
                 ),
               ),
@@ -183,14 +228,54 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
     return brut.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
   }
 
+  String _numeroPropre(String telephone) {
+    var n = telephone.replaceAll(RegExp(r'[^\d+]'), '');
+    if (n.startsWith('+')) n = n.substring(1);
+    // Numéro local RDC (ex : 0973...) → indicatif 243
+    if (n.startsWith('0')) n = '243${n.substring(1)}';
+    return n;
+  }
+
   Future<void> _appeler(String telephone) async {
     final propre = telephone.replaceAll(RegExp(r'[\s\-\(\)]'), '');
     if (propre.isEmpty) return;
-    final uri = Uri.parse('tel:$propre');
     try {
-      await launchUrl(uri);
+      await launchUrl(Uri.parse('tel:$propre'));
     } catch (e) {
       debugPrint("Impossible d'appeler : $e");
+    }
+  }
+
+  Future<void> _relancerWhatsApp(String telephone) async {
+    final client = (widget.data['nomClient'] ?? 'Client').toString();
+    final boutique = ref.read(entrepriseProvider).nom;
+    final limite = _dateLimite(widget.data);
+    final enRetard = _estEnRetard(widget.data);
+    final reste = _nombre(widget.data['resteAPayer']);
+    final articles = _articles.map((a) => '${a['quantite']} × ${a['nom']}').join(', ');
+
+    final message = StringBuffer(
+        'Bonjour $client, votre marchandise ($articles) vous attend chez $boutique. ');
+    if (enRetard) {
+      message.write(
+          'La date de retrait (${_formatJour(limite)}) est dépassée : merci de passer la récupérer au plus vite. ');
+    } else {
+      message.write('Merci de passer la retirer avant le ${_formatJour(limite)}. ');
+    }
+    if (reste > 0.005) {
+      message.write('Reste à payer : ${ref.formatPrice(reste)}. ');
+    }
+    message.write('Merci !');
+
+    final uri = Uri.parse(
+        'https://wa.me/${_numeroPropre(telephone)}?text=${Uri.encodeComponent(message.toString())}');
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Impossible d'ouvrir WhatsApp.")),
+      );
     }
   }
 
@@ -243,7 +328,9 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
 
-    final ref0 = FirebaseFirestore.instance
+    final nomLivreur = await _nomUtilisateurConnecte();
+
+    final venteRef = FirebaseFirestore.instance
         .collection('entreprises')
         .doc(widget.entrepriseId)
         .collection('ventes')
@@ -251,10 +338,11 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
 
     bool horsLigne = false;
     try {
-      await ref0.update({
+      await venteRef.update({
         'statutLivraison': 'Livré',
         'dateLivraison': Timestamp.now(),
         'livrePar': FirebaseAuth.instance.currentUser?.uid,
+        'livreParNom': nomLivreur,
       }).timeout(const Duration(seconds: 5));
     } on TimeoutException {
       horsLigne = true; // gardé sur le téléphone, envoyé au retour d'internet
@@ -303,24 +391,46 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
   Widget build(BuildContext context) {
     final client = (widget.data['nomClient'] ?? 'Client').toString();
     final telephone = (widget.data['telephoneClient'] ?? '').toString();
+    final vendeurNom = (widget.data['vendeurNom'] ?? '').toString();
     final total = _nombre(widget.data['montantTotal']);
     final reste = _nombre(widget.data['resteAPayer']);
     final date = _dateDe(widget.data);
-    final jours = DateTime.now().difference(date).inDays;
+    final limite = _dateLimite(widget.data);
+    final maintenant = DateTime.now();
+    final enRetard = maintenant.isAfter(limite);
     final articles = _articles;
 
-    final Color couleurAttente = jours >= 7
-        ? Colors.red
-        : (jours >= 3 ? Colors.orange.shade800 : Colors.blueGrey);
-    final String texteAttente = jours == 0
-        ? "Aujourd'hui"
-        : 'En attente depuis $jours jour${jours > 1 ? 's' : ''}';
+    // Jours de retard, ou jours restants
+    final debutAujourdhui = DateTime(maintenant.year, maintenant.month, maintenant.day);
+    final debutLimite = DateTime(limite.year, limite.month, limite.day);
+    final ecartJours = debutLimite.difference(debutAujourdhui).inDays;
+
+    final Color couleur;
+    final String texteDelai;
+    if (enRetard) {
+      final retard = -ecartJours;
+      couleur = Colors.red;
+      texteDelai = retard <= 0
+          ? 'Délai dépassé (limite : ${_formatJour(limite)})'
+          : 'Délai dépassé de $retard jour${retard > 1 ? 's' : ''} (limite : ${_formatJour(limite)})';
+    } else if (ecartJours <= 1) {
+      couleur = Colors.orange.shade800;
+      texteDelai = ecartJours == 0
+          ? "À retirer aujourd'hui (limite : ${_formatJour(limite)})"
+          : 'À retirer avant demain soir (${_formatJour(limite)})';
+    } else {
+      couleur = Colors.blueGrey;
+      texteDelai = 'À retirer avant le ${_formatJour(limite)} ($ecartJours jours restants)';
+    }
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: couleurAttente.withValues(alpha: 0.5), width: 1.2),
+        side: BorderSide(
+          color: couleur.withValues(alpha: enRetard ? 0.9 : 0.5),
+          width: enRetard ? 2 : 1.2,
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -353,21 +463,36 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
                 child: Text(telephone, style: TextStyle(color: Colors.grey.shade700)),
               ),
 
-            // Attente
+            // Délai
             Container(
-              margin: const EdgeInsets.only(top: 4, bottom: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              width: double.infinity,
+              margin: const EdgeInsets.only(top: 4, bottom: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               decoration: BoxDecoration(
-                color: couleurAttente.withValues(alpha: 0.1),
+                color: couleur.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(6),
               ),
+              child: Row(
+                children: [
+                  Icon(enRetard ? Icons.warning_amber_rounded : Icons.event,
+                      size: 16, color: couleur),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      texteDelai,
+                      style: TextStyle(color: couleur, fontWeight: FontWeight.bold, fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8, left: 2),
               child: Text(
-                '$texteAttente • vendu le ${_formatDate(date)}',
-                style: TextStyle(
-                  color: couleurAttente,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12,
-                ),
+                vendeurNom.isEmpty
+                    ? 'Vendu le ${_formatDate(date)}'
+                    : 'Vendu le ${_formatDate(date)} par $vendeurNom',
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
               ),
             ),
 
@@ -400,29 +525,53 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
               ),
             const SizedBox(height: 12),
 
-            // Bouton livrer
-            SizedBox(
-              width: double.infinity,
-              height: 46,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green.shade700,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            // Boutons
+            Row(
+              children: [
+                if (telephone.isNotEmpty) ...[
+                  Expanded(
+                    child: SizedBox(
+                      height: 46,
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.green.shade800,
+                          side: BorderSide(color: Colors.green.shade700),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        onPressed: () => _relancerWhatsApp(telephone),
+                        icon: const Icon(Icons.chat),
+                        label: const Text('Relancer'),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                Expanded(
+                  flex: 2,
+                  child: SizedBox(
+                    height: 46,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green.shade700,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      onPressed: _enCours ? null : _marquerLivre,
+                      icon: _enCours
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                            )
+                          : const Icon(Icons.check_circle),
+                      label: const Text(
+                        'Marquer comme livré',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
                 ),
-                onPressed: _enCours ? null : _marquerLivre,
-                icon: _enCours
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                      )
-                    : const Icon(Icons.check_circle),
-                label: const Text(
-                  'Marquer comme livré',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
+              ],
             ),
           ],
         ),

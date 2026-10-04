@@ -46,6 +46,8 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
   String methodePaiement = 'Cash';
   // 🚚 Valeurs enregistrées : 'Livré' ou 'Non livré' (affichées autrement à l'écran)
   String statutLivraison = 'Livré';
+  // ⏰ Délai de retrait (en jours) pour les ventes à livrer plus tard
+  int delaiRetraitJours = 7;
 
   bool imprimerRecu = true;
   bool envoyerWhatsApp = false;
@@ -55,8 +57,6 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
   @override
   void initState() {
     super.initState();
-    // CORRECTIF 1 : setState pour que l'écran ET le calcul utilisent
-    // le montant pré-rempli (avant, seul le texte changeait à l'écran).
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) setState(_preremplirMontant);
     });
@@ -74,6 +74,9 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
   String _formatAmount(double amount) {
     return amount % 1 == 0 ? amount.toStringAsFixed(0) : amount.toStringAsFixed(2);
   }
+
+  String _formatJour(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
 
   void _preremplirMontant() {
     if (!mounted) return;
@@ -188,6 +191,8 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
 
     final eqUSDinLocal = paidUSD * activeInfo.rateToUSD;
     final eqLocalinUSD = activeInfo.rateToUSD > 0 ? paidLocal / activeInfo.rateToUSD : 0.0;
+
+    final dateLimiteApercu = DateTime.now().add(Duration(days: delaiRetraitJours));
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -448,7 +453,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                       ),
                       const SizedBox(height: 10),
 
-                      // 🚚 STATUT LIVRAISON (textes clairs, valeurs inchangées)
+                      // 🚚 STATUT LIVRAISON
                       DropdownButtonFormField<String>(
                         initialValue: statutLivraison,
                         isExpanded: true,
@@ -463,11 +468,6 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                           ),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                          helperText: statutLivraison == 'Non livré'
-                              ? 'Le client reviendra chercher sa marchandise (liste « À livrer »).'
-                              : null,
-                          helperMaxLines: 2,
-                          helperStyle: TextStyle(color: Colors.orange.shade800, fontSize: 11),
                         ),
                         items: const [
                           DropdownMenuItem(
@@ -483,6 +483,37 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                           if (val != null) setState(() => statutLivraison = val);
                         },
                       ),
+
+                      // ⏰ DÉLAI DE RETRAIT (seulement si à livrer plus tard)
+                      if (statutLivraison == 'Non livré') ...[
+                        const SizedBox(height: 10),
+                        DropdownButtonFormField<int>(
+                          initialValue: delaiRetraitJours,
+                          isExpanded: true,
+                          decoration: InputDecoration(
+                            labelText: 'À retirer avant',
+                            prefixIcon: Icon(Icons.event, size: 18, color: Colors.orange.shade800),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                            helperText:
+                                'Date limite : ${_formatJour(dateLimiteApercu)} — le client apparaîtra dans « À livrer ».',
+                            helperMaxLines: 2,
+                            helperStyle: TextStyle(color: Colors.orange.shade800, fontSize: 11),
+                          ),
+                          items: const [1, 3, 7, 14, 30]
+                              .map((j) => DropdownMenuItem(
+                                    value: j,
+                                    child: Text(
+                                      j == 1 ? '1 jour' : '$j jours',
+                                      style: const TextStyle(fontSize: 13),
+                                    ),
+                                  ))
+                              .toList(),
+                          onChanged: (val) {
+                            if (val != null) setState(() => delaiRetraitJours = val);
+                          },
+                        ),
+                      ],
                       const Divider(height: 16),
 
                       // CHECKBOXES
@@ -531,8 +562,6 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(
-                    // CORRECTIF 2 : on n'envoie plus un calcul périmé,
-                    // la fonction recalcule elle-même à la validation.
                     onPressed: isLoading ? null : _validerVente,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.teal.shade800,
@@ -558,7 +587,6 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
 
   // ================= LECTURE DES PRIX D'ACHAT =================
 
-  /// Lit un document : réseau d'abord (3 s max), sinon copie du téléphone.
   Future<DocumentSnapshot<Map<String, dynamic>>?> _lireDoc(
     DocumentReference<Map<String, dynamic>> ref,
   ) async {
@@ -573,12 +601,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
     }
   }
 
-  /// Renvoie le prix d'achat unitaire de chaque produit du panier
-  /// (0 si inconnu).
   Future<Map<String, double>> _chargerPrixAchat(FirebaseFirestore firestore) async {
-    // RAPIDE : 1) mémoire du téléphone (instantané) ;
-    // 2) serveur seulement si le produit n'y est pas ;
-    // tous les produits sont lus EN MÊME TEMPS.
     final ids = widget.cart.map((item) => item.id).toSet().toList();
 
     Future<MapEntry<String, double>> lirePrix(String id) async {
@@ -607,16 +630,13 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
     }
 
     final resultats = await Future.wait(ids.map(lirePrix));
-    final Map<String, double> prixAchat = Map.fromEntries(resultats);
-    return prixAchat;
+    return Map.fromEntries(resultats);
   }
 
   // ================= ENREGISTREMENT ET COMPTABILISATION =================
   Future<void> _validerVente() async {
     setState(() => isLoading = true);
 
-    // CORRECTIF 3 : on recalcule le paiement à partir de ce qui est
-    // réellement saisi dans les champs au moment de la validation.
     final activeInfoValidation = ref.read(currencyProvider).activeCurrencyInfo;
     final calc = PaymentResult(
       totalUSD: widget.total,
@@ -637,12 +657,10 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
           : _clientController.text.trim();
       final String telephone = _telephoneController.text.trim();
 
-      // 🚚 Livré maintenant ou à livrer plus tard ?
       final bool estLivre = statutLivraison == 'Livré';
 
       final firestore = FirebaseFirestore.instance;
 
-      // 0. Prix d'achat des produits vendus (pour le coût des marchandises)
       final prixAchat = await _chargerPrixAchat(firestore);
       double coutMarchandises = 0.0;
       for (final item in widget.cart) {
@@ -652,7 +670,12 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
       final batch = firestore.batch();
       final Timestamp now = Timestamp.now();
 
-      // 1. Enregistrement de la Vente
+      // ⏰ Date limite de retrait (fin de journée du dernier jour)
+      final DateTime limite = now.toDate().add(Duration(days: delaiRetraitJours));
+      final DateTime finJourLimite =
+          DateTime(limite.year, limite.month, limite.day, 23, 59, 59);
+
+      // 1. Vente
       final venteRef = firestore
           .collection('entreprises')
           .doc(widget.entrepriseId)
@@ -675,9 +698,9 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
             ? 'Payé'
             : (verseEffective > 0 ? 'Acompte' : 'Dette'),
         'statutLivraison': statutLivraison,
-        // 🚚 Date et auteur de la livraison (vides si à livrer plus tard)
         'dateLivraison': estLivre ? now : null,
         'livrePar': estLivre ? widget.userId : null,
+        'dateLimiteLivraison': estLivre ? null : Timestamp.fromDate(finJourLimite),
         'methodePaiement': methodePaiement,
         'vendeurId': widget.userId,
         'entrepriseId': widget.entrepriseId,
@@ -697,7 +720,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         'date': now,
       });
 
-      // 2. Écriture Comptable de la vente (SYSCOHADA)
+      // 2. Écriture comptable de la vente (SYSCOHADA)
       final ecritureRef = firestore
           .collection('entreprises')
           .doc(widget.entrepriseId)
@@ -744,8 +767,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         'montantEncaisse': verseEffective,
       });
 
-      // 2 bis. Écriture du coût des marchandises vendues
-      // Débit 603100 (charge) / Crédit 311000 (stock)
+      // 2 bis. Coût des marchandises vendues
       if (coutMarchandises > 0) {
         final coutRef = firestore
             .collection('entreprises')
@@ -777,7 +799,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         });
       }
 
-      // 3. Enregistrement Créance (si reste > 0)
+      // 3. Créance (si reste > 0)
       if (resteEffective > 0) {
         final creanceRef = firestore
             .collection('entreprises')
@@ -805,8 +827,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         });
       }
 
-      // 4. Décrémentation directe des stocks en Batch
-      //    (même si à livrer plus tard : la marchandise est réservée au client)
+      // 4. Stock (même si à livrer plus tard : la marchandise est réservée)
       for (final item in widget.cart) {
         final prodRef = firestore
             .collection('entreprises')
@@ -820,8 +841,6 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         });
       }
 
-      // RAPIDE : la vente est enregistrée sur le téléphone tout de suite.
-      // L'envoi au serveur se fait en arrière-plan (en ligne comme hors ligne).
       batch.commit().then((_) {
         debugPrint('[Stockly] Vente ${venteRef.id} envoyée au serveur');
       }).catchError((Object e) {
@@ -830,7 +849,6 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
 
       if (!mounted) return;
 
-      // Outils récupérés AVANT de fermer le dialogue
       final messenger = ScaffoldMessenger.of(context);
       final navigator = Navigator.of(context);
 
@@ -845,7 +863,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
 
       Future<void> Function()? impressionEnAttente;
 
-      // 5. Impression Reçu Thermique (avec conversion préalable des articles)
+      // 5. Reçu thermique
       if (imprimerRecu) {
         final articlesConvertis = widget.cart.map((item) {
           return CartItem(
@@ -872,10 +890,10 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
 
       if (!mounted) return;
 
-      // 6. Notifications WhatsApp / SMS
+      // 6. WhatsApp / SMS
       final String msgLivraison = estLivre
           ? ''
-          : ' Votre marchandise vous attend à la boutique.';
+          : ' Votre marchandise vous attend à la boutique : merci de la retirer avant le ${_formatJour(finJourLimite)}.';
       final String msgText =
           "Bonjour $client, votre achat chez ${entreprise.nom} s'élève à ${currencyState.formatPrice(totalVente)}. "
           "Payé: ${currencyState.formatPrice(verseEffective)}. Reste: ${currencyState.formatPrice(resteEffective)}.$msgLivraison Merci !";
@@ -898,10 +916,10 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
 
       if (!mounted) return;
 
-      // 7. Fermeture du dialogue de paiement
+      // 7. Fermeture
       navigator.pop();
 
-      // 8. 🚚 Bon de Livraison : seulement si la marchandise part maintenant
+      // 8. Bon de livraison seulement si la marchandise part maintenant
       if (estLivre) {
         navigator.push(
           MaterialPageRoute(
@@ -920,12 +938,12 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         SnackBar(
           content: Text(estLivre
               ? 'Vente enregistrée avec succès !'
-              : 'Vente enregistrée — à livrer plus tard (liste « À livrer »).'),
+              : 'Vente enregistrée — à retirer avant le ${_formatJour(finJourLimite)}.'),
           backgroundColor: estLivre ? Colors.teal : Colors.orange.shade800,
         ),
       );
 
-      // 9. Impression du reçu APRÈS la fermeture (ne bloque plus la caisse)
+      // 9. Impression après la fermeture
       final impression = impressionEnAttente;
       if (impression != null) {
         unawaited(impression());
