@@ -1,0 +1,432 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../core/providers/cart_provider.dart';
+import '../../core/utils/currency_extension.dart';
+import '../../screens/bon_livraison_screen.dart';
+
+// ============================================================================
+// 🚚 VENTES À LIVRER (statutLivraison == 'Non livré'), les plus anciennes d'abord
+// ============================================================================
+final ventesALivrerProvider = StreamProvider.family<
+    List<QueryDocumentSnapshot<Map<String, dynamic>>>, String>((ref, entrepriseId) {
+  if (entrepriseId.isEmpty) {
+    return Stream.value(const <QueryDocumentSnapshot<Map<String, dynamic>>>[]);
+  }
+  return FirebaseFirestore.instance
+      .collection('entreprises')
+      .doc(entrepriseId)
+      .collection('ventes')
+      .where('statutLivraison', isEqualTo: 'Non livré')
+      .snapshots()
+      .map((snap) {
+    final docs = snap.docs.toList();
+    docs.sort((a, b) => _dateDe(a.data()).compareTo(_dateDe(b.data())));
+    return docs;
+  });
+});
+
+DateTime _dateDe(Map<String, dynamic> data) {
+  final v = data['date'] ?? data['createdAt'];
+  if (v is Timestamp) return v.toDate();
+  return DateTime.now();
+}
+
+String _deuxChiffres(int n) => n.toString().padLeft(2, '0');
+
+String _formatDate(DateTime d) =>
+    '${_deuxChiffres(d.day)}/${_deuxChiffres(d.month)}/${d.year} à ${_deuxChiffres(d.hour)}:${_deuxChiffres(d.minute)}';
+
+double _nombre(dynamic v) => v is num ? v.toDouble() : 0.0;
+
+// ============================================================================
+// 🚚 BOUTON « À LIVRER » POUR L'ACCUEIL (avec pastille du nombre en attente)
+// ============================================================================
+class ALivrerNavButton extends ConsumerWidget {
+  final String entrepriseId;
+  const ALivrerNavButton({super.key, required this.entrepriseId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final nb = ref
+            .watch(ventesALivrerProvider(entrepriseId))
+            .whenOrNull(data: (docs) => docs.length) ??
+        0;
+
+    return ElevatedButton.icon(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: nb > 0 ? Colors.amber.shade200 : Colors.blueGrey.shade50,
+        foregroundColor: Colors.brown.shade900,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+      ),
+      icon: Badge(
+        isLabelVisible: nb > 0,
+        label: Text('$nb'),
+        child: const Icon(Icons.local_shipping, size: 18),
+      ),
+      label: const Text(
+        'À livrer',
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+      ),
+      onPressed: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ALivrerScreen(entrepriseId: entrepriseId),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================================
+// 🚚 ÉCRAN « À LIVRER »
+// ============================================================================
+class ALivrerScreen extends ConsumerWidget {
+  final String entrepriseId;
+  const ALivrerScreen({super.key, required this.entrepriseId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(ventesALivrerProvider(entrepriseId));
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('À livrer'),
+        backgroundColor: Colors.amber.shade700,
+        foregroundColor: Colors.white,
+      ),
+      body: async.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text('Erreur de chargement : $e', textAlign: TextAlign.center),
+          ),
+        ),
+        data: (docs) {
+          if (docs.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.task_alt, size: 72, color: Colors.green.shade400),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Aucune livraison en attente',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 6),
+                  const Text('Tous les clients ont reçu leur marchandise.'),
+                ],
+              ),
+            );
+          }
+
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8, left: 4),
+                child: Text(
+                  '${docs.length} client(s) attendent leur marchandise',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.brown.shade800,
+                  ),
+                ),
+              ),
+              ...docs.map((d) => _CarteLivraison(
+                    key: ValueKey(d.id),
+                    entrepriseId: entrepriseId,
+                    venteId: d.id,
+                    data: d.data(),
+                  )),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+// ============================================================================
+// 🚚 CARTE D'UNE LIVRAISON EN ATTENTE
+// ============================================================================
+class _CarteLivraison extends ConsumerStatefulWidget {
+  final String entrepriseId;
+  final String venteId;
+  final Map<String, dynamic> data;
+
+  const _CarteLivraison({
+    super.key,
+    required this.entrepriseId,
+    required this.venteId,
+    required this.data,
+  });
+
+  @override
+  ConsumerState<_CarteLivraison> createState() => _CarteLivraisonState();
+}
+
+class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
+  bool _enCours = false;
+
+  List<Map<String, dynamic>> get _articles {
+    final brut = widget.data['articles'];
+    if (brut is! List) return [];
+    return brut.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
+  }
+
+  Future<void> _appeler(String telephone) async {
+    final propre = telephone.replaceAll(RegExp(r'[\s\-\(\)]'), '');
+    if (propre.isEmpty) return;
+    final uri = Uri.parse('tel:$propre');
+    try {
+      await launchUrl(uri);
+    } catch (e) {
+      debugPrint("Impossible d'appeler : $e");
+    }
+  }
+
+  Future<void> _marquerLivre() async {
+    final client = (widget.data['nomClient'] ?? 'Client').toString();
+    final telephone = (widget.data['telephoneClient'] ?? '').toString();
+    final reste = _nombre(widget.data['resteAPayer']);
+    final articles = _articles;
+
+    final confirme = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirmer la livraison'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Remettre à $client :', style: const TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            ...articles.map((a) => Text('• ${a['quantite']} × ${a['nom']}')),
+            if (reste > 0.005) ...[
+              const SizedBox(height: 12),
+              Text(
+                'Attention : il reste ${ref.formatPrice(reste)} à payer.',
+                style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green.shade700,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Oui, livré'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirme != true || !mounted) return;
+
+    setState(() => _enCours = true);
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
+    final ref0 = FirebaseFirestore.instance
+        .collection('entreprises')
+        .doc(widget.entrepriseId)
+        .collection('ventes')
+        .doc(widget.venteId);
+
+    bool horsLigne = false;
+    try {
+      await ref0.update({
+        'statutLivraison': 'Livré',
+        'dateLivraison': Timestamp.now(),
+        'livrePar': FirebaseAuth.instance.currentUser?.uid,
+      }).timeout(const Duration(seconds: 5));
+    } on TimeoutException {
+      horsLigne = true; // gardé sur le téléphone, envoyé au retour d'internet
+    } catch (e) {
+      if (mounted) setState(() => _enCours = false);
+      messenger.showSnackBar(
+        SnackBar(content: Text('Erreur : $e'), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(horsLigne
+            ? 'Livraison notée sur le téléphone. Envoi dès le retour d\'internet.'
+            : 'Livraison enregistrée pour $client.'),
+        backgroundColor: horsLigne ? Colors.orange.shade800 : Colors.green.shade700,
+      ),
+    );
+
+    // Bon de livraison à remettre au client
+    final itemsBL = articles
+        .map((a) => CartItem(
+              id: (a['produitId'] ?? '').toString(),
+              nom: (a['nom'] ?? '').toString(),
+              prix: _nombre(a['prixUnitaire']),
+              quantite: (a['quantite'] is num) ? (a['quantite'] as num).toInt() : 0,
+              stock: 0,
+            ))
+        .toList();
+
+    navigator.push(
+      MaterialPageRoute(
+        builder: (_) => BonLivraisonScreen(
+          entrepriseId: widget.entrepriseId,
+          nomClient: client,
+          adresseClient: '',
+          telephoneClient: telephone,
+          articles: itemsBL,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final client = (widget.data['nomClient'] ?? 'Client').toString();
+    final telephone = (widget.data['telephoneClient'] ?? '').toString();
+    final total = _nombre(widget.data['montantTotal']);
+    final reste = _nombre(widget.data['resteAPayer']);
+    final date = _dateDe(widget.data);
+    final jours = DateTime.now().difference(date).inDays;
+    final articles = _articles;
+
+    final Color couleurAttente = jours >= 7
+        ? Colors.red
+        : (jours >= 3 ? Colors.orange.shade800 : Colors.blueGrey);
+    final String texteAttente = jours == 0
+        ? "Aujourd'hui"
+        : 'En attente depuis $jours jour${jours > 1 ? 's' : ''}';
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: BorderSide(color: couleurAttente.withValues(alpha: 0.5), width: 1.2),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Client + appel
+            Row(
+              children: [
+                const Icon(Icons.person, size: 20),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    client,
+                    style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (telephone.isNotEmpty)
+                  IconButton(
+                    tooltip: 'Appeler $telephone',
+                    icon: const Icon(Icons.call, color: Colors.green),
+                    onPressed: () => _appeler(telephone),
+                  ),
+              ],
+            ),
+            if (telephone.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(left: 26, bottom: 4),
+                child: Text(telephone, style: TextStyle(color: Colors.grey.shade700)),
+              ),
+
+            // Attente
+            Container(
+              margin: const EdgeInsets.only(top: 4, bottom: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: couleurAttente.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                '$texteAttente • vendu le ${_formatDate(date)}',
+                style: TextStyle(
+                  color: couleurAttente,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+
+            // Articles
+            const Text('À remettre :', style: TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 4),
+            ...articles.map((a) => Padding(
+                  padding: const EdgeInsets.only(left: 8, bottom: 2),
+                  child: Text('• ${a['quantite']} × ${a['nom']}'),
+                )),
+            const SizedBox(height: 8),
+
+            // Montants
+            Text('Facture : ${ref.formatPrice(total)}',
+                style: TextStyle(color: Colors.grey.shade800)),
+            if (reste > 0.005)
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(top: 6),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Text(
+                  'Reste à payer : ${ref.formatPrice(reste)} — à encaisser avant de livrer',
+                  style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                ),
+              ),
+            const SizedBox(height: 12),
+
+            // Bouton livrer
+            SizedBox(
+              width: double.infinity,
+              height: 46,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green.shade700,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                onPressed: _enCours ? null : _marquerLivre,
+                icon: _enCours
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Icon(Icons.check_circle),
+                label: const Text(
+                  'Marquer comme livré',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

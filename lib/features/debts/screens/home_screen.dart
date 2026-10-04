@@ -15,6 +15,7 @@ import '../../../core/widgets/changer_mot_de_passe_dialog.dart';
 import 'comptabilite_screen.dart';
 import 'debt_management_screen.dart';
 import 'depenses_screen.dart';
+import '../../livraisons/a_livrer_screen.dart'; // 🚚
 import 'package:stockly_saas/screens/settings_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -35,7 +36,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // 🔐 DROITS SELON LE RÔLE
   // Propriétaire : tout
   // Gérant       : stock + finances (pas Paramètres / Équipe / Maintenance)
-  // Caissier     : Caisse + Dettes seulement
+  // Caissier     : Caisse + Dettes + À livrer
   // ------------------------------------------------------------------
   bool get _peutGererStock => widget.currentUser.isAdmin; // owner + gérant
   bool get _peutVoirFinances => widget.currentUser.canAccessFinance; // owner + gérant
@@ -284,6 +285,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           builder: (context) => const DebtManagementScreen()),
                     ),
                   ),
+                  // 🚚 À livrer : tout le monde (avec le nombre en attente)
+                  const SizedBox(width: 8),
+                  ALivrerNavButton(entrepriseId: widget.currentUser.entrepriseId),
                   // 📊 P&L + Comptabilité : Propriétaire + Gérant
                   if (_peutVoirFinances) ...[
                     const SizedBox(width: 8),
