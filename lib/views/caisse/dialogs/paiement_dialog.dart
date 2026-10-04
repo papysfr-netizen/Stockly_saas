@@ -17,6 +17,7 @@ import 'package:stockly_saas/core/utils/payment_calculator.dart';
 
 // Import de ton écran de Bon de Livraison professionnel
 import '../../../screens/bon_livraison_screen.dart';
+import '../../../core/services/utilisateur_service.dart';
 
 class PaiementDialog extends ConsumerStatefulWidget {
   final double total;
@@ -703,6 +704,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         'dateLimiteLivraison': estLivre ? null : Timestamp.fromDate(finJourLimite),
         'methodePaiement': methodePaiement,
         'vendeurId': widget.userId,
+        'vendeurNom': await nomUtilisateurConnecte(),
         'entrepriseId': widget.entrepriseId,
         'comptabilise': true,
         'coutMarchandises': coutMarchandises,

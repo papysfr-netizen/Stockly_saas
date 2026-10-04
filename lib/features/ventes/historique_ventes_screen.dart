@@ -40,6 +40,8 @@ String _formatDate(DateTime d) =>
 String _numeroFacture(String id) =>
     id.length >= 8 ? id.substring(0, 8).toUpperCase() : id.toUpperCase();
 
+String _vendeur(Map<String, dynamic> d) => (d['vendeurNom'] ?? '').toString().trim();
+
 enum _Periode { aujourdhui, semaine, mois, tout }
 
 extension on _Periode {
@@ -67,6 +69,7 @@ class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen>
   final _rechercheCtrl = TextEditingController();
   String _recherche = '';
   _Periode _periode = _Periode.aujourdhui;
+  String? _vendeurFiltre; // null = tous les vendeurs
 
   @override
   void dispose() {
@@ -160,10 +163,28 @@ class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen>
                 ),
               ),
               data: (docs) {
-                final ventes = docs.where((doc) {
+                // Ventes de la période + recherche (avant le filtre vendeur)
+                final ventesPeriode = docs.where((doc) {
                   final d = doc.data();
                   return _dansPeriode(_dateVente(d)) && _correspond(doc.id, d);
                 }).toList();
+
+                // Liste des vendeurs présents dans la période
+                final vendeurs = ventesPeriode
+                    .map((v) => _vendeur(v.data()))
+                    .where((n) => n.isNotEmpty)
+                    .toSet()
+                    .toList()
+                  ..sort();
+
+                // Si le vendeur choisi n'existe plus dans la période, on revient à « Tous »
+                final filtre = (_vendeurFiltre != null && vendeurs.contains(_vendeurFiltre))
+                    ? _vendeurFiltre
+                    : null;
+
+                final ventes = filtre == null
+                    ? ventesPeriode
+                    : ventesPeriode.where((v) => _vendeur(v.data()) == filtre).toList();
 
                 double total = 0, encaisse = 0, reste = 0;
                 for (final v in ventes) {
@@ -177,6 +198,35 @@ class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen>
 
                 return Column(
                   children: [
+                    // Filtre vendeur
+                    if (vendeurs.isNotEmpty)
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
+                        child: Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(right: 6),
+                              child: ChoiceChip(
+                                avatar: const Icon(Icons.groups, size: 16),
+                                label: const Text('Tous'),
+                                selected: filtre == null,
+                                onSelected: (_) => setState(() => _vendeurFiltre = null),
+                              ),
+                            ),
+                            ...vendeurs.map((n) => Padding(
+                                  padding: const EdgeInsets.only(right: 6),
+                                  child: ChoiceChip(
+                                    avatar: const Icon(Icons.person, size: 16),
+                                    label: Text(n),
+                                    selected: filtre == n,
+                                    onSelected: (_) => setState(() => _vendeurFiltre = n),
+                                  ),
+                                )),
+                          ],
+                        ),
+                      ),
+
                     // Résumé
                     Container(
                       margin: const EdgeInsets.fromLTRB(12, 6, 12, 6),
@@ -185,19 +235,34 @@ class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen>
                         color: Colors.indigo.shade50,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Row(
+                      child: Column(
                         children: [
-                          _Resume(titre: 'Ventes', valeur: '${ventes.length}'),
-                          _Resume(titre: 'Total', valeur: ref.formatPrice(total)),
-                          _Resume(
-                            titre: 'Encaissé',
-                            valeur: ref.formatPrice(encaisse),
-                            couleur: Colors.green.shade800,
-                          ),
-                          _Resume(
-                            titre: 'Reste',
-                            valeur: ref.formatPrice(reste),
-                            couleur: reste > 0.005 ? Colors.red : Colors.grey.shade700,
+                          if (filtre != null)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 6),
+                              child: Text(
+                                'Ventes de $filtre',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.indigo.shade900,
+                                ),
+                              ),
+                            ),
+                          Row(
+                            children: [
+                              _Resume(titre: 'Ventes', valeur: '${ventes.length}'),
+                              _Resume(titre: 'Total', valeur: ref.formatPrice(total)),
+                              _Resume(
+                                titre: 'Encaissé',
+                                valeur: ref.formatPrice(encaisse),
+                                couleur: Colors.green.shade800,
+                              ),
+                              _Resume(
+                                titre: 'Reste',
+                                valeur: ref.formatPrice(reste),
+                                couleur: reste > 0.005 ? Colors.red : Colors.grey.shade700,
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -324,6 +389,8 @@ class _LigneVente extends ConsumerWidget {
     final articles = _articles;
     final livre = (data['statutLivraison'] ?? 'Livré').toString() != 'Non livré';
     final dateLiv = data['dateLivraison'];
+    final vendeur = _vendeur(data);
+    final livreur = (data['livreParNom'] ?? '').toString().trim();
 
     showModalBottomSheet(
       context: context,
@@ -391,6 +458,9 @@ class _LigneVente extends ConsumerWidget {
             if (reste > 0.005)
               _ligneMontant('Reste à payer', ref.formatPrice(reste), couleur: Colors.red),
             _ligneMontant('Moyen', (data['methodePaiement'] ?? '-').toString()),
+            const Divider(height: 24),
+            _ligneMontant('Vendu par', vendeur.isEmpty ? '—' : vendeur),
+            if (livre) _ligneMontant('Livré par', livreur.isEmpty ? '—' : livreur),
             const SizedBox(height: 18),
             OutlinedButton.icon(
               icon: const Icon(Icons.description_outlined),
@@ -448,6 +518,7 @@ class _LigneVente extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final client = (data['nomClient'] ?? 'Client Divers').toString();
     final total = _num(data['montantTotal']);
+    final vendeur = _vendeur(data);
     final nbArticles = _articles.fold<int>(
         0, (s, a) => s + ((a['quantite'] is num) ? (a['quantite'] as num).toInt() : 0));
 
@@ -468,6 +539,11 @@ class _LigneVente extends ConsumerWidget {
                 '${_formatDate(_dateVente(data))} • ${_numeroFacture(venteId)} • $nbArticles article(s)',
                 style: const TextStyle(fontSize: 12),
               ),
+              if (vendeur.isNotEmpty)
+                Text(
+                  'par $vendeur',
+                  style: TextStyle(fontSize: 12, color: Colors.indigo.shade700),
+                ),
               const SizedBox(height: 4),
               Wrap(spacing: 6, children: [_badgePaiement(data), _badgeLivraison(data)]),
             ],
