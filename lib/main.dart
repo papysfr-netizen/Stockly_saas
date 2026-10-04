@@ -37,13 +37,35 @@ void main() async {
     debugPrint("Erreur d'initialisation Firebase : $e");
   }
 
-  runApp(
-    const ProviderScope(
-      child: AppInitializer(
-        child: MyApp(),
-      ),
-    ),
-  );
+  runApp(const RacineApp());
+}
+
+// ============================================================================
+// 🔄 RACINE : MÉMOIRE NEUVE À CHAQUE CHANGEMENT DE COMPTE
+// Quand le compte connecté change (déconnexion, autre employé…),
+// le ProviderScope reçoit une nouvelle clé : toute la mémoire de l'app
+// (dettes, stock, équipe…) est recréée à neuf pour le nouveau compte.
+// Plus de « permission-denied » hérité du compte précédent.
+// ============================================================================
+class RacineApp extends StatelessWidget {
+  const RacineApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      initialData: FirebaseAuth.instance.currentUser,
+      builder: (context, snapshot) {
+        final uid = snapshot.data?.uid ?? 'deconnecte';
+        return ProviderScope(
+          key: ValueKey('scope_$uid'),
+          child: const AppInitializer(
+            child: MyApp(),
+          ),
+        );
+      },
+    );
+  }
 }
 
 // ============================================================================
@@ -212,6 +234,11 @@ class AuthWrapper extends ConsumerWidget {
               final doc = userSnapshot.data!;
               final rawData = doc.data() as Map<String, dynamic>? ?? {};
 
+              // ⛔ Compte désactivé par le propriétaire (même en cours d'utilisation)
+              if (rawData['estActif'] == false) {
+                return const _CompteDesactiveScreen();
+              }
+
               // Décodage du modèle utilisateur
               final currentUser = UserModel.fromMap(
                 {
@@ -269,6 +296,47 @@ class AuthWrapper extends ConsumerWidget {
           },
         );
       },
+    );
+  }
+}
+
+// ============================================================================
+// ⛔ ÉCRAN « COMPTE DÉSACTIVÉ »
+// ============================================================================
+class _CompteDesactiveScreen extends StatelessWidget {
+  const _CompteDesactiveScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.block, size: 72, color: Colors.red.shade400),
+              const SizedBox(height: 16),
+              const Text(
+                'Compte désactivé',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                "Le propriétaire de la boutique a désactivé ce compte.\n"
+                "Contactez-le pour le réactiver.",
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () => FirebaseAuth.instance.signOut(),
+                icon: const Icon(Icons.logout),
+                label: const Text('Retour à la connexion'),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
