@@ -30,6 +30,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _isImporting = false;
   String _importProgressText = "";
 
+  // ------------------------------------------------------------------
+  // 🔐 DROITS SELON LE RÔLE
+  // Propriétaire : tout
+  // Gérant       : stock + finances (pas Paramètres / Équipe / Maintenance)
+  // Caissier     : Caisse + Dettes seulement
+  // ------------------------------------------------------------------
+  bool get _peutGererStock => widget.currentUser.isAdmin; // owner + gérant
+  bool get _peutVoirFinances => widget.currentUser.canAccessFinance; // owner + gérant
+  bool get _peutGererParametres => widget.currentUser.canManageTeam; // owner seul
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -124,8 +134,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-   final currencyState = ref.watch(currencyProvider);
-    // Utilise .name si c'est un Enum, ou adapte selon ton modèle (ex: currencyState.toString() ne marchait pas car c'était l'instance, mais tu peux cibler .name)
+    final currencyState = ref.watch(currencyProvider);
     final String currency = currencyState.activeCurrencyInfo.symbol;
     final produitsAsync = ref.watch(produitsStreamProvider);
 
@@ -149,7 +158,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ],
         ),
         actions: [
-          if (widget.currentUser.isAdmin) ...[
+          // 📥 Import Excel : Propriétaire + Gérant
+          if (_peutGererStock) ...[
             _isImporting
                 ? Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -181,16 +191,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     onPressed: _importerExcel,
                   ),
           ],
-          IconButton(
-            icon: const Icon(Icons.settings),
-            tooltip: 'Paramètres',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
-              );
-            },
-          ),
+          // ⚙️ Paramètres : Propriétaire seulement
+          if (_peutGererParametres)
+            IconButton(
+              icon: const Icon(Icons.settings),
+              tooltip: 'Paramètres',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                );
+              },
+            ),
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Déconnexion',
@@ -208,6 +220,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
+                  // 🧾 Caisse : tout le monde
                   _buildNavBtn(
                     icon: Icons.point_of_sale,
                     label: 'Caisse POS',
@@ -218,17 +231,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       MaterialPageRoute(builder: (context) => const CaisseScreen()),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  _buildNavBtn(
-                    icon: Icons.account_balance_wallet,
-                    label: 'Dépenses',
-                    bgColor: Colors.redAccent.shade100,
-                    fgColor: Colors.red.shade900,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const DepensesScreen()),
+                  // 💸 Dépenses : Propriétaire + Gérant
+                  if (_peutVoirFinances) ...[
+                    const SizedBox(width: 8),
+                    _buildNavBtn(
+                      icon: Icons.account_balance_wallet,
+                      label: 'Dépenses',
+                      bgColor: Colors.redAccent.shade100,
+                      fgColor: Colors.red.shade900,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const DepensesScreen()),
+                      ),
                     ),
-                  ),
+                  ],
+                  // 📒 Dettes : tout le monde
                   const SizedBox(width: 8),
                   _buildNavBtn(
                     icon: Icons.menu_book,
@@ -241,7 +258,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           builder: (context) => const DebtManagementScreen()),
                     ),
                   ),
-                  if (widget.currentUser.isAdmin) ...[
+                  // 📊 P&L + Comptabilité : Propriétaire + Gérant
+                  if (_peutVoirFinances) ...[
                     const SizedBox(width: 8),
                     _buildNavBtn(
                       icon: Icons.analytics,
@@ -336,7 +354,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         children: [
                           _buildStatCard("Produits", "${filteredDocs.length}",
                               Icons.inventory_2, Colors.blue),
-                          if (widget.currentUser.isAdmin) ...[
+                          // 💰 Valeur du stock : Propriétaire + Gérant
+                          if (_peutVoirFinances) ...[
                             const SizedBox(width: 12),
                             _buildStatCard(
                               "Valeur Stock",
@@ -362,7 +381,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             prix: produit.prixVente.toDouble(),
                             currency: currency,
                             imageUrl: produit.imageUrl,
-                            onEdit: widget.currentUser.isAdmin
+                            // ✏️ Modifier : Propriétaire + Gérant
+                            onEdit: _peutGererStock
                                 ? () {
                                     AddProductModal.show(
                                       context,
@@ -374,7 +394,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 : null,
                           );
 
-                          if (widget.currentUser.isAdmin) {
+                          // 🗑️ Supprimer (glisser) : Propriétaire + Gérant
+                          if (_peutGererStock) {
                             return Dismissible(
                               key: Key(produit.id),
                               direction: DismissDirection.endToStart,
@@ -426,7 +447,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
-      floatingActionButton: widget.currentUser.isAdmin
+      // ➕ Nouveau produit : Propriétaire + Gérant
+      floatingActionButton: _peutGererStock
           ? FloatingActionButton.extended(
               backgroundColor: Colors.blue.shade800,
               onPressed: () => AddProductModal.show(
