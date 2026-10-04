@@ -44,7 +44,13 @@ class CaisseScreen extends ConsumerWidget {
       data: (profile) {
         final entrepriseId = profile.entrepriseId;
         final userId = profile.uid;
-        final canAddProduct = profile.can('canAddProduct');
+
+        // 🔐 Droits selon le rôle
+        // ➕ Nouveau produit : Propriétaire + Gérant (et permission activée)
+        final canAddProduct =
+            profile.can('canAddProduct') && profile.role.peutGererStock;
+        // ⚙️ Paramètres : Propriétaire seulement
+        final estProprietaire = profile.role.peutGererEquipe;
 
         final cart = ref.watch(cartProvider);
         final cartNotifier = ref.read(cartProvider.notifier);
@@ -58,9 +64,7 @@ class CaisseScreen extends ConsumerWidget {
             return Scaffold(
               appBar: AppBar(
                 title: const Text('Caisse / POS'),
-                // Utilisation de titleSpacing et d'une disposition optimisée pour éviter les superpositions
                 actions: [
-                  // On donne une largeur contrôlée ou on laisse le widget s'adapter proprement
                   ConstrainedBox(
                     constraints: BoxConstraints(maxWidth: 180),
                     child: FittedBox(
@@ -79,18 +83,20 @@ class CaisseScreen extends ConsumerWidget {
                       onPressed: () =>
                           _afficherDialogNouveauProduit(context, entrepriseId),
                     ),
-                  IconButton(
-                    icon: const Icon(Icons.settings, size: 24),
-                    tooltip: 'Paramètres',
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SettingsScreen(),
-                        ),
-                      );
-                    },
-                  ),
+                  // 🔐 Paramètres : Propriétaire seulement
+                  if (estProprietaire)
+                    IconButton(
+                      icon: const Icon(Icons.settings, size: 24),
+                      tooltip: 'Paramètres',
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SettingsScreen(),
+                          ),
+                        );
+                      },
+                    ),
                   PopupMenuButton<String>(
                     icon: const Icon(Icons.more_vert, size: 24),
                     tooltip: 'Options d\'exportation',

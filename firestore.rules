@@ -20,14 +20,32 @@ service cloud.firestore {
       return monProfil().entrepriseId;
     }
 
+    function monRole() {
+      return monProfil().get('role', 'caissier');
+    }
+
+    // Compte actif (un compte sans le champ estActif est considéré actif)
+    function estActif() {
+      return monProfil().get('estActif', true) != false;
+    }
+
     function estMembre(entId) {
-      return estConnecte() && profilExiste() && monEntreprise() == entId;
+      return estConnecte() && profilExiste() && monEntreprise() == entId && estActif();
     }
 
     // L'utilisateur est le propriétaire (ownerId) de cette entreprise
     function estProprietaireDe(entId) {
       return estConnecte()
         && get(/databases/$(database)/documents/entreprises/$(entId)).data.ownerId == request.auth.uid;
+    }
+
+    // Propriétaire ou Gérant de cette entreprise (anciens noms de rôles acceptés)
+    function estGerantOuPlus(entId) {
+      return estMembre(entId) && (
+        estProprietaireDe(entId)
+        || monRole() in ['owner', 'proprietaire', 'patron', 'gerant', 'admin',
+                         'administrateur', 'chefboutique', 'chef_boutique', 'chef', 'comptable']
+      );
     }
 
     // L'entreprise est en train d'être créée par cet utilisateur (inscription)
@@ -39,15 +57,11 @@ service cloud.firestore {
     // ---------- Profils utilisateurs ----------
     match /users/{userId} {
 
-      // Lire : son propre profil, ou les membres de SA boutique s'il en est le propriétaire
       allow read: if estConnecte() && (
         request.auth.uid == userId
         || estProprietaireDe(resource.data.entrepriseId)
       );
 
-      // Créer :
-      //  - son propre profil lors de l'inscription de sa boutique ;
-      //  - OU (propriétaire) le profil d'un Gérant / Caissier de SA boutique.
       allow create: if estConnecte() && (
         (request.auth.uid == userId && creeParMoi(request.resource.data.entrepriseId))
         || (
@@ -56,14 +70,10 @@ service cloud.firestore {
         )
       );
 
-      // Modifier :
-      //  - son propre profil, sans toucher au rôle ni à l'entreprise ;
-      //  - OU (propriétaire) un membre de SA boutique : jamais en Propriétaire,
-      //    jamais vers une autre boutique, jamais le compte du propriétaire.
       allow update: if estConnecte() && (
         (
           request.auth.uid == userId
-          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'entrepriseId', 'uid'])
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'entrepriseId', 'uid', 'estActif'])
         )
         || (
           estProprietaireDe(resource.data.entrepriseId)
@@ -73,7 +83,6 @@ service cloud.firestore {
         )
       );
 
-      // Supprimer : jamais (on désactive un employé à la place)
       allow delete: if false;
     }
 
@@ -81,22 +90,57 @@ service cloud.firestore {
     match /entreprises/{entId} {
       allow read: if estMembre(entId);
       allow create: if estConnecte() && request.resource.data.ownerId == request.auth.uid;
-      allow update: if estMembre(entId) && request.resource.data.ownerId == resource.data.ownerId;
+      // Infos de la boutique (Paramètres) : Propriétaire seulement
+      allow update: if estProprietaireDe(entId) && request.resource.data.ownerId == resource.data.ownerId;
       allow delete: if false;
 
-      match /{sousDocument=**} {
+      // ----- Produits -----
+      match /produits/{produitId} {
         allow read: if estMembre(entId);
-        allow write: if estMembre(entId) || creeParMoi(entId);
+        // Créer / supprimer : Propriétaire + Gérant
+        allow create, delete: if estGerantOuPlus(entId);
+        // Modifier : Propriétaire + Gérant (tout) ;
+        //            Caissier : seulement le stock lors d'une vente
+        allow update: if estGerantOuPlus(entId)
+          || (estMembre(entId)
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['quantite', 'updatedAt']));
+      }
+
+      // ----- Ventes, créances, dettes : tout le monde crée et met à jour ; effacer = Gérant+ -----
+      match /ventes/{docId} {
+        allow read, create, update: if estMembre(entId);
+        allow delete: if estGerantOuPlus(entId);
+      }
+      match /creances/{docId} {
+        allow read, create, update: if estMembre(entId);
+        allow delete: if estGerantOuPlus(entId);
+      }
+      match /dettes/{docId} {
+        allow read, create, update: if estMembre(entId);
+        allow delete: if estGerantOuPlus(entId);
+      }
+
+      // ----- Écritures comptables : tout le monde crée ; modifier / effacer = Gérant+ -----
+      match /ecritures_comptables/{docId} {
+        allow read, create: if estMembre(entId);
+        allow update, delete: if estGerantOuPlus(entId);
+      }
+
+      // ----- Toutes les autres sous-collections (comme avant) -----
+      match /{collection}/{reste=**} {
+        allow read: if estMembre(entId);
+        allow write: if !(collection in ['produits', 'ventes', 'creances', 'dettes', 'ecritures_comptables'])
+          && (estMembre(entId) || creeParMoi(entId));
       }
     }
 
-    // ---------- Dépenses (collection principale) ----------
+    // ---------- Dépenses : Propriétaire + Gérant ----------
     match /depenses/{depenseId} {
-      allow read: if estConnecte() && resource.data.entrepriseId == monEntreprise();
-      allow create: if estConnecte() && request.resource.data.entrepriseId == monEntreprise();
-      allow update: if estConnecte() && resource.data.entrepriseId == monEntreprise()
+      allow read: if estGerantOuPlus(monEntreprise()) && resource.data.entrepriseId == monEntreprise();
+      allow create: if estGerantOuPlus(monEntreprise()) && request.resource.data.entrepriseId == monEntreprise();
+      allow update: if estGerantOuPlus(monEntreprise()) && resource.data.entrepriseId == monEntreprise()
         && request.resource.data.entrepriseId == resource.data.entrepriseId;
-      allow delete: if estConnecte() && resource.data.entrepriseId == monEntreprise();
+      allow delete: if estGerantOuPlus(monEntreprise()) && resource.data.entrepriseId == monEntreprise();
     }
 
     // ---------- Ancien chemin (écran Équipe de démonstration) ----------
