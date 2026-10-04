@@ -11,6 +11,7 @@ import '../../../core/services/packing_list_service.dart';
 import '../../../views/caisse/caisse_screen.dart';
 import '../../../views/financial_analysis/financial_analysis_screen.dart';
 import '../../../core/widgets/add_product_modal.dart';
+import '../../../core/widgets/changer_mot_de_passe_dialog.dart';
 import 'comptabilite_screen.dart';
 import 'debt_management_screen.dart';
 import 'depenses_screen.dart';
@@ -203,10 +204,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 );
               },
             ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Déconnexion',
-            onPressed: () => FirebaseAuth.instance.signOut(),
+          // 👤 Mon compte : tout le monde (mot de passe + déconnexion)
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.account_circle),
+            tooltip: 'Mon compte',
+            onSelected: (choix) {
+              if (choix == 'mdp') {
+                ChangerMotDePasseDialog.show(context);
+              } else if (choix == 'deco') {
+                FirebaseAuth.instance.signOut();
+              }
+            },
+            itemBuilder: (context) => const [
+              PopupMenuItem(
+                value: 'mdp',
+                child: ListTile(
+                  leading: Icon(Icons.lock_reset),
+                  title: Text('Changer mon mot de passe'),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              PopupMenuItem(
+                value: 'deco',
+                child: ListTile(
+                  leading: Icon(Icons.logout, color: Colors.red),
+                  title: Text('Se déconnecter'),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ],
           ),
         ],
       ),
