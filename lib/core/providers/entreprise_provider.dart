@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'settings_provider.dart' show settingsProvider, ShopSettings;
+
 class Entreprise {
   final String id;
   final String nom;
@@ -64,9 +66,38 @@ class EntrepriseNotifier extends StateNotifier<Entreprise> {
   void modifierMentionsLegales({required String rccm, required String idNat, required String nif}) {
     state = state.copyWith(rccm: rccm, idNat: idNat, nif: nif);
   }
+
+  /// 🏪 Recopie les vraies infos de la boutique (lues dans Firebase par settingsProvider).
+  /// Un champ vide ne remplace pas la valeur actuelle.
+  void synchroniserAvec(ShopSettings s) {
+    String garder(String nouveau, String actuel) =>
+        nouveau.trim().isEmpty ? actuel : nouveau.trim();
+
+    state = state.copyWith(
+      nom: (s.nomBoutique.trim().isEmpty || s.nomBoutique == 'Ma Boutique')
+          ? state.nom
+          : s.nomBoutique.trim(),
+      adresse: garder(s.adresse, state.adresse),
+      telephone: garder(s.telephone, state.telephone),
+      devise: garder(s.currency, state.devise),
+      rccm: garder(s.rccm, state.rccm),
+      idNat: garder(s.idNat, state.idNat),
+      nif: garder(s.nif, state.nif),
+    );
+  }
 }
 
-/// Le provider global qui remplace ton ancien Provider simple
+/// Le provider global.
+/// 🏪 Il suit automatiquement les infos de la boutique enregistrées dans Firebase
+/// (entreprises/{id} → infosBoutique), pour TOUS les rôles, dès la connexion.
 final entrepriseProvider = StateNotifierProvider<EntrepriseNotifier, Entreprise>((ref) {
-  return EntrepriseNotifier();
+  final notifier = EntrepriseNotifier();
+
+  ref.listen<ShopSettings>(
+    settingsProvider,
+    (_, infos) => notifier.synchroniserAvec(infos),
+    fireImmediately: true,
+  );
+
+  return notifier;
 });
