@@ -16,6 +16,7 @@ import 'comptabilite_screen.dart';
 import 'debt_management_screen.dart';
 import 'depenses_screen.dart';
 import '../../livraisons/a_livrer_screen.dart'; // 🚚
+import '../../ventes/historique_ventes_screen.dart'; // 🧾
 import 'package:stockly_saas/screens/settings_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -36,7 +37,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // 🔐 DROITS SELON LE RÔLE
   // Propriétaire : tout
   // Gérant       : stock + finances (pas Paramètres / Équipe / Maintenance)
-  // Caissier     : Caisse + Dettes + À livrer
+  // Caissier     : Caisse + Ventes + Dettes + À livrer
   // ------------------------------------------------------------------
   bool get _peutGererStock => widget.currentUser.isAdmin; // owner + gérant
   bool get _peutVoirFinances => widget.currentUser.canAccessFinance; // owner + gérant
@@ -256,6 +257,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const CaisseScreen()),
+                    ),
+                  ),
+                  // 🧾 Historique des ventes : tout le monde
+                  const SizedBox(width: 8),
+                  _buildNavBtn(
+                    icon: Icons.receipt_long,
+                    label: 'Ventes',
+                    bgColor: Colors.indigo.shade50,
+                    fgColor: Colors.indigo.shade900,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => HistoriqueVentesScreen(
+                          entrepriseId: widget.currentUser.entrepriseId,
+                        ),
+                      ),
                     ),
                   ),
                   // 💸 Dépenses : Propriétaire + Gérant
