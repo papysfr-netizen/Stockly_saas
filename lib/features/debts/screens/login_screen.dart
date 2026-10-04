@@ -15,6 +15,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isEmailMode = true;
   bool _isOtpSent = false;
   bool _isLoading = false;
+  bool _motDePasseVisible = false;
   String? _verificationId;
 
   // Contrôleurs de texte
@@ -22,6 +23,38 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _otpController = TextEditingController();
+
+  // ------------------------------------------------------------------
+  // 🔤 IDENTIFIANT → E-MAIL INTERNE
+  // Si l'utilisateur tape un identifiant (sans @), on ajoute @stockly.app
+  // Exemple : "gracenbm.nhgkxz" → "gracenbm.nhgkxz@stockly.app"
+  // ------------------------------------------------------------------
+  String _convertirEnEmail(String saisie) {
+    final texte = saisie.trim().toLowerCase().replaceAll(' ', '');
+    if (texte.contains('@')) return texte;
+    return '$texte@stockly.app';
+  }
+
+  // ------------------------------------------------------------------
+  // 💬 MESSAGES D'ERREUR EN FRANÇAIS SIMPLE
+  // ------------------------------------------------------------------
+  String _messageErreurAuth(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'invalid-credential':
+      case 'wrong-password':
+      case 'user-not-found':
+      case 'invalid-email':
+        return "Identifiant (ou e-mail) ou mot de passe incorrect.";
+      case 'user-disabled':
+        return "Ce compte est désactivé. Contactez le propriétaire.";
+      case 'too-many-requests':
+        return "Trop d'essais. Patientez quelques minutes puis réessayez.";
+      case 'network-request-failed':
+        return "Pas de connexion internet. Vérifiez votre réseau.";
+      default:
+        return e.message ?? "Erreur de connexion.";
+    }
+  }
 
   // ------------------------------------------------------------------
   // 🔄 REDIRECTION DYNAMIQUE SELON LE RÔLE FIRESTORE
@@ -39,18 +72,26 @@ class _LoginScreenState extends State<LoginScreen> {
 
       Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
 
+      // ⛔ Compte désactivé par le propriétaire
+      if (userData['estActif'] == false) {
+        await FirebaseAuth.instance.signOut();
+        _afficherMessage(
+            "Ce compte est désactivé. Contactez le propriétaire de la boutique.");
+        return;
+      }
+
       // Normalisation en minuscules pour éviter les erreurs de casse
-      String role = (userData['role'] ?? 'vendeur').toString().toLowerCase();
+      String role = (userData['role'] ?? 'caissier').toString().toLowerCase();
 
       if (!mounted) return;
 
-      _afficherMessage("Connexion réussie ! Rôle : $role");
+      final nom = (userData['nom'] ?? '').toString();
+      _afficherMessage(nom.isEmpty ? "Connexion réussie !" : "Bienvenue $nom !");
 
-      // 🔀 Redirection RBAC selon les permissions
-      if (role == 'owner' || role == 'admin') {
+      // 🔀 Propriétaire et Gérant → tableau de bord ; Caissier → caisse
+      if (role == 'owner' || role == 'admin' || role == 'gerant') {
         Navigator.pushReplacementNamed(context, '/dashboard');
       } else {
-        // Redirection directe vers l'interface de caisse pour les vendeurs / caissiers
         Navigator.pushReplacementNamed(context, '/caisse');
       }
     } catch (e) {
@@ -59,16 +100,18 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // ------------------------------------------------------------------
-  // 📧 1. Connexion par Email / Mot de passe
+  // 📧 1. Connexion par Email OU Identifiant / Mot de passe
   // ------------------------------------------------------------------
   Future<void> _loginWithEmail() async {
-    final email = _emailController.text.trim();
+    final saisie = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
+    if (saisie.isEmpty || password.isEmpty) {
       _afficherMessage("Veuillez remplir tous les champs.");
       return;
     }
+
+    final email = _convertirEnEmail(saisie);
 
     setState(() => _isLoading = true);
 
@@ -80,7 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
         await _fetchUserProfileAndNavigate(userCredential.user!.uid);
       }
     } on FirebaseAuthException catch (e) {
-      _afficherMessage(e.message ?? "Erreur de connexion e-mail.");
+      _afficherMessage(_messageErreurAuth(e));
     } catch (e) {
       _afficherMessage("Erreur : ${e.toString()}");
     } finally {
@@ -214,31 +257,45 @@ class _LoginScreenState extends State<LoginScreen> {
                 label: Text(
                   _isEmailMode
                       ? 'Se connecter avec un numéro'
-                      : 'Se connecter par E-mail',
+                      : 'Se connecter par identifiant ou e-mail',
                 ),
               ),
               const SizedBox(height: 24),
 
-              // Formulaire Mode Email
+              // Formulaire Mode Email / Identifiant
               if (_isEmailMode) ...[
                 TextField(
                   controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
+                  keyboardType: TextInputType.text,
+                  autocorrect: false,
+                  textCapitalization: TextCapitalization.none,
                   decoration: const InputDecoration(
-                    labelText: 'Adresse E-mail',
-                    prefixIcon: Icon(Icons.email),
+                    labelText: 'E-mail ou identifiant',
+                    hintText: 'ex : grace.nhgkxz',
+                    helperText: "Employé : tapez l'identifiant reçu du patron",
+                    prefixIcon: Icon(Icons.person),
                     border: OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
+                  obscureText: !_motDePasseVisible,
+                  decoration: InputDecoration(
                     labelText: 'Mot de passe',
-                    prefixIcon: Icon(Icons.lock),
-                    border: OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.lock),
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: Icon(_motDePasseVisible
+                          ? Icons.visibility_off
+                          : Icons.visibility),
+                      onPressed: () => setState(
+                          () => _motDePasseVisible = !_motDePasseVisible),
+                    ),
                   ),
+                  onSubmitted: (_) {
+                    if (!_isLoading) _loginWithEmail();
+                  },
                 ),
                 const SizedBox(height: 24),
                 SizedBox(
@@ -257,7 +314,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
                   decoration: const InputDecoration(
-                    labelText: 'Téléphone (ex: +33612345678)',
+                    labelText: 'Téléphone (ex: +243970000000)',
                     prefixIcon: Icon(Icons.phone),
                     border: OutlineInputBorder(),
                   ),
