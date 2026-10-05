@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../core/providers/currency_provider.dart';
 import '../core/providers/settings_provider.dart' show settingsProvider;
+import '../core/services/facture_pdf_service.dart';
 
 class BonLivraisonScreen extends ConsumerStatefulWidget {
   final String entrepriseId;
@@ -28,21 +29,37 @@ class BonLivraisonScreen extends ConsumerStatefulWidget {
 }
 
 class _BonLivraisonScreenState extends ConsumerState<BonLivraisonScreen> {
-  void _imprimerOuPartager() {
-    // --- RÈGLE DE SÉCURITÉ / TRAÇABILITÉ ---
-    double totalGlobal = 0;
+  // Numéro et date fixés une seule fois (ne changent plus à chaque rafraîchissement)
+  late final DateTime _date;
+  late final String _numeroBL;
+  bool _enCours = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _date = DateTime.now();
+    _numeroBL = 'BL-${_date.millisecondsSinceEpoch.toString().substring(5)}';
+  }
+
+  double get _totalGlobal {
+    double total = 0;
     for (var item in widget.articles) {
-      totalGlobal += (item.quantite * item.prix);
+      total += (item.quantite * item.prix);
     }
+    return total;
+  }
+
+  Future<void> _imprimerOuPartager() async {
+    // --- RÈGLE DE SÉCURITÉ / TRAÇABILITÉ ---
+    final double totalGlobal = _totalGlobal;
 
     const double seuilMinimumTracabilite = 1000.0; // Seuil fixé à 1000 USD
-    bool estClientAnonyme = widget.nomClient.isEmpty ||
+    final bool estClientAnonyme = widget.nomClient.isEmpty ||
         widget.nomClient.toLowerCase().contains('client divers') ||
         widget.nomClient.toLowerCase().contains('comptoir');
-    bool telephoneManquant =
+    final bool telephoneManquant =
         widget.telephoneClient.isEmpty || widget.telephoneClient == 'N/A';
 
-    // Si le montant dépasse le seuil et que les infos client sont insuffisantes
     if (totalGlobal >= seuilMinimumTracabilite &&
         (estClientAnonyme || telephoneManquant)) {
       showDialog(
@@ -71,27 +88,85 @@ class _BonLivraisonScreenState extends ConsumerState<BonLivraisonScreen> {
       return; // Bloque la génération du document
     }
 
-    // --- IMPRESSION PAS ENCORE DISPONIBLE ---
-    // Aucun document n'est encore généré : on le dit honnêtement
-    // au lieu d'afficher un faux message de succès.
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'L\'impression du bon de livraison arrive bientôt. '
-          'Faites une capture d\'écran en attendant.',
+    // --- CHOIX : IMPRIMER OU PARTAGER ---
+    final choix = await showModalBottomSheet<String>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            const Text('Bon de livraison',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            ListTile(
+              leading: const Icon(Icons.print, color: Colors.teal),
+              title: const Text('Imprimer'),
+              onTap: () => Navigator.pop(ctx, 'imprimer'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.share, color: Colors.green),
+              title: const Text('Partager (WhatsApp, e-mail…)'),
+              onTap: () => Navigator.pop(ctx, 'partager'),
+            ),
+            const SizedBox(height: 8),
+          ],
         ),
-        backgroundColor: Colors.orange,
       ),
     );
+    if (choix == null || !mounted) return;
+
+    setState(() => _enCours = true);
+    final messenger = ScaffoldMessenger.of(context);
+
+    try {
+      final boutique = ref.read(settingsProvider);
+      final currencyState = ref.read(currencyProvider);
+
+      final lignes = widget.articles
+          .map((item) => LigneDocument(
+                nom: item.nom.toString(),
+                quantite: (item.quantite as num).toInt(),
+                prixUnitaire: (item.prix as num).toDouble(),
+              ))
+          .toList();
+
+      final octets = await FacturePdfService.construire(
+        type: TypeDocument.bonLivraison,
+        numero: _numeroBL,
+        date: _date,
+        boutique: boutique,
+        nomClient: widget.nomClient,
+        telephoneClient: widget.telephoneClient,
+        adresseClient: widget.adresseClient,
+        lignes: lignes,
+        formatPrix: (v) => currencyState.formatPrice(v),
+      );
+
+      if (choix == 'imprimer') {
+        await FacturePdfService.imprimer(octets, 'Bon de livraison $_numeroBL');
+      } else {
+        await FacturePdfService.partager(octets, 'Bon_livraison_$_numeroBL.pdf');
+      }
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Impossible de créer le PDF : $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _enCours = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final currencyState = ref.watch(currencyProvider);
     final boutique = ref.watch(settingsProvider);
-    final dateDuJour = DateFormat('dd/MM/yyyy à HH:mm').format(DateTime.now());
-    final numeroBL =
-        'BL-${DateTime.now().millisecondsSinceEpoch.toString().substring(5)}';
+    final dateDuJour = DateFormat('dd/MM/yyyy à HH:mm').format(_date);
 
     // Infos du magasin (Paramètres) : les champs vides ne s'affichent pas
     final String nomMagasin = boutique.nomBoutique.trim().isEmpty
@@ -109,23 +184,29 @@ class _BonLivraisonScreenState extends ConsumerState<BonLivraisonScreen> {
       if (phoneMagasin.isNotEmpty) 'Tél : $phoneMagasin',
     ];
 
-    double totalGlobal = 0;
-    for (var item in widget.articles) {
-      totalGlobal += (item.quantite * item.prix);
-    }
+    final double totalGlobal = _totalGlobal;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bon de Livraison ($numeroBL)',
+        title: Text('Bon de Livraison ($_numeroBL)',
             overflow: TextOverflow.ellipsis),
         backgroundColor: Colors.teal.shade800,
         foregroundColor: Colors.white,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.print_rounded),
-            tooltip: 'Imprimer / Partager',
-            onPressed: _imprimerOuPartager,
-          ),
+          _enCours
+              ? const Padding(
+                  padding: EdgeInsets.all(14),
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  ),
+                )
+              : IconButton(
+                  icon: const Icon(Icons.print_rounded),
+                  tooltip: 'Imprimer / Partager',
+                  onPressed: _imprimerOuPartager,
+                ),
         ],
       ),
       body: SingleChildScrollView(
@@ -200,7 +281,7 @@ class _BonLivraisonScreenState extends ConsumerState<BonLivraisonScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'N° : $numeroBL',
+                            'N° : $_numeroBL',
                             style: const TextStyle(
                                 fontSize: 12, fontWeight: FontWeight.w600),
                           ),
