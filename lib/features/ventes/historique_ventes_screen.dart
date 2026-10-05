@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers/cart_provider.dart';
+import '../../core/providers/settings_provider.dart' show settingsProvider;
+import '../../core/services/facture_pdf_service.dart';
 import '../../core/utils/currency_extension.dart';
 import '../../screens/bon_livraison_screen.dart';
 
@@ -163,13 +165,11 @@ class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen>
                 ),
               ),
               data: (docs) {
-                // Ventes de la période + recherche (avant le filtre vendeur)
                 final ventesPeriode = docs.where((doc) {
                   final d = doc.data();
                   return _dansPeriode(_dateVente(d)) && _correspond(doc.id, d);
                 }).toList();
 
-                // Liste des vendeurs présents dans la période
                 final vendeurs = ventesPeriode
                     .map((v) => _vendeur(v.data()))
                     .where((n) => n.isNotEmpty)
@@ -177,7 +177,6 @@ class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen>
                     .toList()
                   ..sort();
 
-                // Si le vendeur choisi n'existe plus dans la période, on revient à « Tous »
                 final filtre = (_vendeurFiltre != null && vendeurs.contains(_vendeurFiltre))
                     ? _vendeurFiltre
                     : null;
@@ -381,6 +380,84 @@ class _LigneVente extends ConsumerWidget {
     return brut.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
   }
 
+  // 📄 Facture PDF : imprimer ou partager
+  Future<void> _facturePdf(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final boutique = ref.read(settingsProvider);
+    String formatPrix(double v) => ref.formatPrice(v);
+
+    final choix = await showModalBottomSheet<String>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            Text('Facture ${_numeroFacture(venteId)}',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            ListTile(
+              leading: const Icon(Icons.print, color: Colors.teal),
+              title: const Text('Imprimer'),
+              onTap: () => Navigator.pop(ctx, 'imprimer'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.share, color: Colors.green),
+              title: const Text('Partager (WhatsApp, e-mail…)'),
+              onTap: () => Navigator.pop(ctx, 'partager'),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+    if (choix == null) return;
+
+    try {
+      final total = _num(data['montantTotal']);
+      final reste = _num(data['resteAPayer']);
+      final numero = _numeroFacture(venteId);
+
+      final lignes = _articles
+          .map((a) => LigneDocument(
+                nom: (a['nom'] ?? '').toString(),
+                quantite: (a['quantite'] is num) ? (a['quantite'] as num).toInt() : 0,
+                prixUnitaire: _num(a['prixUnitaire']),
+              ))
+          .toList();
+
+      final octets = await FacturePdfService.construire(
+        type: TypeDocument.facture,
+        numero: numero,
+        date: _dateVente(data),
+        boutique: boutique,
+        nomClient: (data['nomClient'] ?? 'Client Divers').toString(),
+        telephoneClient: (data['telephoneClient'] ?? '').toString(),
+        lignes: lignes,
+        formatPrix: formatPrix,
+        montantPaye: total - reste,
+        resteAPayer: reste,
+        vendeur: _vendeur(data),
+        livreur: (data['livreParNom'] ?? '').toString(),
+      );
+
+      if (choix == 'imprimer') {
+        await FacturePdfService.imprimer(octets, 'Facture $numero');
+      } else {
+        await FacturePdfService.partager(octets, 'Facture_$numero.pdf');
+      }
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Impossible de créer la facture : $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   void _ouvrirDetail(BuildContext context, WidgetRef ref) {
     final client = (data['nomClient'] ?? 'Client Divers').toString();
     final tel = (data['telephoneClient'] ?? '').toString();
@@ -462,9 +539,30 @@ class _LigneVente extends ConsumerWidget {
             _ligneMontant('Vendu par', vendeur.isEmpty ? '—' : vendeur),
             if (livre) _ligneMontant('Livré par', livreur.isEmpty ? '—' : livreur),
             const SizedBox(height: 18),
+
+            // 📄 Facture PDF
+            SizedBox(
+              height: 46,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green.shade700,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                icon: const Icon(Icons.picture_as_pdf),
+                label: const Text('Facture PDF (imprimer / WhatsApp)',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  _facturePdf(context, ref);
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+
             OutlinedButton.icon(
               icon: const Icon(Icons.description_outlined),
-              label: const Text('Réimprimer le bon de livraison'),
+              label: const Text('Bon de livraison'),
               onPressed: () {
                 final items = articles
                     .map((a) => CartItem(
