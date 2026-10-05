@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/user_model.dart';
 import '../../../core/providers/currency_provider.dart';
 import '../../../core/providers/produit_provider.dart';
+import '../../../core/providers/entreprise_provider.dart';
 import '../../../core/services/packing_list_service.dart';
 import '../../../views/caisse/caisse_screen.dart';
 import '../../../views/financial_analysis/financial_analysis_screen.dart';
@@ -140,6 +141,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final currencyState = ref.watch(currencyProvider);
     final String currency = currencyState.activeCurrencyInfo.symbol;
     final produitsAsync = ref.watch(produitsStreamProvider);
+    ref.watch(entrepriseProvider); // 🏪 charge les infos de la boutique dès l'accueil
 
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
