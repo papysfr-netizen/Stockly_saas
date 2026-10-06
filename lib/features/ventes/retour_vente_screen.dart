@@ -550,6 +550,7 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
       'montantRetourne': FieldValue.increment(montant),
       'statutRetour': toutRetourne ? 'total' : 'partiel',
       'dateDernierRetour': now,
+      if (coutAbime > 0.005) 'coutAbimeRetours': FieldValue.increment(coutAbime),
       if (reduction > 0.005) 'resteAPayer': nouveauReste,
       if (reduction > 0.005 && nouveauReste <= 0.005) 'statutPaiement': 'Payé',
     });

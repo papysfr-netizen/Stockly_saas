@@ -63,8 +63,6 @@ class FinancialCalculationService {
     required String entrepriseId,
   }) {
     // PÉRIODE EN JOURS ENTIERS : du 1er jour à 00:00 jusqu'à la fin du dernier jour.
-    // (Un sélecteur de dates renvoie des dates à minuit : sans cela, "Aujourd'hui"
-    // ne comptait que les ventes faites entre 00:00:00 et 00:00:01.)
     final DateTime debut = DateTime(
         dateRange.start.year, dateRange.start.month, dateRange.start.day);
     final DateTime finExclusive = DateTime(
@@ -109,7 +107,7 @@ class FinancialCalculationService {
       if (pNom.isNotEmpty) prixAchatParNom[pNom] = pAchat;
     }
 
-    // 3. Traitement des ventes et calcul des coûts
+    // 3. Traitement des ventes et calcul des coûts (retours déduits)
     double chiffreAffaires = 0.0;
     double coutAchatStockVendu = 0.0;
 
@@ -128,11 +126,12 @@ class FinancialCalculationService {
         continue;
       }
 
-      // CORRECTIF : la caisse enregistre les lignes sous "articles"
-      // (l'ancien code cherchait seulement "produits" / "items" : le coût
-      // d'achat des ventes de la caisse était donc toujours 0).
       final dynamic rawItems = data['produits'] ?? data['articles'] ?? data['items'];
       final List<dynamic> items = rawItems is List ? rawItems : const [];
+
+      // Quantités retournées (même ordre que les articles)
+      final dynamic rawRetours = data['quantitesRetournees'];
+      final List<dynamic> retours = rawRetours is List ? rawRetours : const [];
 
       // Total de la vente : total déclaré, sinon somme des lignes,
       // et en tout dernier recours le montant payé.
@@ -148,24 +147,32 @@ class FinancialCalculationService {
         totalVente = somme > 0 ? somme : _num(data['montantPaye']);
       }
 
-      // Une vente sans date valide n'est rattachée à aucune période
-      // (avant, elle était comptée dans TOUTES les périodes).
       final DateTime? dateVente = _date(data['date'] ?? data['createdAt']);
       if (!dansLaPeriode(dateVente)) continue;
 
-      chiffreAffaires += totalVente;
+      // ↩️ Retours : le chiffre d'affaires est NET des retours
+      chiffreAffaires += totalVente - _num(data['montantRetourne']);
 
-      for (final rawItem in items) {
+      for (var i = 0; i < items.length; i++) {
+        final rawItem = items[i];
         if (rawItem is! Map) continue;
         final item = rawItem;
 
         final double qteBrute =
             _num(item['quantite'] ?? item['quantity'] ?? item['qte'], 1.0);
+        final double qteRetournee = i < retours.length ? _num(retours[i]) : 0.0;
+        final double qteNette =
+            (qteBrute - qteRetournee) > 0 ? qteBrute - qteRetournee : 0.0;
+        if (qteNette <= 0) continue; // tout a été retourné
+
         final num qte =
-            qteBrute == qteBrute.roundToDouble() ? qteBrute.toInt() : qteBrute;
+            qteNette == qteNette.roundToDouble() ? qteNette.toInt() : qteNette;
         final nom =
             (item['nom'] ?? item['name'] ?? item['produit'] ?? 'Produit').toString();
-        final double prixVenteTotal = _totalLigne(item);
+
+        final double totalLigneBrut = _totalLigne(item);
+        final double prixVenteTotal =
+            qteBrute > 0 ? totalLigneBrut * qteNette / qteBrute : totalLigneBrut;
 
         double prixAchatItem = _num(
             item['prixAchat'] ?? item['prix_achat'] ?? item['achat']);
@@ -185,7 +192,7 @@ class FinancialCalculationService {
           }
         }
 
-        final double totalCoutItem = prixAchatItem * qteBrute;
+        final double totalCoutItem = prixAchatItem * qteNette;
         coutAchatStockVendu += totalCoutItem;
 
         detailsVentesList.add({
@@ -209,6 +216,29 @@ class FinancialCalculationService {
           'totalVente': prixVenteTotal,
           'totalAchat': totalCoutItem,
           'marge': prixVenteTotal - totalCoutItem,
+        });
+      }
+
+      // ↩️ Articles retournés abîmés : ils ne reviennent pas en stock,
+      // leur coût d'achat reste une charge (perte).
+      final double perte = _num(data['coutAbimeRetours']);
+      if (perte > 0.005) {
+        coutAchatStockVendu += perte;
+
+        detailsCoutAchatList.add({
+          'nom': 'Pertes : articles retournés abîmés',
+          'qte': 0,
+          'prixAchatUnit': 0.0,
+          'total': perte,
+          'date': dateVente,
+        });
+
+        detailsMargeList.add({
+          'nom': 'Pertes : articles retournés abîmés',
+          'qte': 0,
+          'totalVente': 0.0,
+          'totalAchat': perte,
+          'marge': -perte,
         });
       }
     }
