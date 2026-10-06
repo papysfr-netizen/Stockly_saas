@@ -7,10 +7,8 @@ import 'package:share_plus/share_plus.dart';
 
 import '../models/produit.dart';
 
+// 📤 EXPORT DU STOCK — version 2 (titres clairs, totaux, date dans le nom)
 class ExcelService {
-  // ------------------------------------------------------------------
-  // Helper : Extraction sécurisée des valeurs Excel (compatibilité v4+)
-  // ------------------------------------------------------------------
   static String _extractString(dynamic cellValue) {
     if (cellValue == null) return '';
     dynamic val = cellValue;
@@ -25,7 +23,6 @@ class ExcelService {
     if (cellValue == null) return 0;
     dynamic raw = cellValue;
     if (raw is Data) raw = raw.value;
-
     if (raw is num) return raw.toInt();
     String str = _extractString(raw);
     double? parsedDouble = double.tryParse(str.replaceAll(',', '.'));
@@ -36,14 +33,14 @@ class ExcelService {
     if (cellValue == null) return 0.0;
     dynamic raw = cellValue;
     if (raw is Data) raw = raw.value;
-
     if (raw is num) return raw.toDouble();
     String str = _extractString(raw).replaceAll(',', '.');
     return double.tryParse(str) ?? 0.0;
   }
 
   // ------------------------------------------------------------------
-  // 1. Importer le catalogue (Excel .xlsx / .xls ou CSV .csv)
+  // 1. Ancien import (NON UTILISÉ — remplacé par PackingListService).
+  //    Gardé temporairement, à supprimer après vérification.
   // ------------------------------------------------------------------
   static List<Produit> importerStockDepuisExcel(
     List<int> bytes,
@@ -56,7 +53,6 @@ class ExcelService {
 
     var excel = Excel.decodeBytes(bytes);
     List<Produit> produits = [];
-
     if (excel.tables.isEmpty) return produits;
 
     var sheet = excel.tables[excel.tables.keys.first];
@@ -66,7 +62,6 @@ class ExcelService {
     var headerRow = sheet.rows.first;
     bool hasHeader = false;
 
-    // Détection dynamique des colonnes par leurs intitulés
     for (int col = 0; col < headerRow.length; col++) {
       String val = _extractString(headerRow[col]).toLowerCase();
       if (val.contains('code') || val.contains('ref') || val.contains('barcode')) {
@@ -88,7 +83,6 @@ class ExcelService {
     }
 
     int startRow = hasHeader ? 1 : 0;
-
     for (int i = startRow; i < sheet.maxRows; i++) {
       var row = sheet.rows[i];
       if (row.isEmpty) continue;
@@ -107,23 +101,16 @@ class ExcelService {
           'prixAchat': prixAchat,
           'prixVente': prixVente,
           'entrepriseId': entrepriseId,
-        }, '')); // Passer la chaîne vide comme ID généré ultérieurement
+        }, ''));
       }
     }
     return produits;
   }
 
-  // ------------------------------------------------------------------
-  // Parsing CSV sécurisé avec détection dynamique de colonnes
-  // ------------------------------------------------------------------
   static List<Produit> _importerDepuisCsv(List<int> bytes, String entrepriseId) {
     String content = utf8.decode(bytes, allowMalformed: true);
     String delimiter = content.contains(';') ? ';' : ',';
-
-    // Suppression de eol: '\n' pour laisser le parser gérer automatiquement \r\n et \n
-    List<List<dynamic>> rows = CsvToListConverter(
-      fieldDelimiter: delimiter,
-    ).convert(content);
+    List<List<dynamic>> rows = CsvToListConverter(fieldDelimiter: delimiter).convert(content);
 
     List<Produit> produits = [];
     if (rows.isEmpty) return produits;
@@ -153,7 +140,6 @@ class ExcelService {
     }
 
     int startRow = hasHeader ? 1 : 0;
-
     for (int i = startRow; i < rows.length; i++) {
       var row = rows[i];
       if (row.isEmpty) continue;
@@ -179,43 +165,104 @@ class ExcelService {
   }
 
   // ------------------------------------------------------------------
-  // 2. Exporter le catalogue vers un fichier Excel et le partager
+  // 2. 📤 Exporter le stock vers Excel et le partager
   // ------------------------------------------------------------------
+  static double _nombre(dynamic v) => v is num ? v.toDouble() : (double.tryParse('$v') ?? 0.0);
+
+  static String _deux(int n) => n.toString().padLeft(2, '0');
+
   static Future<File> exporterStockVersExcel(
     List<Map<String, dynamic>> produits, {
     bool triggerShare = true,
   }) async {
-    var excel = Excel.createExcel();
-
-    String defaultSheet = excel.getDefaultSheet() ?? 'Sheet1';
+    final excel = Excel.createExcel();
+    final String defaultSheet = excel.getDefaultSheet() ?? 'Sheet1';
     excel.rename(defaultSheet, 'Stock Actuel');
-    Sheet sheetObject = excel['Stock Actuel'];
+    final Sheet feuille = excel['Stock Actuel'];
 
-    sheetObject.appendRow([
-      TextCellValue('codeBarre'),
-      TextCellValue('nom'),
-      TextCellValue('quantite'),
-      TextCellValue('PA'),
-      TextCellValue('PV'),
+    // Titres clairs (et toujours reconnus par l'import de Stockly)
+    const titres = [
+      'Code-barres',
+      'Nom',
+      'Quantité',
+      "Prix d'achat (USD)",
+      'Prix de vente (USD)',
+      'Valeur achat (USD)',
+      'Valeur vente (USD)',
+      'Marge unitaire (USD)',
+    ];
+    feuille.appendRow(titres.map((t) => TextCellValue(t)).toList());
+
+    // Lecture sûre (anciens champs acceptés), puis tri alphabétique
+    final lignes = produits.map((p) {
+      return (
+        code: (p['codeBarre'] ?? p['code_barre'] ?? '').toString(),
+        nom: (p['nom'] ?? 'Inconnu').toString(),
+        quantite: _nombre(p['quantite'] ?? p['stock']).toInt(),
+        prixAchat: _nombre(p['prixAchat']),
+        prixVente: _nombre(p['prixVente'] ?? p['prix']),
+      );
+    }).toList()
+      ..sort((a, b) => a.nom.toLowerCase().compareTo(b.nom.toLowerCase()));
+
+    int totalQuantite = 0;
+    double totalAchat = 0, totalVente = 0;
+
+    for (final l in lignes) {
+      final valeurAchat = l.quantite * l.prixAchat;
+      final valeurVente = l.quantite * l.prixVente;
+      totalQuantite += l.quantite;
+      totalAchat += valeurAchat;
+      totalVente += valeurVente;
+
+      feuille.appendRow([
+        TextCellValue(l.code),
+        TextCellValue(l.nom),
+        IntCellValue(l.quantite),
+        DoubleCellValue(l.prixAchat),
+        DoubleCellValue(l.prixVente),
+        DoubleCellValue(valeurAchat),
+        DoubleCellValue(valeurVente),
+        DoubleCellValue(l.prixVente - l.prixAchat),
+      ]);
+    }
+
+    // Ligne TOTAL
+    feuille.appendRow([
+      TextCellValue(''),
+      TextCellValue('TOTAL (${lignes.length} produits)'),
+      IntCellValue(totalQuantite),
+      TextCellValue(''),
+      TextCellValue(''),
+      DoubleCellValue(totalAchat),
+      DoubleCellValue(totalVente),
+      DoubleCellValue(totalVente - totalAchat),
     ]);
 
-    for (var produit in produits) {
-      sheetObject.appendRow([
-        TextCellValue(produit['codeBarre']?.toString() ?? ''),
-        TextCellValue(produit['nom']?.toString() ?? 'Inconnu'),
-        IntCellValue((produit['quantite'] as num?)?.toInt() ?? 0),
-        DoubleCellValue((produit['prixAchat'] as num?)?.toDouble() ?? 0.0),
-        DoubleCellValue((produit['prixVente'] as num?)?.toDouble() ?? 0.0),
-      ]);
+    // Titres et TOTAL en gras + largeur des colonnes
+    final gras = CellStyle(bold: true);
+    final ligneTotal = lignes.length + 1;
+    for (int c = 0; c < titres.length; c++) {
+      feuille.cell(CellIndex.indexByColumnRow(columnIndex: c, rowIndex: 0)).cellStyle = gras;
+      feuille.cell(CellIndex.indexByColumnRow(columnIndex: c, rowIndex: ligneTotal)).cellStyle = gras;
+    }
+    feuille.setColumnWidth(0, 18);
+    feuille.setColumnWidth(1, 32);
+    for (int c = 2; c < titres.length; c++) {
+      feuille.setColumnWidth(c, 16);
     }
 
     final fileBytes = excel.encode();
     if (fileBytes == null) {
-      throw Exception("Erreur lors de la génération du fichier Excel.");
+      throw Exception('Erreur lors de la génération du fichier Excel.');
     }
 
+    // Nom du fichier avec la date et l'heure
+    final m = DateTime.now();
+    final horodatage =
+        '${m.year}-${_deux(m.month)}-${_deux(m.day)}_${_deux(m.hour)}h${_deux(m.minute)}';
     final directory = await getTemporaryDirectory();
-    final filePath = "${directory.path}/Rapport_Stock_Stockly.xlsx";
+    final filePath = '${directory.path}/Stock_Stockly_$horodatage.xlsx';
 
     final file = File(filePath);
     await file.writeAsBytes(fileBytes);
@@ -223,8 +270,8 @@ class ExcelService {
     if (triggerShare) {
       await Share.shareXFiles(
         [XFile(filePath)],
-        subject: 'Rapport de Stock',
-        text: 'Veuillez trouver ci-joint le rapport de stock.',
+        subject: 'État du stock du ${_deux(m.day)}/${_deux(m.month)}/${m.year}',
+        text: 'Veuillez trouver ci-joint l\'état du stock.',
       );
     }
 
