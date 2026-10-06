@@ -13,6 +13,8 @@ import '../../screens/bon_livraison_screen.dart';
 
 // ============================================================================
 // 🚚 VENTES À LIVRER (statutLivraison == 'Non livré')
+// Une vente partiellement livrée reste 'Non livré' (avec livraisonPartielle = true)
+// jusqu'à ce que toute la marchandise soit sortie.
 // Tri : les retards d'abord, puis par date limite la plus proche.
 // ============================================================================
 final ventesALivrerProvider = StreamProvider.family<
@@ -59,6 +61,11 @@ String _formatJour(DateTime d) =>
     '${_deuxChiffres(d.day)}/${_deuxChiffres(d.month)}/${d.year}';
 
 double _nombre(dynamic v) => v is num ? v.toDouble() : 0.0;
+
+int _entier(dynamic v) {
+  if (v is num) return v.toInt();
+  return int.tryParse('$v') ?? 0;
+}
 
 /// Nom de l'utilisateur connecté (lu dans son profil : téléphone d'abord, puis serveur).
 Future<String> _nomUtilisateurConnecte() async {
@@ -228,6 +235,36 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
     return brut.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
   }
 
+  /// Quantités déjà remises au client, article par article (même ordre que `articles`).
+  List<int> get _quantitesLivrees {
+    final n = _articles.length;
+    final res = List<int>.filled(n, 0);
+    final brut = widget.data['quantitesLivrees'];
+    if (brut is List) {
+      for (var i = 0; i < n && i < brut.length; i++) {
+        res[i] = _entier(brut[i]);
+      }
+    }
+    return res;
+  }
+
+  /// Quantités restant à remettre, article par article.
+  List<int> get _restes {
+    final articles = _articles;
+    final livrees = _quantitesLivrees;
+    return List<int>.generate(articles.length, (i) {
+      final r = _entier(articles[i]['quantite']) - livrees[i];
+      return r > 0 ? r : 0;
+    });
+  }
+
+  /// Historique des sorties déjà faites.
+  List<Map<String, dynamic>> get _sorties {
+    final brut = widget.data['livraisons'];
+    if (brut is! List) return [];
+    return brut.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
+  }
+
   String _numeroPropre(String telephone) {
     var n = telephone.replaceAll(RegExp(r'[^\d+]'), '');
     if (n.startsWith('+')) n = n.substring(1);
@@ -252,10 +289,18 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
     final limite = _dateLimite(widget.data);
     final enRetard = _estEnRetard(widget.data);
     final reste = _nombre(widget.data['resteAPayer']);
-    final articles = _articles.map((a) => '${a['quantite']} × ${a['nom']}').join(', ');
+    final articles = _articles;
+    final restes = _restes;
+    final dejaSorti = _quantitesLivrees.any((q) => q > 0);
 
-    final message = StringBuffer(
-        'Bonjour $client, votre marchandise ($articles) vous attend chez $boutique. ');
+    final listeRestante = [
+      for (var i = 0; i < articles.length; i++)
+        if (restes[i] > 0) '${restes[i]} × ${articles[i]['nom']}',
+    ].join(', ');
+
+    final message = StringBuffer(dejaSorti
+        ? 'Bonjour $client, le reste de votre marchandise ($listeRestante) vous attend chez $boutique. '
+        : 'Bonjour $client, votre marchandise ($listeRestante) vous attend chez $boutique. ');
     if (enRetard) {
       message.write(
           'La date de retrait (${_formatJour(limite)}) est dépassée : merci de passer la récupérer au plus vite. ');
@@ -279,46 +324,141 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
     }
   }
 
+  // ==========================================================================
+  // REMISE DE LA MARCHANDISE (totale ou partielle)
+  // ==========================================================================
   Future<void> _marquerLivre() async {
     final client = (widget.data['nomClient'] ?? 'Client').toString();
     final telephone = (widget.data['telephoneClient'] ?? '').toString();
-    final reste = _nombre(widget.data['resteAPayer']);
+    final resteAPayer = _nombre(widget.data['resteAPayer']);
     final articles = _articles;
+    final dejaLivrees = _quantitesLivrees;
+    final restes = _restes;
+    final totalReste = restes.fold<int>(0, (s, r) => s + r);
+
+    // Par défaut : tout ce qui reste est remis maintenant.
+    final aRemettre = List<int>.from(restes);
 
     final confirme = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Confirmer la livraison'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Remettre à $client :', style: const TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            ...articles.map((a) => Text('• ${a['quantite']} × ${a['nom']}')),
-            if (reste > 0.005) ...[
-              const SizedBox(height: 12),
-              Text(
-                'Attention : il reste ${ref.formatPrice(reste)} à payer.',
-                style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setD) {
+          final totalMaintenant = aRemettre.fold<int>(0, (s, q) => s + q);
+          final resteApres = totalReste - totalMaintenant;
+
+          return AlertDialog(
+            title: const Text('Remettre la marchandise'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Client : $client', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Indiquez ce que le client emporte maintenant :',
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                  ),
+                  const SizedBox(height: 8),
+                  if (totalReste == 0) const Text('Tout a déjà été remis.'),
+                  for (var i = 0; i < articles.length; i++)
+                    if (restes[i] > 0)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${articles[i]['nom']}',
+                                    style: const TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                  Text(
+                                    dejaLivrees[i] > 0
+                                        ? 'Reste ${restes[i]} (déjà remis : ${dejaLivrees[i]})'
+                                        : 'Vendu : ${restes[i]}',
+                                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              visualDensity: VisualDensity.compact,
+                              icon: const Icon(Icons.remove_circle_outline),
+                              onPressed: aRemettre[i] > 0
+                                  ? () => setD(() => aRemettre[i]--)
+                                  : null,
+                            ),
+                            SizedBox(
+                              width: 28,
+                              child: Text(
+                                '${aRemettre[i]}',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            IconButton(
+                              visualDensity: VisualDensity.compact,
+                              icon: const Icon(Icons.add_circle_outline),
+                              onPressed: aRemettre[i] < restes[i]
+                                  ? () => setD(() => aRemettre[i]++)
+                                  : null,
+                            ),
+                          ],
+                        ),
+                      ),
+                  if (totalReste > 0) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: resteApres > 0 ? Colors.orange.shade50 : Colors.green.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        totalMaintenant == 0
+                            ? 'Choisissez au moins une pièce à remettre.'
+                            : resteApres > 0
+                                ? 'Sortie partielle : il restera $resteApres pièce(s) à retirer.'
+                                : 'Livraison complète : tout est remis.',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: resteApres > 0 ? Colors.orange.shade900 : Colors.green.shade800,
+                        ),
+                      ),
+                    ),
+                  ],
+                  if (resteAPayer > 0.005) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      'Attention : il reste ${ref.formatPrice(resteAPayer)} à payer.',
+                      style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Annuler'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green.shade700,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: (totalMaintenant > 0 || totalReste == 0)
+                    ? () => Navigator.pop(ctx, true)
+                    : null,
+                child: Text(resteApres > 0 ? 'Valider la sortie' : 'Oui, tout livré'),
               ),
             ],
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Annuler'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green.shade700,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Oui, livré'),
-          ),
-        ],
+          );
+        },
       ),
     );
 
@@ -329,6 +469,47 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
     final navigator = Navigator.of(context);
 
     final nomLivreur = await _nomUtilisateurConnecte();
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    final maintenant = Timestamp.now();
+
+    final nouvellesLivrees = List<int>.generate(
+        articles.length, (i) => dejaLivrees[i] + aRemettre[i]);
+    var toutLivre = true;
+    for (var i = 0; i < articles.length; i++) {
+      if (nouvellesLivrees[i] < _entier(articles[i]['quantite'])) toutLivre = false;
+    }
+    final restantApres =
+        totalReste - aRemettre.fold<int>(0, (s, q) => s + q);
+
+    final sortieArticles = <Map<String, dynamic>>[
+      for (var i = 0; i < articles.length; i++)
+        if (aRemettre[i] > 0)
+          {
+            'produitId': (articles[i]['produitId'] ?? '').toString(),
+            'nom': (articles[i]['nom'] ?? '').toString(),
+            'quantite': aRemettre[i],
+          },
+    ];
+
+    final miseAJour = <String, dynamic>{
+      'quantitesLivrees': nouvellesLivrees,
+      'livraisonPartielle': !toutLivre,
+      if (sortieArticles.isNotEmpty)
+        'livraisons': FieldValue.arrayUnion([
+          {
+            'date': maintenant,
+            'par': uid,
+            'parNom': nomLivreur,
+            'articles': sortieArticles,
+          }
+        ]),
+      if (toutLivre) ...{
+        'statutLivraison': 'Livré',
+        'dateLivraison': maintenant,
+        'livrePar': uid,
+        'livreParNom': nomLivreur,
+      },
+    };
 
     final venteRef = FirebaseFirestore.instance
         .collection('entreprises')
@@ -338,12 +519,7 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
 
     bool horsLigne = false;
     try {
-      await venteRef.update({
-        'statutLivraison': 'Livré',
-        'dateLivraison': Timestamp.now(),
-        'livrePar': FirebaseAuth.instance.currentUser?.uid,
-        'livreParNom': nomLivreur,
-      }).timeout(const Duration(seconds: 5));
+      await venteRef.update(miseAJour).timeout(const Duration(seconds: 5));
     } on TimeoutException {
       horsLigne = true; // gardé sur le téléphone, envoyé au retour d'internet
     } catch (e) {
@@ -354,25 +530,39 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
       return;
     }
 
+    if (mounted) setState(() => _enCours = false);
+
+    final String texte;
+    if (horsLigne) {
+      texte = "Sortie notée sur le téléphone. Envoi dès le retour d'internet.";
+    } else if (toutLivre) {
+      texte = 'Livraison complète enregistrée pour $client.';
+    } else {
+      texte = 'Sortie partielle enregistrée : il reste $restantApres pièce(s) à retirer.';
+    }
     messenger.showSnackBar(
       SnackBar(
-        content: Text(horsLigne
-            ? 'Livraison notée sur le téléphone. Envoi dès le retour d\'internet.'
-            : 'Livraison enregistrée pour $client.'),
-        backgroundColor: horsLigne ? Colors.orange.shade800 : Colors.green.shade700,
+        content: Text(texte),
+        backgroundColor: horsLigne
+            ? Colors.orange.shade800
+            : (toutLivre ? Colors.green.shade700 : Colors.blue.shade700),
       ),
     );
 
-    // Bon de livraison à remettre au client
-    final itemsBL = articles
-        .map((a) => CartItem(
-              id: (a['produitId'] ?? '').toString(),
-              nom: (a['nom'] ?? '').toString(),
-              prix: _nombre(a['prixUnitaire']),
-              quantite: (a['quantite'] is num) ? (a['quantite'] as num).toInt() : 0,
-              stock: 0,
-            ))
-        .toList();
+    if (sortieArticles.isEmpty) return;
+
+    // Bon de livraison : seulement ce qui sort aujourd'hui
+    final itemsBL = <CartItem>[
+      for (var i = 0; i < articles.length; i++)
+        if (aRemettre[i] > 0)
+          CartItem(
+            id: (articles[i]['produitId'] ?? '').toString(),
+            nom: (articles[i]['nom'] ?? '').toString(),
+            prix: _nombre(articles[i]['prixUnitaire']),
+            quantite: aRemettre[i],
+            stock: 0,
+          ),
+    ];
 
     navigator.push(
       MaterialPageRoute(
@@ -399,6 +589,10 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
     final maintenant = DateTime.now();
     final enRetard = maintenant.isAfter(limite);
     final articles = _articles;
+    final livrees = _quantitesLivrees;
+    final restes = _restes;
+    final sorties = _sorties;
+    final partielle = livrees.any((q) => q > 0);
 
     // Jours de retard, ou jours restants
     final debutAujourdhui = DateTime(maintenant.year, maintenant.month, maintenant.day);
@@ -463,6 +657,26 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
                 child: Text(telephone, style: TextStyle(color: Colors.grey.shade700)),
               ),
 
+            // Étiquette « Partiellement livré »
+            if (partielle)
+              Container(
+                margin: const EdgeInsets.only(top: 2, bottom: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.blue.shade300),
+                ),
+                child: Text(
+                  'Partiellement livré',
+                  style: TextStyle(
+                    color: Colors.blue.shade800,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                  ),
+                ),
+              ),
+
             // Délai
             Container(
               width: double.infinity,
@@ -497,12 +711,42 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
             ),
 
             // Articles
-            const Text('À remettre :', style: TextStyle(fontWeight: FontWeight.w600)),
+            Text(
+              partielle ? 'Reste à remettre :' : 'À remettre :',
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
             const SizedBox(height: 4),
-            ...articles.map((a) => Padding(
-                  padding: const EdgeInsets.only(left: 8, bottom: 2),
-                  child: Text('• ${a['quantite']} × ${a['nom']}'),
-                )),
+            for (var i = 0; i < articles.length; i++)
+              Padding(
+                padding: const EdgeInsets.only(left: 8, bottom: 2),
+                child: restes[i] == 0
+                    ? Text(
+                        '✓ ${articles[i]['quantite']} × ${articles[i]['nom']} — tout remis',
+                        style: TextStyle(color: Colors.grey.shade500),
+                      )
+                    : Text(
+                        livrees[i] > 0
+                            ? '• ${restes[i]} × ${articles[i]['nom']}  (remis ${livrees[i]} sur ${articles[i]['quantite']})'
+                            : '• ${articles[i]['quantite']} × ${articles[i]['nom']}',
+                      ),
+              ),
+
+            // Historique des sorties
+            if (sorties.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Déjà sorti :',
+                style: TextStyle(fontWeight: FontWeight.w600, color: Colors.blue.shade800),
+              ),
+              for (final s in sorties)
+                Padding(
+                  padding: const EdgeInsets.only(left: 8, top: 2),
+                  child: Text(
+                    _texteSortie(s),
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                  ),
+                ),
+            ],
             const SizedBox(height: 8),
 
             // Montants
@@ -536,11 +780,15 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.green.shade800,
                           side: BorderSide(color: Colors.green.shade700),
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
                         onPressed: () => _relancerWhatsApp(telephone),
-                        icon: const Icon(Icons.chat),
-                        label: const Text('Relancer'),
+                        icon: const Icon(Icons.chat, size: 18),
+                        label: const FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text('Relancer', maxLines: 1, softWrap: false),
+                        ),
                       ),
                     ),
                   ),
@@ -554,6 +802,7 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green.shade700,
                         foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
                       onPressed: _enCours ? null : _marquerLivre,
@@ -564,9 +813,14 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
                               child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                             )
                           : const Icon(Icons.check_circle),
-                      label: const Text(
-                        'Marquer comme livré',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                      label: const FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'Marquer comme livré',
+                          maxLines: 1,
+                          softWrap: false,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
                   ),
@@ -577,5 +831,19 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
         ),
       ),
     );
+  }
+
+  String _texteSortie(Map<String, dynamic> s) {
+    final d = s['date'];
+    final quand = d is Timestamp ? _formatDate(d.toDate()) : '';
+    final arts = s['articles'];
+    final liste = arts is List
+        ? arts
+            .whereType<Map>()
+            .map((a) => '${a['quantite']} × ${a['nom']}')
+            .join(', ')
+        : '';
+    final par = (s['parNom'] ?? '').toString();
+    return par.isEmpty ? '$quand : $liste' : '$quand : $liste (par $par)';
   }
 }
