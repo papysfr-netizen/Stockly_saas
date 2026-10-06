@@ -111,6 +111,12 @@ service cloud.firestore {
         allow read, create, update: if estMembre(entId);
         allow delete: if estGerantOuPlus(entId);
       }
+      match /retours/{docId} {
+        // Retours de marchandise : tout le monde voit ; Gérant+ crée ; personne ne modifie
+        allow read: if estMembre(entId);
+        allow create: if estGerantOuPlus(entId);
+        allow update, delete: if false;
+      }
       match /creances/{docId} {
         allow read, create, update: if estMembre(entId);
         allow delete: if estGerantOuPlus(entId);
@@ -129,7 +135,7 @@ service cloud.firestore {
       // ----- Toutes les autres sous-collections (comme avant) -----
       match /{collection}/{reste=**} {
         allow read: if estMembre(entId);
-        allow write: if !(collection in ['produits', 'ventes', 'creances', 'dettes', 'ecritures_comptables'])
+        allow write: if !(collection in ['produits', 'ventes', 'retours', 'creances', 'dettes', 'ecritures_comptables'])
           && (estMembre(entId) || creeParMoi(entId));
       }
     }

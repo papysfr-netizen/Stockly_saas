@@ -7,6 +7,7 @@ import '../../core/providers/settings_provider.dart' show settingsProvider;
 import '../../core/services/facture_pdf_service.dart';
 import '../../core/utils/currency_extension.dart';
 import '../../screens/bon_livraison_screen.dart';
+import 'retour_vente_screen.dart';
 
 // ============================================================================
 // 🧾 HISTORIQUE DES VENTES (les 500 plus récentes)
@@ -33,6 +34,8 @@ DateTime _dateVente(Map<String, dynamic> d) {
 }
 
 double _num(dynamic v) => v is num ? v.toDouble() : 0.0;
+
+int _int(dynamic v) => v is num ? v.toInt() : 0;
 
 String _deux(int n) => n.toString().padLeft(2, '0');
 
@@ -185,10 +188,11 @@ class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen>
                     ? ventesPeriode
                     : ventesPeriode.where((v) => _vendeur(v.data()) == filtre).toList();
 
+                // Totaux NETS (retours déduits)
                 double total = 0, encaisse = 0, reste = 0;
                 for (final v in ventes) {
                   final d = v.data();
-                  final t = _num(d['montantTotal']);
+                  final t = _num(d['montantTotal']) - _num(d['montantRetourne']);
                   final r = _num(d['resteAPayer']);
                   total += t;
                   reste += r;
@@ -360,6 +364,16 @@ Widget _badgeLivraison(Map<String, dynamic> d) {
       : _badge('Livré', Colors.blueGrey);
 }
 
+List<Widget> _badges(Map<String, dynamic> d) {
+  final statutRetour = (d['statutRetour'] ?? '').toString();
+  return [
+    _badgePaiement(d),
+    _badgeLivraison(d),
+    if (statutRetour == 'total') _badge('Retour total', Colors.deepOrange.shade700),
+    if (statutRetour == 'partiel') _badge('Retour partiel', Colors.deepOrange.shade700),
+  ];
+}
+
 // ============================================================================
 // Ligne d'une vente + détail
 // ============================================================================
@@ -378,6 +392,18 @@ class _LigneVente extends ConsumerWidget {
     final brut = data['articles'];
     if (brut is! List) return [];
     return brut.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
+  }
+
+  List<int> get _retournees {
+    final n = _articles.length;
+    final res = List<int>.filled(n, 0);
+    final brut = data['quantitesRetournees'];
+    if (brut is List) {
+      for (var i = 0; i < n && i < brut.length; i++) {
+        res[i] = _int(brut[i]);
+      }
+    }
+    return res;
   }
 
   // 📄 Facture PDF : imprimer ou partager
@@ -463,7 +489,9 @@ class _LigneVente extends ConsumerWidget {
     final tel = (data['telephoneClient'] ?? '').toString();
     final total = _num(data['montantTotal']);
     final reste = _num(data['resteAPayer']);
+    final montantRetourne = _num(data['montantRetourne']);
     final articles = _articles;
+    final retournees = _retournees;
     final livre = (data['statutLivraison'] ?? 'Livré').toString() != 'Non livré';
     final dateLiv = data['dateLivraison'];
     final vendeur = _vendeur(data);
@@ -510,7 +538,7 @@ class _LigneVente extends ConsumerWidget {
                 child: Text(tel),
               ),
             const SizedBox(height: 10),
-            Wrap(spacing: 6, children: [_badgePaiement(data), _badgeLivraison(data)]),
+            Wrap(spacing: 6, runSpacing: 4, children: _badges(data)),
             if (livre && dateLiv is Timestamp)
               Padding(
                 padding: const EdgeInsets.only(top: 6),
@@ -520,17 +548,40 @@ class _LigneVente extends ConsumerWidget {
             const Divider(height: 24),
             const Text('Articles', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 6),
-            ...articles.map((a) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 3),
-                  child: Row(
-                    children: [
-                      Expanded(child: Text('${a['quantite']} × ${a['nom']}')),
-                      Text(ref.formatPrice(_num(a['totalItem']))),
-                    ],
-                  ),
-                )),
+            for (var i = 0; i < articles.length; i++)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 3),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('${articles[i]['quantite']} × ${articles[i]['nom']}'),
+                          if (retournees[i] > 0)
+                            Text(
+                              '↩ ${retournees[i]} retourné(s)',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.deepOrange.shade700,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    Text(ref.formatPrice(_num(articles[i]['totalItem']))),
+                  ],
+                ),
+              ),
             const Divider(height: 24),
             _ligneMontant('Total', ref.formatPrice(total), gras: true),
+            if (montantRetourne > 0.005) ...[
+              _ligneMontant('Retourné', '- ${ref.formatPrice(montantRetourne)}',
+                  couleur: Colors.deepOrange.shade700),
+              _ligneMontant('Total après retour', ref.formatPrice(total - montantRetourne),
+                  gras: true),
+            ],
             _ligneMontant('Payé', ref.formatPrice(total - reste)),
             if (reste > 0.005)
               _ligneMontant('Reste à payer', ref.formatPrice(reste), couleur: Colors.red),
@@ -588,6 +639,30 @@ class _LigneVente extends ConsumerWidget {
                 );
               },
             ),
+            const SizedBox(height: 8),
+
+            // ↩️ Retour de marchandise (gérant et patron ; contrôlé dans l'écran)
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.deepOrange.shade700,
+                side: BorderSide(color: Colors.deepOrange.shade300),
+              ),
+              icon: const Icon(Icons.assignment_return),
+              label: const Text('Retour de marchandise'),
+              onPressed: () {
+                Navigator.pop(ctx);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => RetourVenteScreen(
+                      entrepriseId: entrepriseId,
+                      venteId: venteId,
+                      data: data,
+                    ),
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -615,7 +690,7 @@ class _LigneVente extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final client = (data['nomClient'] ?? 'Client Divers').toString();
-    final total = _num(data['montantTotal']);
+    final total = _num(data['montantTotal']) - _num(data['montantRetourne']);
     final vendeur = _vendeur(data);
     final nbArticles = _articles.fold<int>(
         0, (s, a) => s + ((a['quantite'] is num) ? (a['quantite'] as num).toInt() : 0));
@@ -643,7 +718,7 @@ class _LigneVente extends ConsumerWidget {
                   style: TextStyle(fontSize: 12, color: Colors.indigo.shade700),
                 ),
               const SizedBox(height: 4),
-              Wrap(spacing: 6, children: [_badgePaiement(data), _badgeLivraison(data)]),
+              Wrap(spacing: 6, runSpacing: 4, children: _badges(data)),
             ],
           ),
         ),
