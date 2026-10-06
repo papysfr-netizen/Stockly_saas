@@ -98,7 +98,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     });
 
     try {
-      final count = await PackingListService().importerExcel(
+      final count = await PackingListService().importerAvecApercu(context,
         entrepriseId: widget.currentUser.entrepriseId,
         onProgress: (traites, total) {
           if (mounted) {

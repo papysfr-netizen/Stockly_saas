@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -8,11 +9,13 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../features/import/import_apercu_screen.dart';
+
 // ------------------------------------------------------------------
-// Helpers : Nettoyage et normalisation des textes et accents
+// Helpers : nettoyage des textes et des cellules
 // ------------------------------------------------------------------
 
-String _normalize(String input) {
+String normaliserTexte(String input) {
   return input
       .toLowerCase()
       .replaceAll(RegExp(r'[éèêë]'), 'e')
@@ -21,6 +24,7 @@ String _normalize(String input) {
       .replaceAll(RegExp(r'[ôö]'), 'o')
       .replaceAll(RegExp(r'[ùûü]'), 'u')
       .replaceAll(RegExp(r'[ç]'), 'c')
+      .replaceAll(RegExp(r'\s+'), ' ')
       .trim();
 }
 
@@ -59,7 +63,6 @@ int _cellToInt(dynamic cellValue) {
   var raw = _getRawValue(cellValue);
   if (raw == null) return 0;
   if (raw is num) return raw.toInt();
-
   String str = raw.toString().trim().replaceAll('\r', '').replaceAll(',', '.');
   double? parsedDouble = double.tryParse(str);
   return parsedDouble?.toInt() ?? int.tryParse(str) ?? 0;
@@ -69,348 +72,448 @@ double _cellToDouble(dynamic cellValue) {
   var raw = _getRawValue(cellValue);
   if (raw == null) return 0.0;
   if (raw is num) return raw.toDouble();
-
   String str = raw.toString().trim().replaceAll('\r', '').replaceAll(',', '.');
   return double.tryParse(str) ?? 0.0;
 }
 
+// Mots qui ne sont jamais de vrais noms de produits (en-têtes, lignes de total)
+const _motsEntete = {
+  'nom', 'designation', 'article', 'produit', 'description', 'libelle', 'total',
+  'code', 'ref', 'reference', 'nom du produit', 'nom produit',
+};
+
 // ------------------------------------------------------------------
-// Parser Excel (.xlsx / .xls)
+// Analyse commune (Excel et CSV) — tourne en arrière-plan
 // ------------------------------------------------------------------
-List<Map<String, dynamic>> _parserModeleProduits(Uint8List bytes) {
+Map<String, dynamic> _analyserLignes(List<List<dynamic>> rows) {
+  final produits = <Map<String, dynamic>>[];
+  final colonnes = <String, String>{};
+
+  if (rows.isEmpty) {
+    return {'produits': produits, 'colonnes': colonnes, 'avecEntete': false};
+  }
+
+  int idxCode = -1, idxNom = -1, idxQte = -1, idxPA = -1, idxPV = -1;
+  final entete = rows.first;
+
+  for (int col = 0; col < entete.length; col++) {
+    final brut = _cellToString(entete[col]);
+    final val = normaliserTexte(brut);
+    if (val.isEmpty) continue;
+
+    if (idxCode == -1 &&
+        (val.contains('code') || val.contains('ref') || val.contains('barcode') || val.contains('ean'))) {
+      idxCode = col;
+      colonnes['code'] = brut;
+    } else if (idxNom == -1 &&
+        (val.contains('nom') || val.contains('desig') || val.contains('produit') ||
+            val.contains('article') || val.contains('libelle') || val.contains('description'))) {
+      idxNom = col;
+      colonnes['nom'] = brut;
+    } else if (idxQte == -1 &&
+        (val.contains('qte') || val.contains('qty') || val.contains('quantit') || val.contains('stock'))) {
+      idxQte = col;
+      colonnes['quantite'] = brut;
+    } else if (idxPA == -1 &&
+        (val == 'pa' || val.contains('achat') || val.contains('cout') || val.contains('revient'))) {
+      idxPA = col;
+      colonnes['prixAchat'] = brut;
+    } else if (idxPV == -1 && (val == 'pv' || val.contains('vente') || val.contains('prix'))) {
+      idxPV = col;
+      colonnes['prixVente'] = brut;
+    }
+  }
+
+  // Au moins 2 titres reconnus = la 1re ligne est une ligne d'en-tête
+  final trouves = [idxCode, idxNom, idxQte, idxPA, idxPV].where((i) => i >= 0).length;
+  final avecEntete = trouves >= 2;
+
+  if (!avecEntete) {
+    // Pas d'en-tête : ordre standard A=Code, B=Nom, C=Qté, D=Prix achat, E=Prix vente
+    idxCode = 0;
+    idxNom = 1;
+    idxQte = 2;
+    idxPA = 3;
+    idxPV = 4;
+    colonnes
+      ..clear()
+      ..['code'] = 'colonne A'
+      ..['nom'] = 'colonne B'
+      ..['quantite'] = 'colonne C'
+      ..['prixAchat'] = 'colonne D'
+      ..['prixVente'] = 'colonne E';
+  } else if (idxNom == -1) {
+    return {
+      'produits': produits,
+      'colonnes': colonnes,
+      'avecEntete': true,
+      'erreur': 'Colonne du nom des produits introuvable. Ajoutez un titre « Nom » ou « Désignation ».',
+    };
+  }
+
+  final debut = avecEntete ? 1 : 0;
+  for (int i = debut; i < rows.length; i++) {
+    final row = rows[i];
+    if (row.isEmpty) continue;
+
+    String lireTexte(int idx) => (idx >= 0 && idx < row.length) ? _cellToString(row[idx]) : '';
+    final codeBarre = (idxCode >= 0 && idxCode < row.length) ? _cellToCode(row[idxCode]) : '';
+    final nom = lireTexte(idxNom);
+    final quantite = (idxQte >= 0 && idxQte < row.length) ? _cellToInt(row[idxQte]) : 0;
+    final prixAchat = (idxPA >= 0 && idxPA < row.length) ? _cellToDouble(row[idxPA]) : 0.0;
+    final prixVente = (idxPV >= 0 && idxPV < row.length) ? _cellToDouble(row[idxPV]) : 0.0;
+
+    final nomNorm = normaliserTexte(nom);
+    if (nom.isEmpty || _motsEntete.contains(nomNorm) || nomNorm.startsWith('total')) continue;
+
+    produits.add({
+      'ligne': i + 1,
+      'codeBarre': codeBarre,
+      'nom': nom,
+      'quantite': quantite,
+      'prixAchat': prixAchat,
+      'prixVente': prixVente,
+    });
+  }
+
+  return {'produits': produits, 'colonnes': colonnes, 'avecEntete': avecEntete};
+}
+
+Map<String, dynamic> _parserExcel(Uint8List bytes) {
   try {
-    var excel = Excel.decodeBytes(bytes);
-    List<Map<String, dynamic>> produits = [];
-
-    if (excel.tables.isEmpty) return produits;
-    var sheet = excel.tables[excel.tables.keys.first];
-
-    if (sheet == null || sheet.maxRows == 0 || sheet.rows.isEmpty) return produits;
-
-    int idxCode = -1, idxNom = -1, idxQte = -1, idxPA = -1, idxPV = -1;
-    var headerRow = sheet.rows.first;
-
-    for (int col = 0; col < headerRow.length; col++) {
-      String val = _normalize(_cellToString(headerRow[col]));
-      if (val.contains('code') || val.contains('ref') || val.contains('barcode')) {
-        idxCode = col;
-      } else if (val.contains('nom') || val.contains('desig') || val.contains('produit') || val.contains('article')) {
-        idxNom = col;
-      } else if (val.contains('qte') || val.contains('quantit') || val.contains('stock')) {
-        idxQte = col;
-      } else if (val == 'pa' || val.contains('achat') || val.contains('cout')) {
-        idxPA = col;
-      } else if (val == 'pv' || val.contains('vente') || val.contains('prix')) {
-        idxPV = col;
-      }
-    }
-
-    if (idxNom == -1) idxNom = 1;
-    if (idxCode == -1) idxCode = 0;
-    if (idxQte == -1) idxQte = 2;
-    if (idxPA == -1) idxPA = 3;
-    if (idxPV == -1) idxPV = 4;
-
-    bool hasHeaderRow = idxNom >= 0 && _normalize(_cellToString(headerRow[idxNom])).contains('nom');
-    int startRow = hasHeaderRow ? 1 : 0;
-
-    for (int i = startRow; i < sheet.maxRows; i++) {
-      if (i >= sheet.rows.length) break;
-      var row = sheet.rows[i];
-      if (row.isEmpty) continue;
-
-      String codeBarre = (idxCode < row.length && idxCode >= 0) ? _cellToCode(row[idxCode]) : '';
-      String nom = (idxNom < row.length && idxNom >= 0) ? _cellToString(row[idxNom]) : '';
-      int quantite = (idxQte < row.length && idxQte >= 0) ? _cellToInt(row[idxQte]) : 0;
-      double prixAchat = (idxPA < row.length && idxPA >= 0) ? _cellToDouble(row[idxPA]) : 0.0;
-      double prixVente = (idxPV < row.length && idxPV >= 0) ? _cellToDouble(row[idxPV]) : 0.0;
-
-      String nomNorm = _normalize(nom);
-      if (nom.isNotEmpty && nomNorm != 'nom' && nomNorm != 'designation') {
-        produits.add({
-          'codeBarre': codeBarre,
-          'code_barre': codeBarre,
-          'nom': nom,
-          'quantite': quantite,
-          'prixAchat': prixAchat,
-          'prixVente': prixVente,
-          'prix': prixVente,
-          'categorie': 'Général',
-          'seuilAlerte': 5,
-          'totalPrixAchat': quantite * prixAchat,
-          'totalPrixVente': quantite * prixVente,
-          'benefice': prixVente - prixAchat,
-          'beneficeTotal': quantite * (prixVente - prixAchat),
-        });
-      }
-    }
-    return produits;
+    final excel = Excel.decodeBytes(bytes);
+    if (excel.tables.isEmpty) return _analyserLignes([]);
+    final sheet = excel.tables[excel.tables.keys.first];
+    if (sheet == null || sheet.rows.isEmpty) return _analyserLignes([]);
+    final rows = sheet.rows.map((r) => List<dynamic>.from(r)).toList();
+    return _analyserLignes(rows);
   } catch (e) {
-    debugPrint('Erreur lors du parsing Excel: $e');
-    return [];
+    return {
+      'produits': <Map<String, dynamic>>[],
+      'colonnes': <String, String>{},
+      'avecEntete': false,
+      'erreur': 'Fichier Excel illisible. Enregistrez-le au format .xlsx puis réessayez.',
+    };
   }
 }
 
-// ------------------------------------------------------------------
-// Parser CSV (.csv)
-// ------------------------------------------------------------------
-List<Map<String, dynamic>> _parserCsv(Uint8List bytes) {
-  String content = utf8
+Map<String, dynamic> _parserCsv(Uint8List bytes) {
+  final content = utf8
       .decode(bytes, allowMalformed: true)
+      .replaceFirst('\uFEFF', '')
       .replaceAll('\r\n', '\n')
       .replaceAll('\r', '\n');
 
-  String delimiter = content.contains(';') ? ';' : ',';
-
-  List<List<dynamic>> rows = CsvToListConverter(
-    fieldDelimiter: delimiter,
-    eol: '\n',
-  ).convert(content);
-
-  List<Map<String, dynamic>> produits = [];
-  if (rows.isEmpty) return produits;
-
-  int idxCode = -1, idxNom = -1, idxQte = -1, idxPA = -1, idxPV = -1;
-  var headerRow = rows.first;
-
-  for (int col = 0; col < headerRow.length; col++) {
-    String val = _normalize(headerRow[col].toString());
-    if (val.contains('code') || val.contains('ref') || val.contains('barcode')) {
-      idxCode = col;
-    } else if (val.contains('nom') || val.contains('desig') || val.contains('produit') || val.contains('article')) {
-      idxNom = col;
-    } else if (val.contains('qte') || val.contains('quantit') || val.contains('stock')) {
-      idxQte = col;
-    } else if (val == 'pa' || val.contains('achat') || val.contains('cout')) {
-      idxPA = col;
-    } else if (val == 'pv' || val.contains('vente') || val.contains('prix')) {
-      idxPV = col;
-    }
-  }
-
-  if (idxNom == -1) idxNom = 1;
-  if (idxCode == -1) idxCode = 0;
-  if (idxQte == -1) idxQte = 2;
-  if (idxPA == -1) idxPA = 3;
-  if (idxPV == -1) idxPV = 4;
-
-  bool hasHeaderRow = idxNom >= 0 && _normalize(headerRow[idxNom].toString()).contains('nom');
-  int startRow = hasHeaderRow ? 1 : 0;
-
-  for (int i = startRow; i < rows.length; i++) {
-    var row = rows[i];
-    if (row.isEmpty) continue;
-
-    String codeBarre = (idxCode < row.length && idxCode >= 0) ? _cellToCode(row[idxCode]) : '';
-    String nom = (idxNom < row.length && idxNom >= 0) ? _cellToString(row[idxNom]) : '';
-    int quantite = (idxQte < row.length && idxQte >= 0) ? _cellToInt(row[idxQte]) : 0;
-    double prixAchat = (idxPA < row.length && idxPA >= 0) ? _cellToDouble(row[idxPA]) : 0.0;
-    double prixVente = (idxPV < row.length && idxPV >= 0) ? _cellToDouble(row[idxPV]) : 0.0;
-
-    String nomNorm = _normalize(nom);
-    if (nom.isNotEmpty && nomNorm != 'nom' && nomNorm != 'designation') {
-      produits.add({
-        'codeBarre': codeBarre,
-        'code_barre': codeBarre,
-        'nom': nom,
-        'quantite': quantite,
-        'prixAchat': prixAchat,
-        'prixVente': prixVente,
-        'prix': prixVente,
-        'categorie': 'Général',
-        'seuilAlerte': 5,
-        'totalPrixAchat': quantite * prixAchat,
-        'totalPrixVente': quantite * prixVente,
-        'benefice': prixVente - prixAchat,
-        'beneficeTotal': quantite * (prixVente - prixAchat),
-      });
-    }
-  }
-  return produits;
+  final delimiter = content.contains(';') ? ';' : ',';
+  final rows = CsvToListConverter(fieldDelimiter: delimiter, eol: '\n').convert(content);
+  return _analyserLignes(rows);
 }
 
 // ------------------------------------------------------------------
-// Service Firestore
+// Modèles
+// ------------------------------------------------------------------
+enum StatutLigne { nouveau, existant, ignore }
+
+enum ModeImport { arrivage, inventaire }
+
+class LigneImport {
+  final int numeroLigne;
+  final String nom;
+  final String codeBarre;
+  int quantite;
+  double prixAchat;
+  double prixVente;
+
+  StatutLigne statut = StatutLigne.nouveau;
+  String? idExistant;
+  String nomExistant = '';
+  bool codeExistantVide = true;
+  int stockActuel = 0;
+  String raison = '';
+
+  LigneImport({
+    required this.numeroLigne,
+    required this.nom,
+    required this.codeBarre,
+    required this.quantite,
+    required this.prixAchat,
+    required this.prixVente,
+  });
+
+  int nouveauStock(ModeImport mode) {
+    if (statut == StatutLigne.nouveau) return quantite;
+    return mode == ModeImport.arrivage ? stockActuel + quantite : quantite;
+  }
+}
+
+class AnalyseImport {
+  final String entrepriseId;
+  final String nomFichier;
+  final Map<String, String> colonnes;
+  final bool avecEntete;
+  final List<LigneImport> lignes;
+
+  AnalyseImport({
+    required this.entrepriseId,
+    required this.nomFichier,
+    required this.colonnes,
+    required this.avecEntete,
+    required this.lignes,
+  });
+
+  int get nbNouveaux => lignes.where((l) => l.statut == StatutLigne.nouveau).length;
+  int get nbExistants => lignes.where((l) => l.statut == StatutLigne.existant).length;
+  int get nbIgnores => lignes.where((l) => l.statut == StatutLigne.ignore).length;
+}
+
+class ResultatImport {
+  int nouveaux = 0;
+  int misAJour = 0;
+  int ignores = 0;
+  bool horsLigne = false;
+  int get total => nouveaux + misAJour;
+}
+
+// ------------------------------------------------------------------
+// Service
 // ------------------------------------------------------------------
 class PackingListService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  CollectionReference<Map<String, dynamic>> _produits(String entrepriseId) =>
+      _firestore.collection('entreprises').doc(entrepriseId).collection('produits');
+
+  /// Point d'entrée : choix du fichier → aperçu → import. Renvoie le nombre de produits écrits.
+  Future<int> importerAvecApercu(
+    BuildContext context, {
+    required String entrepriseId,
+    void Function(int traites, int total)? onProgress,
+  }) async {
+    final analyse = await choisirEtAnalyser(entrepriseId: entrepriseId);
+    if (analyse == null || !context.mounted) return 0;
+
+    final resultat = await Navigator.of(context).push<ResultatImport>(
+      MaterialPageRoute(
+        builder: (_) => ImportApercuScreen(analyse: analyse, service: this),
+      ),
+    );
+    return resultat?.total ?? 0;
+  }
+
+  /// Ancien point d'entrée (gardé pour compatibilité).
   static Future<void> importerEtTraiter(
     BuildContext context, {
     required String entrepriseId,
   }) async {
     final messenger = ScaffoldMessenger.of(context);
-    final ValueNotifier<String> statusNotifier =
-        ValueNotifier("Sélection du fichier...");
-
-    bool dialogDisplayed = false;
-
-    if (entrepriseId.isEmpty) {
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Erreur: Identifiant d\'entreprise non valide.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
     try {
-      final service = PackingListService();
-
-      int nbTraites = await service.importerExcel(
-        entrepriseId: entrepriseId,
-        onProgress: (traites, total) {
-          if (!dialogDisplayed && context.mounted) {
-            dialogDisplayed = true;
-            showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (dialogContext) {
-                return ValueListenableBuilder<String>(
-                  valueListenable: statusNotifier,
-                  builder: (_, message, __) {
-                    return AlertDialog(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      title: const Text("Importation en cours"),
-                      content: Row(
-                        children: [
-                          const CircularProgressIndicator(),
-                          const SizedBox(width: 20),
-                          Expanded(child: Text(message)),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              },
-            );
-          }
-          statusNotifier.value =
-              "Enregistrement : $traites / $total produits...";
-        },
-      );
-
-      if (dialogDisplayed && context.mounted) {
-        Navigator.of(context, rootNavigator: true).pop();
-      }
-
-      if (nbTraites > 0) {
+      final nb = await PackingListService().importerAvecApercu(context, entrepriseId: entrepriseId);
+      if (nb > 0) {
         messenger.showSnackBar(
           SnackBar(
-            content: Text('$nbTraites produit(s) importé(s) avec succès !'),
+            content: Text('$nb produit(s) importé(s) ou mis à jour.'),
             backgroundColor: Colors.green.shade700,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
           ),
         );
       }
     } catch (e) {
-      if (dialogDisplayed && context.mounted) {
-        Navigator.of(context, rootNavigator: true).pop();
-      }
       messenger.showSnackBar(
-        SnackBar(
-          content: Text('Erreur d\'importation : $e'),
-          backgroundColor: Colors.red.shade700,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
+        SnackBar(content: Text('Erreur d\'importation : $e'), backgroundColor: Colors.red.shade700),
       );
     }
   }
 
-  Future<int> importerExcel({
-    required String entrepriseId,
-    Function(int traites, int total)? onProgress,
-  }) async {
-    if (entrepriseId.isEmpty) {
-      throw Exception("Identifiant d'entreprise manquant.");
-    }
+  /// 1) Choisit le fichier, le lit, et compare avec les produits existants.
+  Future<AnalyseImport?> choisirEtAnalyser({required String entrepriseId}) async {
+    if (entrepriseId.isEmpty) throw Exception("Identifiant d'entreprise manquant.");
 
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['xlsx', 'xls', 'csv'],
       withData: true,
     );
-
-    if (result == null || result.files.isEmpty) return 0;
+    if (result == null || result.files.isEmpty) return null;
 
     final pickedFile = result.files.first;
     final name = pickedFile.name.toLowerCase();
-
     final isExcel = name.endsWith('.xlsx') || name.endsWith('.xls');
     final isCsv = name.endsWith('.csv');
-
     if (!isExcel && !isCsv) {
-      throw Exception(
-          "Format non supporté. Veuillez sélectionner un fichier .xlsx, .xls ou .csv.");
+      throw Exception('Format non supporté. Choisissez un fichier .xlsx ou .csv.');
     }
 
     Uint8List? bytes = pickedFile.bytes;
-    if (bytes == null &&
-        pickedFile.path != null &&
-        pickedFile.path!.isNotEmpty) {
+    if (bytes == null && pickedFile.path != null && pickedFile.path!.isNotEmpty) {
       bytes = await File(pickedFile.path!).readAsBytes();
     }
-
     if (bytes == null || bytes.isEmpty) {
-      throw Exception("Impossible de lire le contenu du fichier sélectionné.");
+      throw Exception('Impossible de lire le contenu du fichier.');
     }
 
-    final List<Map<String, dynamic>> produitsAInserer = isCsv
-        ? await compute(_parserCsv, bytes)
-        : await compute(_parserModeleProduits, bytes);
+    final brut = isCsv ? await compute(_parserCsv, bytes) : await compute(_parserExcel, bytes);
+    if (brut['erreur'] != null) throw Exception(brut['erreur']);
 
-    if (produitsAInserer.isEmpty) return 0;
+    final produitsFichier = (brut['produits'] as List).cast<Map<String, dynamic>>();
+    final colonnes = Map<String, String>.from(brut['colonnes'] as Map);
 
-    // NOUVEAU CHEMIN : Ciblage direct sous /entreprises/{entrepriseId}/produits
-    final collection = _firestore
-        .collection('entreprises')
-        .doc(entrepriseId)
-        .collection('produits');
+    // Produits existants (serveur, sinon copie du téléphone)
+    QuerySnapshot<Map<String, dynamic>> snap;
+    try {
+      snap = await _produits(entrepriseId).get().timeout(const Duration(seconds: 8));
+    } catch (_) {
+      snap = await _produits(entrepriseId).get(const GetOptions(source: Source.cache));
+    }
 
-    final total = produitsAInserer.length;
-    int traites = 0;
+    final parCode = <String, QueryDocumentSnapshot<Map<String, dynamic>>>{};
+    final parNom = <String, QueryDocumentSnapshot<Map<String, dynamic>>>{};
+    for (final d in snap.docs) {
+      final data = d.data();
+      final code = (data['codeBarre'] ?? data['code_barre'] ?? '').toString().trim();
+      if (code.isNotEmpty) parCode[code] = d;
+      final nom = normaliserTexte((data['nom'] ?? '').toString());
+      if (nom.isNotEmpty) parNom.putIfAbsent(nom, () => d);
+    }
 
-    const int batchSize = 400;
-    for (int i = 0; i < total; i += batchSize) {
-      final batch = _firestore.batch();
-      final chunk = produitsAInserer.skip(i).take(batchSize);
+    final lignes = <LigneImport>[];
+    final dejaVu = <String, LigneImport>{};
 
-      for (var item in chunk) {
-        String barcode = item['codeBarre']?.toString().trim() ?? '';
-        
-        DocumentReference docRef;
-        if (barcode.isNotEmpty) {
-          String sanitizedCode = barcode.replaceAll(RegExp(r'[^a-zA-Z0-9_\-]'), '_');
-          docRef = collection.doc('${entrepriseId}_$sanitizedCode');
-        } else {
-          docRef = collection.doc();
+    for (final p in produitsFichier) {
+      final ligne = LigneImport(
+        numeroLigne: (p['ligne'] as num?)?.toInt() ?? 0,
+        nom: (p['nom'] ?? '').toString().trim(),
+        codeBarre: (p['codeBarre'] ?? '').toString().trim(),
+        quantite: (p['quantite'] as num?)?.toInt() ?? 0,
+        prixAchat: (p['prixAchat'] as num?)?.toDouble() ?? 0.0,
+        prixVente: (p['prixVente'] as num?)?.toDouble() ?? 0.0,
+      );
+
+      if (ligne.quantite < 0) {
+        ligne.statut = StatutLigne.ignore;
+        ligne.raison = 'Quantité négative';
+        lignes.add(ligne);
+        continue;
+      }
+
+      // Même produit deux fois dans le fichier → on fusionne
+      final cle = ligne.codeBarre.isNotEmpty ? 'c:${ligne.codeBarre}' : 'n:${normaliserTexte(ligne.nom)}';
+      final precedent = dejaVu[cle];
+      if (precedent != null) {
+        precedent.quantite += ligne.quantite;
+        if (ligne.prixAchat > 0) precedent.prixAchat = ligne.prixAchat;
+        if (ligne.prixVente > 0) precedent.prixVente = ligne.prixVente;
+        ligne.statut = StatutLigne.ignore;
+        ligne.raison = 'Fusionné avec la ligne ${precedent.numeroLigne}';
+        lignes.add(ligne);
+        continue;
+      }
+
+      // Recherche du produit existant : code-barres d'abord, puis nom
+      QueryDocumentSnapshot<Map<String, dynamic>>? existant;
+      if (ligne.codeBarre.isNotEmpty) existant = parCode[ligne.codeBarre];
+      if (existant == null) {
+        final candidat = parNom[normaliserTexte(ligne.nom)];
+        if (candidat != null) {
+          final codeCandidat =
+              (candidat.data()['codeBarre'] ?? candidat.data()['code_barre'] ?? '').toString().trim();
+          // Même nom mais code-barres différent = autre article : on ne mélange pas
+          if (ligne.codeBarre.isEmpty || codeCandidat.isEmpty || codeCandidat == ligne.codeBarre) {
+            existant = candidat;
+          }
         }
-
-        final data = Map<String, dynamic>.from(item);
-        data['entrepriseId'] = entrepriseId;
-        data['isPublicEcommerce'] = false; // Flag pour préparation e-commerce
-        data['createdAt'] = FieldValue.serverTimestamp();
-        data['updatedAt'] = FieldValue.serverTimestamp();
-
-        batch.set(docRef, data, SetOptions(merge: true));
       }
 
-      await batch.commit();
-      traites += chunk.length;
-      if (onProgress != null) {
-        onProgress(traites, total);
+      if (existant != null) {
+        final data = existant.data();
+        ligne.statut = StatutLigne.existant;
+        ligne.idExistant = existant.id;
+        ligne.nomExistant = (data['nom'] ?? '').toString();
+        ligne.stockActuel = (data['quantite'] as num?)?.toInt() ?? 0;
+        ligne.codeExistantVide =
+            (data['codeBarre'] ?? data['code_barre'] ?? '').toString().trim().isEmpty;
+      } else {
+        ligne.statut = StatutLigne.nouveau;
       }
+
+      dejaVu[cle] = ligne;
+      lignes.add(ligne);
     }
 
-    return traites;
+    return AnalyseImport(
+      entrepriseId: entrepriseId,
+      nomFichier: pickedFile.name,
+      colonnes: colonnes,
+      avecEntete: brut['avecEntete'] == true,
+      lignes: lignes,
+    );
+  }
+
+  /// 2) Enregistre l'import (après confirmation sur l'écran d'aperçu).
+  Future<ResultatImport> appliquer(
+    AnalyseImport analyse,
+    ModeImport mode, {
+    void Function(int traites, int total)? onProgress,
+  }) async {
+    final resultat = ResultatImport();
+    final aEcrire = analyse.lignes.where((l) => l.statut != StatutLigne.ignore).toList();
+    resultat.ignores = analyse.lignes.length - aEcrire.length;
+
+    final collection = _produits(analyse.entrepriseId);
+    const taille = 400;
+    int faits = 0;
+
+    for (int i = 0; i < aEcrire.length; i += taille) {
+      final batch = _firestore.batch();
+      final paquet = aEcrire.skip(i).take(taille).toList();
+
+      for (final l in paquet) {
+        if (l.statut == StatutLigne.existant && l.idExistant != null) {
+          final maj = <String, dynamic>{
+            'quantite': mode == ModeImport.arrivage ? FieldValue.increment(l.quantite) : l.quantite,
+            'updatedAt': FieldValue.serverTimestamp(),
+          };
+          // Un prix vide ou à 0 dans le fichier ne remplace pas le prix actuel
+          if (l.prixAchat > 0) maj['prixAchat'] = l.prixAchat;
+          if (l.prixVente > 0) {
+            maj['prixVente'] = l.prixVente;
+            maj['prix'] = l.prixVente;
+          }
+          if (l.codeBarre.isNotEmpty && l.codeExistantVide) {
+            maj['codeBarre'] = l.codeBarre;
+            maj['code_barre'] = l.codeBarre;
+          }
+          batch.update(collection.doc(l.idExistant), maj);
+          resultat.misAJour++;
+        } else {
+          batch.set(collection.doc(), {
+            'nom': l.nom,
+            'codeBarre': l.codeBarre,
+            'code_barre': l.codeBarre,
+            'quantite': l.quantite,
+            'prixAchat': l.prixAchat,
+            'prixVente': l.prixVente,
+            'prix': l.prixVente,
+            'categorie': 'Général',
+            'seuilAlerte': 5,
+            'entrepriseId': analyse.entrepriseId,
+            'isPublicEcommerce': false,
+            'createdAt': FieldValue.serverTimestamp(),
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+          resultat.nouveaux++;
+        }
+      }
+
+      try {
+        await batch.commit().timeout(const Duration(seconds: 15));
+      } on TimeoutException {
+        // Hors ligne : gardé sur le téléphone, envoyé au retour d'internet
+        resultat.horsLigne = true;
+      }
+
+      faits += paquet.length;
+      onProgress?.call(faits, aEcrire.length);
+    }
+
+    return resultat;
   }
 }
