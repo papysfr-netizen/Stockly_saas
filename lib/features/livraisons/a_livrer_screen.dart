@@ -10,11 +10,12 @@ import '../../core/providers/cart_provider.dart';
 import '../../core/providers/entreprise_provider.dart';
 import '../../core/utils/currency_extension.dart';
 import '../../screens/bon_livraison_screen.dart';
+import '../ventes/retour_vente_screen.dart';
 
 // ============================================================================
 // 🚚 VENTES À LIVRER (statutLivraison == 'Non livré')
 // Une vente partiellement livrée reste 'Non livré' (avec livraisonPartielle = true)
-// jusqu'à ce que toute la marchandise soit sortie.
+// jusqu'à ce que toute la marchandise soit sortie ou annulée.
 // Tri : les retards d'abord, puis par date limite la plus proche.
 // ============================================================================
 final ventesALivrerProvider = StreamProvider.family<
@@ -65,6 +66,16 @@ double _nombre(dynamic v) => v is num ? v.toDouble() : 0.0;
 int _entier(dynamic v) {
   if (v is num) return v.toInt();
   return int.tryParse('$v') ?? 0;
+}
+
+List<int> _listeEntiers(dynamic brut, int n) {
+  final res = List<int>.filled(n, 0);
+  if (brut is List) {
+    for (var i = 0; i < n && i < brut.length; i++) {
+      res[i] = _entier(brut[i]);
+    }
+  }
+  return res;
 }
 
 /// Nom de l'utilisateur connecté (lu dans son profil : téléphone d'abord, puis serveur).
@@ -235,25 +246,21 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
     return brut.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
   }
 
-  /// Quantités déjà remises au client, article par article (même ordre que `articles`).
-  List<int> get _quantitesLivrees {
-    final n = _articles.length;
-    final res = List<int>.filled(n, 0);
-    final brut = widget.data['quantitesLivrees'];
-    if (brut is List) {
-      for (var i = 0; i < n && i < brut.length; i++) {
-        res[i] = _entier(brut[i]);
-      }
-    }
-    return res;
-  }
+  /// Quantités déjà remises au client, article par article.
+  List<int> get _quantitesLivrees =>
+      _listeEntiers(widget.data['quantitesLivrees'], _articles.length);
+
+  /// Quantités annulées (jamais retirées), article par article.
+  List<int> get _quantitesAnnulees =>
+      _listeEntiers(widget.data['quantitesAnnulees'], _articles.length);
 
   /// Quantités restant à remettre, article par article.
   List<int> get _restes {
     final articles = _articles;
     final livrees = _quantitesLivrees;
+    final annulees = _quantitesAnnulees;
     return List<int>.generate(articles.length, (i) {
-      final r = _entier(articles[i]['quantite']) - livrees[i];
+      final r = _entier(articles[i]['quantite']) - livrees[i] - annulees[i];
       return r > 0 ? r : 0;
     });
   }
@@ -325,6 +332,23 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
   }
 
   // ==========================================================================
+  // ✖️ ANNULATION (marchandise jamais retirée)
+  // ==========================================================================
+  void _annuler() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => RetourVenteScreen(
+          entrepriseId: widget.entrepriseId,
+          venteId: widget.venteId,
+          data: widget.data,
+          annulation: true,
+        ),
+      ),
+    );
+  }
+
+  // ==========================================================================
   // REMISE DE LA MARCHANDISE (totale ou partielle)
   // ==========================================================================
   Future<void> _marquerLivre() async {
@@ -333,6 +357,7 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
     final resteAPayer = _nombre(widget.data['resteAPayer']);
     final articles = _articles;
     final dejaLivrees = _quantitesLivrees;
+    final annulees = _quantitesAnnulees;
     final restes = _restes;
     final totalReste = restes.fold<int>(0, (s, r) => s + r);
 
@@ -378,7 +403,7 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
                                   Text(
                                     dejaLivrees[i] > 0
                                         ? 'Reste ${restes[i]} (déjà remis : ${dejaLivrees[i]})'
-                                        : 'Vendu : ${restes[i]}',
+                                        : 'À remettre : ${restes[i]}',
                                     style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
                                   ),
                                 ],
@@ -476,7 +501,9 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
         articles.length, (i) => dejaLivrees[i] + aRemettre[i]);
     var toutLivre = true;
     for (var i = 0; i < articles.length; i++) {
-      if (nouvellesLivrees[i] < _entier(articles[i]['quantite'])) toutLivre = false;
+      if (nouvellesLivrees[i] + annulees[i] < _entier(articles[i]['quantite'])) {
+        toutLivre = false;
+      }
     }
     final restantApres =
         totalReste - aRemettre.fold<int>(0, (s, q) => s + q);
@@ -590,6 +617,7 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
     final enRetard = maintenant.isAfter(limite);
     final articles = _articles;
     final livrees = _quantitesLivrees;
+    final annulees = _quantitesAnnulees;
     final restes = _restes;
     final sorties = _sorties;
     final partielle = livrees.any((q) => q > 0);
@@ -719,16 +747,27 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
             for (var i = 0; i < articles.length; i++)
               Padding(
                 padding: const EdgeInsets.only(left: 8, bottom: 2),
-                child: restes[i] == 0
-                    ? Text(
-                        '✓ ${articles[i]['quantite']} × ${articles[i]['nom']} — tout remis',
-                        style: TextStyle(color: Colors.grey.shade500),
-                      )
-                    : Text(
-                        livrees[i] > 0
-                            ? '• ${restes[i]} × ${articles[i]['nom']}  (remis ${livrees[i]} sur ${articles[i]['quantite']})'
-                            : '• ${articles[i]['quantite']} × ${articles[i]['nom']}',
-                      ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    restes[i] == 0
+                        ? Text(
+                            '✓ ${articles[i]['quantite']} × ${articles[i]['nom']} — rien à remettre',
+                            style: TextStyle(color: Colors.grey.shade500),
+                          )
+                        : Text(
+                            (livrees[i] > 0 || annulees[i] > 0)
+                                ? '• ${restes[i]} × ${articles[i]['nom']}  (sur ${articles[i]['quantite']})'
+                                : '• ${articles[i]['quantite']} × ${articles[i]['nom']}',
+                          ),
+                    if (livrees[i] > 0)
+                      Text('   remis : ${livrees[i]}',
+                          style: TextStyle(fontSize: 11, color: Colors.blue.shade700)),
+                    if (annulees[i] > 0)
+                      Text('   ✕ ${annulees[i]} annulé(s)',
+                          style: TextStyle(fontSize: 11, color: Colors.red.shade700)),
+                  ],
+                ),
               ),
 
             // Historique des sorties
@@ -826,6 +865,17 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
                   ),
                 ),
               ],
+            ),
+
+            // Annulation (gérant et patron ; contrôlé dans l'écran)
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                style: TextButton.styleFrom(foregroundColor: Colors.red.shade700),
+                onPressed: _enCours ? null : _annuler,
+                icon: const Icon(Icons.cancel_outlined, size: 18),
+                label: const Text('Annuler la vente'),
+              ),
             ),
           ],
         ),

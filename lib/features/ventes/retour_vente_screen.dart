@@ -11,12 +11,14 @@ import '../../core/services/utilisateur_service.dart';
 import '../../core/utils/currency_extension.dart';
 
 // ============================================================================
-// ↩️ RETOUR DE MARCHANDISE
-// - Gérant et patron seulement. Après 7 jours : patron seulement.
-// - Seule la marchandise déjà remise au client peut revenir.
-// - Stock remis (sauf articles abîmés), dette du client diminuée d'abord,
-//   puis remboursement en espèces ou en avoir.
-// - Écritures comptables inverses (701 / 411 / 571 ou 419, et 311 / 603).
+// ↩️ RETOUR DE MARCHANDISE  /  ✖️ ANNULATION DE VENTE NON RETIRÉE
+// - Gérant et patron seulement.
+// - Retour : marchandise déjà remise au client ; après 7 jours, patron seulement.
+//   Stock remis (sauf articles abîmés).
+// - Annulation : marchandise jamais retirée ; tout revient en stock.
+// - Dette du client diminuée d'abord, puis : espèces, avoir,
+//   ou (annulation seulement) la boutique garde l'acompte.
+// - Écritures comptables inverses (701 / 411 / 571, 419 ou 758, et 311 / 603).
 // ============================================================================
 
 int _entier(dynamic v) {
@@ -46,11 +48,16 @@ class RetourVenteScreen extends ConsumerStatefulWidget {
   final String venteId;
   final Map<String, dynamic> data;
 
+  /// true = annulation de marchandise jamais retirée ;
+  /// false = retour de marchandise déjà remise au client.
+  final bool annulation;
+
   const RetourVenteScreen({
     super.key,
     required this.entrepriseId,
     required this.venteId,
     required this.data,
+    this.annulation = false,
   });
 
   @override
@@ -61,7 +68,9 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
   static const int delaiJours = 7;
 
   late final List<Map<String, dynamic>> _articles;
+  late final List<int> _livrees;
   late final List<int> _dejaRetournees;
+  late final List<int> _dejaAnnulees;
   late final List<int> _max;
   late final List<int> _qte;
   late final List<bool> _abime;
@@ -69,6 +78,9 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
   String _mode = 'especes';
   final _motifCtrl = TextEditingController();
   bool _enCours = false;
+
+  bool get _annulation => widget.annulation;
+  Color get _couleur => _annulation ? Colors.red.shade800 : Colors.deepOrange.shade700;
 
   @override
   void initState() {
@@ -79,15 +91,29 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
         : <Map<String, dynamic>>[];
     final n = _articles.length;
 
-    // Anciennes ventes sans statut de livraison : considérées comme livrées.
-    final toutLivre = widget.data['statutLivraison'] != 'Non livré';
-    final livrees = _liste(widget.data['quantitesLivrees'], n);
+    // Quantités remises au client :
+    // - liste « quantitesLivrees » si elle existe (livraisons partielles) ;
+    // - sinon tout, si la vente est livrée (anciennes ventes comprises) ;
+    // - sinon rien.
+    final statut = (widget.data['statutLivraison'] ?? 'Livré').toString();
+    final brutLivrees = widget.data['quantitesLivrees'];
+    _livrees = brutLivrees is List
+        ? _liste(brutLivrees, n)
+        : List<int>.generate(
+            n,
+            (i) => (statut == 'Non livré' || statut == 'Annulé')
+                ? 0
+                : _entier(_articles[i]['quantite']),
+          );
+
     _dejaRetournees = _liste(widget.data['quantitesRetournees'], n);
+    _dejaAnnulees = _liste(widget.data['quantitesAnnulees'], n);
 
     _max = List<int>.generate(n, (i) {
       final q = _entier(_articles[i]['quantite']);
-      final remis = toutLivre ? q : livrees[i];
-      final m = remis - _dejaRetournees[i];
+      final m = _annulation
+          ? q - _livrees[i] - _dejaAnnulees[i] // jamais sorti, pas encore annulé
+          : _livrees[i] - _dejaRetournees[i]; // sorti, pas encore retourné
       return m > 0 ? m : 0;
     });
     _qte = List<int>.filled(n, 0);
@@ -127,8 +153,8 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Retour de marchandise'),
-        backgroundColor: Colors.deepOrange.shade700,
+        title: Text(_annulation ? 'Annuler la vente' : 'Retour de marchandise'),
+        backgroundColor: _couleur,
         foregroundColor: Colors.white,
       ),
       body: profileAsync.when(
@@ -162,11 +188,15 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
     final client = (widget.data['nomClient'] ?? 'Client').toString();
     final dateVente = _dateVente;
     final jours = DateTime.now().difference(dateVente).inDays;
-    final horsDelai = jours > delaiJours;
+    final horsDelai = !_annulation && jours > delaiJours;
 
     if (!peutRetour) {
-      return _message(Icons.lock_outline,
-          'Seuls le gérant et le patron peuvent enregistrer un retour.');
+      return _message(
+        Icons.lock_outline,
+        _annulation
+            ? 'Seuls le gérant et le patron peuvent annuler une vente.'
+            : 'Seuls le gérant et le patron peuvent enregistrer un retour.',
+      );
     }
     if (horsDelai && !estPatron) {
       return _message(
@@ -180,9 +210,13 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
     if (_max.every((m) => m == 0)) {
       return _message(
         Icons.info_outline,
-        'Rien à retourner sur cette vente.\n\n'
-        "Soit tout a déjà été retourné, soit la marchandise n'a pas encore "
-        'été remise au client (dans ce cas, il faudra annuler la vente).',
+        _annulation
+            ? 'Rien à annuler sur cette vente.\n\n'
+                'Toute la marchandise a déjà été remise au client ou déjà annulée. '
+                "S'il la rapporte, utilisez « Retour de marchandise »."
+            : 'Rien à retourner sur cette vente.\n\n'
+                "Soit tout a déjà été retourné, soit la marchandise n'a pas encore "
+                'été remise au client (dans ce cas, utilisez « Annuler la vente »).',
       );
     }
 
@@ -190,6 +224,18 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
     final reduction = _reductionPrevue;
     final aRembourser = _aRembourserPrevu;
     final motifOk = _motifCtrl.text.trim().isNotEmpty;
+
+    final String explicationMode;
+    switch (_mode) {
+      case 'avoir':
+        explicationMode = 'Le client garde un crédit à utiliser sur un prochain achat.';
+        break;
+      case 'garder':
+        explicationMode = "La boutique garde l'argent (acompte non remboursé).";
+        break;
+      default:
+        explicationMode = "L'argent sort de la caisse.";
+    }
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 28),
@@ -214,6 +260,20 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
             ),
           ),
         ),
+        if (_annulation)
+          Container(
+            margin: const EdgeInsets.only(top: 8),
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.red.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.red.shade200),
+            ),
+            child: Text(
+              "Marchandise jamais retirée par le client : elle revient en stock et la vente est annulée pour ces articles.",
+              style: TextStyle(color: Colors.red.shade900),
+            ),
+          ),
         if (horsDelai)
           Container(
             margin: const EdgeInsets.only(top: 8),
@@ -229,7 +289,8 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
             ),
           ),
         const SizedBox(height: 14),
-        const Text('Articles rapportés', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text(_annulation ? 'Articles à annuler' : 'Articles rapportés',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         const SizedBox(height: 6),
 
         // Articles
@@ -250,9 +311,12 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
                               Text('${_articles[i]['nom']}',
                                   style: const TextStyle(fontWeight: FontWeight.w600)),
                               Text(
-                                'Prix : ${ref.formatPrice(_nombre(_articles[i]['prixUnitaire']))}'
-                                ' • retournable : ${_max[i]}'
-                                '${_dejaRetournees[i] > 0 ? ' (déjà retourné : ${_dejaRetournees[i]})' : ''}',
+                                _annulation
+                                    ? 'Prix : ${ref.formatPrice(_nombre(_articles[i]['prixUnitaire']))}'
+                                        ' • non retiré : ${_max[i]}'
+                                    : 'Prix : ${ref.formatPrice(_nombre(_articles[i]['prixUnitaire']))}'
+                                        ' • retournable : ${_max[i]}'
+                                        '${_dejaRetournees[i] > 0 ? ' (déjà retourné : ${_dejaRetournees[i]})' : ''}',
                                 style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
                               ),
                             ],
@@ -276,7 +340,7 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
                         ),
                       ],
                     ),
-                    if (_qte[i] > 0)
+                    if (!_annulation && _qte[i] > 0)
                       Wrap(
                         spacing: 8,
                         children: [
@@ -298,15 +362,31 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
               ),
             ),
 
+        if (_annulation && _max.where((m) => m > 0).length > 1)
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              icon: const Icon(Icons.select_all),
+              label: const Text('Tout annuler'),
+              onPressed: () => setState(() {
+                for (var i = 0; i < _qte.length; i++) {
+                  _qte[i] = _max[i];
+                }
+              }),
+            ),
+          ),
+
         // Motif
         const SizedBox(height: 12),
         TextField(
           controller: _motifCtrl,
           onChanged: (_) => setState(() {}),
-          decoration: const InputDecoration(
-            labelText: 'Motif du retour *',
-            hintText: 'Ex : mauvaise taille, défaut de fabrication…',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: _annulation ? "Motif de l'annulation *" : 'Motif du retour *',
+            hintText: _annulation
+                ? 'Ex : client jamais venu, délai dépassé…'
+                : 'Ex : mauvaise taille, défaut de fabrication…',
+            border: const OutlineInputBorder(),
           ),
         ),
 
@@ -322,8 +402,12 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Montant du retour : ${ref.formatPrice(montant)}',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(
+                  _annulation
+                      ? 'Montant annulé : ${ref.formatPrice(montant)}'
+                      : 'Montant du retour : ${ref.formatPrice(montant)}',
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
                 if (reduction > 0.005)
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
@@ -332,32 +416,38 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
                 if (aRembourser > 0.005) ...[
                   Padding(
                     padding: const EdgeInsets.only(top: 4, bottom: 8),
-                    child: Text('À rendre au client : ${ref.formatPrice(aRembourser)}',
-                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                    child: Text(
+                      _annulation
+                          ? 'Déjà payé par le client : ${ref.formatPrice(aRembourser)}'
+                          : 'À rendre au client : ${ref.formatPrice(aRembourser)}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
                   SegmentedButton<String>(
-                    segments: const [
-                      ButtonSegment(
+                    segments: [
+                      const ButtonSegment(
                         value: 'especes',
                         label: Text('Espèces'),
                         icon: Icon(Icons.payments_outlined),
                       ),
-                      ButtonSegment(
+                      const ButtonSegment(
                         value: 'avoir',
                         label: Text('Avoir'),
                         icon: Icon(Icons.card_giftcard),
                       ),
+                      if (_annulation)
+                        const ButtonSegment(
+                          value: 'garder',
+                          label: Text('Garder'),
+                          icon: Icon(Icons.store_outlined),
+                        ),
                     ],
                     selected: {_mode},
                     onSelectionChanged: (s) => setState(() => _mode = s.first),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    _mode == 'especes'
-                        ? "L'argent sort de la caisse."
-                        : 'Le client garde un crédit à utiliser sur un prochain achat.',
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
-                  ),
+                  Text(explicationMode,
+                      style: TextStyle(fontSize: 12, color: Colors.grey.shade700)),
                 ],
               ],
             ),
@@ -369,7 +459,7 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
           height: 50,
           child: ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.deepOrange.shade700,
+              backgroundColor: _couleur,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
@@ -380,9 +470,13 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
                     height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                   )
-                : const Icon(Icons.assignment_return),
+                : Icon(_annulation ? Icons.cancel_outlined : Icons.assignment_return),
             label: Text(
-              montant > 0 ? 'Valider le retour (${ref.formatPrice(montant)})' : 'Choisissez les articles',
+              montant <= 0
+                  ? 'Choisissez les articles'
+                  : _annulation
+                      ? "Valider l'annulation (${ref.formatPrice(montant)})"
+                      : 'Valider le retour (${ref.formatPrice(montant)})',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
@@ -409,7 +503,7 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Confirmer le retour'),
+        title: Text(_annulation ? "Confirmer l'annulation" : 'Confirmer le retour'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -430,10 +524,10 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Retour')),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.deepOrange.shade700,
+              backgroundColor: _couleur,
               foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.pop(ctx, true),
@@ -476,6 +570,7 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
     final motif = _motifCtrl.text.trim();
     final uid = FirebaseAuth.instance.currentUser?.uid;
     final now = Timestamp.now();
+    final n = _articles.length;
 
     final nomAgent = await nomUtilisateurConnecte();
     final creanceDoc = await _lireCreance(entRef.collection('creances'));
@@ -492,10 +587,11 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
     var coutRemisEnStock = 0.0;
     var coutAbime = 0.0;
     final lignes = <Map<String, dynamic>>[];
-    for (var i = 0; i < _articles.length; i++) {
+    for (var i = 0; i < n; i++) {
       if (_qte[i] <= 0) continue;
       final pa = _nombre(_articles[i]['prixAchat']);
-      if (_abime[i]) {
+      final abime = !_annulation && _abime[i];
+      if (abime) {
         coutAbime += pa * _qte[i];
       } else {
         coutRemisEnStock += pa * _qte[i];
@@ -506,25 +602,19 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
         'quantite': _qte[i],
         'prixUnitaire': _nombre(_articles[i]['prixUnitaire']),
         'prixAchat': pa,
-        'etat': _abime[i] ? 'abime' : 'revendable',
+        'etat': abime ? 'abime' : 'revendable',
       });
     }
     coutRemisEnStock = _arrondi(coutRemisEnStock);
     coutAbime = _arrondi(coutAbime);
 
-    final nouvellesRetournees = List<int>.generate(
-        _articles.length, (i) => _dejaRetournees[i] + _qte[i]);
-    var toutRetourne = true;
-    for (var i = 0; i < _articles.length; i++) {
-      if (nouvellesRetournees[i] < _entier(_articles[i]['quantite'])) toutRetourne = false;
-    }
-
     final batch = db.batch();
 
-    // 1. Fiche du retour (historique + avoir éventuel)
+    // 1. Fiche (historique + avoir éventuel)
     final retourRef = entRef.collection('retours').doc();
     batch.set(retourRef, {
       'id': retourRef.id,
+      'type': _annulation ? 'annulation' : 'retour',
       'entrepriseId': widget.entrepriseId,
       'venteId': widget.venteId,
       'nomClient': client,
@@ -532,8 +622,9 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
       'articles': lignes,
       'montant': montant,
       'reductionDette': reduction,
-      'montantRembourse': aRembourser,
-      'modeRemboursement': mode, // 'especes' | 'avoir' | 'aucun'
+      'montantRembourse': (mode == 'especes' || mode == 'avoir') ? aRembourser : 0.0,
+      'montantConserve': mode == 'garder' ? aRembourser : 0.0,
+      'modeRemboursement': mode, // 'especes' | 'avoir' | 'garder' | 'aucun'
       'avoirSolde': mode == 'avoir' ? aRembourser : 0.0,
       'coutRemisEnStock': coutRemisEnStock,
       'coutAbime': coutAbime,
@@ -545,15 +636,42 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
 
     // 2. Vente
     final nouveauReste = _arrondi(math.max(0, _detteVente - reduction));
-    batch.update(venteRef, {
-      'quantitesRetournees': nouvellesRetournees,
-      'montantRetourne': FieldValue.increment(montant),
-      'statutRetour': toutRetourne ? 'total' : 'partiel',
+    final venteMaj = <String, dynamic>{
       'dateDernierRetour': now,
-      if (coutAbime > 0.005) 'coutAbimeRetours': FieldValue.increment(coutAbime),
       if (reduction > 0.005) 'resteAPayer': nouveauReste,
       if (reduction > 0.005 && nouveauReste <= 0.005) 'statutPaiement': 'Payé',
-    });
+    };
+
+    if (_annulation) {
+      final nouvellesAnnulees = List<int>.generate(n, (i) => _dejaAnnulees[i] + _qte[i]);
+      var plusRienALivrer = true;
+      var toutAnnule = true;
+      for (var i = 0; i < n; i++) {
+        final q = _entier(_articles[i]['quantite']);
+        if (_livrees[i] + nouvellesAnnulees[i] < q) plusRienALivrer = false;
+        if (nouvellesAnnulees[i] < q) toutAnnule = false;
+      }
+      venteMaj.addAll({
+        'quantitesAnnulees': nouvellesAnnulees,
+        'montantAnnule': FieldValue.increment(montant),
+        'statutAnnulation': toutAnnule ? 'total' : 'partiel',
+        if (plusRienALivrer) 'statutLivraison': toutAnnule ? 'Annulé' : 'Livré',
+        if (plusRienALivrer) 'livraisonPartielle': false,
+      });
+    } else {
+      final nouvellesRetournees = List<int>.generate(n, (i) => _dejaRetournees[i] + _qte[i]);
+      var toutRetourne = true;
+      for (var i = 0; i < n; i++) {
+        if (nouvellesRetournees[i] < _entier(_articles[i]['quantite'])) toutRetourne = false;
+      }
+      venteMaj.addAll({
+        'quantitesRetournees': nouvellesRetournees,
+        'montantRetourne': FieldValue.increment(montant),
+        'statutRetour': toutRetourne ? 'total' : 'partiel',
+        if (coutAbime > 0.005) 'coutAbimeRetours': FieldValue.increment(coutAbime),
+      });
+    }
+    batch.update(venteRef, venteMaj);
 
     // 3. Créance du client
     if (creanceDoc != null && reduction > 0.005) {
@@ -570,7 +688,9 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
     final lines = <Map<String, dynamic>>[
       {
         'accountCode': '701000',
-        'accountLabel': 'Ventes de marchandises (retour)',
+        'accountLabel': _annulation
+            ? 'Ventes de marchandises (annulation)'
+            : 'Ventes de marchandises (retour)',
         'debit': montant,
         'credit': 0.0,
       },
@@ -595,6 +715,13 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
           'debit': 0.0,
           'credit': aRembourser,
         },
+      if (mode == 'garder')
+        {
+          'accountCode': '758000',
+          'accountLabel': 'Produits divers (acompte conservé) - $client',
+          'debit': 0.0,
+          'credit': aRembourser,
+        },
     ];
     final ecritureRef = entRef.collection('ecritures_comptables').doc('RET-${retourRef.id}');
     batch.set(ecritureRef, {
@@ -602,8 +729,10 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
       'entrepriseId': widget.entrepriseId,
       'reference': widget.venteId,
       'retourId': retourRef.id,
-      'type': 'retour',
-      'description': 'Retour de marchandise - $client ($motif)',
+      'type': _annulation ? 'annulation' : 'retour',
+      'description': _annulation
+          ? 'Annulation de vente (non retirée) - $client ($motif)'
+          : 'Retour de marchandise - $client ($motif)',
       'date': now,
       'lines': lines,
       'montantEncaisse': 0.0,
@@ -618,7 +747,7 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
         'entrepriseId': widget.entrepriseId,
         'reference': widget.venteId,
         'retourId': retourRef.id,
-        'type': 'retour',
+        'type': _annulation ? 'annulation' : 'retour',
         'description': 'Retour en stock (coût des marchandises) - $client',
         'date': now,
         'lines': [
@@ -639,9 +768,10 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
       });
     }
 
-    // 6. Stock : seulement les articles revendables
-    for (var i = 0; i < _articles.length; i++) {
-      if (_qte[i] <= 0 || _abime[i]) continue;
+    // 6. Stock : articles revendables (tous, pour une annulation)
+    for (var i = 0; i < n; i++) {
+      if (_qte[i] <= 0) continue;
+      if (!_annulation && _abime[i]) continue;
       final id = (_articles[i]['produitId'] ?? '').toString();
       if (id.isEmpty) continue;
       batch.update(entRef.collection('produits').doc(id), {
@@ -663,13 +793,20 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
       return;
     }
 
+    final debut = _annulation ? 'Annulation enregistrée.' : 'Retour enregistré.';
     final String texte;
-    if (mode == 'especes') {
-      texte = 'Retour enregistré. Rendez ${ref.formatPrice(aRembourser)} au client en espèces.';
-    } else if (mode == 'avoir') {
-      texte = 'Retour enregistré. Avoir de ${ref.formatPrice(aRembourser)} pour $client.';
-    } else {
-      texte = 'Retour enregistré. Dette du client diminuée de ${ref.formatPrice(reduction)}.';
+    switch (mode) {
+      case 'especes':
+        texte = '$debut Rendez ${ref.formatPrice(aRembourser)} au client en espèces.';
+        break;
+      case 'avoir':
+        texte = '$debut Avoir de ${ref.formatPrice(aRembourser)} pour $client.';
+        break;
+      case 'garder':
+        texte = '$debut Acompte de ${ref.formatPrice(aRembourser)} conservé par la boutique.';
+        break;
+      default:
+        texte = '$debut Dette du client diminuée de ${ref.formatPrice(reduction)}.';
     }
     messenger.showSnackBar(
       SnackBar(

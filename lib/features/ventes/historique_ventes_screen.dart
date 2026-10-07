@@ -37,6 +37,10 @@ double _num(dynamic v) => v is num ? v.toDouble() : 0.0;
 
 int _int(dynamic v) => v is num ? v.toInt() : 0;
 
+/// Montant net d'une vente : total - retours - annulations.
+double _totalNet(Map<String, dynamic> d) =>
+    _num(d['montantTotal']) - _num(d['montantRetourne']) - _num(d['montantAnnule']);
+
 String _deux(int n) => n.toString().padLeft(2, '0');
 
 String _formatDate(DateTime d) =>
@@ -188,11 +192,11 @@ class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen>
                     ? ventesPeriode
                     : ventesPeriode.where((v) => _vendeur(v.data()) == filtre).toList();
 
-                // Totaux NETS (retours déduits)
+                // Totaux NETS (retours et annulations déduits)
                 double total = 0, encaisse = 0, reste = 0;
                 for (final v in ventes) {
                   final d = v.data();
-                  final t = _num(d['montantTotal']) - _num(d['montantRetourne']);
+                  final t = _totalNet(d);
                   final r = _num(d['resteAPayer']);
                   total += t;
                   reste += r;
@@ -359,6 +363,7 @@ Widget _badgePaiement(Map<String, dynamic> d) {
 
 Widget _badgeLivraison(Map<String, dynamic> d) {
   final statut = (d['statutLivraison'] ?? 'Livré').toString();
+  if (statut == 'Annulé') return _badge('Annulée', Colors.red.shade800);
   return statut == 'Non livré'
       ? _badge('À livrer', Colors.brown)
       : _badge('Livré', Colors.blueGrey);
@@ -366,9 +371,14 @@ Widget _badgeLivraison(Map<String, dynamic> d) {
 
 List<Widget> _badges(Map<String, dynamic> d) {
   final statutRetour = (d['statutRetour'] ?? '').toString();
+  final statutAnnulation = (d['statutAnnulation'] ?? '').toString();
+  final statutLivraison = (d['statutLivraison'] ?? '').toString();
   return [
     _badgePaiement(d),
     _badgeLivraison(d),
+    if (statutAnnulation == 'partiel' ||
+        (statutAnnulation == 'total' && statutLivraison != 'Annulé'))
+      _badge('Annulation partielle', Colors.red.shade700),
     if (statutRetour == 'total') _badge('Retour total', Colors.deepOrange.shade700),
     if (statutRetour == 'partiel') _badge('Retour partiel', Colors.deepOrange.shade700),
   ];
@@ -394,10 +404,10 @@ class _LigneVente extends ConsumerWidget {
     return brut.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
   }
 
-  List<int> get _retournees {
+  List<int> _listeEntiers(String champ) {
     final n = _articles.length;
     final res = List<int>.filled(n, 0);
-    final brut = data['quantitesRetournees'];
+    final brut = data[champ];
     if (brut is List) {
       for (var i = 0; i < n && i < brut.length; i++) {
         res[i] = _int(brut[i]);
@@ -484,15 +494,33 @@ class _LigneVente extends ConsumerWidget {
     }
   }
 
+  void _ouvrirEcranRetour(BuildContext context, {required bool annulation}) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => RetourVenteScreen(
+          entrepriseId: entrepriseId,
+          venteId: venteId,
+          data: data,
+          annulation: annulation,
+        ),
+      ),
+    );
+  }
+
   void _ouvrirDetail(BuildContext context, WidgetRef ref) {
     final client = (data['nomClient'] ?? 'Client Divers').toString();
     final tel = (data['telephoneClient'] ?? '').toString();
     final total = _num(data['montantTotal']);
     final reste = _num(data['resteAPayer']);
     final montantRetourne = _num(data['montantRetourne']);
+    final montantAnnule = _num(data['montantAnnule']);
     final articles = _articles;
-    final retournees = _retournees;
-    final livre = (data['statutLivraison'] ?? 'Livré').toString() != 'Non livré';
+    final retournees = _listeEntiers('quantitesRetournees');
+    final annulees = _listeEntiers('quantitesAnnulees');
+    final statut = (data['statutLivraison'] ?? 'Livré').toString();
+    final livre = statut != 'Non livré' && statut != 'Annulé';
+    final aLivrer = statut == 'Non livré';
     final dateLiv = data['dateLivraison'];
     final vendeur = _vendeur(data);
     final livreur = (data['livreParNom'] ?? '').toString().trim();
@@ -567,6 +595,15 @@ class _LigneVente extends ConsumerWidget {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
+                          if (annulees[i] > 0)
+                            Text(
+                              '✕ ${annulees[i]} annulé(s)',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.red.shade700,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -576,12 +613,14 @@ class _LigneVente extends ConsumerWidget {
               ),
             const Divider(height: 24),
             _ligneMontant('Total', ref.formatPrice(total), gras: true),
-            if (montantRetourne > 0.005) ...[
+            if (montantRetourne > 0.005)
               _ligneMontant('Retourné', '- ${ref.formatPrice(montantRetourne)}',
                   couleur: Colors.deepOrange.shade700),
-              _ligneMontant('Total après retour', ref.formatPrice(total - montantRetourne),
-                  gras: true),
-            ],
+            if (montantAnnule > 0.005)
+              _ligneMontant('Annulé', '- ${ref.formatPrice(montantAnnule)}',
+                  couleur: Colors.red.shade700),
+            if (montantRetourne > 0.005 || montantAnnule > 0.005)
+              _ligneMontant('Total net', ref.formatPrice(_totalNet(data)), gras: true),
             _ligneMontant('Payé', ref.formatPrice(total - reste)),
             if (reste > 0.005)
               _ligneMontant('Reste à payer', ref.formatPrice(reste), couleur: Colors.red),
@@ -651,18 +690,26 @@ class _LigneVente extends ConsumerWidget {
               label: const Text('Retour de marchandise'),
               onPressed: () {
                 Navigator.pop(ctx);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => RetourVenteScreen(
-                      entrepriseId: entrepriseId,
-                      venteId: venteId,
-                      data: data,
-                    ),
-                  ),
-                );
+                _ouvrirEcranRetour(context, annulation: false);
               },
             ),
+
+            // ✖️ Annulation : seulement si de la marchandise attend encore
+            if (aLivrer) ...[
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.red.shade700,
+                  side: BorderSide(color: Colors.red.shade300),
+                ),
+                icon: const Icon(Icons.cancel_outlined),
+                label: const Text('Annuler la vente (non retirée)'),
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  _ouvrirEcranRetour(context, annulation: true);
+                },
+              ),
+            ],
           ],
         ),
       ),
@@ -690,8 +737,9 @@ class _LigneVente extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final client = (data['nomClient'] ?? 'Client Divers').toString();
-    final total = _num(data['montantTotal']) - _num(data['montantRetourne']);
+    final total = _totalNet(data);
     final vendeur = _vendeur(data);
+    final annulee = (data['statutLivraison'] ?? '').toString() == 'Annulé';
     final nbArticles = _articles.fold<int>(
         0, (s, a) => s + ((a['quantite'] is num) ? (a['quantite'] as num).toInt() : 0));
 
@@ -702,7 +750,10 @@ class _LigneVente extends ConsumerWidget {
         title: Text(client,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontWeight: FontWeight.bold)),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              decoration: annulee ? TextDecoration.lineThrough : null,
+            )),
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 4),
           child: Column(
@@ -726,7 +777,7 @@ class _LigneVente extends ConsumerWidget {
           ref.formatPrice(total),
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.indigo.shade800,
+            color: annulee ? Colors.grey : Colors.indigo.shade800,
           ),
         ),
       ),

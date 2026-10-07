@@ -151,7 +151,7 @@ class FinancialCalculationService {
       if (!dansLaPeriode(dateVente)) continue;
 
       // ↩️ Retours : le chiffre d'affaires est NET des retours
-      chiffreAffaires += totalVente - _num(data['montantRetourne']);
+      chiffreAffaires += totalVente - _num(data['montantRetourne']) - _num(data['montantAnnule']);
 
       for (var i = 0; i < items.length; i++) {
         final rawItem = items[i];
@@ -160,7 +160,11 @@ class FinancialCalculationService {
 
         final double qteBrute =
             _num(item['quantite'] ?? item['quantity'] ?? item['qte'], 1.0);
-        final double qteRetournee = i < retours.length ? _num(retours[i]) : 0.0;
+        final dynamic rawAnnul = data['quantitesAnnulees'];
+        final double qteAnnulee =
+            (rawAnnul is List && i < rawAnnul.length) ? _num(rawAnnul[i]) : 0.0;
+        final double qteRetournee =
+            (i < retours.length ? _num(retours[i]) : 0.0) + qteAnnulee;
         final double qteNette =
             (qteBrute - qteRetournee) > 0 ? qteBrute - qteRetournee : 0.0;
         if (qteNette <= 0) continue; // tout a été retourné
