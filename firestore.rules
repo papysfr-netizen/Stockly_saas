@@ -39,12 +39,25 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/entreprises/$(entId)).data.ownerId == request.auth.uid;
     }
 
-    // Propriétaire ou Gérant de cette entreprise (anciens noms de rôles acceptés)
+    // Le rôle est Propriétaire ou Gérant (anciens noms de rôles acceptés)
+    function aRoleGerantOuPlus() {
+      return monRole() in ['owner', 'proprietaire', 'patron', 'gerant', 'admin',
+                           'administrateur', 'chefboutique', 'chef_boutique', 'chef', 'comptable'];
+    }
+
+    // Propriétaire ou Gérant de cette entreprise
     function estGerantOuPlus(entId) {
+      return estMembre(entId) && (estProprietaireDe(entId) || aRoleGerantOuPlus());
+    }
+
+    // 🔐 Autorisation réglée par le patron (Paramètres → Équipe)
+    //  - Propriétaire : toujours oui
+    //  - Sinon : l'interrupteur choisi par le patron,
+    //    ou par défaut : Gérant = oui, Caissier = non
+    function aPermission(entId, cle) {
       return estMembre(entId) && (
         estProprietaireDe(entId)
-        || monRole() in ['owner', 'proprietaire', 'patron', 'gerant', 'admin',
-                         'administrateur', 'chefboutique', 'chef_boutique', 'chef', 'comptable']
+        || monProfil().get('permissions', {}).get(cle, aRoleGerantOuPlus()) == true
       );
     }
 
@@ -72,8 +85,10 @@ service cloud.firestore {
 
       allow update: if estConnecte() && (
         (
+          // Un employé modifie son propre profil : JAMAIS son rôle, son entreprise,
+          // son état actif ni ses autorisations
           request.auth.uid == userId
-          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'entrepriseId', 'uid', 'estActif'])
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'entrepriseId', 'uid', 'estActif', 'permissions'])
         )
         || (
           estProprietaireDe(resource.data.entrepriseId)
@@ -97,11 +112,11 @@ service cloud.firestore {
       // ----- Produits -----
       match /produits/{produitId} {
         allow read: if estMembre(entId);
-        // Créer / supprimer : Propriétaire + Gérant
-        allow create, delete: if estGerantOuPlus(entId);
-        // Modifier : Propriétaire + Gérant (tout) ;
-        //            Caissier : seulement le stock lors d'une vente
-        allow update: if estGerantOuPlus(entId)
+        // Créer / supprimer : autorisation « Gérer le stock »
+        allow create, delete: if aPermission(entId, 'gererStock');
+        // Modifier : « Gérer le stock » (tout) ;
+        //            les autres : seulement le stock lors d'une vente / d'un retour
+        allow update: if aPermission(entId, 'gererStock')
           || (estMembre(entId)
               && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['quantite', 'updatedAt']));
       }
@@ -112,17 +127,27 @@ service cloud.firestore {
         allow delete: if estGerantOuPlus(entId);
       }
       match /retours/{docId} {
-        // Retours de marchandise : tout le monde voit ; Gérant+ crée ; personne ne modifie
+        // Retours / annulations : tout le monde voit ;
+        // créer = autorisation « Retours et annulations » ; personne ne modifie
         allow read: if estMembre(entId);
-        allow create: if estGerantOuPlus(entId);
+        allow create: if aPermission(entId, 'retours');
         allow update, delete: if false;
       }
       match /comptes_clients/{compteId} {
-        // Comptes clients (dépôts / avoirs) : on ne supprime jamais
-        allow read, create, update: if estMembre(entId);
+        // Comptes clients (dépôts / avoirs) : on ne supprime jamais.
+        // Un RETRAIT (totalRetire change) = autorisation « Remises et retraits »
+        allow read, create: if estMembre(entId);
+        allow update: if estMembre(entId) && (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['totalRetire'])
+          || aPermission(entId, 'remisesRetraits')
+        );
         allow delete: if false;
         match /mouvements/{mvtId} {
-          allow read, create: if estMembre(entId);
+          allow read: if estMembre(entId);
+          allow create: if estMembre(entId) && (
+            request.resource.data.get('type', '') != 'retrait'
+            || aPermission(entId, 'remisesRetraits')
+          );
           allow update, delete: if false;
         }
       }
