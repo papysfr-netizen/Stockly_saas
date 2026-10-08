@@ -132,7 +132,7 @@ class MyApp extends ConsumerWidget {
     final currentLocale = ref.watch(localeProvider);
 
     return MaterialApp(
-      title: 'Stockly SaaS',
+      title: 'Stockly Pro',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,

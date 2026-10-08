@@ -417,7 +417,7 @@ class ReceiptService {
                 pw.SizedBox(height: 3),
                 pw.Center(
                   child: pw.Text(
-                    'Stockly SaaS | Conçu par PAPY SAFARI (+243 97 34 14 587)',
+                    'Stockly Pro | Conçu par PAPY SAFARI (+243 97 34 14 587)',
                     style: pw.TextStyle(
                         fontWeight: pw.FontWeight.bold, fontSize: 6),
                     textAlign: pw.TextAlign.center,

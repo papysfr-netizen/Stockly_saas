@@ -1,11 +1,11 @@
 {
-    "name": "stockly_saas",
-    "short_name": "stockly_saas",
+    "name": "Stockly Pro",
+    "short_name": "Stockly Pro",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Stockly Pro : stock, caisse, dettes et comptabilité.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

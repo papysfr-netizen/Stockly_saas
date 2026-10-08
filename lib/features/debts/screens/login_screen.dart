@@ -239,7 +239,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const Icon(Icons.storefront, size: 80, color: Colors.blue),
               const SizedBox(height: 12),
               const Text(
-                'Stockly SaaS',
+                'Stockly Pro',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
