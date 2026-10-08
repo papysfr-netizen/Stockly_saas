@@ -684,6 +684,8 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
     final nouveauReste = _arrondi(math.max(0, _detteVente - reduction));
     final venteMaj = <String, dynamic>{
       'dateDernierRetour': now,
+      if (mode == 'garder' && aRembourser > 0.005)
+        'montantConserve': FieldValue.increment(aRembourser),
       if (reduction > 0.005) 'resteAPayer': nouveauReste,
       if (reduction > 0.005 && nouveauReste <= 0.005) 'statutPaiement': 'Payé',
     };
