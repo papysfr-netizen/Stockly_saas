@@ -6,6 +6,7 @@ import 'package:stockly_saas/features/comptes_clients/comptes_clients_screen.dar
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/user_model.dart';
+import '../../../core/providers/user_role_provider.dart';
 import '../../../core/providers/currency_provider.dart';
 import '../../../core/providers/produit_provider.dart';
 import '../../../core/providers/entreprise_provider.dart';
@@ -41,8 +42,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // Gérant       : stock + finances (pas Paramètres / Équipe / Maintenance)
   // Caissier     : Caisse + Ventes + Dettes + À livrer
   // ------------------------------------------------------------------
-  bool get _peutGererStock => widget.currentUser.isAdmin; // owner + gérant
-  bool get _peutVoirFinances => widget.currentUser.canAccessFinance; // owner + gérant
+  // Les autorisations réglées par le patron (Paramètres → Équipe).
+  // Tant que le profil n'est pas chargé, on garde l'ancienne règle du rôle.
+  UserProfile? get _profil {
+    final p = ref.watch(userProfileProvider).value;
+    return (p == null || p.uid.isEmpty) ? null : p;
+  }
+
+  bool get _peutGererStock =>
+      _profil?.peutGererStock ?? widget.currentUser.isAdmin; // interrupteur « Gérer le stock »
+  bool get _peutVoirFinances =>
+      _profil?.peutVoirFinances ?? widget.currentUser.canAccessFinance; // interrupteur « Voir les finances »
   bool get _peutGererParametres => widget.currentUser.canManageTeam; // owner seul
 
   @override
@@ -479,6 +489,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 child: const Icon(Icons.delete, color: Colors.white),
                               ),
                               confirmDismiss: (_) async {
+                                // 🛑 Produit avec du stock : suppression refusée
+                                if (produit.quantite > 0) {
+                                  await showDialog<void>(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      title: const Text('Suppression impossible'),
+                                      content: Text(
+                                          '« ${produit.nom} » a encore ${produit.quantite} article(s) en stock.\n\n'
+                                          'Mettez d\'abord le stock à 0 (inventaire ou perte), '
+                                          'pour que la perte reste visible dans les comptes.'),
+                                      actions: [
+                                        ElevatedButton(
+                                          onPressed: () => Navigator.pop(ctx),
+                                          child: const Text('Compris'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                  return false;
+                                }
                                 final confirm = await showDialog<bool>(
                                   context: context,
                                   builder: (ctx) => AlertDialog(
