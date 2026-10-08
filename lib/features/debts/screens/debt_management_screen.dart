@@ -1,4 +1,4 @@
-// lib/features/debt/screens/debt_management_screen.dart
+// lib/features/debts/screens/debt_management_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,11 +7,14 @@ import 'package:stockly_saas/core/models/dette.dart';
 import 'package:stockly_saas/features/debts/controllers/debt_controller.dart';
 import 'package:stockly_saas/core/providers/currency_provider.dart';
 import 'package:stockly_saas/core/providers/user_role_provider.dart';
-import 'package:stockly_saas/core/services/report_export_service.dart'; // (Ou le bon chemin de votre service d'export)
+import 'package:stockly_saas/core/services/report_export_service.dart';
 import 'package:stockly_saas/features/debts/widgets/debt_dialogs.dart';
 import 'package:stockly_saas/features/debts/widgets/debt_list_view.dart';
+
 class DebtManagementScreen extends ConsumerWidget {
   const DebtManagementScreen({super.key});
+
+  static const Color _bleuNuit = Color(0xFF1E293B);
 
   String _formaterDate(DateTime date) {
     return "${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}";
@@ -23,48 +26,49 @@ class DebtManagementScreen extends ConsumerWidget {
     required bool isClientTab,
     required String currency,
   }) async {
-    final currentTypeLabel =
-        isClientTab ? 'Creances_Clients' : 'Dettes_Fournisseurs';
-    final titreDoc = isClientTab
-        ? 'Rapport des Créances Clients'
-        : 'Rapport des Dettes Fournisseurs';
+    final titreDoc = isClientTab ? 'Créances clients' : 'Dettes fournisseurs';
 
     final targetType = isClientTab ? TypeDette.client : TypeDette.fournisseur;
-    final listeFiltree = dettes.where((d) => d.type == targetType).toList();
+    final listeFiltree = dettes.where((d) => d.type == targetType && !d.estSolde).toList()
+      ..sort((a, b) => a.dateCreation.compareTo(b.dateCreation));
 
     final enTetes = [
-      'Tiers / Nom',
+      isClientTab ? 'Client' : 'Fournisseur',
+      'Téléphone',
       'N° Facture',
-      'Total Initial',
-      'Déjà payé',
-      'Reste à Payer',
+      'Date',
+      'Âge (jours)',
+      'Total ($currency)',
+      'Déjà payé ($currency)',
+      'Reste ($currency)',
       'Statut',
-      'Échéance'
     ];
 
-    final lignes = listeFiltree.map((dette) {
-      final String statutStr = dette.statut == 'paye'
-          ? 'Soldé'
-          : (dette.statut == 'partiel' ? 'Partiel' : 'Non Payé');
-
-      final String echeanceStr = dette.dateEcheance != null
-          ? _formaterDate(dette.dateEcheance!)
-          : '-';
-
-      return [
-        dette.nomTiers,
-        dette.numeroFacture,
-        '${dette.montantInitial.toStringAsFixed(2)} $currency',
-        '${dette.acomptePaye.toStringAsFixed(2)} $currency',
-        '${dette.montantReste.toStringAsFixed(2)} $currency',
-        statutStr,
-        echeanceStr,
-      ];
-    }).toList();
+    double total = 0;
+    final lignes = <List<dynamic>>[];
+    for (final d in listeFiltree) {
+      total += d.montantReste;
+      final age = DateTime.now().difference(d.dateCreation).inDays;
+      final statut = (d.estEnRetard || age > 30)
+          ? 'En retard'
+          : (d.acomptePaye > 0 ? 'Partiel' : 'Non payée');
+      lignes.add(<dynamic>[
+        d.nomTiers,
+        d.telephone,
+        d.numeroFacture,
+        _formaterDate(d.dateCreation),
+        age,
+        d.montantInitial,
+        d.acomptePaye,
+        d.montantReste,
+        statut,
+      ]);
+    }
+    lignes.add(<dynamic>['TOTAL', '', '', '', '', '', '', total, '']);
 
     if (format == 'excel') {
       await ReportExportService.exporterExcel(
-        titreRapport: 'Rapport_$currentTypeLabel',
+        titreRapport: titreDoc,
         enTetes: enTetes,
         lignes: lignes,
       );
@@ -73,55 +77,12 @@ class DebtManagementScreen extends ConsumerWidget {
         titreRapport: titreDoc,
         nomBoutique: 'Stockly Pro',
         enTetes: enTetes,
-        lignes: lignes,
+        lignes: lignes
+            .map((l) => l.map((v) => v is double ? v.toStringAsFixed(2) : v).toList())
+            .toList(),
+        modePaysage: true,
       );
     }
-  }
-
-  Widget _buildSummaryCard({
-    required String title,
-    required double amount,
-    required String currency,
-    required Color color,
-  }) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.all(12.0),
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 5,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 13,
-              color: Colors.grey,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '${amount.toStringAsFixed(2)} $currency',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -138,22 +99,22 @@ class DebtManagementScreen extends ConsumerWidget {
       child: Builder(
         builder: (context) {
           return Scaffold(
-            backgroundColor: Colors.grey.shade100,
+            backgroundColor: const Color(0xFFF3F4F6),
             appBar: AppBar(
               title: const Text(
-                'Gestion des Dettes',
+                'Créances & Dettes',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              backgroundColor: Colors.indigo.shade800,
+              backgroundColor: _bleuNuit,
               foregroundColor: Colors.white,
+              elevation: 0,
               actions: [
                 PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_vert, color: Colors.white),
+                  icon: const Icon(Icons.ios_share_rounded, color: Colors.white),
                   tooltip: 'Exporter',
                   onSelected: (value) {
                     final dettes = dettesAsync.value ?? [];
-                    final isClientTab =
-                        DefaultTabController.of(context).index == 0;
+                    final isClientTab = DefaultTabController.of(context).index == 0;
                     _exporterRapport(
                       format: value,
                       dettes: dettes,
@@ -161,51 +122,42 @@ class DebtManagementScreen extends ConsumerWidget {
                       currency: currency,
                     );
                   },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
+                  itemBuilder: (context) => const [
+                    PopupMenuItem(
                       value: 'excel',
-                      child: Row(
-                        children: [
-                          Icon(Icons.table_chart, color: Colors.green),
-                          SizedBox(width: 8),
-                          Text('Exporter vers Excel'),
-                        ],
-                      ),
+                      child: Row(children: [
+                        Icon(Icons.table_chart, color: Colors.green),
+                        SizedBox(width: 8),
+                        Text('Exporter vers Excel'),
+                      ]),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'pdf',
-                      child: Row(
-                        children: [
-                          Icon(Icons.picture_as_pdf, color: Colors.red),
-                          SizedBox(width: 8),
-                          Text('Imprimer / PDF'),
-                        ],
-                      ),
+                      child: Row(children: [
+                        Icon(Icons.picture_as_pdf, color: Colors.red),
+                        SizedBox(width: 8),
+                        Text('Imprimer / PDF'),
+                      ]),
                     ),
                   ],
                 ),
               ],
               bottom: const TabBar(
                 indicatorColor: Colors.amber,
+                indicatorWeight: 3,
                 labelColor: Colors.white,
                 unselectedLabelColor: Colors.white60,
+                labelStyle: TextStyle(fontWeight: FontWeight.bold),
                 tabs: [
-                  Tab(
-                    icon: Icon(Icons.call_received),
-                    text: 'Clients (Créances)',
-                  ),
-                  Tab(
-                    icon: Icon(Icons.call_made),
-                    text: 'Fournisseurs (Dettes)',
-                  ),
+                  Tab(icon: Icon(Icons.call_received_rounded), text: 'Clients'),
+                  Tab(icon: Icon(Icons.call_made_rounded), text: 'Fournisseurs'),
                 ],
               ),
             ),
             body: Stack(
               children: [
                 dettesAsync.when(
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
+                  loading: () => const Center(child: CircularProgressIndicator()),
                   error: (err, stack) => Center(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -216,60 +168,24 @@ class DebtManagementScreen extends ConsumerWidget {
                     ),
                   ),
                   data: (dettes) {
-                    final creancesClients = dettes
-                        .where((d) => d.type == TypeDette.client)
-                        .toList();
-
-                    final dettesFournisseurs = dettes
-                        .where((d) => d.type == TypeDette.fournisseur)
-                        .toList();
-
-                    final totalCreances = creancesClients.fold<double>(
-                      0.0,
-                      (sum, item) => sum + item.montantReste,
-                    );
-                    final totalDettes = dettesFournisseurs.fold<double>(
-                      0.0,
-                      (sum, item) => sum + item.montantReste,
-                    );
+                    final creancesClients =
+                        dettes.where((d) => d.type == TypeDette.client).toList();
+                    final dettesFournisseurs =
+                        dettes.where((d) => d.type == TypeDette.fournisseur).toList();
 
                     return TabBarView(
                       children: [
-                        Column(
-                          children: [
-                            _buildSummaryCard(
-                              title: 'Total des Créances à Recouvrer',
-                              amount: totalCreances,
-                              currency: currency,
-                              color: Colors.green.shade800,
-                            ),
-                            Expanded(
-                              child: DebtListView(
-                                entrepriseId: entrepriseId,
-                                liste: creancesClients,
-                                type: TypeDette.client,
-                                currency: currency,
-                              ),
-                            ),
-                          ],
+                        DebtListView(
+                          entrepriseId: entrepriseId,
+                          liste: creancesClients,
+                          type: TypeDette.client,
+                          currency: currency,
                         ),
-                        Column(
-                          children: [
-                            _buildSummaryCard(
-                              title: 'Total des Dettes à Payer',
-                              amount: totalDettes,
-                              currency: currency,
-                              color: Colors.red.shade800,
-                            ),
-                            Expanded(
-                              child: DebtListView(
-                                entrepriseId: entrepriseId,
-                                liste: dettesFournisseurs,
-                                type: TypeDette.fournisseur,
-                                currency: currency,
-                              ),
-                            ),
-                          ],
+                        DebtListView(
+                          entrepriseId: entrepriseId,
+                          liste: dettesFournisseurs,
+                          type: TypeDette.fournisseur,
+                          currency: currency,
                         ),
                       ],
                     );
@@ -283,7 +199,7 @@ class DebtManagementScreen extends ConsumerWidget {
               ],
             ),
             floatingActionButton: FloatingActionButton.extended(
-              backgroundColor: Colors.indigo.shade800,
+              backgroundColor: _bleuNuit,
               icon: const Icon(Icons.add, color: Colors.white),
               label: const Text(
                 'Ajouter une dette',

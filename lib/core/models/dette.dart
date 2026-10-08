@@ -8,6 +8,7 @@ enum TypeDette { client, fournisseur }
 class Dette {
   final String id;
   final String nomTiers;
+  final String telephone;
   final String numeroFacture;
   final double montantInitial;
   final double acomptePaye;
@@ -24,6 +25,7 @@ class Dette {
   const Dette({
     required this.id,
     required this.nomTiers,
+    this.telephone = '',
     required this.numeroFacture,
     required this.montantInitial,
     required this.acomptePaye,
@@ -150,6 +152,7 @@ class Dette {
     return Dette(
       id: docId ?? json['id']?.toString() ?? '',
       nomTiers: nomTiersResolved,
+      telephone: (json['telephone'] ?? json['telephoneClient'] ?? json['tel'] ?? '').toString(),
       numeroFacture: numeroFactureResolved,
       montantInitial: montantInitialResolved,
       acomptePaye: finalAcompte,
@@ -183,6 +186,7 @@ class Dette {
     return {
       'id': id,
       'nomTiers': nomTiers,
+      'telephone': telephone,
       'numeroFacture': numeroFacture,
       'montantInitial': montantInitial,
       'acomptePaye': acomptePaye,
@@ -203,6 +207,7 @@ class Dette {
     return {
       'id': id,
       'nomTiers': nomTiers,
+      'telephone': telephone,
       'numeroFacture': numeroFacture,
       'montantInitial': montantInitial,
       'acomptePaye': acomptePaye,
@@ -225,6 +230,7 @@ class Dette {
   Dette copyWith({
     String? id,
     String? nomTiers,
+    String? telephone,
     String? numeroFacture,
     double? montantInitial,
     double? acomptePaye,
@@ -241,6 +247,7 @@ class Dette {
     return Dette(
       id: id ?? this.id,
       nomTiers: nomTiers ?? this.nomTiers,
+      telephone: telephone ?? this.telephone,
       numeroFacture: numeroFacture ?? this.numeroFacture,
       montantInitial: montantInitial ?? this.montantInitial,
       acomptePaye: acomptePaye ?? this.acomptePaye,

@@ -1,12 +1,22 @@
-// lib/features/debts/presentation/views/debt_list_view.dart
+// lib/features/debts/widgets/debt_list_view.dart
+//
+// Liste professionnelle des créances clients / dettes fournisseurs :
+//  - carte de synthèse (total, nombre de dossiers, montant en retard)
+//  - recherche (nom, facture, téléphone) + filtres
+//  - cartes avec barre de progression, âge de la dette,
+//    boutons « Encaisser / Payer » et « Relancer » (WhatsApp)
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:stockly_saas/core/models/dette.dart';
 import 'debt_dialogs.dart';
 
-class DebtListView extends ConsumerWidget {
+enum _Filtre { enCours, recentes, enRetard, partielles, soldees }
+
+class DebtListView extends ConsumerStatefulWidget {
   final String entrepriseId;
   final List<Dette> liste;
   final TypeDette type;
@@ -20,279 +30,519 @@ class DebtListView extends ConsumerWidget {
     required this.currency,
   });
 
-  String _formaterDateHeure(DateTime date) {
-    final jour = date.day.toString().padLeft(2, '0');
-    final mois = date.month.toString().padLeft(2, '0');
-    final annee = date.year;
-    final heure = date.hour.toString().padLeft(2, '0');
-    final minute = date.minute.toString().padLeft(2, '0');
+  @override
+  ConsumerState<DebtListView> createState() => _DebtListViewState();
+}
 
-    return "$jour/$mois/$annee à $heure:$minute";
-  }
+class _DebtListViewState extends ConsumerState<DebtListView> {
+  static const Color _bleuNuit = Color(0xFF1E293B);
+  static const Color _vert = Color(0xFF0F9D58);
+  static const Color _rouge = Color(0xFFD93025);
+  static const int _joursRetard = 30;
+
+  final TextEditingController _recherche = TextEditingController();
+  String _texte = '';
+  _Filtre _filtre = _Filtre.enCours;
+
+  final NumberFormat _nf = NumberFormat('#,##0.00', 'fr_FR');
+
+  bool get _isClient => widget.type == TypeDette.client;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final double totalDetteReste = liste.fold(
-      0.0,
-      (sum, dette) => sum + dette.montantReste,
+  void dispose() {
+    _recherche.dispose();
+    super.dispose();
+  }
+
+  String _m(double v) => '${_nf.format(v)} ${widget.currency}';
+
+  int _age(Dette d) => DateTime.now().difference(d.dateCreation).inDays;
+
+  /// En retard : échéance dépassée, ou plus de 30 jours sans être soldée.
+  bool _enRetard(Dette d) => !d.estSolde && (d.estEnRetard || _age(d) > _joursRetard);
+
+  String _ageTexte(Dette d) {
+    final j = _age(d);
+    if (j <= 0) return "Aujourd'hui";
+    if (j == 1) return 'Hier';
+    if (j < 30) return 'Il y a $j jours';
+    final mois = j ~/ 30;
+    return mois == 1 ? 'Il y a 1 mois' : 'Il y a $mois mois';
+  }
+
+  bool _correspond(Dette d) {
+    switch (_filtre) {
+      case _Filtre.enCours:
+        if (d.estSolde) return false;
+        break;
+      case _Filtre.recentes:
+        if (d.estSolde || _age(d) > _joursRetard) return false;
+        break;
+      case _Filtre.enRetard:
+        if (!_enRetard(d)) return false;
+        break;
+      case _Filtre.partielles:
+        if (d.estSolde || d.acomptePaye <= 0.005) return false;
+        break;
+      case _Filtre.soldees:
+        if (!d.estSolde) return false;
+        break;
+    }
+    if (_texte.isEmpty) return true;
+    final t = _texte.toLowerCase();
+    return d.nomTiers.toLowerCase().contains(t) ||
+        d.numeroFacture.toLowerCase().contains(t) ||
+        d.telephone.contains(t);
+  }
+
+  // ------------------------------------------------------------------
+  // RELANCE WHATSAPP
+  // ------------------------------------------------------------------
+  Future<void> _relancer(Dette d) async {
+    final date = DateFormat('dd/MM/yyyy', 'fr_FR').format(d.dateCreation);
+    final facture = d.numeroFacture.isNotEmpty ? ' (facture ${d.numeroFacture})' : '';
+    final message = _isClient
+        ? 'Bonjour ${d.nomTiers},\n\n'
+            'Petit rappel amical : il reste ${_m(d.montantReste)} à régler sur votre achat du $date$facture.\n'
+            'Montant total : ${_m(d.montantInitial)} — déjà payé : ${_m(d.acomptePaye)}.\n\n'
+            'Merci pour votre confiance !'
+        : 'Bonjour ${d.nomTiers},\n\n'
+            'Concernant notre facture du $date$facture : il nous reste ${_m(d.montantReste)} à vous régler.\n'
+            'Nous revenons vers vous très bientôt pour le paiement.\n\nMerci.';
+
+    // Numéro : chiffres seulement, 0 au début -> 243 (RDC)
+    var tel = d.telephone.replaceAll(RegExp(r'[^0-9]'), '');
+    if (tel.startsWith('0')) tel = '243${tel.substring(1)}';
+
+    final uri = Uri.parse(
+        'https://wa.me/${tel.length >= 9 ? tel : ''}?text=${Uri.encodeComponent(message)}');
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!ok && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Impossible d'ouvrir WhatsApp sur cet appareil.")),
+      );
+    }
+  }
+
+  // ------------------------------------------------------------------
+  // BUILD
+  // ------------------------------------------------------------------
+  @override
+  Widget build(BuildContext context) {
+    final ouvertes = widget.liste.where((d) => !d.estSolde).toList();
+    final total = ouvertes.fold<double>(0, (s, d) => s + d.montantReste);
+    final enRetard = ouvertes.where(_enRetard).toList();
+    final totalRetard = enRetard.fold<double>(0, (s, d) => s + d.montantReste);
+    final nbTiers = ouvertes.map((d) => d.nomTiers.trim().toLowerCase()).toSet().length;
+
+    final visibles = widget.liste.where(_correspond).toList()
+      ..sort((a, b) {
+        // Les plus anciennes (et non soldées) d'abord
+        if (a.estSolde != b.estSolde) return a.estSolde ? 1 : -1;
+        return a.dateCreation.compareTo(b.dateCreation);
+      });
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+      children: [
+        _synthese(total, ouvertes.length, nbTiers, totalRetard, enRetard.length),
+        const SizedBox(height: 14),
+        _barreRecherche(),
+        const SizedBox(height: 10),
+        _filtres(),
+        const SizedBox(height: 12),
+        if (widget.liste.isEmpty)
+          _etatVide(
+            _isClient ? Icons.handshake_outlined : Icons.local_shipping_outlined,
+            _isClient ? 'Aucune créance client' : 'Aucune dette fournisseur',
+            _isClient
+                ? 'Les ventes à crédit ou partielles apparaîtront ici automatiquement.'
+                : 'Ajoutez ici ce que vous devez à vos fournisseurs avec le bouton « Ajouter une dette ».',
+          )
+        else if (visibles.isEmpty)
+          _etatVide(Icons.search_off_rounded, 'Aucun résultat',
+              'Essayez un autre filtre ou une autre recherche.')
+        else
+          ...visibles.map(_carte),
+      ],
     );
+  }
 
-    final bool isClient = type == TypeDette.client;
-    final Color couleurPrincipale =
-        isClient ? Colors.orange.shade800 : Colors.red.shade800;
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+  // ------------------------------------------------------------------
+  // WIDGETS
+  // ------------------------------------------------------------------
+  Widget _synthese(double total, int nbDossiers, int nbTiers, double totalRetard, int nbRetard) {
+    final couleur = _isClient ? const Color(0xFF1565C0) : const Color(0xFFB71C1C);
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [couleur, Color.lerp(couleur, Colors.black, 0.3)!],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(color: couleur.withValues(alpha: 0.28), blurRadius: 14, offset: const Offset(0, 6)),
+        ],
+      ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Card(
-            elevation: 3,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            color: couleurPrincipale,
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: Colors.white24,
-                    radius: 24,
-                    child: Icon(
-                      isClient ? Icons.arrow_downward : Icons.arrow_upward,
-                      color: Colors.white,
-                      size: 28,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        isClient
-                            ? 'Total À Recouvrer (Clients)'
-                            : 'Total À Payer (Fournisseurs)',
-                        style: const TextStyle(
-                            color: Colors.white70, fontSize: 13),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${totalDetteReste.toStringAsFixed(2)} $currency',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 26,
+          Row(
+            children: [
+              Icon(_isClient ? Icons.call_received_rounded : Icons.call_made_rounded,
+                  color: Colors.white70, size: 16),
+              const SizedBox(width: 6),
+              Text(
+                _isClient ? 'À RECOUVRER (CLIENTS)' : 'À PAYER (FOURNISSEURS)',
+                style: const TextStyle(
+                    color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(_m(total),
+                style: const TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.w800)),
+          ),
+          const SizedBox(height: 14),
+          Container(height: 1, color: Colors.white24),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              _infoSynthese('$nbDossiers', nbDossiers > 1 ? 'dossiers ouverts' : 'dossier ouvert'),
+              _infoSynthese('$nbTiers', _isClient ? (nbTiers > 1 ? 'clients' : 'client') : (nbTiers > 1 ? 'fournisseurs' : 'fournisseur')),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        _nf.format(totalRetard),
+                        style: TextStyle(
+                          color: totalRetard > 0.005 ? const Color(0xFFFFD54F) : Colors.white,
+                          fontSize: 15,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                    ),
+                    Text('en retard ($nbRetard)',
+                        style: const TextStyle(color: Colors.white70, fontSize: 11)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _infoSynthese(String valeur, String libelle) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(valeur,
+              style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
+          Text(libelle, style: const TextStyle(color: Colors.white70, fontSize: 11)),
+        ],
+      ),
+    );
+  }
+
+  Widget _barreRecherche() {
+    return TextField(
+      controller: _recherche,
+      onChanged: (v) => setState(() => _texte = v.trim()),
+      decoration: InputDecoration(
+        hintText: _isClient
+            ? 'Rechercher un client, une facture, un téléphone…'
+            : 'Rechercher un fournisseur, une facture…',
+        prefixIcon: const Icon(Icons.search_rounded),
+        suffixIcon: _texte.isEmpty
+            ? null
+            : IconButton(
+                icon: const Icon(Icons.close_rounded),
+                onPressed: () {
+                  _recherche.clear();
+                  setState(() => _texte = '');
+                },
+              ),
+        filled: true,
+        fillColor: Colors.white,
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(vertical: 12),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+      ),
+    );
+  }
+
+  Widget _filtres() {
+    const libelles = {
+      _Filtre.enCours: 'En cours',
+      _Filtre.recentes: 'Récentes (< 30 j)',
+      _Filtre.enRetard: 'En retard',
+      _Filtre.partielles: 'Partielles',
+      _Filtre.soldees: 'Soldées',
+    };
+    return SizedBox(
+      height: 36,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: [
+          for (final f in _Filtre.values) ...[
+            ChoiceChip(
+              label: Text(libelles[f]!),
+              selected: _filtre == f,
+              onSelected: (_) => setState(() => _filtre = f),
+              selectedColor: _bleuNuit,
+              backgroundColor: Colors.white,
+              labelStyle: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: _filtre == f ? Colors.white : _bleuNuit,
+              ),
+              showCheckmark: false,
+              side: BorderSide(color: Colors.grey.shade300),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            ),
+            const SizedBox(width: 8),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _etatVide(IconData icone, String titre, String texte) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 34,
+            backgroundColor: Colors.grey.shade200,
+            child: Icon(icone, size: 34, color: Colors.grey.shade500),
+          ),
+          const SizedBox(height: 14),
+          Text(titre,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _bleuNuit)),
+          const SizedBox(height: 6),
+          Text(texte,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13, color: Colors.grey.shade600)),
+        ],
+      ),
+    );
+  }
+
+  Widget _carte(Dette d) {
+    final retard = _enRetard(d);
+    final pct = d.pourcentagePaye;
+
+    final Color couleurStatut;
+    final String libelleStatut;
+    if (d.estSolde) {
+      couleurStatut = _vert;
+      libelleStatut = 'Soldée';
+    } else if (retard) {
+      couleurStatut = _rouge;
+      libelleStatut = 'En retard';
+    } else if (d.acomptePaye > 0.005) {
+      couleurStatut = Colors.orange.shade800;
+      libelleStatut = 'Partiel';
+    } else {
+      couleurStatut = Colors.blueGrey.shade600;
+      libelleStatut = 'Non payée';
+    }
+
+    final initiale = d.nomTiers.trim().isEmpty ? '?' : d.nomTiers.trim()[0].toUpperCase();
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border(left: BorderSide(color: couleurStatut, width: 4)),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2)),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Ligne 1 : avatar, nom, reste
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: couleurStatut.withValues(alpha: 0.12),
+                  child: Text(initiale,
+                      style: TextStyle(color: couleurStatut, fontWeight: FontWeight.bold)),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(d.nomTiers,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.bold, color: _bleuNuit)),
+                      const SizedBox(height: 2),
+                      Text(
+                        [
+                          if (d.numeroFacture.isNotEmpty) 'Fact. ${d.numeroFacture}',
+                          _ageTexte(d),
+                        ].join(' • '),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                      ),
                     ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      d.estSolde ? _nf.format(d.montantInitial) : _nf.format(d.montantReste),
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                        color: d.estSolde ? _vert : _rouge,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: couleurStatut.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(libelleStatut,
+                          style: TextStyle(
+                              fontSize: 11, fontWeight: FontWeight.bold, color: couleurStatut)),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Ligne 2 : progression du paiement
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: LinearProgressIndicator(
+                value: pct,
+                minHeight: 7,
+                backgroundColor: Colors.grey.shade200,
+                valueColor: AlwaysStoppedAnimation(d.estSolde ? _vert : Colors.teal),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Payé ${_nf.format(d.acomptePaye)} sur ${_m(d.montantInitial)}',
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Text('${(pct * 100).toStringAsFixed(0)} %',
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: _bleuNuit)),
+              ],
+            ),
+
+            // Ligne 3 : échéance / dernier paiement / note
+            if (d.dateEcheance != null || d.dernierPaiement != null || d.note.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 12,
+                runSpacing: 4,
+                children: [
+                  if (d.dateEcheance != null)
+                    _petiteInfo(
+                      Icons.event_rounded,
+                      'Échéance ${DateFormat('dd/MM/yyyy').format(d.dateEcheance!)}',
+                      couleur: d.estEnRetard ? _rouge : null,
+                    ),
+                  if (d.dernierPaiement != null)
+                    _petiteInfo(Icons.history_rounded,
+                        'Dernier paiement ${DateFormat('dd/MM/yyyy').format(d.dernierPaiement!)}'),
+                  if (d.note.isNotEmpty) _petiteInfo(Icons.notes_rounded, d.note),
+                ],
+              ),
+            ],
+
+            // Ligne 4 : actions
+            if (!d.estSolde) ...[
+              const SizedBox(height: 4),
+              const Divider(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton.icon(
+                    onPressed: () => _relancer(d),
+                    icon: const Icon(Icons.chat_rounded, size: 18, color: Color(0xFF25D366)),
+                    label: Text(_isClient ? 'Relancer' : 'Message',
+                        style: const TextStyle(color: Color(0xFF128C7E), fontWeight: FontWeight.w600)),
+                  ),
+                  const SizedBox(width: 4),
+                  FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: _bleuNuit,
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    onPressed: () => DebtDialogs.afficherPaiement(
+                        context, ref, widget.entrepriseId, d, widget.currency),
+                    icon: const Icon(Icons.payments_rounded, size: 18),
+                    label: Text(_isClient ? 'Encaisser' : 'Payer'),
                   ),
                 ],
               ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          if (liste.isEmpty)
-            Padding(
-              padding: const EdgeInsets.all(40),
-              child: Text(
-                isClient
-                    ? 'Aucune créance client enregistrée.'
-                    : 'Aucune dette fournisseur enregistrée.',
-                style: const TextStyle(color: Colors.grey),
-              ),
-            )
-          else
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: liste.length,
-              itemBuilder: (context, index) {
-                final dette = liste[index];
-
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 8),
-                    title: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          dette.nomTiers,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                        if (dette.numeroFacture.isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: Colors.indigo.shade50,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              'Facture: ${dette.numeroFacture}',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.indigo.shade900,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 6),
-                        if (dette.dateEcheance != null)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 4),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.access_time,
-                                  size: 13,
-                                  color: Colors.grey,
-                                ),
-                                const SizedBox(width: 4),
-                                Expanded(
-                                  child: Text(
-                                    'Échéance : ${_formaterDateHeure(dette.dateEcheance!)}',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: dette.estEnRetard
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
-                                      color: dette.estEnRetard
-                                          ? Colors.red.shade700
-                                          : Colors.grey.shade800,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                if (dette.estEnRetard) ...[
-                                  const SizedBox(width: 6),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 6, vertical: 1),
-                                    decoration: BoxDecoration(
-                                      color: Colors.red.shade100,
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: const Text(
-                                      'EN RETARD',
-                                      style: TextStyle(
-                                        color: Colors.red,
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        Text(
-                            'Total initial : ${dette.montantInitial.toStringAsFixed(2)} $currency'),
-                        if (dette.acomptePaye > 0)
-                          Text(
-                              'Déjà payé : ${dette.acomptePaye.toStringAsFixed(2)} $currency',
-                              style: const TextStyle(color: Colors.blueGrey)),
-                        
-                        // CORRECTION : Enveloppement dans un Expanded pour éviter le débordement
-                        if (dette.dernierPaiement != null) ...[
-                          const SizedBox(height: 2),
-                          Row(
-                            children: [
-                              const Icon(Icons.history_rounded, size: 13, color: Colors.grey),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  'Dernier règlement : ${_formaterDateHeure(dette.dernierPaiement!)}',
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.grey,
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-
-                        if (dette.note.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 2),
-                            child: Text('Note : ${dette.note}',
-                                style: const TextStyle(
-                                    fontStyle: FontStyle.italic)),
-                          ),
-                      ],
-                    ),
-                    trailing: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          '${dette.montantReste.toStringAsFixed(2)} $currency',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                            color: dette.montantReste > 0
-                                ? Colors.red.shade700
-                                : Colors.green.shade700,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: dette.statut == 'paye'
-                                ? Colors.green.shade100
-                                : (dette.statut == 'partiel'
-                                    ? Colors.orange.shade100
-                                    : Colors.red.shade100),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            dette.statut == 'paye'
-                                ? 'Soldé'
-                                : (dette.statut == 'partiel'
-                                    ? 'Partiel'
-                                    : 'Non Payé'),
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: dette.statut == 'paye'
-                                  ? Colors.green.shade800
-                                  : (dette.statut == 'partiel'
-                                      ? Colors.orange.shade800
-                                      : Colors.red.shade800),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    onTap: dette.montantReste > 0
-                        ? () => DebtDialogs.afficherPaiement(
-                            context, ref, entrepriseId, dette, currency)
-                        : null,
-                  ),
-                );
-              },
-            ),
-        ],
+            ] else
+              const SizedBox(height: 6),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _petiteInfo(IconData icone, String texte, {Color? couleur}) {
+    final c = couleur ?? Colors.grey.shade600;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icone, size: 13, color: c),
+        const SizedBox(width: 4),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 240),
+          child: Text(texte,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 11.5, color: c, fontWeight: couleur != null ? FontWeight.bold : null)),
+        ),
+      ],
     );
   }
 }
