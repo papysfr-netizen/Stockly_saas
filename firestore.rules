@@ -117,6 +117,15 @@ service cloud.firestore {
         allow create: if estGerantOuPlus(entId);
         allow update, delete: if false;
       }
+      match /comptes_clients/{compteId} {
+        // Comptes clients (dépôts / avoirs) : on ne supprime jamais
+        allow read, create, update: if estMembre(entId);
+        allow delete: if false;
+        match /mouvements/{mvtId} {
+          allow read, create: if estMembre(entId);
+          allow update, delete: if false;
+        }
+      }
       match /creances/{docId} {
         allow read, create, update: if estMembre(entId);
         allow delete: if estGerantOuPlus(entId);
@@ -135,7 +144,7 @@ service cloud.firestore {
       // ----- Toutes les autres sous-collections (comme avant) -----
       match /{collection}/{reste=**} {
         allow read: if estMembre(entId);
-        allow write: if !(collection in ['produits', 'ventes', 'retours', 'creances', 'dettes', 'ecritures_comptables'])
+        allow write: if !(collection in ['produits', 'ventes', 'retours', 'comptes_clients', 'creances', 'dettes', 'ecritures_comptables'])
           && (estMembre(entId) || creeParMoi(entId));
       }
     }

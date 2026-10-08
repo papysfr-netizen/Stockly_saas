@@ -12,6 +12,7 @@ import 'package:stockly_saas/core/providers/cart_provider.dart';
 import 'package:stockly_saas/core/providers/currency_provider.dart';
 import 'package:stockly_saas/core/providers/entreprise_provider.dart';
 import 'package:stockly_saas/features/accounting/services/accounting_journal_service.dart';
+import 'package:stockly_saas/features/comptes_clients/compte_client_service.dart';
 import 'package:stockly_saas/core/services/receipt_service.dart';
 import 'package:stockly_saas/core/utils/payment_calculator.dart';
 
@@ -55,6 +56,24 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
   bool envoyerSMS = false;
   bool isLoading = false;
 
+  // 💰 Compte client (dépôts / avoirs)
+  Timer? _rechercheTimer;
+  bool _rechercheEnCours = false;
+  double _soldeCompte = 0.0;
+  bool _utiliserSolde = false;
+
+  /// Part de la facture payée par le compte client (en USD).
+  double get _montantSoldeUtilise {
+    if (!_utiliserSolde || _soldeCompte <= 0) return 0.0;
+    return _soldeCompte < widget.total ? _soldeCompte : widget.total;
+  }
+
+  /// Ce qu'il reste à encaisser (espèces, Mobile Money…) après le compte client.
+  double get _totalAPayer {
+    final t = widget.total - _montantSoldeUtilise;
+    return t > 0 ? t : 0.0;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -65,6 +84,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
 
   @override
   void dispose() {
+    _rechercheTimer?.cancel();
     _clientController.dispose();
     _telephoneController.dispose();
     _verseUSDController.dispose();
@@ -82,13 +102,22 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
   void _preremplirMontant() {
     if (!mounted) return;
     final activeInfo = ref.read(currencyProvider).activeCurrencyInfo;
+    final aPayer = _totalAPayer;
+
+    if (aPayer <= 0.001) {
+      // Tout est payé par le compte client
+      _verseUSDController.clear();
+      _verseLocalController.clear();
+      statutPaiement = 'Payé';
+      return;
+    }
 
     if (statutPaiement == 'Payé') {
       if (activeInfo.code == 'USD') {
-        _verseUSDController.text = widget.total.toStringAsFixed(2);
+        _verseUSDController.text = aPayer.toStringAsFixed(2);
         _verseLocalController.clear();
       } else {
-        final totalLocal = widget.total * activeInfo.rateToUSD;
+        final totalLocal = aPayer * activeInfo.rateToUSD;
         _verseLocalController.text = _formatAmount(totalLocal);
         _verseUSDController.clear();
       }
@@ -101,7 +130,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
   void _onMontantChanged(double rate) {
     final paidUSD = double.tryParse(_verseUSDController.text.trim()) ?? 0.0;
     final paidLocal = double.tryParse(_verseLocalController.text.trim()) ?? 0.0;
-    final totalPayeUSD = paidUSD + (rate > 0 ? paidLocal / rate : 0.0);
+    final totalPayeUSD = paidUSD + (rate > 0 ? paidLocal / rate : 0.0) + _montantSoldeUtilise;
 
     setState(() {
       if (totalPayeUSD >= widget.total - 0.001) {
@@ -116,7 +145,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
 
   void _payerToutUSD() {
     setState(() {
-      _verseUSDController.text = widget.total.toStringAsFixed(2);
+      _verseUSDController.text = _totalAPayer.toStringAsFixed(2);
       _verseLocalController.clear();
       statutPaiement = 'Payé';
     });
@@ -124,7 +153,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
 
   void _payerToutLocal(double rate) {
     setState(() {
-      _verseLocalController.text = _formatAmount(widget.total * rate);
+      _verseLocalController.text = _formatAmount(_totalAPayer * rate);
       _verseUSDController.clear();
       statutPaiement = 'Payé';
     });
@@ -135,6 +164,39 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
     setState(() {
       _verseLocalController.text = _formatAmount(calc.remainingUSD * rate);
       statutPaiement = 'Payé';
+    });
+  }
+
+  // 💰 Recherche du compte client quand on tape le téléphone
+  void _onTelephoneChanged(String tel) {
+    _rechercheTimer?.cancel();
+    if (!CompteClientService.telephoneValide(tel)) {
+      if (_soldeCompte != 0 || _utiliserSolde) {
+        setState(() {
+          _soldeCompte = 0.0;
+          _utiliserSolde = false;
+          _preremplirMontant();
+        });
+      }
+      return;
+    }
+    _rechercheTimer = Timer(const Duration(milliseconds: 600), () async {
+      if (!mounted) return;
+      setState(() => _rechercheEnCours = true);
+      final compte = await CompteClientService.lireCompte(widget.entrepriseId, tel);
+      if (!mounted) return;
+      final brut = compte?['solde'];
+      final solde = brut is num ? brut.toDouble() : 0.0;
+      final nom = (compte?['nom'] ?? '').toString();
+      setState(() {
+        _rechercheEnCours = false;
+        _soldeCompte = solde > 0 ? solde : 0.0;
+        if (_soldeCompte <= 0.005) _utiliserSolde = false;
+        if (_clientController.text.trim().isEmpty && nom.isNotEmpty) {
+          _clientController.text = nom;
+        }
+        _preremplirMontant();
+      });
     });
   }
 
@@ -184,7 +246,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
     final paidLocal = double.tryParse(_verseLocalController.text.trim()) ?? 0.0;
 
     final calc = PaymentResult(
-      totalUSD: widget.total,
+      totalUSD: _totalAPayer,
       paidUSD: paidUSD,
       paidLocal: paidLocal,
       localRate: activeInfo.rateToUSD,
@@ -194,6 +256,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
     final eqLocalinUSD = activeInfo.rateToUSD > 0 ? paidLocal / activeInfo.rateToUSD : 0.0;
 
     final dateLimiteApercu = DateTime.now().add(Duration(days: delaiRetraitJours));
+    final soldeUtilise = _montantSoldeUtilise;
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -247,6 +310,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                       const SizedBox(height: 10),
                       TextField(
                         controller: _telephoneController,
+                        onChanged: _onTelephoneChanged,
                         decoration: InputDecoration(
                           labelText: 'Téléphone (ex: +243...)',
                           hintText: '+243...',
@@ -256,6 +320,61 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                         ),
                         keyboardType: TextInputType.phone,
                       ),
+                      if (_rechercheEnCours)
+                        const Padding(
+                          padding: EdgeInsets.only(top: 4),
+                          child: LinearProgressIndicator(minHeight: 2),
+                        ),
+
+                      // 💰 COMPTE CLIENT
+                      if (_soldeCompte > 0.005)
+                        Container(
+                          width: double.infinity,
+                          margin: const EdgeInsets.only(top: 8),
+                          padding: const EdgeInsets.fromLTRB(10, 6, 4, 8),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade50,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.green.shade300),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.account_balance_wallet,
+                                      color: Colors.green.shade800, size: 20),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      'Compte client : ${currencyState.formatPrice(_soldeCompte)}',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.green.shade900,
+                                      ),
+                                    ),
+                                  ),
+                                  const Text('Utiliser', style: TextStyle(fontSize: 12)),
+                                  Switch(
+                                    value: _utiliserSolde,
+                                    activeThumbColor: Colors.green.shade700,
+                                    onChanged: (v) => setState(() {
+                                      _utiliserSolde = v;
+                                      statutPaiement = 'Payé';
+                                      _preremplirMontant();
+                                    }),
+                                  ),
+                                ],
+                              ),
+                              if (_utiliserSolde)
+                                Text(
+                                  'Payé par le compte : ${currencyState.formatPrice(soldeUtilise)}'
+                                  ' • Nouveau solde : ${currencyState.formatPrice(_soldeCompte - soldeUtilise)}',
+                                  style: TextStyle(fontSize: 12, color: Colors.green.shade900),
+                                ),
+                            ],
+                          ),
+                        ),
                       const SizedBox(height: 10),
 
                       // MOYEN ET STATUT DE PAIEMENT
@@ -285,6 +404,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                           const SizedBox(width: 6),
                           Expanded(
                             child: DropdownButtonFormField<String>(
+                              key: ValueKey('statut_$statutPaiement'),
                               initialValue: statutPaiement,
                               isExpanded: true,
                               decoration: InputDecoration(
@@ -340,6 +460,29 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                                 ),
                               ],
                             ),
+                            if (soldeUtilise > 0.005) ...[
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('Payé par compte client :',
+                                      style: TextStyle(fontSize: 12, color: Colors.green.shade800)),
+                                  Text('- ${currencyState.formatPrice(soldeUtilise)}',
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.green.shade800)),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text('À encaisser maintenant :',
+                                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                                  Text(currencyState.formatPrice(_totalAPayer),
+                                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                            ],
                             const Divider(height: 12),
 
                             // BOUTONS D'ACTION RAPIDE
@@ -639,24 +782,42 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
     setState(() => isLoading = true);
 
     final activeInfoValidation = ref.read(currencyProvider).activeCurrencyInfo;
+    final double soldeUtilise = _montantSoldeUtilise;
     final calc = PaymentResult(
-      totalUSD: widget.total,
+      totalUSD: _totalAPayer,
       paidUSD: double.tryParse(_verseUSDController.text.trim()) ?? 0.0,
       paidLocal: double.tryParse(_verseLocalController.text.trim()) ?? 0.0,
       localRate: activeInfoValidation.rateToUSD,
     );
 
     try {
-      final double totalVente = widget.total;
-      final double verseEffective = calc.totalPaidInUSD > totalVente
-          ? totalVente
-          : (calc.totalPaidInUSD < 0 ? 0.0 : calc.totalPaidInUSD);
-      final double resteEffective = calc.remainingUSD > 0 ? calc.remainingUSD : 0.0;
-
       final String client = _clientController.text.trim().isEmpty
           ? 'Client Divers'
           : _clientController.text.trim();
       final String telephone = _telephoneController.text.trim();
+
+      // 💰 Vérifie que le solde du compte client est toujours suffisant
+      double soldeAvant = _soldeCompte;
+      if (soldeUtilise > 0.005) {
+        soldeAvant = await CompteClientService.lireSolde(widget.entrepriseId, telephone);
+        if (soldeAvant < soldeUtilise - 0.005) {
+          throw Exception(
+              'Le solde du client a changé (disponible : ${soldeAvant.toStringAsFixed(2)} \$). '
+              'Désactivez puis réactivez « Utiliser » pour recalculer.');
+        }
+      }
+
+      final double totalVente = widget.total;
+      final double aPayer = totalVente - soldeUtilise;
+      final double verseCash = calc.totalPaidInUSD > aPayer
+          ? aPayer
+          : (calc.totalPaidInUSD < 0 ? 0.0 : calc.totalPaidInUSD);
+      final double verseEffective = verseCash + soldeUtilise;
+      final double resteEffective = calc.remainingUSD > 0 ? calc.remainingUSD : 0.0;
+
+      final String methodeEnregistree = soldeUtilise > 0.005
+          ? (verseCash > 0.005 ? '$methodePaiement + Compte client' : 'Compte client')
+          : methodePaiement;
 
       final bool estLivre = statutLivraison == 'Livré';
 
@@ -667,6 +828,8 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
       for (final item in widget.cart) {
         coutMarchandises += (prixAchat[item.id] ?? 0.0) * item.quantite;
       }
+
+      final vendeurNom = await nomUtilisateurConnecte();
 
       final batch = firestore.batch();
       final Timestamp now = Timestamp.now();
@@ -682,29 +845,31 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
           .doc(widget.entrepriseId)
           .collection('ventes')
           .doc();
+      final numeroFacture = venteRef.id.substring(0, 8).toUpperCase();
 
       batch.set(venteRef, {
         'id': venteRef.id,
         'nomClient': client,
         'telephoneClient': telephone,
         'montantTotal': totalVente,
-        'montantPaye': calc.totalPaidInUSD,
+        'montantPaye': calc.totalPaidInUSD + soldeUtilise,
         'montantPayeUSD': calc.paidUSD,
         'montantPayeLocal': calc.paidLocal,
+        'montantCompteClient': soldeUtilise,
         'monnaieRendueUSD': calc.changeInUSD,
         'monnaieRendueLocal': calc.changeInLocal,
         'tauxEchange': calc.localRate,
         'resteAPayer': resteEffective,
-        'statutPaiement': verseEffective >= totalVente
+        'statutPaiement': verseEffective >= totalVente - 0.001
             ? 'Payé'
             : (verseEffective > 0 ? 'Acompte' : 'Dette'),
         'statutLivraison': statutLivraison,
         'dateLivraison': estLivre ? now : null,
         'livrePar': estLivre ? widget.userId : null,
         'dateLimiteLivraison': estLivre ? null : Timestamp.fromDate(finJourLimite),
-        'methodePaiement': methodePaiement,
+        'methodePaiement': methodeEnregistree,
         'vendeurId': widget.userId,
-        'vendeurNom': await nomUtilisateurConnecte(),
+        'vendeurNom': vendeurNom,
         'entrepriseId': widget.entrepriseId,
         'comptabilise': true,
         'coutMarchandises': coutMarchandises,
@@ -734,11 +899,20 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
 
       final List<Map<String, dynamic>> lines = [];
 
-      if (verseEffective > 0) {
+      if (verseCash > 0) {
         lines.add({
           'accountCode': codeTresorerie,
           'accountLabel': AccountingJournalService.getAccountLabel(codeTresorerie),
-          'debit': verseEffective,
+          'debit': verseCash,
+          'credit': 0.0,
+        });
+      }
+
+      if (soldeUtilise > 0.005) {
+        lines.add({
+          'accountCode': CompteClientService.compteAvances,
+          'accountLabel': '${CompteClientService.libelleAvances} - $client',
+          'debit': soldeUtilise,
           'credit': 0.0,
         });
       }
@@ -766,7 +940,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         'description': 'Facture de vente - $client',
         'date': now,
         'lines': lines,
-        'montantEncaisse': verseEffective,
+        'montantEncaisse': verseCash,
       });
 
       // 2 bis. Coût des marchandises vendues
@@ -812,7 +986,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         batch.set(creanceRef, {
           'id': creanceRef.id,
           'venteId': venteRef.id,
-          'numeroFacture': venteRef.id.substring(0, 8).toUpperCase(),
+          'numeroFacture': numeroFacture,
           'nomTiers': client,
           'nomClient': client,
           'telephone': telephone,
@@ -827,6 +1001,24 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
           'createdAt': now,
           'dateCreation': now,
         });
+      }
+
+      // 3 bis. 💰 Compte client : mouvement « Achat »
+      if (soldeUtilise > 0.005) {
+        CompteClientService.ajouterMouvement(
+          batch,
+          entrepriseId: widget.entrepriseId,
+          telephone: telephone,
+          nom: client == 'Client Divers' ? '' : client,
+          type: 'achat',
+          delta: -soldeUtilise,
+          soldeAvant: soldeAvant,
+          description: 'Achat facture $numeroFacture',
+          date: now,
+          uid: widget.userId,
+          parNom: vendeurNom,
+          venteId: venteRef.id,
+        );
       }
 
       // 4. Stock (même si à livrer plus tard : la marchandise est réservée)
@@ -860,7 +1052,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
       final activeInfo = currencyState.activeCurrencyInfo;
 
       final double totalAffiche = totalVente * activeInfo.rateToUSD;
-      final double payeAffiche = calc.totalPaidInUSD * activeInfo.rateToUSD;
+      final double payeAffiche = (calc.totalPaidInUSD + soldeUtilise) * activeInfo.rateToUSD;
       final double resteAffiche = resteEffective * activeInfo.rateToUSD;
 
       Future<void> Function()? impressionEnAttente;
@@ -896,9 +1088,12 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
       final String msgLivraison = estLivre
           ? ''
           : ' Votre marchandise vous attend à la boutique : merci de la retirer avant le ${_formatJour(finJourLimite)}.';
+      final String msgCompte = soldeUtilise > 0.005
+          ? ' Payé par votre compte : ${currencyState.formatPrice(soldeUtilise)}. Nouveau solde : ${currencyState.formatPrice(soldeAvant - soldeUtilise)}.'
+          : '';
       final String msgText =
           "Bonjour $client, votre achat chez ${entreprise.nom} s'élève à ${currencyState.formatPrice(totalVente)}. "
-          "Payé: ${currencyState.formatPrice(verseEffective)}. Reste: ${currencyState.formatPrice(resteEffective)}.$msgLivraison Merci !";
+          "Payé: ${currencyState.formatPrice(verseEffective)}. Reste: ${currencyState.formatPrice(resteEffective)}.$msgCompte$msgLivraison Merci !";
 
       if (envoyerWhatsApp && telephone.isNotEmpty) {
         await _envoyerNotificationMessage(
@@ -936,11 +1131,14 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         );
       }
 
+      final String texteCompte = soldeUtilise > 0.005
+          ? ' Nouveau solde du client : ${currencyState.formatPrice(soldeAvant - soldeUtilise)}.'
+          : '';
       messenger.showSnackBar(
         SnackBar(
           content: Text(estLivre
-              ? 'Vente enregistrée avec succès !'
-              : 'Vente enregistrée — à retirer avant le ${_formatJour(finJourLimite)}.'),
+              ? 'Vente enregistrée avec succès !$texteCompte'
+              : 'Vente enregistrée — à retirer avant le ${_formatJour(finJourLimite)}.$texteCompte'),
           backgroundColor: estLivre ? Colors.teal : Colors.orange.shade800,
         ),
       );
@@ -956,7 +1154,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Erreur lors de la validation : $e'),
+          content: Text('Erreur lors de la validation : ${e.toString().replaceFirst('Exception: ', '')}'),
           backgroundColor: Colors.red,
         ),
       );

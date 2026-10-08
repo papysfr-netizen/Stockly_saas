@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:stockly_saas/features/comptes_clients/comptes_clients_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/user_model.dart';
@@ -307,6 +308,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   // 🚚 À livrer : tout le monde (avec le nombre en attente)
                   const SizedBox(width: 8),
                   ALivrerNavButton(entrepriseId: widget.currentUser.entrepriseId),
+                  // 💰 Comptes clients (dépôts / avoirs) : tout le monde
+                  const SizedBox(width: 8),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal.shade100,
+                      foregroundColor: Colors.teal.shade900,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                    ),
+                    icon: const Icon(Icons.account_balance_wallet, size: 18),
+                    label: const Text(
+                      'Comptes clients',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                    ),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ComptesClientsScreen(
+                          entrepriseId: widget.currentUser.entrepriseId,
+                        ),
+                      ),
+                    ),
+                  ),
                   // 📊 P&L + Comptabilité : Propriétaire + Gérant
                   if (_peutVoirFinances) ...[
                     const SizedBox(width: 8),
