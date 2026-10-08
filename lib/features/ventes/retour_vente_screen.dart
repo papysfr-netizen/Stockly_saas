@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/user_role_provider.dart';
 import '../../core/services/utilisateur_service.dart';
 import '../../core/utils/currency_extension.dart';
+import '../comptes_clients/compte_client_service.dart';
 
 // ============================================================================
 // ↩️ RETOUR DE MARCHANDISE  /  ✖️ ANNULATION DE VENTE NON RETIRÉE
@@ -16,9 +17,9 @@ import '../../core/utils/currency_extension.dart';
 // - Retour : marchandise déjà remise au client ; après 7 jours, patron seulement.
 //   Stock remis (sauf articles abîmés).
 // - Annulation : marchandise jamais retirée ; tout revient en stock.
-// - Dette du client diminuée d'abord, puis : espèces, avoir,
-//   ou (annulation seulement) la boutique garde l'acompte.
-// - Écritures comptables inverses (701 / 411 / 571, 419 ou 758, et 311 / 603).
+// - Dette du client diminuée d'abord, puis : espèces, avoir (versé sur le
+//   COMPTE CLIENT), ou (annulation seulement) la boutique garde l'acompte.
+// - Écritures comptables inverses (701 / 411 / 571, 419100 ou 758, et 311 / 603).
 // ============================================================================
 
 int _entier(dynamic v) {
@@ -77,6 +78,7 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
 
   String _mode = 'especes';
   final _motifCtrl = TextEditingController();
+  late final TextEditingController _telAvoirCtrl;
   bool _enCours = false;
 
   bool get _annulation => widget.annulation;
@@ -118,11 +120,15 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
     });
     _qte = List<int>.filled(n, 0);
     _abime = List<bool>.filled(n, false);
+
+    _telAvoirCtrl = TextEditingController(
+        text: (widget.data['telephoneClient'] ?? '').toString());
   }
 
   @override
   void dispose() {
     _motifCtrl.dispose();
+    _telAvoirCtrl.dispose();
     super.dispose();
   }
 
@@ -145,6 +151,12 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
   double get _reductionPrevue => _arrondi(math.min(_montant, _detteVente));
 
   double get _aRembourserPrevu => _arrondi(_montant - _reductionPrevue);
+
+  /// Un avoir doit être rattaché à un compte client (téléphone valide).
+  bool get _avoirSansTelephone =>
+      _mode == 'avoir' &&
+      _aRembourserPrevu > 0.005 &&
+      !CompteClientService.telephoneValide(_telAvoirCtrl.text);
 
   // ---------------------------------------------------------------- interface
   @override
@@ -228,7 +240,8 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
     final String explicationMode;
     switch (_mode) {
       case 'avoir':
-        explicationMode = 'Le client garde un crédit à utiliser sur un prochain achat.';
+        explicationMode =
+            'Le montant est ajouté au compte client : il pourra l\'utiliser en Caisse.';
         break;
       case 'garder':
         explicationMode = "La boutique garde l'argent (acompte non remboursé).";
@@ -270,7 +283,7 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
               border: Border.all(color: Colors.red.shade200),
             ),
             child: Text(
-              "Marchandise jamais retirée par le client : elle revient en stock et la vente est annulée pour ces articles.",
+              'Marchandise jamais retirée par le client : elle revient en stock et la vente est annulée pour ces articles.',
               style: TextStyle(color: Colors.red.shade900),
             ),
           ),
@@ -448,6 +461,23 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
                   const SizedBox(height: 4),
                   Text(explicationMode,
                       style: TextStyle(fontSize: 12, color: Colors.grey.shade700)),
+                  if (_mode == 'avoir') ...[
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _telAvoirCtrl,
+                      keyboardType: TextInputType.phone,
+                      onChanged: (_) => setState(() {}),
+                      decoration: InputDecoration(
+                        labelText: 'Téléphone du compte client *',
+                        prefixIcon: const Icon(Icons.account_balance_wallet),
+                        isDense: true,
+                        border: const OutlineInputBorder(),
+                        errorText: _avoirSansTelephone
+                            ? 'Un avoir a besoin du téléphone du client'
+                            : null,
+                      ),
+                    ),
+                  ],
                 ],
               ],
             ),
@@ -463,7 +493,9 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            onPressed: (montant > 0 && motifOk && !_enCours) ? _valider : null,
+            onPressed: (montant > 0 && motifOk && !_avoirSansTelephone && !_enCours)
+                ? _valider
+                : null,
             icon: _enCours
                 ? const SizedBox(
                     width: 18,
@@ -518,6 +550,11 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
             if (nbAbimes > 0)
               Text('$nbAbimes pièce(s) abîmée(s) : ne reviennent pas en stock.',
                   style: TextStyle(color: Colors.red.shade700, fontSize: 12)),
+            if (_mode == 'avoir' && _aRembourserPrevu > 0.005)
+              Text(
+                'Avoir de ${ref.formatPrice(_aRembourserPrevu)} versé sur le compte ${_telAvoirCtrl.text.trim()}.',
+                style: TextStyle(color: Colors.green.shade800, fontSize: 12),
+              ),
             const SizedBox(height: 6),
             const Text('Cette opération ne peut pas être annulée.',
                 style: TextStyle(fontSize: 12)),
@@ -567,10 +604,14 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
     final venteRef = entRef.collection('ventes').doc(widget.venteId);
     final client = (widget.data['nomClient'] ?? 'Client').toString();
     final telephone = (widget.data['telephoneClient'] ?? '').toString();
+    final telAvoir = _telAvoirCtrl.text.trim();
     final motif = _motifCtrl.text.trim();
     final uid = FirebaseAuth.instance.currentUser?.uid;
     final now = Timestamp.now();
     final n = _articles.length;
+    final numeroFacture = widget.venteId.length >= 8
+        ? widget.venteId.substring(0, 8).toUpperCase()
+        : widget.venteId.toUpperCase();
 
     final nomAgent = await nomUtilisateurConnecte();
     final creanceDoc = await _lireCreance(entRef.collection('creances'));
@@ -583,6 +624,11 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
     final reduction = _arrondi(math.max(0, math.min(montant, detteActuelle)));
     final aRembourser = _arrondi(montant - reduction);
     final mode = aRembourser > 0.005 ? _mode : 'aucun';
+
+    // Solde actuel du compte client (pour l'historique)
+    final soldeAvantAvoir = mode == 'avoir'
+        ? await CompteClientService.lireSolde(widget.entrepriseId, telAvoir)
+        : 0.0;
 
     var coutRemisEnStock = 0.0;
     var coutAbime = 0.0;
@@ -610,7 +656,7 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
 
     final batch = db.batch();
 
-    // 1. Fiche (historique + avoir éventuel)
+    // 1. Fiche (historique)
     final retourRef = entRef.collection('retours').doc();
     batch.set(retourRef, {
       'id': retourRef.id,
@@ -625,7 +671,7 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
       'montantRembourse': (mode == 'especes' || mode == 'avoir') ? aRembourser : 0.0,
       'montantConserve': mode == 'garder' ? aRembourser : 0.0,
       'modeRemboursement': mode, // 'especes' | 'avoir' | 'garder' | 'aucun'
-      'avoirSolde': mode == 'avoir' ? aRembourser : 0.0,
+      'compteClient': mode == 'avoir' ? CompteClientService.normaliser(telAvoir) : null,
       'coutRemisEnStock': coutRemisEnStock,
       'coutAbime': coutAbime,
       'motif': motif,
@@ -684,6 +730,27 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
       });
     }
 
+    // 3 bis. 💰 Avoir versé sur le compte client
+    if (mode == 'avoir') {
+      CompteClientService.ajouterMouvement(
+        batch,
+        entrepriseId: widget.entrepriseId,
+        telephone: telAvoir,
+        nom: client == 'Client Divers' ? '' : client,
+        type: 'avoir',
+        delta: aRembourser,
+        soldeAvant: soldeAvantAvoir,
+        description: _annulation
+            ? 'Avoir (annulation facture $numeroFacture)'
+            : 'Avoir (retour facture $numeroFacture)',
+        date: now,
+        uid: uid,
+        parNom: nomAgent,
+        venteId: widget.venteId,
+        retourId: retourRef.id,
+      );
+    }
+
     // 4. Écriture comptable inverse de la vente
     final lines = <Map<String, dynamic>>[
       {
@@ -710,8 +777,8 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
         },
       if (mode == 'avoir')
         {
-          'accountCode': '419000',
-          'accountLabel': 'Clients - avoirs à utiliser - $client',
+          'accountCode': CompteClientService.compteAvances,
+          'accountLabel': '${CompteClientService.libelleAvances} - $client',
           'debit': 0.0,
           'credit': aRembourser,
         },
@@ -800,7 +867,8 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
         texte = '$debut Rendez ${ref.formatPrice(aRembourser)} au client en espèces.';
         break;
       case 'avoir':
-        texte = '$debut Avoir de ${ref.formatPrice(aRembourser)} pour $client.';
+        texte = '$debut Avoir de ${ref.formatPrice(aRembourser)} ajouté au compte client '
+            '(nouveau solde : ${ref.formatPrice(soldeAvantAvoir + aRembourser)}).';
         break;
       case 'garder':
         texte = '$debut Acompte de ${ref.formatPrice(aRembourser)} conservé par la boutique.';
