@@ -67,14 +67,54 @@ extension UserRoleX on UserRole {
   /// Propriétaire ou Gérant (ancien nom conservé pour compatibilité)
   bool get isAdminOrOwner => isOwner || isGerant;
 
-  /// Ajouter / modifier des produits, gérer le stock
+  /// Ajouter / modifier des produits, gérer le stock (selon le RÔLE seul).
+  /// Pour tenir compte des autorisations du patron, utiliser profile.can(...).
   bool get peutGererStock => isOwner || isGerant;
 
-  /// Voir la comptabilité, les bénéfices, les dépenses et les rapports
+  /// Voir la comptabilité, les bénéfices, les dépenses et les rapports (RÔLE seul)
   bool get peutVoirFinances => isOwner || isGerant;
 
   /// Gérer l'équipe et les paramètres sensibles (Propriétaire seulement)
   bool get peutGererEquipe => isOwner;
+}
+
+// ================= 1 bis. AUTORISATIONS RÉGLABLES PAR LE PATRON =================
+/// Clés enregistrées dans users/{uid}.permissions (Map<String, bool>).
+///
+/// Règle :
+///  - Propriétaire : tout, toujours.
+///  - Gérant  : tout AUTORISÉ par défaut ; le patron peut RETIRER.
+///  - Caissier : tout INTERDIT par défaut ; le patron peut DONNER.
+class Permissions {
+  static const String voirFinances = 'voirFinances';
+  static const String retours = 'retours';
+  static const String gererStock = 'gererStock';
+  static const String remisesRetraits = 'remisesRetraits';
+
+  /// Ancienne clé (Caisse : bouton « Nouveau produit ») : suit « Gérer le stock ».
+  static const String ancienneAjoutProduit = 'canAddProduct';
+
+  /// Ordre d'affichage dans l'écran Équipe.
+  static const List<String> toutes = [
+    voirFinances,
+    retours,
+    gererStock,
+    remisesRetraits,
+  ];
+
+  static const Map<String, String> titres = {
+    voirFinances: 'Voir les finances',
+    retours: 'Retours et annulations',
+    gererStock: 'Gérer le stock',
+    remisesRetraits: 'Remises et retraits',
+  };
+
+  static const Map<String, String> descriptions = {
+    voirFinances: 'P&L, comptabilité, prix d\'achat et marges.',
+    retours: 'Enregistrer un retour ou annuler une vente non retirée.',
+    gererStock: 'Ajouter, modifier, supprimer des produits, importer un fichier.',
+    remisesRetraits: 'Retirer de l\'argent d\'un compte client (et les remises, plus tard).',
+  };
 }
 
 // ================= 2. MODÈLE DE PROFIL IMMUABLE =================
@@ -137,12 +177,27 @@ class UserProfile {
     );
   }
 
-  /// Le Propriétaire et le Gérant ont toutes les permissions fines ;
-  /// le Caissier seulement celles cochées par le Propriétaire.
+  /// Valeur par défaut d'une autorisation selon le rôle
+  /// (gérant : oui ; caissier : non).
+  static bool valeurParDefaut(UserRole role) => role.isOwner || role.isGerant;
+
+  /// L'utilisateur a-t-il cette autorisation ?
+  ///  - Propriétaire : toujours oui.
+  ///  - Sinon : ce que le patron a choisi, ou la valeur par défaut du rôle.
   bool can(String permissionKey) {
-    if (role.isAdminOrOwner) return true;
-    return permissions[permissionKey] ?? false;
+    if (role.isOwner) return true;
+    // L'ancienne clé « canAddProduct » suit désormais « Gérer le stock ».
+    final cle = permissionKey == Permissions.ancienneAjoutProduit
+        ? Permissions.gererStock
+        : permissionKey;
+    return permissions[cle] ?? valeurParDefaut(role);
   }
+
+  // Raccourcis lisibles
+  bool get peutVoirFinances => can(Permissions.voirFinances);
+  bool get peutFaireRetours => can(Permissions.retours);
+  bool get peutGererStock => can(Permissions.gererStock);
+  bool get peutRemisesRetraits => can(Permissions.remisesRetraits);
 
   UserProfile copyWith({
     String? uid,

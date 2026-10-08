@@ -292,6 +292,13 @@ class _DialogueCreationState extends State<_DialogueCreation> {
                 ],
                 onChanged: _enCours ? null : (v) => setState(() => _role = v ?? 'caissier'),
               ),
+              const SizedBox(height: 8),
+              Text(
+                _role == 'gerant'
+                    ? 'Un gérant a toutes les autorisations par défaut. Vous pourrez en retirer ensuite.'
+                    : 'Un caissier n\'a aucune autorisation spéciale par défaut. Vous pourrez en donner ensuite.',
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+              ),
               if (_erreur != null) ...[
                 const SizedBox(height: 12),
                 Text(_erreur!, style: TextStyle(color: Colors.red.shade700)),
@@ -326,6 +333,13 @@ class _CarteMembre extends StatelessWidget {
   final bool estMoi;
   const _CarteMembre({required this.doc, required this.estMoi});
 
+  static const Map<String, IconData> _icones = {
+    Permissions.voirFinances: Icons.bar_chart,
+    Permissions.retours: Icons.assignment_return,
+    Permissions.gererStock: Icons.inventory_2_outlined,
+    Permissions.remisesRetraits: Icons.price_change_outlined,
+  };
+
   Future<void> _action(BuildContext context, Future<void> Function() action, String succes) async {
     final messenger = ScaffoldMessenger.of(context);
     try {
@@ -336,6 +350,17 @@ class _CarteMembre extends StatelessWidget {
     }
   }
 
+  /// Valeur actuelle d'une autorisation : choix du patron, sinon valeur par défaut du rôle.
+  /// L'ancien interrupteur « remises » (canGiveDiscount) compte pour « Remises et retraits ».
+  bool _valeur(Map<String, dynamic> permissions, String cle, UserRole role) {
+    final v = permissions[cle];
+    if (v is bool) return v;
+    if (cle == Permissions.remisesRetraits && permissions['canGiveDiscount'] == true) {
+      return true;
+    }
+    return UserProfile.valeurParDefaut(role);
+  }
+
   @override
   Widget build(BuildContext context) {
     final data = doc.data();
@@ -344,11 +369,13 @@ class _CarteMembre extends StatelessWidget {
     final login = (data['identifiant'] ?? data['email'] ?? '').toString();
     final actif = data['estActif'] as bool? ?? true;
     final permissions = (data['permissions'] as Map<String, dynamic>?) ?? {};
-    final remises = permissions['canGiveDiscount'] == true;
 
     final couleur = role.isOwner
         ? Colors.amber.shade700
         : (role.isGerant ? Colors.indigo : Colors.teal);
+
+    final nbAutorisees =
+        Permissions.toutes.where((cle) => _valeur(permissions, cle, role)).length;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
@@ -425,17 +452,47 @@ class _CarteMembre extends StatelessWidget {
                   v ? 'Compte réactivé' : 'Compte désactivé',
                 ),
               ),
-              if (role.isCaissier)
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Accorder des remises en caisse'),
-                  value: remises,
-                  onChanged: (v) => _action(
-                    context,
-                    () => EquipeService.changerPermission(doc.id, 'canGiveDiscount', v),
-                    'Permission mise à jour',
+
+              // 🔐 AUTORISATIONS
+              Theme(
+                data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                child: ExpansionTile(
+                  tilePadding: EdgeInsets.zero,
+                  childrenPadding: EdgeInsets.zero,
+                  leading: Icon(Icons.verified_user_outlined, color: couleur),
+                  title: Text(
+                    'Autorisations ($nbAutorisees/${Permissions.toutes.length})',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
+                  subtitle: Text(
+                    role.isGerant
+                        ? 'Par défaut pour un gérant : tout est autorisé'
+                        : 'Par défaut pour un caissier : rien de spécial',
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                  ),
+                  children: [
+                    for (final cle in Permissions.toutes)
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                        secondary: Icon(_icones[cle], size: 22),
+                        title: Text(Permissions.titres[cle] ?? cle),
+                        subtitle: Text(
+                          Permissions.descriptions[cle] ?? '',
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        value: _valeur(permissions, cle, role),
+                        onChanged: (v) => _action(
+                          context,
+                          () => EquipeService.changerPermission(doc.id, cle, v),
+                          v
+                              ? '« ${Permissions.titres[cle]} » autorisé pour $nom'
+                              : '« ${Permissions.titres[cle]} » retiré à $nom',
+                        ),
+                      ),
+                  ],
                 ),
+              ),
             ],
           ],
         ),
