@@ -48,7 +48,7 @@ class CaisseScreen extends ConsumerWidget {
         // 🔐 Droits selon le rôle
         // ➕ Nouveau produit : Propriétaire + Gérant (et permission activée)
         final canAddProduct =
-            profile.can('canAddProduct') && profile.role.peutGererStock;
+            profile.peutGererStock;
         // ⚙️ Paramètres : Propriétaire seulement
         final estProprietaire = profile.role.peutGererEquipe;
 

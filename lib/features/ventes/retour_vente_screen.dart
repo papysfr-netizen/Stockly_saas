@@ -173,7 +173,7 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Erreur : $e')),
         data: (profile) => _corps(
-          peutRetour: profile.role.peutGererStock,
+          peutRetour: profile.peutFaireRetours,
           estPatron: profile.role.peutGererEquipe,
         ),
       ),

@@ -429,7 +429,7 @@ class CompteClientDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final peutRetirer = ref
             .watch(userProfileProvider)
-            .whenOrNull(data: (p) => p.role.peutGererStock) ??
+            .whenOrNull(data: (p) => p.peutRemisesRetraits) ??
         false;
 
     return Scaffold(
