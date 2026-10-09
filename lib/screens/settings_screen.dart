@@ -163,7 +163,7 @@ class SettingsScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               ExportCard(entrepriseId: entrepriseId),
               const SizedBox(height: 16),
-              if (userProfile?.role.isOwner == true) ...[
+              if (userProfile?.peutMaintenance == true) ...[
                 MaintenanceCard(entrepriseId: entrepriseId),
                 const SizedBox(height: 20),
               ],

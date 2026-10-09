@@ -338,6 +338,7 @@ class _CarteMembre extends StatelessWidget {
     Permissions.retours: Icons.assignment_return,
     Permissions.gererStock: Icons.inventory_2_outlined,
     Permissions.remisesRetraits: Icons.price_change_outlined,
+    Permissions.maintenance: Icons.cleaning_services_outlined,
   };
 
   Future<void> _action(BuildContext context, Future<void> Function() action, String succes) async {
@@ -358,7 +359,7 @@ class _CarteMembre extends StatelessWidget {
     if (cle == Permissions.remisesRetraits && permissions['canGiveDiscount'] == true) {
       return true;
     }
-    return UserProfile.valeurParDefaut(role);
+    return UserProfile.valeurParDefaut(role, cle);
   }
 
   @override

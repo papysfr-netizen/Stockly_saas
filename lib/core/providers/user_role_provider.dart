@@ -90,6 +90,7 @@ class Permissions {
   static const String retours = 'retours';
   static const String gererStock = 'gererStock';
   static const String remisesRetraits = 'remisesRetraits';
+  static const String maintenance = 'maintenance';
 
   /// Ancienne clé (Caisse : bouton « Nouveau produit ») : suit « Gérer le stock ».
   static const String ancienneAjoutProduit = 'canAddProduct';
@@ -100,6 +101,7 @@ class Permissions {
     retours,
     gererStock,
     remisesRetraits,
+    maintenance,
   ];
 
   static const Map<String, String> titres = {
@@ -107,6 +109,7 @@ class Permissions {
     retours: 'Retours et annulations',
     gererStock: 'Gérer le stock',
     remisesRetraits: 'Remises et retraits',
+    maintenance: 'Maintenance des données',
   };
 
   static const Map<String, String> descriptions = {
@@ -114,6 +117,7 @@ class Permissions {
     retours: 'Enregistrer un retour ou annuler une vente non retirée.',
     gererStock: 'Ajouter, modifier, supprimer des produits, importer un fichier.',
     remisesRetraits: 'Retirer de l\'argent d\'un compte client (et les remises, plus tard).',
+    maintenance: 'Paramètres : rattraper les coûts, fusionner les doublons.',
   };
 }
 
@@ -179,7 +183,9 @@ class UserProfile {
 
   /// Valeur par défaut d'une autorisation selon le rôle
   /// (gérant : oui ; caissier : non).
-  static bool valeurParDefaut(UserRole role) => role.isOwner || role.isGerant;
+  /// (« Maintenance » : non par défaut, même pour le gérant.)
+  static bool valeurParDefaut(UserRole role, [String? cle]) =>
+      cle == Permissions.maintenance ? role.isOwner : (role.isOwner || role.isGerant);
 
   /// L'utilisateur a-t-il cette autorisation ?
   ///  - Propriétaire : toujours oui.
@@ -190,7 +196,7 @@ class UserProfile {
     final cle = permissionKey == Permissions.ancienneAjoutProduit
         ? Permissions.gererStock
         : permissionKey;
-    return permissions[cle] ?? valeurParDefaut(role);
+    return permissions[cle] ?? valeurParDefaut(role, cle);
   }
 
   // Raccourcis lisibles
@@ -198,6 +204,7 @@ class UserProfile {
   bool get peutFaireRetours => can(Permissions.retours);
   bool get peutGererStock => can(Permissions.gererStock);
   bool get peutRemisesRetraits => can(Permissions.remisesRetraits);
+  bool get peutMaintenance => can(Permissions.maintenance);
 
   UserProfile copyWith({
     String? uid,
