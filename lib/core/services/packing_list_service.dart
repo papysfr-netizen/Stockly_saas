@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:csv/csv.dart';
 import 'package:excel/excel.dart';
+import 'xlsx_lecteur_simple.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -188,11 +189,19 @@ Map<String, dynamic> _parserExcel(Uint8List bytes) {
     final rows = sheet.rows.map((r) => List<dynamic>.from(r)).toList();
     return _analyserLignes(rows);
   } catch (e) {
+    // 🛟 Lecteur de secours (fichiers WPS, LibreOffice, Google Sheets…)
+    try {
+      final rows = XlsxLecteurSimple.lirePremiereFeuille(bytes);
+      if (rows.isNotEmpty) return _analyserLignes(rows);
+    } catch (_) {
+      // fichier vraiment illisible
+    }
     return {
       'produits': <Map<String, dynamic>>[],
       'colonnes': <String, String>{},
       'avecEntete': false,
-      'erreur': 'Fichier Excel illisible. Enregistrez-le au format .xlsx puis réessayez.',
+      'erreur': "Fichier Excel illisible. S'il s'agit d'un ancien fichier .xls, "
+          'enregistrez-le au format .xlsx ou .csv puis réessayez.',
     };
   }
 }
