@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:stockly_saas/features/boutiques/boutiques_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -155,6 +156,8 @@ class SettingsScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               if (userProfile?.role.isOwner == true) ...[
                 const _TeamCard(),
+                const SizedBox(height: 16),
+                MesBoutiquesCard(entrepriseId: entrepriseId),
                 const SizedBox(height: 16),
               ],
               const CurrencyCard(),

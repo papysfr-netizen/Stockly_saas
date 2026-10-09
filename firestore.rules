@@ -122,6 +122,13 @@ service cloud.firestore {
       }
 
       // ----- Ventes, créances, dettes : tout le monde crée et met à jour ; effacer = Gérant+ -----
+      // ----- Boutiques (multi-boutiques) : tout le monde voit ; le patron gère -----
+      match /boutiques/{boutiqueId} {
+        allow read: if estMembre(entId);
+        allow create, update: if estProprietaireDe(entId);
+        allow delete: if false;
+      }
+
       match /ventes/{docId} {
         allow read, create, update: if estMembre(entId);
         allow delete: if estGerantOuPlus(entId);
@@ -169,7 +176,7 @@ service cloud.firestore {
       // ----- Toutes les autres sous-collections (comme avant) -----
       match /{collection}/{reste=**} {
         allow read: if estMembre(entId);
-        allow write: if !(collection in ['produits', 'ventes', 'retours', 'comptes_clients', 'creances', 'dettes', 'ecritures_comptables'])
+        allow write: if !(collection in ['produits', 'ventes', 'retours', 'comptes_clients', 'boutiques', 'creances', 'dettes', 'ecritures_comptables'])
           && (estMembre(entId) || creeParMoi(entId));
       }
     }
