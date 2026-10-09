@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:stockly_saas/features/comptes_clients/comptes_clients_screen.dart';
+import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/user_model.dart';
@@ -167,9 +168,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               "Stockly Pro",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
-            Text(
-              "Connecté: ${widget.currentUser.nom}",
-              style: const TextStyle(fontSize: 12, color: Colors.white70),
+            Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    "Connecté: ${widget.currentUser.nom}",
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 12, color: Colors.white70),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // 🏬 Choix de la boutique (patron, dès 2 boutiques)
+                SelecteurBoutique(entrepriseId: widget.currentUser.entrepriseId),
+              ],
             ),
           ],
         ),
@@ -412,6 +423,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: Text("Erreur de chargement : $err"),
               ),
               data: (produits) {
+                // 🏬 Boutique affichée (null = toutes les boutiques)
+                final boutique = ref.watch(boutiqueActiveProvider);
                 final filteredDocs = produits.where((p) {
                   final nom = p.nom.toLowerCase();
                   final code = p.codeBarre.toLowerCase();
@@ -426,7 +439,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 }
 
                 final double valeurTotale = filteredDocs.fold(0.0, (acc, item) {
-                  return acc + (item.prixVente * item.quantite);
+                  return acc + (item.prixPour(boutique) * item.stockBoutique(boutique));
                 });
 
                 return Column(
@@ -460,8 +473,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                           final produitWidget = ProduitCard(
                             nom: produit.nom.isNotEmpty ? produit.nom : 'Sans nom',
-                            quantite: produit.quantite,
-                            prix: produit.prixVente.toDouble(),
+                            quantite: produit.stockBoutique(boutique),
+                            prix: produit.prixPour(boutique),
                             currency: currency,
                             imageUrl: produit.imageUrl,
                             // ✏️ Modifier : Propriétaire + Gérant

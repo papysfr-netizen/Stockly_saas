@@ -14,6 +14,10 @@ class Produit {
   final double prixVente;
   final int seuilAlerte;
   final String? imageUrl;
+  /// 🏬 Stock des boutiques AUTRES que la principale : {idBoutique: quantité}
+  final Map<String, int> stocks;
+  /// 🏬 Prix de vente propre à une boutique : {idBoutique: prix}
+  final Map<String, double> prixParBoutique;
 
   const Produit({
     required this.id,
@@ -26,6 +30,8 @@ class Produit {
     this.prixVente = 0.0,
     this.seuilAlerte = 5,
     this.imageUrl,
+    this.stocks = const {},
+    this.prixParBoutique = const {},
   });
 
   // ================= GETTERS MÉTIER =================
@@ -44,6 +50,30 @@ class Produit {
   double get pourcentageMarge =>
       prixAchat > 0 ? ((prixVente - prixAchat) / prixAchat) * 100 : 0.0;
 
+  // ================= 🏬 MULTI-BOUTIQUES =================
+  static const String idPrincipale = 'principale';
+
+  /// Stock total dans les boutiques autres que la principale
+  int get stockAutresBoutiques => stocks.entries
+      .where((e) => e.key != idPrincipale)
+      .fold(0, (s, e) => s + e.value);
+
+  /// Stock d'une boutique (null = toutes les boutiques = stock total)
+  int stockBoutique(String? boutiqueId) {
+    if (boutiqueId == null) return quantite;
+    if (boutiqueId == idPrincipale) {
+      final reste = quantite - stockAutresBoutiques;
+      return reste < 0 ? 0 : reste;
+    }
+    return stocks[boutiqueId] ?? 0;
+  }
+
+  /// Prix de vente dans une boutique (prix propre, sinon prix normal)
+  double prixPour(String? boutiqueId) {
+    final p = boutiqueId == null ? null : prixParBoutique[boutiqueId];
+    return (p != null && p > 0) ? p : prixVente;
+  }
+
   // ================= COPYWITH =================
   Produit copyWith({
     String? id,
@@ -56,6 +86,8 @@ class Produit {
     double? prixVente,
     int? seuilAlerte,
     String? imageUrl,
+    Map<String, int>? stocks,
+    Map<String, double>? prixParBoutique,
   }) {
     return Produit(
       id: id ?? this.id,
@@ -68,6 +100,8 @@ class Produit {
       prixVente: prixVente ?? this.prixVente,
       seuilAlerte: seuilAlerte ?? this.seuilAlerte,
       imageUrl: imageUrl ?? this.imageUrl,
+      stocks: stocks ?? this.stocks,
+      prixParBoutique: prixParBoutique ?? this.prixParBoutique,
     );
   }
 
@@ -127,6 +161,12 @@ class Produit {
       ),
       seuilAlerte: parseInt(map['seuilAlerte'] ?? map['seuil_alerte'], 5),
       imageUrl: parseImageUrl(map['imageUrl'] ?? map['image_url'] ?? map['image']),
+      stocks: (map['stocks'] is Map)
+          ? (map['stocks'] as Map).map((k, v) => MapEntry(k.toString(), parseInt(v)))
+          : const {},
+      prixParBoutique: (map['prixParBoutique'] is Map)
+          ? (map['prixParBoutique'] as Map).map((k, v) => MapEntry(k.toString(), parseDouble(v)))
+          : const {},
     );
   }
 
@@ -146,6 +186,8 @@ class Produit {
       'prixVente': prixVente,
       'seuilAlerte': seuilAlerte,
       'imageUrl': imageUrl,
+      'stocks': stocks,
+      'prixParBoutique': prixParBoutique,
     };
   }
 
@@ -168,7 +210,9 @@ class Produit {
         other.prixAchat == prixAchat &&
         other.prixVente == prixVente &&
         other.seuilAlerte == seuilAlerte &&
-        other.imageUrl == imageUrl;
+        other.imageUrl == imageUrl &&
+        mapEquals(other.stocks, stocks) &&
+        mapEquals(other.prixParBoutique, prixParBoutique);
   }
 
   @override
@@ -184,6 +228,8 @@ class Produit {
       prixVente,
       seuilAlerte,
       imageUrl,
+      Object.hashAll(stocks.entries),
+      Object.hashAll(prixParBoutique.entries),
     );
   }
 
