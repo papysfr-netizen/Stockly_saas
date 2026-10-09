@@ -129,6 +129,8 @@ class UserProfile {
   final UserRole role;
   final String entrepriseId;
   final Map<String, bool> permissions;
+  /// Boutique de travail (vide = boutique principale)
+  final String boutiqueId;
 
   const UserProfile({
     required this.uid,
@@ -136,6 +138,7 @@ class UserProfile {
     required this.role,
     required this.entrepriseId,
     required this.permissions,
+    this.boutiqueId = '',
   });
 
   factory UserProfile.empty() => const UserProfile(
@@ -175,6 +178,7 @@ class UserProfile {
       nom: data['nom'] ?? data['displayName'] ?? user.displayName ?? '',
       role: role,
       entrepriseId: data['entrepriseId']?.toString() ?? '',
+      boutiqueId: data['boutiqueId']?.toString() ?? '',
       permissions: rawPermissions.map(
         (key, value) => MapEntry(key, value is bool ? value : false),
       ),
@@ -212,6 +216,7 @@ class UserProfile {
     UserRole? role,
     String? entrepriseId,
     Map<String, bool>? permissions,
+    String? boutiqueId,
   }) {
     return UserProfile(
       uid: uid ?? this.uid,
@@ -219,6 +224,7 @@ class UserProfile {
       role: role ?? this.role,
       entrepriseId: entrepriseId ?? this.entrepriseId,
       permissions: permissions ?? this.permissions,
+      boutiqueId: boutiqueId ?? this.boutiqueId,
     );
   }
 
@@ -231,6 +237,7 @@ class UserProfile {
           nom == other.nom &&
           role == other.role &&
           entrepriseId == other.entrepriseId &&
+          boutiqueId == other.boutiqueId &&
           mapEquals(permissions, other.permissions);
 
   @override
@@ -239,6 +246,7 @@ class UserProfile {
         nom,
         role,
         entrepriseId,
+        boutiqueId,
         Object.hashAll(permissions.entries),
       );
 }

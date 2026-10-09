@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/providers/user_role_provider.dart';
 import '../core/services/equipe_service.dart';
+import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
 
 /// Membres de la boutique (collection users, même entrepriseId)
 final membresEquipeProvider = StreamProvider.family<
@@ -441,6 +442,13 @@ class _CarteMembre extends StatelessWidget {
                     },
                   ),
                 ],
+              ),
+              // 🏬 Boutique de travail (visible dès 2 boutiques)
+              ChoixBoutiqueMembre(
+                entrepriseId: (data['entrepriseId'] ?? '').toString(),
+                uid: doc.id,
+                boutiqueId: (data['boutiqueId'] ?? '').toString(),
+                nomMembre: nom,
               ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,

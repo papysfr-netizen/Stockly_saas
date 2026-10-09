@@ -88,7 +88,7 @@ service cloud.firestore {
           // Un employé modifie son propre profil : JAMAIS son rôle, son entreprise,
           // son état actif ni ses autorisations
           request.auth.uid == userId
-          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'entrepriseId', 'uid', 'estActif', 'permissions'])
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'entrepriseId', 'uid', 'estActif', 'permissions', 'boutiqueId'])
         )
         || (
           estProprietaireDe(resource.data.entrepriseId)
