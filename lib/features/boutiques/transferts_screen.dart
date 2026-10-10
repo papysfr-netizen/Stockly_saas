@@ -128,8 +128,16 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
 
     setState(() => _enCours = true);
     try {
-      final batch = FirebaseFirestore.instance.batch();
+      // Firestore accepte 500 écritures par paquet : on découpe par 400.
+      final paquets = <WriteBatch>[FirebaseFirestore.instance.batch()];
+      var nb = 0;
       for (final l in lignes) {
+        if (nb == 400) {
+          paquets.add(FirebaseFirestore.instance.batch());
+          nb = 0;
+        }
+        nb++;
+        final batch = paquets.last;
         final q = l['quantite'] as int;
         final maj = <String, dynamic>{'updatedAt': FieldValue.serverTimestamp()};
         if (_de != _principale) maj['stocks.$_de'] = FieldValue.increment(-q);
@@ -139,7 +147,7 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
 
       final profil = ref.read(userProfileProvider).value;
       final transfertRef = _entRef.collection('transferts').doc();
-      batch.set(transfertRef, {
+      paquets.last.set(transfertRef, {
         'id': transfertRef.id,
         'de': _de,
         'deNom': deNom,
@@ -154,9 +162,11 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
 
       // Hors ligne : le transfert est gardé sur le téléphone et envoyé au retour du réseau.
       var horsLigne = false;
-      await batch.commit().timeout(const Duration(seconds: 6), onTimeout: () {
-        horsLigne = true;
-      });
+      for (final b in paquets) {
+        await b.commit().timeout(const Duration(seconds: 6), onTimeout: () {
+          horsLigne = true;
+        });
+      }
 
       if (!mounted) return;
       setState(() => _qte.clear());
@@ -313,6 +323,33 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
                     borderSide: BorderSide(color: Colors.grey.shade300),
                   ),
                 ),
+              ),
+            ),
+            // Tout transférer / Vider
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                children: [
+                  TextButton.icon(
+                    onPressed: visibles.isEmpty
+                        ? null
+                        : () => setState(() {
+                              for (final p in visibles) {
+                                final dispo = p.stockBoutique(_de);
+                                if (dispo > 0) _qte[p.id] = dispo;
+                              }
+                            }),
+                    icon: const Icon(Icons.select_all_rounded),
+                    label: Text(_recherche.isEmpty ? 'Tout transférer' : 'Tout (recherche)'),
+                  ),
+                  const Spacer(),
+                  if (_totalArticles > 0)
+                    TextButton.icon(
+                      onPressed: () => setState(() => _qte.clear()),
+                      icon: const Icon(Icons.clear_rounded),
+                      label: const Text('Vider'),
+                    ),
+                ],
               ),
             ),
             // Produits
