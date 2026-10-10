@@ -431,6 +431,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   return nom.contains(_searchQuery) || code.contains(_searchQuery);
                 }).toList();
 
+                // 🏬 Boutique précise : produits en stock d'abord, ruptures à la fin
+                if (boutique != null) {
+                  final enStock =
+                      filteredDocs.where((p) => p.stockBoutique(boutique) > 0).toList();
+                  final sansStock =
+                      filteredDocs.where((p) => p.stockBoutique(boutique) <= 0).toList();
+                  filteredDocs
+                    ..clear()
+                    ..addAll(enStock)
+                    ..addAll(sansStock);
+                }
+
                 if (filteredDocs.isEmpty) {
                   return const Center(
                     child: Text("Aucun produit trouvé.",
