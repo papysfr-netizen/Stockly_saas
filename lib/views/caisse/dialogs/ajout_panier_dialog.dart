@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/produit.dart';
@@ -25,7 +26,7 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
 
     final currencyState = ref.read(currencyProvider);
     final rate = currencyState.activeCurrencyInfo.rateToUSD;
-    final prixConverti = widget.produit.prixVente * rate;
+    final prixConverti = widget.produit.prixPour(ref.boutiqueVente) * rate;
 
     _prixController = TextEditingController(
       text: prixConverti % 1 == 0
@@ -48,8 +49,8 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
     setState(() {
       if (qte <= 0) {
         _erreurStock = 'Quantité invalide';
-      } else if (qte > widget.produit.quantite) {
-        _erreurStock = 'Max disponible : ${widget.produit.quantite}';
+      } else if (qte > widget.produit.stockBoutique(ref.boutiqueVente)) {
+        _erreurStock = 'Max disponible : ${widget.produit.stockBoutique(ref.boutiqueVente)}';
       } else {
         _erreurStock = null;
       }
@@ -79,15 +80,15 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: widget.produit.quantite < 5 ? Colors.orange.shade50 : Colors.green.shade50,
+                color: widget.produit.stockBoutique(ref.boutiqueVente) < 5 ? Colors.orange.shade50 : Colors.green.shade50,
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
-                'Stock disponible : ${widget.produit.quantite}',
+                'Stock disponible : ${widget.produit.stockBoutique(ref.boutiqueVente)}',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: widget.produit.quantite < 5 ? Colors.orange.shade900 : Colors.green.shade900,
+                  color: widget.produit.stockBoutique(ref.boutiqueVente) < 5 ? Colors.orange.shade900 : Colors.green.shade900,
                 ),
               ),
             ),
@@ -154,24 +155,24 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
                   final prixTexte = _prixController.text.replaceAll(',', '.').trim();
                   final qteTexte = _qteController.text.replaceAll(',', '.').trim();
 
-                  final prixSaisi = double.tryParse(prixTexte) ?? (widget.produit.prixVente * rate);
+                  final prixSaisi = double.tryParse(prixTexte) ?? (widget.produit.prixPour(ref.boutiqueVente) * rate);
                   final qte = int.tryParse(qteTexte) ?? 1;
 
-                  final prixUSD = rate > 0 ? (prixSaisi / rate) : widget.produit.prixVente;
+                  final prixUSD = rate > 0 ? (prixSaisi / rate) : widget.produit.prixPour(ref.boutiqueVente);
 
-                  // Transmettre explicitement widget.produit.quantite
+                  // Transmettre explicitement widget.produit.stockBoutique(ref.boutiqueVente)
                   final result = ref.read(cartProvider.notifier).addProduct(
                         widget.produit.id,
                         widget.produit.nom,
                         prixUSD,
                         qte,
-                        widget.produit.quantite,
+                        widget.produit.stockBoutique(ref.boutiqueVente),
                       );
 
                   if (result == CartOperationResult.stockLimitReached) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Quantité supérieure au stock disponible (${widget.produit.quantite})'),
+                        content: Text('Quantité supérieure au stock disponible (${widget.produit.stockBoutique(ref.boutiqueVente)})'),
                         backgroundColor: Colors.orange,
                       ),
                     );

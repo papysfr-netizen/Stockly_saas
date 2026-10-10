@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:stockly_saas/core/models/produit.dart';
@@ -41,7 +42,7 @@ class _ProduitsViewState extends ConsumerState<ProduitsView> {
     if (produitIndex != -1) {
       final produit = produits[produitIndex];
 
-      if (produit.quantite <= 0) {
+      if (produit.stockBoutique(ref.boutiqueVente) <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${produit.nom} est en rupture de stock !'),
@@ -254,10 +255,10 @@ class _ProduitsViewState extends ConsumerState<ProduitsView> {
                                 itemCount: produitsFiltres.length,
                                 itemBuilder: (context, index) {
                                   final produit = produitsFiltres[index];
-                                  final bool enRupture = produit.quantite <= 0;
+                                  final bool enRupture = produit.stockBoutique(ref.boutiqueVente) <= 0;
 
                                   final double prixBase =
-                                      (produit.prixVente as num).toDouble();
+                                      (produit.prixPour(ref.boutiqueVente) as num).toDouble();
                                   final String prixTexte =
                                       currencyState.formatPrice(prixBase);
 
@@ -308,7 +309,7 @@ class _ProduitsViewState extends ConsumerState<ProduitsView> {
                                               decoration: BoxDecoration(
                                                 color: enRupture
                                                     ? Colors.red.shade100
-                                                    : (produit.quantite < 5
+                                                    : (produit.stockBoutique(ref.boutiqueVente) < 5
                                                         ? Colors.orange.shade100
                                                         : Colors
                                                             .green.shade100),
@@ -316,13 +317,13 @@ class _ProduitsViewState extends ConsumerState<ProduitsView> {
                                                     BorderRadius.circular(4),
                                               ),
                                               child: Text(
-                                                'Stock: ${produit.quantite}',
+                                                'Stock: ${produit.stockBoutique(ref.boutiqueVente)}',
                                                 style: TextStyle(
                                                   fontSize: 11,
                                                   fontWeight: FontWeight.bold,
                                                   color: enRupture
                                                       ? Colors.red.shade800
-                                                      : (produit.quantite < 5
+                                                      : (produit.stockBoutique(ref.boutiqueVente) < 5
                                                           ? Colors.orange
                                                               .shade900
                                                           : Colors

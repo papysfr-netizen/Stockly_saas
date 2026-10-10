@@ -210,3 +210,9 @@ class SelecteurBoutique extends ConsumerWidget {
     );
   }
 }
+
+/// 🏬 Boutique où se fait une vente : employé = sa boutique ;
+/// patron = boutique choisie (« Toutes les boutiques » = boutique principale).
+extension BoutiqueVenteRef on WidgetRef {
+  String get boutiqueVente => read(boutiqueActiveProvider) ?? BoutiquesService.idPrincipale;
+}
