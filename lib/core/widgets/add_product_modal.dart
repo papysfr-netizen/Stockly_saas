@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:stockly_saas/core/models/produit.dart';
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,8 @@ class AddProductModal extends StatefulWidget {
   final Map<String, dynamic>? product;
   final String? id;
   final Function(Map<String, dynamic> productData)? onProductAdded;
+  /// 🏬 Boutique concernée (null = toutes les boutiques = stock total)
+  final String? boutiqueId;
 
   const AddProductModal({
     super.key,
@@ -25,6 +28,7 @@ class AddProductModal extends StatefulWidget {
     this.product,
     this.id,
     this.onProductAdded,
+    this.boutiqueId,
   });
 
   static Future<void> show(
@@ -33,6 +37,7 @@ class AddProductModal extends StatefulWidget {
     Map<String, dynamic>? product,
     String? id,
     Function(Map<String, dynamic> productData)? onProductAdded,
+    String? boutiqueId,
   }) async {
     final resultat = await showModalBottomSheet<Object?>(
       context: context,
@@ -43,6 +48,7 @@ class AddProductModal extends StatefulWidget {
         product: product,
         id: id,
         onProductAdded: onProductAdded,
+        boutiqueId: boutiqueId,
       ),
     );
 
@@ -58,6 +64,7 @@ class AddProductModal extends StatefulWidget {
         product: resultat.donnees,
         id: resultat.id,
         onProductAdded: onProductAdded,
+        boutiqueId: boutiqueId,
       );
     }
   }
@@ -93,6 +100,11 @@ class _AddProductModalState extends State<AddProductModal> {
 
   bool get isEditing => widget.id != null && widget.id!.isNotEmpty;
 
+  /// 🏬 Produit tel qu'il était à l'ouverture
+  Produit? get _produitAvant => widget.product == null
+      ? null
+      : Produit.fromMap(Map<String, dynamic>.from(widget.product!), widget.id);
+
   @override
   void initState() {
     super.initState();
@@ -126,6 +138,10 @@ class _AddProductModalState extends State<AddProductModal> {
       text: widget.product?['imageUrl']?.toString() ?? '',
     );
 
+    // 🏬 En boutique précise : on affiche le stock de CETTE boutique
+    if (widget.boutiqueId != null && _produitAvant != null) {
+      _quantiteController.text = '${_produitAvant!.stockBoutique(widget.boutiqueId)}';
+    }
     final existingCat = widget.product?['categorie']?.toString();
     if (existingCat != null && existingCat.isNotEmpty) {
       if (!_categories.contains(existingCat)) {
@@ -322,6 +338,23 @@ class _AddProductModalState extends State<AddProductModal> {
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
+      // 🏬 Stock par boutique : on applique seulement la différence
+      final b = widget.boutiqueId;
+      int? totalApres;
+      if (b != null) {
+        final avant = _produitAvant;
+        if (isEditing && avant != null) {
+          final delta = quantiteVal - avant.stockBoutique(b);
+          productData['quantite'] = FieldValue.increment(delta);
+          if (b != Produit.idPrincipale) {
+            productData['stocks'] = {b: FieldValue.increment(delta)};
+          }
+          totalApres = avant.quantite + delta;
+        } else if (!isEditing && b != Produit.idPrincipale) {
+          productData['stocks'] = {b: quantiteVal};
+        }
+      }
+
       final produitsRef = FirebaseFirestore.instance
           .collection('entreprises')
           .doc(entrepriseId)
@@ -348,6 +381,8 @@ class _AddProductModalState extends State<AddProductModal> {
         );
       }
 
+      if (totalApres != null) productData['quantite'] = totalApres;
+      productData.remove('stocks');
       productData['id'] = docRef.id;
       widget.onProductAdded?.call(productData);
 

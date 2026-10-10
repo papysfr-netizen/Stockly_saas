@@ -293,9 +293,9 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Votre stock actuel appartient à la boutique principale. '
-                        'Le stock par boutique, les transferts et les prix par boutique '
-                        'arriveront dans les prochaines mises à jour.',
+                        'Stock de la boutique principale = stock total − stock des autres boutiques. '
+                        'Utilisez « Transférer du stock » pour approvisionner une boutique, '
+                        'et « Prix par boutique » pour adapter les prix à chaque marché.',
                         style: TextStyle(fontSize: 13, color: Colors.blue.shade900),
                       ),
                     ),

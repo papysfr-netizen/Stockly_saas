@@ -59,7 +59,8 @@ class _PrixBoutiquesScreenState extends ConsumerState<PrixBoutiquesScreen> {
   /// Affiche un montant USD dans la devise active
   String _fmt(double usd, double taux) {
     final v = usd * taux;
-    return taux >= 100 ? v.toStringAsFixed(0) : v.toStringAsFixed(2);
+    if (taux >= 100 || (v - v.roundToDouble()).abs() < 0.005) return v.toStringAsFixed(0);
+    return v.toStringAsFixed(2);
   }
 
   TextEditingController _ctrl(Produit p, double taux) {
@@ -272,7 +273,7 @@ class _PrixBoutiquesScreenState extends ConsumerState<PrixBoutiquesScreen> {
           ),
           const SizedBox(width: 10),
           SizedBox(
-            width: 120,
+            width: 150,
             child: TextField(
               controller: c,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -282,6 +283,8 @@ class _PrixBoutiquesScreenState extends ConsumerState<PrixBoutiquesScreen> {
                 isDense: true,
                 hintText: _fmt(p.prixVente, taux),
                 suffixText: currency,
+                suffixStyle: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                hintStyle: TextStyle(color: Colors.grey.shade400),
                 border: const OutlineInputBorder(),
               ),
               onChanged: (_) => setState(() => _modifies.add(p.id)),

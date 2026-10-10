@@ -497,6 +497,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       entrepriseId: widget.currentUser.entrepriseId,
                                       product: produit.toJson(),
                                       id: produit.id,
+                                      boutiqueId: ref.read(boutiqueActiveProvider), // 🏬
                                     );
                                   }
                                 : null,
@@ -582,6 +583,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               onPressed: () => AddProductModal.show(
                 context,
                 entrepriseId: widget.currentUser.entrepriseId,
+                boutiqueId: ref.read(boutiqueActiveProvider), // 🏬
               ),
               icon: const Icon(Icons.add, color: Colors.white),
               label: const Text('Nouveau Produit',
