@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -75,6 +76,14 @@ class HistoriqueVentesScreen extends ConsumerStatefulWidget {
 }
 
 class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen> {
+  /// 🏬 La vente appartient-elle à la boutique affichée ? (sans boutique = principale)
+  bool _dansBoutique(Map d) {
+    final choisie = ref.read(boutiqueActiveProvider);
+    if (choisie == null) return true;
+    final b = (d['boutiqueId'] ?? '').toString();
+    return (b.isEmpty ? 'principale' : b) == choisie;
+  }
+
   final _rechercheCtrl = TextEditingController();
   String _recherche = '';
   _Periode _periode = _Periode.aujourdhui;
@@ -174,7 +183,7 @@ class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen>
               data: (docs) {
                 final ventesPeriode = docs.where((doc) {
                   final d = doc.data();
-                  return _dansPeriode(_dateVente(d)) && _correspond(doc.id, d);
+                  return _dansPeriode(_dateVente(d)) && _correspond(doc.id, d) && _dansBoutique(d);
                 }).toList();
 
                 final vendeurs = ventesPeriode

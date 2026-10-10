@@ -77,6 +77,13 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
     }
   }
 
+  /// 🏬 La dépense appartient-elle à la boutique affichée ? (sans boutique = principale)
+  bool _dansBoutique(Depense d) {
+    final choisie = ref.read(boutiqueActiveProvider);
+    if (choisie == null) return true;
+    return (d.boutiqueId.isEmpty ? 'principale' : d.boutiqueId) == choisie;
+  }
+
   List<Depense> _filtrerDepenses(List<Depense> depenses) {
     return depenses.where((d) {
       final matchCat = _categorieFiltre == 'Toutes' || d.categorie == _categorieFiltre;
@@ -84,7 +91,7 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
           d.titre.toLowerCase().contains(_searchQuery) ||
           (d.note?.toLowerCase().contains(_searchQuery) ?? false) ||
           d.categorie.toLowerCase().contains(_searchQuery);
-      return matchCat && matchQuery;
+      return matchCat && matchQuery && _dansBoutique(d);
     }).toList();
   }
 
