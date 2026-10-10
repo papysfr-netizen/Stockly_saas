@@ -50,7 +50,7 @@ service cloud.firestore {
       return estMembre(entId) && (estProprietaireDe(entId) || aRoleGerantOuPlus());
     }
 
-    // 🔐 Autorisation réglée par le patron (Paramètres → Équipe)
+    // Autorisation réglée par le patron (Paramètres → Équipe)
     //  - Propriétaire : toujours oui
     //  - Sinon : l'interrupteur choisi par le patron,
     //    ou par défaut : Gérant = oui, Caissier = non
@@ -118,7 +118,7 @@ service cloud.firestore {
         //            les autres : seulement le stock lors d'une vente / d'un retour
         allow update: if aPermission(entId, 'gererStock')
           || (estMembre(entId)
-              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['quantite', 'updatedAt']));
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['quantite', 'stocks', 'updatedAt']));
       }
 
       // ----- Ventes, créances, dettes : tout le monde crée et met à jour ; effacer = Gérant+ -----

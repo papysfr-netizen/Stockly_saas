@@ -843,8 +843,11 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
       if (!_annulation && _abime[i]) continue;
       final id = (_articles[i]['produitId'] ?? '').toString();
       if (id.isEmpty) continue;
+      // 🏬 le stock revient dans la boutique de la vente
+      final bv = (widget.data['boutiqueId'] ?? 'principale').toString();
       batch.update(entRef.collection('produits').doc(id), {
         'quantite': FieldValue.increment(_qte[i]),
+        if (bv.isNotEmpty && bv != 'principale') 'stocks.$bv': FieldValue.increment(_qte[i]),
         'updatedAt': now,
       });
     }

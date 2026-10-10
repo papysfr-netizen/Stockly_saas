@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:stockly_saas/core/models/payment_method.dart';
 import 'package:stockly_saas/core/providers/cart_provider.dart';
+import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
 import 'package:stockly_saas/core/providers/currency_provider.dart';
 import 'package:stockly_saas/core/providers/entreprise_provider.dart';
 import 'package:stockly_saas/features/accounting/services/accounting_journal_service.dart';
@@ -39,6 +40,9 @@ class PaiementDialog extends ConsumerStatefulWidget {
 }
 
 class _PaiementDialogState extends ConsumerState<PaiementDialog> {
+  /// 🏬 Boutique de la vente (patron sur « Toutes les boutiques » = boutique principale)
+  String get _boutiqueVente => ref.read(boutiqueActiveProvider) ?? 'principale';
+
   final _clientController = TextEditingController();
   final _telephoneController = TextEditingController();
   final _verseUSDController = TextEditingController();
@@ -869,6 +873,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         'dateLimiteLivraison': estLivre ? null : Timestamp.fromDate(finJourLimite),
         'methodePaiement': methodeEnregistree,
         'vendeurId': widget.userId,
+        'boutiqueId': _boutiqueVente, // 🏬
         'vendeurNom': vendeurNom,
         'entrepriseId': widget.entrepriseId,
         'comptabilise': true,
@@ -1029,8 +1034,11 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
             .collection('produits')
             .doc(item.id);
 
+        final b = _boutiqueVente;
         batch.update(prodRef, {
           'quantite': FieldValue.increment(-item.quantite),
+          // 🏬 stock de la boutique (la principale = total − autres boutiques)
+          if (b != 'principale') 'stocks.$b': FieldValue.increment(-item.quantite),
           'updatedAt': now,
         });
       }
