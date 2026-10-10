@@ -1,6 +1,7 @@
 // lib/features/debts/screens/depenses_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -632,6 +633,8 @@ class _AjoutDepenseBottomSheetState extends ConsumerState<_AjoutDepenseBottomShe
           date: _dateSelectionnee,
           note: note,
           enregistrePar: widget.userNom,
+          // 🏬 boutique de la dépense
+          boutiqueId: ref.read(boutiqueActiveProvider) ?? 'principale',
         );
         await repo.ajouterDepense(nouvelleDepense);
       }
