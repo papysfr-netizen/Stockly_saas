@@ -12,6 +12,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+import 'prix_boutiques_screen.dart';
 import 'transferts_screen.dart';
 
 class BoutiquesService {
@@ -201,6 +202,13 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
     }
   }
 
+  void _ouvrirPrix() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => PrixBoutiquesScreen(entrepriseId: widget.entrepriseId)),
+    );
+  }
+
   void _ouvrirTransferts() {
     Navigator.push(
       context,
@@ -309,6 +317,23 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
                       style: TextStyle(color: Colors.white70)),
                   trailing: const Icon(Icons.chevron_right_rounded, color: Colors.white),
                   onTap: _ouvrirTransferts,
+                ),
+              ),
+              const SizedBox(height: 10),
+              // 💲 Prix par boutique
+              Card(
+                elevation: 0,
+                color: Colors.teal.shade700,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  leading: const Icon(Icons.sell_rounded, color: Colors.white),
+                  title: const Text('Prix par boutique',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  subtitle: const Text('Adapter les prix de vente au marché de chaque boutique',
+                      style: TextStyle(color: Colors.white70)),
+                  trailing: const Icon(Icons.chevron_right_rounded, color: Colors.white),
+                  onTap: _ouvrirPrix,
                 ),
               ),
               const SizedBox(height: 16),
