@@ -14,6 +14,8 @@ class Depense {
   final String? note;
   final String? enregistrePar;
   final bool comptabilise;
+  /// 🏬 Boutique de la dépense (vide = boutique principale)
+  final String boutiqueId;
 
   const Depense({
     required this.id,
@@ -26,6 +28,7 @@ class Depense {
     this.note,
     this.enregistrePar,
     this.comptabilise = false,
+    this.boutiqueId = '',
   });
 
   /// Parseur de date sécurisé (Timestamp Firestore, String ISO 8601, Epoch Int)
@@ -53,6 +56,7 @@ class Depense {
       note: json['note']?.toString(),
       enregistrePar: json['enregistrePar']?.toString() ?? json['createdBy']?.toString(),
       comptabilise: json['comptabilise'] as bool? ?? false,
+      boutiqueId: json['boutiqueId']?.toString() ?? '',
     );
   }
 
@@ -75,6 +79,7 @@ class Depense {
       'note': note,
       'enregistrePar': enregistrePar,
       'comptabilise': comptabilise,
+      'boutiqueId': boutiqueId,
     };
   }
 
@@ -97,6 +102,7 @@ class Depense {
     String? note,
     String? enregistrePar,
     bool? comptabilise,
+    String? boutiqueId,
   }) {
     return Depense(
       id: id ?? this.id,
@@ -109,6 +115,7 @@ class Depense {
       note: note ?? this.note,
       enregistrePar: enregistrePar ?? this.enregistrePar,
       comptabilise: comptabilise ?? this.comptabilise,
+      boutiqueId: boutiqueId ?? this.boutiqueId,
     );
   }
 
@@ -126,7 +133,8 @@ class Depense {
           methodePaiement == other.methodePaiement &&
           note == other.note &&
           enregistrePar == other.enregistrePar &&
-          comptabilise == other.comptabilise;
+          comptabilise == other.comptabilise &&
+          boutiqueId == other.boutiqueId;
 
   @override
   int get hashCode => Object.hash(
@@ -140,6 +148,7 @@ class Depense {
         note,
         enregistrePar,
         comptabilise,
+        boutiqueId,
       );
 
   @override

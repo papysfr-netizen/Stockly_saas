@@ -16,6 +16,7 @@ import '../../core/providers/currency_provider.dart';
 import '../../core/providers/user_role_provider.dart';
 import '../../core/providers/depense_provider.dart';
 import '../../core/services/report_export_service.dart';
+import '../../features/boutiques/boutique_provider.dart';
 
 import 'services/financial_calculation_service.dart';
 import 'widgets/details_bottom_sheet.dart';
@@ -169,6 +170,12 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
     final entrepriseId = userProfile?.entrepriseId ?? '';
 
     final depensesAsync = ref.watch(depensesStreamProvider);
+    // 🏬 Boutique affichée (null = toutes les boutiques)
+    final boutique = ref.watch(boutiqueActiveProvider);
+    final boutiques = ref.watch(boutiquesActivesProvider(entrepriseId));
+    final nomBoutique = boutique == null
+        ? null
+        : boutiques.where((b) => b.id == boutique).map((b) => b.nom).firstOrNull;
     final periodes = _periodes();
     if (_selectedPeriodeIndex >= periodes.length) _selectedPeriodeIndex = 0;
 
@@ -189,6 +196,10 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
         ? dfJour.format(dateRange.start)
         : 'du ${dfJour.format(dateRange.start)} au ${dfJour.format(dateRange.end)}';
 
+    final libelle = (boutiques.length < 2)
+        ? libellePeriode
+        : '$libellePeriode • ${nomBoutique ?? 'Toutes les boutiques'}';
+
     return Scaffold(
       backgroundColor: const Color(0xFFF3F4F6),
       appBar: AppBar(
@@ -200,6 +211,8 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
+          Center(child: SelecteurBoutique(entrepriseId: entrepriseId)),
+          const SizedBox(width: 4),
           PopupMenuButton<String>(
             icon: const Icon(Icons.ios_share_rounded, color: Colors.white),
             tooltip: 'Exporter',
@@ -317,17 +330,29 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                           }
 
                           final produits = snapProduits.data?.docs ?? [];
-                          final ventes = snapVentes.data?.docs ?? [];
+                          // 🏬 Ventes et dépenses de la boutique choisie
+                          // (sans boutique = boutique principale)
+                          final ventes = (snapVentes.data?.docs ?? []).where((d) {
+                            if (boutique == null) return true;
+                            final m = (d.data() as Map<String, dynamic>?) ?? const {};
+                            final b = (m['boutiqueId'] ?? '').toString();
+                            return (b.isEmpty ? 'principale' : b) == boutique;
+                          }).toList();
+                          final depensesBoutique = toutesLesDepenses.where((dep) {
+                            if (boutique == null) return true;
+                            final b = ((dep as dynamic).boutiqueId ?? '').toString();
+                            return (b.isEmpty ? 'principale' : b) == boutique;
+                          }).toList();
 
                           final r = FinancialCalculationService.computePL(
-                            toutesLesDepenses: toutesLesDepenses,
+                            toutesLesDepenses: depensesBoutique,
                             produitsDocs: produits,
                             ventesDocs: ventes,
                             dateRange: dateRange,
                             entrepriseId: entrepriseId,
                           );
                           final prec = FinancialCalculationService.computePL(
-                            toutesLesDepenses: toutesLesDepenses,
+                            toutesLesDepenses: depensesBoutique,
                             produitsDocs: produits,
                             ventesDocs: ventes,
                             dateRange: rangePrec,
@@ -335,12 +360,12 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                           );
 
                           _dernier = r;
-                          _dernierePeriode = libellePeriode;
+                          _dernierePeriode = libelle;
 
                           return ListView(
                             padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
                             children: [
-                              _carteResultat(r, prec, fmt, currency, libellePeriode),
+                              _carteResultat(r, prec, fmt, currency, libelle),
                               const SizedBox(height: 14),
                               _indicateurs(r, prec, fmt, currency),
                               const SizedBox(height: 20),
