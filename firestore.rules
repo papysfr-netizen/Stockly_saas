@@ -129,6 +129,13 @@ service cloud.firestore {
         allow delete: if false;
       }
 
+      // ----- Transferts de stock entre boutiques : historique jamais modifiable -----
+      match /transferts/{transfertId} {
+        allow read: if estMembre(entId);
+        allow create: if aPermission(entId, 'gererStock');
+        allow update, delete: if false;
+      }
+
       match /ventes/{docId} {
         allow read, create, update: if estMembre(entId);
         allow delete: if estGerantOuPlus(entId);
@@ -176,7 +183,7 @@ service cloud.firestore {
       // ----- Toutes les autres sous-collections (comme avant) -----
       match /{collection}/{reste=**} {
         allow read: if estMembre(entId);
-        allow write: if !(collection in ['produits', 'ventes', 'retours', 'comptes_clients', 'boutiques', 'creances', 'dettes', 'ecritures_comptables'])
+        allow write: if !(collection in ['produits', 'ventes', 'retours', 'comptes_clients', 'boutiques', 'transferts', 'creances', 'dettes', 'ecritures_comptables'])
           && (estMembre(entId) || creeParMoi(entId));
       }
     }

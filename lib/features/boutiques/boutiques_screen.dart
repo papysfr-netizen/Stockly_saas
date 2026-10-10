@@ -12,6 +12,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+import 'transferts_screen.dart';
+
 class BoutiquesService {
   static const String idPrincipale = 'principale';
 
@@ -199,6 +201,13 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
     }
   }
 
+  void _ouvrirTransferts() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => TransfertsScreen(entrepriseId: widget.entrepriseId)),
+    );
+  }
+
   Future<void> _changerActif(String id, String nom, bool actif) async {
     final messenger = ScaffoldMessenger.of(context);
     try {
@@ -220,6 +229,13 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
         backgroundColor: _bleuNuit,
         foregroundColor: Colors.white,
         elevation: 0,
+        actions: [
+          IconButton(
+            tooltip: 'Transferts de stock',
+            icon: const Icon(Icons.swap_horiz_rounded),
+            onPressed: _ouvrirTransferts,
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: _bleuNuit,
@@ -276,6 +292,23 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
                       ),
                     ),
                   ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              // 🔁 Transferts de stock
+              Card(
+                elevation: 0,
+                color: Colors.indigo.shade700,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  leading: const Icon(Icons.local_shipping_rounded, color: Colors.white),
+                  title: const Text('Transférer du stock',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  subtitle: const Text('Envoyer de la marchandise d\'une boutique à l\'autre',
+                      style: TextStyle(color: Colors.white70)),
+                  trailing: const Icon(Icons.chevron_right_rounded, color: Colors.white),
+                  onTap: _ouvrirTransferts,
                 ),
               ),
               const SizedBox(height: 16),
