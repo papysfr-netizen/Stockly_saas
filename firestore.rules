@@ -67,6 +67,16 @@ service cloud.firestore {
         && getAfter(/databases/$(database)/documents/entreprises/$(entId)).data.ownerId == request.auth.uid;
     }
 
+    // Boutique de travail de l'utilisateur (vide = boutique principale)
+    function maBoutique() {
+      return monProfil().get('boutiqueId', '') == '' ? 'principale' : monProfil().get('boutiqueId', '');
+    }
+
+    // Le proprietaire travaille partout ; les autres seulement dans leur boutique
+    function boutiqueAutorisee(entId, b) {
+      return estProprietaireDe(entId) || (b == '' ? 'principale' : b) == maBoutique();
+    }
+
     // ---------- Profils utilisateurs ----------
     match /users/{userId} {
 
@@ -118,7 +128,8 @@ service cloud.firestore {
         //            les autres : seulement le stock lors d'une vente / d'un retour
         allow update: if aPermission(entId, 'gererStock')
           || (estMembre(entId)
-              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['quantite', 'stocks', 'updatedAt']));
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['quantite', 'stocks', 'updatedAt'])
+              && request.resource.data.get('stocks', {}).diff(resource.data.get('stocks', {})).affectedKeys().hasOnly([maBoutique()]));
       }
 
       // ----- Ventes, créances, dettes : tout le monde crée et met à jour ; effacer = Gérant+ -----
@@ -137,7 +148,9 @@ service cloud.firestore {
       }
 
       match /ventes/{docId} {
-        allow read, create, update: if estMembre(entId);
+        allow read, update: if estMembre(entId);
+        allow create: if estMembre(entId)
+          && boutiqueAutorisee(entId, request.resource.data.get('boutiqueId', ''));
         allow delete: if estGerantOuPlus(entId);
       }
       match /retours/{docId} {
@@ -191,7 +204,8 @@ service cloud.firestore {
     // ---------- Dépenses : Propriétaire + Gérant ----------
     match /depenses/{depenseId} {
       allow read: if estGerantOuPlus(monEntreprise()) && resource.data.entrepriseId == monEntreprise();
-      allow create: if estGerantOuPlus(monEntreprise()) && request.resource.data.entrepriseId == monEntreprise();
+      allow create: if estGerantOuPlus(monEntreprise()) && request.resource.data.entrepriseId == monEntreprise()
+        && boutiqueAutorisee(monEntreprise(), request.resource.data.get('boutiqueId', ''));
       allow update: if estGerantOuPlus(monEntreprise()) && resource.data.entrepriseId == monEntreprise()
         && request.resource.data.entrepriseId == resource.data.entrepriseId;
       allow delete: if estGerantOuPlus(monEntreprise()) && resource.data.entrepriseId == monEntreprise();
