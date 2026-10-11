@@ -21,6 +21,10 @@ import 'package:stockly_saas/features/debts/screens/debt_management_screen.dart'
 import 'package:stockly_saas/features/debts/screens/depenses_screen.dart';
 import 'package:stockly_saas/features/debts/screens/home_screen.dart';
 import 'package:stockly_saas/views/caisse/caisse_screen.dart';
+import 'package:stockly_saas/features/comptes_clients/comptes_clients_screen.dart';
+import 'package:stockly_saas/features/debts/screens/comptabilite_screen.dart';
+import 'package:stockly_saas/features/livraisons/a_livrer_screen.dart';
+import 'package:stockly_saas/features/ventes/historique_ventes_screen.dart';
 
 const _vert = Color(0xFF0B7A5A);
 const _bleu = Color(0xFF0052FF);
@@ -288,6 +292,27 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                 ),
               ),
 
+              // ---------- Plus ----------
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _raccourci('Ventes', Icons.receipt_long_rounded, Colors.indigo,
+                          () => _ouvrir(HistoriqueVentesScreen(entrepriseId: _entrepriseId))),
+                      ALivrerNavButton(entrepriseId: _entrepriseId),
+                      _raccourci('Comptes clients', Icons.account_balance_wallet_rounded, Colors.teal,
+                          () => _ouvrir(ComptesClientsScreen(entrepriseId: _entrepriseId))),
+                      if (voirFinances)
+                        _raccourci('Comptabilité', Icons.calculate_rounded, Colors.brown,
+                            () => _ouvrir(ComptabiliteScreen(entrepriseId: _entrepriseId))),
+                    ],
+                  ),
+                ),
+              ),
+
               // ---------- Ventes du jour ----------
               SliverToBoxAdapter(
                 child: Padding(
@@ -364,6 +389,17 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
           );
         },
       ),
+    );
+  }
+
+  Widget _raccourci(String titre, IconData icone, Color couleur, VoidCallback onTap) {
+    return ActionChip(
+      avatar: Icon(icone, size: 18, color: couleur),
+      label: Text(titre, style: TextStyle(fontWeight: FontWeight.w600, color: couleur)),
+      backgroundColor: Colors.white,
+      side: BorderSide(color: Colors.grey.shade300),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      onPressed: onTap,
     );
   }
 

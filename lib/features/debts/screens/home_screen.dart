@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:stockly_saas/features/comptes_clients/comptes_clients_screen.dart';
 import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -12,16 +11,8 @@ import '../../../core/providers/currency_provider.dart';
 import '../../../core/providers/produit_provider.dart';
 import '../../../core/providers/entreprise_provider.dart';
 import '../../../core/services/packing_list_service.dart';
-import '../../../views/caisse/caisse_screen.dart';
-import '../../../views/financial_analysis/financial_analysis_screen.dart';
 import '../../../core/widgets/add_product_modal.dart';
 import '../../../core/widgets/changer_mot_de_passe_dialog.dart';
-import 'comptabilite_screen.dart';
-import 'debt_management_screen.dart';
-import 'depenses_screen.dart';
-import '../../livraisons/a_livrer_screen.dart'; // 🚚
-import '../../ventes/historique_ventes_screen.dart'; // 🧾
-import 'package:stockly_saas/screens/settings_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   final UserModel currentUser;
@@ -54,7 +45,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       _profil?.peutGererStock ?? widget.currentUser.isAdmin; // interrupteur « Gérer le stock »
   bool get _peutVoirFinances =>
       _profil?.peutVoirFinances ?? widget.currentUser.canAccessFinance; // interrupteur « Voir les finances »
-  bool get _peutGererParametres => widget.currentUser.canManageTeam; // owner seul
 
   @override
   void dispose() {
@@ -218,18 +208,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     onPressed: _importerExcel,
                   ),
           ],
-          // ⚙️ Paramètres : Propriétaire seulement
-          if (_peutGererParametres)
-            IconButton(
-              icon: const Icon(Icons.settings),
-              tooltip: 'Paramètres',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SettingsScreen()),
-                );
-              },
-            ),
           // 👤 Mon compte : tout le monde (mot de passe + déconnexion)
           PopupMenuButton<String>(
             icon: const Icon(Icons.account_circle),
@@ -264,129 +242,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       body: Column(
         children: [
-          // ================= 1. MENU ACCÈS RAPIDE =================
-          Container(
-            color: Colors.blue.shade800,
-            padding: const EdgeInsets.only(left: 12, right: 12, bottom: 16),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  // 🧾 Caisse : tout le monde
-                  _buildNavBtn(
-                    icon: Icons.point_of_sale,
-                    label: 'Caisse POS',
-                    bgColor: Colors.white,
-                    fgColor: Colors.blue.shade800,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const CaisseScreen()),
-                    ),
-                  ),
-                  // 🧾 Historique des ventes : tout le monde
-                  const SizedBox(width: 8),
-                  _buildNavBtn(
-                    icon: Icons.receipt_long,
-                    label: 'Ventes',
-                    bgColor: Colors.indigo.shade50,
-                    fgColor: Colors.indigo.shade900,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HistoriqueVentesScreen(
-                          entrepriseId: widget.currentUser.entrepriseId,
-                        ),
-                      ),
-                    ),
-                  ),
-                  // 💸 Dépenses : Propriétaire + Gérant
-                  if (_peutVoirFinances) ...[
-                    const SizedBox(width: 8),
-                    _buildNavBtn(
-                      icon: Icons.account_balance_wallet,
-                      label: 'Dépenses',
-                      bgColor: Colors.redAccent.shade100,
-                      fgColor: Colors.red.shade900,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const DepensesScreen()),
-                      ),
-                    ),
-                  ],
-                  // 📒 Dettes : tout le monde
-                  const SizedBox(width: 8),
-                  _buildNavBtn(
-                    icon: Icons.menu_book,
-                    label: 'Dettes',
-                    bgColor: Colors.orange.shade100,
-                    fgColor: Colors.orange.shade900,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const DebtManagementScreen()),
-                    ),
-                  ),
-                  // 🚚 À livrer : tout le monde (avec le nombre en attente)
-                  const SizedBox(width: 8),
-                  ALivrerNavButton(entrepriseId: widget.currentUser.entrepriseId),
-                  // 💰 Comptes clients (dépôts / avoirs) : tout le monde
-                  const SizedBox(width: 8),
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal.shade100,
-                      foregroundColor: Colors.teal.shade900,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-                    ),
-                    icon: const Icon(Icons.account_balance_wallet, size: 18),
-                    label: const Text(
-                      'Comptes clients',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                    ),
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ComptesClientsScreen(
-                          entrepriseId: widget.currentUser.entrepriseId,
-                        ),
-                      ),
-                    ),
-                  ),
-                  // 📊 P&L + Comptabilité : Propriétaire + Gérant
-                  if (_peutVoirFinances) ...[
-                    const SizedBox(width: 8),
-                    _buildNavBtn(
-                      icon: Icons.analytics,
-                      label: 'P&L Net',
-                      bgColor: Colors.indigo.shade100,
-                      fgColor: Colors.indigo.shade900,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const FinancialAnalysisScreen()),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    _buildNavBtn(
-                      icon: Icons.calculate,
-                      label: 'Comptabilité',
-                      bgColor: Colors.teal.shade100,
-                      fgColor: Colors.teal.shade900,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ComptabiliteScreen(
-                            entrepriseId: widget.currentUser.entrepriseId,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-
           // ================= 2. BARRE DE RECHERCHE =================
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -593,26 +448,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildNavBtn({
-    required IconData icon,
-    required String label,
-    required Color bgColor,
-    required Color fgColor,
-    required VoidCallback onTap,
-  }) {
-    return ElevatedButton.icon(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: bgColor,
-        foregroundColor: fgColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-      ),
-      icon: Icon(icon, size: 18),
-      label: Text(label,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-      onPressed: onTap,
-    );
-  }
 
   Widget _buildStatCard(
       String title, String value, IconData icon, Color color) {

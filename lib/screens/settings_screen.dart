@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:stockly_saas/core/widgets/changer_mot_de_passe_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:stockly_saas/features/boutiques/boutiques_screen.dart';
 import 'package:flutter/material.dart';
@@ -152,9 +154,12 @@ class SettingsScreen extends ConsumerWidget {
           ListView(
             padding: const EdgeInsets.all(16.0),
             children: [
-              const InfoCard(),
+              // 👤 Mon compte : tout le monde
+              const _MonCompteCard(),
               const SizedBox(height: 16),
               if (userProfile?.role.isOwner == true) ...[
+                const InfoCard(),
+                const SizedBox(height: 16),
                 const _TeamCard(),
                 const SizedBox(height: 16),
                 MesBoutiquesCard(entrepriseId: entrepriseId),
@@ -164,8 +169,11 @@ class SettingsScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               const LanguageCard(),
               const SizedBox(height: 16),
-              ExportCard(entrepriseId: entrepriseId),
-              const SizedBox(height: 16),
+              // 📤 Export : seulement avec l'autorisation « voir les finances »
+              if (userProfile?.peutVoirFinances == true) ...[
+                ExportCard(entrepriseId: entrepriseId),
+                const SizedBox(height: 16),
+              ],
               if (userProfile?.peutMaintenance == true) ...[
                 MaintenanceCard(entrepriseId: entrepriseId),
                 const SizedBox(height: 20),
@@ -214,6 +222,61 @@ class _TeamCard extends StatelessWidget {
                 builder: (context) => const GestionEquipeScreen()),
           );
         },
+      ),
+    );
+  }
+}
+
+
+// ============================================================================
+// 👤 MON COMPTE : mot de passe + déconnexion (tout le monde)
+// ============================================================================
+class _MonCompteCard extends StatelessWidget {
+  const _MonCompteCard();
+
+  Future<void> _deconnecter(BuildContext context) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Se déconnecter ?'),
+        content: const Text('Vous devrez vous reconnecter avec votre e-mail et votre mot de passe.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Se déconnecter'),
+          ),
+        ],
+      ),
+    );
+    if (ok == true) await FirebaseAuth.instance.signOut();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final email = FirebaseAuth.instance.currentUser?.email ?? '';
+    return Card(
+      child: Column(
+        children: [
+          ListTile(
+            leading: const CircleAvatar(child: Icon(Icons.person_rounded)),
+            title: const Text('Mon compte', style: TextStyle(fontWeight: FontWeight.bold)),
+            subtitle: email.isEmpty ? null : Text(email),
+          ),
+          const Divider(height: 1),
+          ListTile(
+            leading: const Icon(Icons.lock_reset_rounded),
+            title: const Text('Changer mon mot de passe'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => ChangerMotDePasseDialog.show(context),
+          ),
+          ListTile(
+            leading: const Icon(Icons.logout_rounded, color: Colors.red),
+            title: const Text('Se déconnecter', style: TextStyle(color: Colors.red)),
+            onTap: () => _deconnecter(context),
+          ),
+        ],
       ),
     );
   }
