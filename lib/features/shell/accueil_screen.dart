@@ -180,7 +180,10 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          SelecteurBoutique(entrepriseId: _entrepriseId),
+                          if (profil?.role.isOwner == true)
+                            SelecteurBoutique(entrepriseId: _entrepriseId)
+                          else
+                            _etiquetteBoutique(boutique),
                         ],
                       ),
                       const SizedBox(height: 14),
@@ -200,7 +203,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                               const Icon(Icons.currency_exchange_rounded, color: Colors.white, size: 18),
                               const SizedBox(width: 8),
                               Text(
-                                '1 \$ = ${NumberFormat.decimalPattern('fr_FR').format(tauxCdf)} FC',
+                                '1 \$ = ${NumberFormat('#,##0', 'fr_FR').format(tauxCdf)} FC',
                                 style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                               ),
                               const SizedBox(width: 8),
@@ -387,6 +390,35 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
             ],
           );
         },
+      ),
+    );
+  }
+
+  /// 🏬 Nom de la boutique de l'employé (lecture seule)
+  Widget _etiquetteBoutique(String? id) {
+    final boutiques = ref.watch(boutiquesActivesProvider(_entrepriseId));
+    final nom = boutiques.where((b) => b.id == (id ?? 'principale')).map((b) => b.nom).firstOrNull ??
+        'Boutique principale';
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 170),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.storefront_rounded, color: Colors.white, size: 18),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              nom,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:stockly_saas/core/widgets/currency_selector_widget.dart';
+import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
 import '../../core/providers/cart_provider.dart';
 import '../../core/providers/currency_provider.dart';
 import '../../core/providers/produit_provider.dart';
@@ -51,6 +52,9 @@ class CaisseScreen extends ConsumerWidget {
             profile.peutGererStock;
         // ⚙️ Paramètres : Propriétaire seulement
         final estProprietaire = profile.role.peutGererEquipe;
+        // 🏬 Bandeau de la boutique de vente (dès 2 boutiques)
+        final plusieursBoutiques =
+            ref.watch(boutiquesActivesProvider(entrepriseId)).length > 1;
 
         final cart = ref.watch(cartProvider);
         final cartNotifier = ref.read(cartProvider.notifier);
@@ -64,6 +68,15 @@ class CaisseScreen extends ConsumerWidget {
             return Scaffold(
               appBar: AppBar(
                 title: const Text('Caisse / POS'),
+                bottom: plusieursBoutiques
+                    ? PreferredSize(
+                        preferredSize: const Size.fromHeight(46),
+                        child: BandeauBoutiqueVente(
+                          entrepriseId: entrepriseId,
+                          estProprietaire: estProprietaire,
+                        ),
+                      )
+                    : null,
                 actions: [
                   ConstrainedBox(
                     constraints: BoxConstraints(maxWidth: 180),
@@ -361,6 +374,57 @@ class CaisseScreen extends ConsumerWidget {
         cart: cart,
         entrepriseId: entrepriseId,
         userId: userId,
+      ),
+    );
+  }
+}
+
+
+// ============================================================================
+// 🏬 BANDEAU « VENTE : <BOUTIQUE> »
+// ============================================================================
+class BandeauBoutiqueVente extends ConsumerWidget {
+  final String entrepriseId;
+  final bool estProprietaire;
+
+  const BandeauBoutiqueVente({
+    super.key,
+    required this.entrepriseId,
+    required this.estProprietaire,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final choisie = ref.watch(boutiqueActiveProvider);
+    final boutiques = ref.watch(boutiquesActivesProvider(entrepriseId));
+    final id = choisie ?? 'principale';
+    final nom = boutiques.where((b) => b.id == id).map((b) => b.nom).firstOrNull ??
+        'Boutique principale';
+    // Propriétaire sur « Toutes les boutiques » : il doit choisir
+    final attention = estProprietaire && choisie == null;
+
+    return Container(
+      width: double.infinity,
+      height: 46,
+      color: attention ? Colors.orange.shade800 : const Color(0xFF1E3A8A),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Row(
+        children: [
+          Icon(
+            attention ? Icons.warning_amber_rounded : Icons.storefront_rounded,
+            color: Colors.white,
+            size: 20,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              attention ? 'Choisissez la boutique de vente' : 'Vente : $nom',
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+          ),
+          if (estProprietaire) SelecteurBoutique(entrepriseId: entrepriseId),
+        ],
       ),
     );
   }
