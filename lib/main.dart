@@ -13,7 +13,7 @@ import 'core/models/auth_state.dart';
 import 'core/models/user_model.dart';
 import 'features/debts/screens/providers/auth_controller.dart';
 import 'core/providers/locale_provider.dart';
-import 'features/debts/screens/home_screen.dart';
+import 'features/shell/main_shell.dart';
 import 'features/debts/screens/login_screen.dart';
 import 'features/debts/screens/pin_lock_screen.dart';
 import 'core/widgets/app_initializer.dart';
@@ -268,7 +268,7 @@ class AuthWrapper extends ConsumerWidget {
                           .read(authControllerProvider.notifier)
                           .registerUserActivity();
                     },
-                    child: HomeScreen(
+                    child: MainShell(
                       currentUser: currentUser,
                     ),
                   ),

@@ -81,6 +81,8 @@ double _cellToDouble(dynamic cellValue) {
 const _motsEntete = {
   'nom', 'designation', 'article', 'produit', 'description', 'libelle', 'total',
   'code', 'ref', 'reference', 'nom du produit', 'nom produit',
+  'noms', 'designations', 'articles', 'produits', 'descriptions', 'libelles',
+  'codes', 'refs', 'references', 'noms des produits',
 };
 
 // ------------------------------------------------------------------
@@ -95,39 +97,61 @@ Map<String, dynamic> _analyserLignes(List<List<dynamic>> rows) {
   }
 
   int idxCode = -1, idxNom = -1, idxQte = -1, idxPA = -1, idxPV = -1;
-  final entete = rows.first;
+  int ligneEntete = -1;
 
-  for (int col = 0; col < entete.length; col++) {
-    final brut = _cellToString(entete[col]);
-    final val = normaliserTexte(brut);
-    if (val.isEmpty) continue;
+  // 🔎 La ligne de titres n'est pas toujours la 1re (titre du document,
+  // ligne vide…) : on la cherche dans les 10 premières lignes.
+  for (int r = 0; r < rows.length && r < 10 && ligneEntete == -1; r++) {
+    final entete = rows[r];
+    // Une ligne qui contient des nombres est une ligne de produit, pas de titres
+    if (entete.any((c) => _getRawValue(c) is num)) continue;
 
-    if (idxCode == -1 &&
-        (val.contains('code') || val.contains('ref') || val.contains('barcode') || val.contains('ean'))) {
-      idxCode = col;
-      colonnes['code'] = brut;
-    } else if (idxNom == -1 &&
-        (val.contains('nom') || val.contains('desig') || val.contains('produit') ||
-            val.contains('article') || val.contains('libelle') || val.contains('description'))) {
-      idxNom = col;
-      colonnes['nom'] = brut;
-    } else if (idxQte == -1 &&
-        (val.contains('qte') || val.contains('qty') || val.contains('quantit') || val.contains('stock'))) {
-      idxQte = col;
-      colonnes['quantite'] = brut;
-    } else if (idxPA == -1 &&
-        (val == 'pa' || val.contains('achat') || val.contains('cout') || val.contains('revient'))) {
-      idxPA = col;
-      colonnes['prixAchat'] = brut;
-    } else if (idxPV == -1 && (val == 'pv' || val.contains('vente') || val.contains('prix'))) {
-      idxPV = col;
-      colonnes['prixVente'] = brut;
+    int c0 = -1, n0 = -1, q0 = -1, a0 = -1, v0 = -1;
+    final cols = <String, String>{};
+    for (int col = 0; col < entete.length; col++) {
+      final brut = _cellToString(entete[col]);
+      final val = normaliserTexte(brut);
+      if (val.isEmpty) continue;
+      final court = val.replaceAll(RegExp(r'[.\s]'), ''); // « P.A » -> « pa »
+
+      if (c0 == -1 &&
+          (val.contains('code') || val.contains('ref') || val.contains('barcode') || val.contains('ean'))) {
+        c0 = col;
+        cols['code'] = brut;
+      } else if (n0 == -1 &&
+          (val.contains('nom') || val.contains('desig') || val.contains('produit') ||
+              val.contains('article') || val.contains('libelle') || val.contains('description'))) {
+        n0 = col;
+        cols['nom'] = brut;
+      } else if (q0 == -1 &&
+          (val.contains('qte') || val.contains('qty') || val.contains('quantit') || val.contains('stock'))) {
+        q0 = col;
+        cols['quantite'] = brut;
+      } else if (a0 == -1 &&
+          (court == 'pa' || court == 'pau' || val.contains('achat') || val.contains('cout') ||
+              val.contains('revient'))) {
+        a0 = col;
+        cols['prixAchat'] = brut;
+      } else if (v0 == -1 &&
+          (court == 'pv' || court == 'pu' || court == 'pvu' || val.contains('vente') || val.contains('prix'))) {
+        v0 = col;
+        cols['prixVente'] = brut;
+      }
+    }
+
+    // Au moins 2 titres reconnus = c'est la ligne de titres
+    if ([c0, n0, q0, a0, v0].where((i) => i >= 0).length >= 2) {
+      ligneEntete = r;
+      idxCode = c0;
+      idxNom = n0;
+      idxQte = q0;
+      idxPA = a0;
+      idxPV = v0;
+      colonnes.addAll(cols);
     }
   }
 
-  // Au moins 2 titres reconnus = la 1re ligne est une ligne d'en-tête
-  final trouves = [idxCode, idxNom, idxQte, idxPA, idxPV].where((i) => i >= 0).length;
-  final avecEntete = trouves >= 2;
+  final avecEntete = ligneEntete >= 0;
 
   if (!avecEntete) {
     // Pas d'en-tête : ordre standard A=Code, B=Nom, C=Qté, D=Prix achat, E=Prix vente
@@ -152,7 +176,7 @@ Map<String, dynamic> _analyserLignes(List<List<dynamic>> rows) {
     };
   }
 
-  final debut = avecEntete ? 1 : 0;
+  final debut = avecEntete ? ligneEntete + 1 : 0;
   for (int i = debut; i < rows.length; i++) {
     final row = rows[i];
     if (row.isEmpty) continue;
