@@ -107,7 +107,6 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
         ],
       ),
     );
-    ctrl.dispose();
     if (nouveau == null || nouveau <= 0) return;
     ref.read(currencyProvider.notifier).updateRate('CDF', nouveau, modifiedBy: widget.currentUser.nom);
   }
