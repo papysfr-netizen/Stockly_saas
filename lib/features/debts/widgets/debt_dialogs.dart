@@ -157,9 +157,19 @@ class DebtDialogs {
                       double.tryParse(acompteController.text.trim()) ?? 0.0;
 
                   if (nom.isNotEmpty && montantTotal > 0) {
-                    final navigator = Navigator.of(dialogContext);
-                    await ref
-                        .read(debtControllerProvider(entrepriseId).notifier)
+                    // 🛑 Déjà payé > total : on refuse
+                    if (acompte > montantTotal + 0.005 || acompte < 0) {
+                      ScaffoldMessenger.of(dialogContext).showSnackBar(const SnackBar(
+                        content: Text('Le montant déjà payé dépasse le montant total.'),
+                        backgroundColor: Colors.red,
+                      ));
+                      return;
+                    }
+                    final controleur =
+                        ref.read(debtControllerProvider(entrepriseId).notifier);
+                    // On ferme d'abord la fenêtre, puis on enregistre
+                    Navigator.of(dialogContext).pop();
+                    await controleur
                         .ajouterDette(
                           nomTiers: nom,
                           numeroFacture: factureController.text.trim(),
@@ -169,7 +179,6 @@ class DebtDialogs {
                           note: noteController.text.trim(),
                           dateEcheance: dateEcheanceSelectionnee,
                         );
-                    navigator.pop();
                   }
                 },
                 child: const Text('Enregistrer',
@@ -192,6 +201,10 @@ class DebtDialogs {
   ) {
     final montantPaiementController = TextEditingController();
     PaymentMethod modePaiementSelectionne = PaymentMethod.cash;
+    String? erreurMontant;
+    bool enCours = false;
+    final messenger = ScaffoldMessenger.of(context);
+    final controleur = ref.read(debtControllerProvider(entrepriseId).notifier);
 
     showDialog(
       context: context,
@@ -219,10 +232,15 @@ class DebtDialogs {
                   controller: montantPaiementController,
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Montant du Règlement',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
+                    errorText: erreurMontant,
+                    helperText: 'Maximum : ${dette.montantReste.toStringAsFixed(2)} $currency',
                   ),
+                  onChanged: (_) {
+                    if (erreurMontant != null) setDialogState(() => erreurMontant = null);
+                  },
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<PaymentMethod>(
@@ -261,21 +279,42 @@ class DebtDialogs {
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green.shade700),
-              onPressed: () async {
-                final paye =
-                    double.tryParse(montantPaiementController.text.trim()) ?? 0.0;
-                if (paye > 0) {
-                  final navigator = Navigator.of(dialogContext);
-                  await ref
-                      .read(debtControllerProvider(entrepriseId).notifier)
-                      .enregistrerPaiement(
-                        detteId: dette.id,
-                        montantPaye: paye,
-                        paymentMethod: modePaiementSelectionne,
-                      );
-                  navigator.pop();
-                }
-              },
+              onPressed: enCours
+                  ? null
+                  : () async {
+                      final paye = double.tryParse(
+                              montantPaiementController.text.trim().replaceAll(',', '.')) ??
+                          0.0;
+                      // 🛑 Montant vide, nul ou supérieur au reste : on refuse
+                      if (paye <= 0) {
+                        setDialogState(() => erreurMontant = 'Saisissez un montant.');
+                        return;
+                      }
+                      if (paye > dette.montantReste + 0.005) {
+                        setDialogState(() => erreurMontant =
+                            'Trop élevé. Maximum : ${dette.montantReste.toStringAsFixed(2)} $currency');
+                        return;
+                      }
+                      setDialogState(() => enCours = true);
+                      // On ferme d'abord la fenêtre, puis on enregistre
+                      Navigator.of(dialogContext).pop();
+                      try {
+                        await controleur.enregistrerPaiement(
+                          detteId: dette.id,
+                          montantPaye: paye,
+                          paymentMethod: modePaiementSelectionne,
+                        );
+                        messenger.showSnackBar(SnackBar(
+                          content: Text('Règlement de ${paye.toStringAsFixed(2)} $currency enregistré.'),
+                          backgroundColor: Colors.green.shade700,
+                        ));
+                      } catch (e) {
+                        messenger.showSnackBar(SnackBar(
+                          content: Text('Erreur : $e'),
+                          backgroundColor: Colors.red.shade700,
+                        ));
+                      }
+                    },
               child: const Text('Valider le Règlement',
                   style: TextStyle(color: Colors.white)),
             ),

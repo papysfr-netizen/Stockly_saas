@@ -21,6 +21,7 @@ import 'package:stockly_saas/features/debts/screens/debt_management_screen.dart'
 import 'package:stockly_saas/features/debts/screens/depenses_screen.dart';
 import 'package:stockly_saas/features/debts/screens/home_screen.dart';
 import 'package:stockly_saas/views/caisse/caisse_screen.dart';
+import 'package:stockly_saas/features/shell/accueil_widgets.dart';
 import 'package:stockly_saas/features/comptes_clients/comptes_clients_screen.dart';
 import 'package:stockly_saas/features/debts/screens/comptabilite_screen.dart';
 import 'package:stockly_saas/features/livraisons/a_livrer_screen.dart';
@@ -138,7 +139,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: _streamVentes(),
         builder: (context, snap) {
-          double ventes = 0, encaisse = 0, credit = 0;
+          double ventes = 0, encaisse = 0, credit = 0, cout = 0;
           final listeVentes = <Map<String, dynamic>>[];
           for (final doc in snap.data?.docs ?? const []) {
             final v = doc.data();
@@ -149,6 +150,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
             ventes += total;
             encaisse += _nombre(v['montantPaye']);
             credit += _nombre(v['resteAPayer']);
+            cout += _nombre(v['coutMarchandises']);
             listeVentes.add(v);
           }
           listeVentes.sort((a, b) => (_date(b['date']) ?? minuit).compareTo(_date(a['date']) ?? minuit));
@@ -213,6 +215,20 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                         ),
                       ),
                     ],
+                  ),
+                ),
+              ),
+
+              // ---------- La phrase du jour ----------
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: ResumeDuJour(
+                    prenom: prenom,
+                    nbVentes: listeVentes.length,
+                    ventes: ventes,
+                    benefice: ventes - cout - totalDepenses,
+                    voirFinances: voirFinances,
                   ),
                 ),
               ),
@@ -311,6 +327,19 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                         _raccourci('Comptabilité', Icons.calculate_rounded, Colors.brown,
                             () => _ouvrir(ComptabiliteScreen(entrepriseId: _entrepriseId))),
                     ],
+                  ),
+                ),
+              ),
+
+              // ---------- À faire aujourd'hui ----------
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: AFaireAujourdhui(
+                    entrepriseId: _entrepriseId,
+                    boutique: boutique,
+                    onOuvrirStock: () => _ouvrir(HomeScreen(currentUser: widget.currentUser)),
+                    onOuvrirCredits: () => _ouvrir(const DebtManagementScreen()),
                   ),
                 ),
               ),
