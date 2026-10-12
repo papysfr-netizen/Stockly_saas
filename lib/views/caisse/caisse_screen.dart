@@ -3,16 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:stockly_saas/core/widgets/currency_selector_widget.dart';
 import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
-import '../../core/providers/cart_provider.dart';
 import '../../core/providers/currency_provider.dart';
 import '../../core/providers/produit_provider.dart';
 import '../../core/providers/user_role_provider.dart';
 import '../../features/debts/repositories/vente_repository.dart';
 import '../../core/services/report_export_service.dart';
-import '../../core/utils/currency_extension.dart';
 import 'package:stockly_saas/screens/settings_screen.dart';
 import 'dialogs/nouveau_produit_dialog.dart';
-import 'dialogs/paiement_dialog.dart';
 import 'widgets/panier_view.dart';
 import 'widgets/produits_view.dart' hide PanierView;
 
@@ -56,10 +53,6 @@ class CaisseScreen extends ConsumerWidget {
         final plusieursBoutiques =
             ref.watch(boutiquesActivesProvider(entrepriseId)).length > 1;
 
-        final cart = ref.watch(cartProvider);
-        final cartNotifier = ref.read(cartProvider.notifier);
-        final totalAmount = ref.watch(cartTotalProvider);
-        final totalItemsCount = ref.watch(cartItemCountProvider);
 
         return LayoutBuilder(
           builder: (context, constraints) {
@@ -190,29 +183,6 @@ class CaisseScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
-              floatingActionButton: isMobile && cart.isNotEmpty
-                  ? FloatingActionButton.extended(
-                      onPressed: () => _afficherModalPanier(
-                        context,
-                        ref,
-                        cart,
-                        cartNotifier,
-                        totalAmount,
-                        entrepriseId,
-                        userId,
-                      ),
-                      backgroundColor: Colors.green,
-                      icon:
-                          const Icon(Icons.shopping_cart, color: Colors.white),
-                      label: Text(
-                        'Panier ($totalItemsCount) - ${ref.formatPrice(totalAmount)}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    )
-                  : null,
             );
           },
         );
@@ -220,122 +190,6 @@ class CaisseScreen extends ConsumerWidget {
     );
   }
 
-  void _afficherModalPanier(
-    BuildContext context,
-    WidgetRef ref,
-    List<CartItem> cart,
-    CartNotifier cartNotifier,
-    double totalAmount,
-    String entrepriseId,
-    String userId,
-  ) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (modalContext) {
-        return Container(
-          height: MediaQuery.of(modalContext).size.height * 0.75,
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Panier Actuel',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(modalContext),
-                  ),
-                ],
-              ),
-              const Divider(),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: cart.length,
-                  itemBuilder: (context, index) {
-                    final item = cart[index];
-                    return ListTile(
-                      title: Text(
-                        item.nom,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text(
-                        'Qté: ${item.quantite} x ${ref.formatPrice(item.prix)}',
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () {
-                          cartNotifier.removeProduct(item.id);
-                          if (cart.length <= 1 && modalContext.mounted) {
-                            Navigator.pop(modalContext);
-                          }
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(12.0),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      'Total: ${ref.formatPrice(totalAmount)}',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(modalContext);
-                          _afficherDialogPaiement(
-                            context,
-                            totalAmount,
-                            cart,
-                            entrepriseId,
-                            userId,
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: const Text(
-                          'ENCAISSER',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 
   void _afficherDialogNouveauProduit(
       BuildContext context, String entrepriseId) {
@@ -346,37 +200,6 @@ class CaisseScreen extends ConsumerWidget {
     );
   }
 
-  void _afficherDialogPaiement(
-    BuildContext context,
-    double total,
-    List<CartItem> cart,
-    String entrepriseId,
-    String userId,
-  ) {
-    final stockInsuffisant = cart.where((item) => item.quantite > item.stock);
-    if (stockInsuffisant.isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Stock insuffisant pour : ${stockInsuffisant.map((e) => e.nom).join(", ")}',
-          ),
-          backgroundColor: Colors.orange.shade800,
-        ),
-      );
-      return;
-    }
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => PaiementDialog(
-        total: total,
-        cart: cart,
-        entrepriseId: entrepriseId,
-        userId: userId,
-      ),
-    );
-  }
 }
 
 
