@@ -1043,11 +1043,41 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         });
       }
 
-      batch.commit().then((_) {
+      // ⏳ On attend la réponse du serveur (6 s maximum).
+      //    Pas de réseau : la vente reste sur le téléphone et partira plus tard.
+      //    Refus du serveur : on prévient clairement, rien n'est enregistré.
+      try {
+        await batch.commit().timeout(const Duration(seconds: 6));
         debugPrint('[Stockly] Vente ${venteRef.id} envoyée au serveur');
-      }).catchError((Object e) {
-        debugPrint('[Stockly] Envoi de la vente ${venteRef.id} : $e');
-      });
+      } on TimeoutException {
+        debugPrint('[Stockly] Vente ${venteRef.id} gardée hors ligne');
+      } on FirebaseException catch (e) {
+        debugPrint('[Stockly] Vente ${venteRef.id} REFUSÉE : ${e.code} ${e.message}');
+        if (!mounted) return;
+        setState(() => isLoading = false);
+        await showDialog<void>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            icon: const Icon(Icons.error_outline_rounded, color: Colors.red, size: 44),
+            title: const Text('Vente NON enregistrée'),
+            content: Text(
+              e.code == 'permission-denied'
+                  ? "Le serveur a refusé cette vente (droits insuffisants).\n\n"
+                      "Rien n'a été enregistré : ni la vente, ni le stock, ni la caisse.\n"
+                      "Ne donnez pas encore la marchandise : prévenez le responsable.\n\n"
+                      "Code : ${e.code}"
+                  : "Rien n'a été enregistré.\n\n${e.code} : ${e.message ?? ''}",
+            ),
+            actions: [
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Compris'),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
 
       if (!mounted) return;
 
