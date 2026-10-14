@@ -1,7 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'user_role_provider.dart';
 
 // ============================================================================
 // MODÈLES DE DONNÉES
@@ -248,10 +252,36 @@ class CurrencyNotifier extends Notifier<CurrencyState> {
   static const double _defaultBccRate = 2850.0;
   static const String _prefActiveCurrency = 'active_currency_code';
   static const String _prefCdfRate = 'cdf_exchange_rate';
+  static const String _champTaux = 'tauxCDF';
+
+  /// true dès que le taux de l'entreprise est arrivé de Firestore
+  /// (il passe alors avant le taux gardé dans le téléphone)
+  bool _tauxServeurRecu = false;
 
   @override
   CurrencyState build() {
+    _tauxServeurRecu = false;
+    final entrepriseId = ref.watch(entrepriseIdProvider);
+
     _loadPersistedPreferences();
+
+    // 🔄 Taux partagé : on écoute entreprises/{id}, champ 'tauxCDF'
+    if (entrepriseId.isNotEmpty) {
+      final abonnement = FirebaseFirestore.instance
+          .collection('entreprises')
+          .doc(entrepriseId)
+          .snapshots()
+          .listen(
+        (doc) {
+          final taux = (doc.data()?[_champTaux] as num?)?.toDouble();
+          if (taux != null && taux > 0) _appliquerTauxServeur(taux);
+        },
+        onError: (e) =>
+            debugPrint('[Stockly] Lecture du taux partagé impossible : $e'),
+      );
+      ref.onDispose(abonnement.cancel);
+    }
+
     return CurrencyState(
       activeCurrency: 'USD',
       bccCdfRate: _defaultBccRate,
@@ -263,7 +293,9 @@ class CurrencyNotifier extends Notifier<CurrencyState> {
   Future<void> _loadPersistedPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     final savedCurrency = prefs.getString(_prefActiveCurrency) ?? 'USD';
-    final savedCdfRate = prefs.getDouble(_prefCdfRate) ?? _defaultBccRate;
+    final savedCdfRate = _tauxServeurRecu
+        ? state.bccCdfRate
+        : (prefs.getDouble(_prefCdfRate) ?? _defaultBccRate);
 
     // Mise à jour interne du taux initial sans enregistrer un faux log d'audit
     final cdfInfo = state.currencies['CDF']?.copyWith(rateToUSD: savedCdfRate);
@@ -274,6 +306,50 @@ class CurrencyNotifier extends Notifier<CurrencyState> {
         bccCdfRate: savedCdfRate,
         currencies: updatedMap,
       );
+    }
+  }
+
+  /// Applique le taux reçu de l'entreprise (sans écrire dans l'historique)
+  Future<void> _appliquerTauxServeur(double taux) async {
+    _tauxServeurRecu = true;
+    final cdf = state.currencies['CDF'];
+    if (cdf == null || cdf.rateToUSD == taux) return;
+
+    state = state.copyWith(
+      bccCdfRate: taux,
+      currencies: {...state.currencies, 'CDF': cdf.copyWith(rateToUSD: taux)},
+    );
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setDouble(_prefCdfRate, taux);
+    } catch (e) {
+      debugPrint('[Stockly] Taux partagé non gardé sur le téléphone : $e');
+    }
+  }
+
+  /// Envoie le nouveau taux à toute l'entreprise (Firestore)
+  Future<void> _envoyerTauxServeur(double taux, String modifiedBy) async {
+    final entrepriseId = ref.read(entrepriseIdProvider);
+    if (entrepriseId.isEmpty) return;
+    final uid = ref.read(userProfileProvider).value?.uid ?? '';
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('entreprises')
+          .doc(entrepriseId)
+          .set({
+            _champTaux: taux,
+            'tauxCDFDate': FieldValue.serverTimestamp(),
+            'tauxCDFPar': modifiedBy,
+            'tauxCDFParUid': uid,
+          }, SetOptions(merge: true))
+          .timeout(const Duration(seconds: 5));
+      debugPrint('[Stockly] Taux $taux envoyé à toute l\'entreprise');
+    } on TimeoutException {
+      debugPrint('[Stockly] Taux gardé sur le téléphone, envoi en attente du réseau');
+    } catch (e) {
+      debugPrint('[Stockly] Taux NON partagé : $e');
     }
   }
 
@@ -341,6 +417,8 @@ class CurrencyNotifier extends Notifier<CurrencyState> {
     if (code == 'CDF') {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setDouble(_prefCdfRate, newRate);
+      // 🔄 Partage avec tous les téléphones de l'entreprise
+      unawaited(_envoyerTauxServeur(newRate, modifiedBy));
     }
 
     // Déclenche l'enregistrement automatique dans l'historique d'audit
