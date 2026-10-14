@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stockly_saas/core/models/dette.dart';
 import 'package:stockly_saas/core/models/payment_method.dart';
 import '../controllers/debt_controller.dart';
+import 'package:stockly_saas/features/comptes_clients/compte_client_service.dart';
 
 class DebtDialogs {
   static String _formaterDate(DateTime date) {
@@ -236,7 +237,12 @@ class DebtDialogs {
                     labelText: 'Montant du Règlement',
                     border: const OutlineInputBorder(),
                     errorText: erreurMontant,
-                    helperText: 'Maximum : ${dette.montantReste.toStringAsFixed(2)} $currency',
+                    helperText: dette.type == TypeDette.client &&
+                            CompteClientService.telephoneValide(dette.telephone)
+                        ? 'Reste : ${dette.montantReste.toStringAsFixed(2)} $currency. Un surplus peut aller sur son compte client.'
+                        : 'Maximum : ${dette.montantReste.toStringAsFixed(2)} $currency',
+                    helperMaxLines: 2,
+                    errorMaxLines: 3,
                   ),
                   onChanged: (_) {
                     if (erreurMontant != null) setDialogState(() => erreurMontant = null);
@@ -290,24 +296,77 @@ class DebtDialogs {
                         setDialogState(() => erreurMontant = 'Saisissez un montant.');
                         return;
                       }
+                      // 💰 Le client donne PLUS que sa dette : le surplus peut aller sur son compte
+                      double surplus = 0;
                       if (paye > dette.montantReste + 0.005) {
-                        setDialogState(() => erreurMontant =
-                            'Trop élevé. Maximum : ${dette.montantReste.toStringAsFixed(2)} $currency');
-                        return;
+                        final peutGarder = dette.type == TypeDette.client &&
+                            CompteClientService.telephoneValide(dette.telephone);
+                        if (!peutGarder) {
+                          setDialogState(() => erreurMontant = dette.type == TypeDette.client
+                              ? 'Trop élevé. Maximum : ${dette.montantReste.toStringAsFixed(2)} $currency (client sans numéro : pas de compte client)'
+                              : 'Trop élevé. Maximum : ${dette.montantReste.toStringAsFixed(2)} $currency');
+                          return;
+                        }
+                        surplus = paye - dette.montantReste;
+                        final accepte = await showDialog<bool>(
+                          context: dialogContext,
+                          builder: (c) => AlertDialog(
+                            icon: const Icon(Icons.savings_rounded, color: Colors.teal, size: 40),
+                            title: const Text('Le client donne plus'),
+                            content: Text(
+                              'Dette : ${dette.montantReste.toStringAsFixed(2)} $currency\n'
+                              'Donné : ${paye.toStringAsFixed(2)} $currency\n\n'
+                              'Mettre ${surplus.toStringAsFixed(2)} $currency sur le compte client de ${dette.nomTiers} ?\n'
+                              "Il pourra s'en servir pour ses prochains achats.",
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(c, false),
+                                child: const Text('Non, corriger'),
+                              ),
+                              FilledButton(
+                                onPressed: () => Navigator.pop(c, true),
+                                child: const Text('Oui, sur son compte'),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (accepte != true) return;
                       }
+                      if (!dialogContext.mounted) return;
+                      final payeDette = surplus > 0 ? dette.montantReste : paye;
                       setDialogState(() => enCours = true);
                       // On ferme d'abord la fenêtre, puis on enregistre
                       Navigator.of(dialogContext).pop();
                       try {
                         await controleur.enregistrerPaiement(
                           detteId: dette.id,
-                          montantPaye: paye,
+                          montantPaye: payeDette,
                           paymentMethod: modePaiementSelectionne,
                         );
-                        messenger.showSnackBar(SnackBar(
-                          content: Text('Règlement de ${paye.toStringAsFixed(2)} $currency enregistré.'),
-                          backgroundColor: Colors.green.shade700,
-                        ));
+                        if (surplus > 0) {
+                          final envoye = await CompteClientService.depot(
+                            entrepriseId: entrepriseId,
+                            telephone: dette.telephone,
+                            nom: dette.nomTiers,
+                            montant: surplus,
+                            methode: modePaiementSelectionne.name.toLowerCase().contains('mobile')
+                                ? 'Mobile Money'
+                                : 'Espèces',
+                          );
+                          messenger.showSnackBar(SnackBar(
+                            content: Text(
+                              'Dette soldée. ${surplus.toStringAsFixed(2)} $currency mis sur le compte de ${dette.nomTiers}.'
+                              '${envoye ? '' : " (envoi dès le retour d'internet)"}',
+                            ),
+                            backgroundColor: Colors.teal.shade700,
+                          ));
+                        } else {
+                          messenger.showSnackBar(SnackBar(
+                            content: Text('Règlement de ${paye.toStringAsFixed(2)} $currency enregistré.'),
+                            backgroundColor: Colors.green.shade700,
+                          ));
+                        }
                       } catch (e) {
                         messenger.showSnackBar(SnackBar(
                           content: Text('Erreur : $e'),
