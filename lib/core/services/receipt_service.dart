@@ -18,9 +18,24 @@ class ReceiptService {
   static pw.Font? _fontItalic;
 
   static Future<void> _loadFonts() async {
-    _fontRegular ??= await PdfGoogleFonts.robotoRegular();
-    _fontBold ??= await PdfGoogleFonts.robotoBold();
-    _fontItalic ??= await PdfGoogleFonts.robotoItalic();
+    if (_fontRegular != null && _fontBold != null && _fontItalic != null) return;
+    try {
+      // 🌐 Roboto vient d'Internet : 5 secondes maximum
+      final polices = await Future.wait([
+        PdfGoogleFonts.robotoRegular(),
+        PdfGoogleFonts.robotoBold(),
+        PdfGoogleFonts.robotoItalic(),
+      ]).timeout(const Duration(seconds: 5));
+      _fontRegular = polices[0];
+      _fontBold = polices[1];
+      _fontItalic = polices[2];
+    } catch (e) {
+      // 📴 Pas de réseau : police de base du PDF (le reçu sort quand même)
+      debugPrint('[Stockly] Police Roboto indisponible, reçu avec la police de base : $e');
+      _fontRegular = null;
+      _fontBold = null;
+      _fontItalic = null;
+    }
   }
 
   /// Formatage unifié de prix

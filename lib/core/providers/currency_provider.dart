@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'user_role_provider.dart';
+import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
 
 // ============================================================================
 // MODÈLES DE DONNÉES
@@ -262,14 +263,18 @@ class CurrencyNotifier extends Notifier<CurrencyState> {
   CurrencyState build() {
     _tauxServeurRecu = false;
     final entrepriseId = ref.watch(entrepriseIdProvider);
+    final boutiqueId = ref.watch(boutiqueActiveProvider);
 
     _loadPersistedPreferences();
 
-    // 🔄 Taux partagé : on écoute entreprises/{id}, champ 'tauxCDF'
-    if (entrepriseId.isNotEmpty) {
+    // 🔄 Taux partagé PAR BOUTIQUE : entreprises/{id}/boutiques/{boutique}, champ 'tauxCDF'
+    //    (patron sur « Toutes les boutiques » : taux du téléphone seulement)
+    if (entrepriseId.isNotEmpty && boutiqueId != null) {
       final abonnement = FirebaseFirestore.instance
           .collection('entreprises')
           .doc(entrepriseId)
+          .collection('boutiques')
+          .doc(boutiqueId)
           .snapshots()
           .listen(
         (doc) {
@@ -328,16 +333,23 @@ class CurrencyNotifier extends Notifier<CurrencyState> {
     }
   }
 
-  /// Envoie le nouveau taux à toute l'entreprise (Firestore)
+  /// Envoie le nouveau taux aux téléphones de LA BOUTIQUE (Firestore)
   Future<void> _envoyerTauxServeur(double taux, String modifiedBy) async {
     final entrepriseId = ref.read(entrepriseIdProvider);
+    final boutiqueId = ref.read(boutiqueActiveProvider);
     if (entrepriseId.isEmpty) return;
+    if (boutiqueId == null) {
+      debugPrint('[Stockly] Taux gardé sur ce téléphone (aucune boutique choisie)');
+      return;
+    }
     final uid = ref.read(userProfileProvider).value?.uid ?? '';
 
     try {
       await FirebaseFirestore.instance
           .collection('entreprises')
           .doc(entrepriseId)
+          .collection('boutiques')
+          .doc(boutiqueId)
           .set({
             _champTaux: taux,
             'tauxCDFDate': FieldValue.serverTimestamp(),
@@ -345,7 +357,7 @@ class CurrencyNotifier extends Notifier<CurrencyState> {
             'tauxCDFParUid': uid,
           }, SetOptions(merge: true))
           .timeout(const Duration(seconds: 5));
-      debugPrint('[Stockly] Taux $taux envoyé à toute l\'entreprise');
+      debugPrint('[Stockly] Taux $taux envoyé à la boutique $boutiqueId');
     } on TimeoutException {
       debugPrint('[Stockly] Taux gardé sur le téléphone, envoi en attente du réseau');
     } catch (e) {
