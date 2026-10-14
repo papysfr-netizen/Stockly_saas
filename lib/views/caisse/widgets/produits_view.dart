@@ -4,10 +4,9 @@ import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:stockly_saas/core/models/produit.dart';
-import 'package:stockly_saas/core/providers/auth_provider.dart';
 import 'package:stockly_saas/core/providers/cart_provider.dart';
 import 'package:stockly_saas/core/providers/currency_provider.dart';
-import 'package:stockly_saas/core/providers/entreprise_provider.dart';
+import 'package:stockly_saas/core/providers/user_role_provider.dart';
 import 'package:stockly_saas/core/providers/produit_provider.dart';
 import 'package:stockly_saas/views/caisse/dialogs/ajout_panier_dialog.dart';
 import 'package:stockly_saas/views/caisse/dialogs/paiement_dialog.dart';
@@ -49,10 +48,10 @@ String _initiales(String nom) {
 void ouvrirPaiementCaisse(BuildContext context, WidgetRef ref) {
   final cartItems = ref.read(cartProvider);
   final totalUSD = ref.read(cartTotalProvider);
-  final entreprise = ref.read(entrepriseProvider);
-  final authState = ref.read(authProvider);
-  final userId = authState.user?.uid ?? '';
-  final String entrepriseId = entreprise.id;
+  // L'entreprise et l'utilisateur viennent du PROFIL connecté (toujours les bons)
+  final profil = ref.read(userProfileProvider).value;
+  final String entrepriseId = profil?.entrepriseId ?? '';
+  final userId = profil?.uid ?? '';
 
   if (cartItems.isEmpty) return;
   if (entrepriseId.isEmpty) {
