@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:stockly_saas/core/models/vente.dart';
 import 'package:stockly_saas/core/providers/settings_provider.dart';
+import 'package:stockly_saas/core/services/imprimante_reglages.dart';
 
 class ReceiptService {
   // Cache des polices Google Fonts pour éviter les re-téléchargements
@@ -209,6 +210,8 @@ class ReceiptService {
     double? resteForce,
   }) async {
     await _loadFonts();
+    // 🖨️ Réglages de l'imprimante de ce téléphone (papier, mode)
+    final reglages = await ReglagesImprimante.charger();
 
     // Les infos enregistrées dans Paramètres priment sur les valeurs
     // écrites en dur par les écrans (ex : 'Stockly Pro').
@@ -236,7 +239,7 @@ class ReceiptService {
 
     pdf.addPage(
       pw.Page(
-        pageFormat: PdfPageFormat.roll80,
+        pageFormat: reglages.papier58 ? PdfPageFormat.roll57 : PdfPageFormat.roll80,
         margin: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 8),
         build: (pw.Context context) {
           return pw.Theme(
@@ -445,9 +448,17 @@ class ReceiptService {
       ),
     );
 
-    await Printing.layoutPdf(
-      onLayout: (format) async => pdf.save(),
-      name: 'Ticket_${clientName.replaceAll(' ', '_')}_${now.millisecondsSinceEpoch}',
-    );
+    final nomTicket =
+        'Ticket_${clientName.replaceAll(' ', '_')}_${now.millisecondsSinceEpoch}';
+
+    if (reglages.partagerPdf) {
+      // 📤 Pas d'imprimante : le reçu part en PDF (WhatsApp, Bluetooth, e-mail…)
+      await Printing.sharePdf(bytes: await pdf.save(), filename: '$nomTicket.pdf');
+    } else {
+      await Printing.layoutPdf(
+        onLayout: (format) async => pdf.save(),
+        name: nomTicket,
+      );
+    }
   }
 }
