@@ -11,6 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:stockly_saas/core/models/user_model.dart';
 import 'package:stockly_saas/core/providers/currency_provider.dart';
@@ -283,6 +285,31 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                             ),
                           ),
                         ],
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: () => _envoyerResume(
+                              boutique: boutique,
+                              nbVentes: listeVentes.length,
+                              ventes: ventes,
+                              encaisse: encaisse,
+                              credit: credit,
+                              depenses: totalDepenses,
+                              solde: solde,
+                              benefice: ventes - cout - totalDepenses,
+                              voirFinances: voirFinances,
+                              devise: devise,
+                              taux: tauxCdf,
+                            ),
+                            icon: const Icon(Icons.send_rounded, color: Color(0xFF25D366)),
+                            label: const Text('Envoyer le résumé du jour'),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -421,6 +448,59 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
         },
       ),
     );
+  }
+
+  // ---------- 📤 Résumé du jour par WhatsApp ----------
+  Future<void> _envoyerResume({
+    required String? boutique,
+    required int nbVentes,
+    required double ventes,
+    required double encaisse,
+    required double credit,
+    required double depenses,
+    required double solde,
+    required double benefice,
+    required bool voirFinances,
+    required CurrencyState devise,
+    required double taux,
+  }) async {
+    const jours = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+    final now = DateTime.now();
+    final date = '${jours[now.weekday - 1]} '
+        '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}';
+    final nomBoutique = boutique == null
+        ? 'Toutes les boutiques'
+        : ref
+                .read(boutiquesActivesProvider(_entrepriseId))
+                .where((b) => b.id == boutique)
+                .map((b) => b.nom)
+                .firstOrNull ??
+            'Boutique principale';
+
+    final t = StringBuffer()
+      ..writeln('📊 *$nomBoutique — $date*')
+      ..writeln('Ventes : $nbVentes pour ${devise.formatPrice(ventes)}')
+      ..writeln('Encaissé : ${devise.formatPrice(encaisse)}')
+      ..writeln('Crédit : ${devise.formatPrice(credit)}')
+      ..writeln('Dépenses : ${devise.formatPrice(depenses)}');
+    if (voirFinances) {
+      t
+        ..writeln('💵 Argent en caisse : ${devise.formatPrice(solde)}')
+        ..writeln('📈 Bénéfice : ${devise.formatPrice(benefice)}');
+    }
+    t
+      ..writeln('Taux : 1 \$ = ${NumberFormat('#,##0', 'fr_FR').format(taux)} FC')
+      ..write('Envoyé par ${widget.currentUser.nom} — Stockly Pro');
+    final texte = t.toString();
+
+    // WhatsApp d'abord (on choisit le contact), sinon le menu de partage
+    try {
+      final wa = Uri.parse('https://wa.me/?text=${Uri.encodeComponent(texte)}');
+      if (await launchUrl(wa, mode: LaunchMode.externalApplication)) return;
+    } catch (_) {
+      // WhatsApp absent : on passe au menu de partage
+    }
+    await Share.share(texte);
   }
 
   /// 🏬 Nom de la boutique de l'employé (lecture seule)
