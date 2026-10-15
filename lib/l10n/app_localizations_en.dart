@@ -222,4 +222,85 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get actAll => 'All';
+
+  @override
+  String get caisseNoCompany => 'Error: no company selected.';
+
+  @override
+  String caisseOutOfStock(String nom) {
+    return '$nom is out of stock!';
+  }
+
+  @override
+  String caisseStockLimit(int count) {
+    return 'Stock limit reached ($count)';
+  }
+
+  @override
+  String caisseAdded(String nom) {
+    return '$nom added to the cart!';
+  }
+
+  @override
+  String caisseNoBarcode(String code) {
+    return 'No product found for code: $code';
+  }
+
+  @override
+  String get caisseSearch => 'Search for a product…';
+
+  @override
+  String get caisseScan => 'Scan a barcode';
+
+  @override
+  String errorPrefix(String message) {
+    return 'Error: $message';
+  }
+
+  @override
+  String get caisseNoProducts =>
+      'No products yet.\nAdd your products in the “Stock” tab.';
+
+  @override
+  String get caisseHint => 'Tap a product to add it • long press: quantity';
+
+  @override
+  String get caisseNoMatch => 'No product matches your search.';
+
+  @override
+  String caisseCheckout(String montant) {
+    return 'Checkout $montant';
+  }
+
+  @override
+  String get caisseNoName => 'No name';
+
+  @override
+  String get caisseOut => 'Out';
+
+  @override
+  String get caissePriceNeedsPermission =>
+      'Changing the price requires the “Discounts and withdrawals” permission.';
+
+  @override
+  String get cartTitle => 'Shopping cart';
+
+  @override
+  String get cartEmpty => 'Your cart is empty';
+
+  @override
+  String cartCount(int count) {
+    return 'Cart ($count items)';
+  }
+
+  @override
+  String get cartClear => 'Empty the cart';
+
+  @override
+  String cartNormalPrice(String montant) {
+    return 'Normal price: $montant';
+  }
+
+  @override
+  String get cartLoss => 'Sold at a loss';
 }

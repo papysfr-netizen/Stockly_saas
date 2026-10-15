@@ -221,4 +221,85 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get actAll => 'Zote';
+
+  @override
+  String get caisseNoCompany => 'Kosa: hakuna kampuni iliyochaguliwa.';
+
+  @override
+  String caisseOutOfStock(String nom) {
+    return '$nom imeisha!';
+  }
+
+  @override
+  String caisseStockLimit(int count) {
+    return 'Kikomo cha bidhaa kimefikiwa ($count)';
+  }
+
+  @override
+  String caisseAdded(String nom) {
+    return '$nom imeongezwa kwenye kikapu!';
+  }
+
+  @override
+  String caisseNoBarcode(String code) {
+    return 'Hakuna bidhaa ya msimbo : $code';
+  }
+
+  @override
+  String get caisseSearch => 'Tafuta bidhaa…';
+
+  @override
+  String get caisseScan => 'Soma msimbo pau';
+
+  @override
+  String errorPrefix(String message) {
+    return 'Kosa : $message';
+  }
+
+  @override
+  String get caisseNoProducts =>
+      'Hakuna bidhaa bado.\nOngeza bidhaa zako kwenye « Bidhaa ».';
+
+  @override
+  String get caisseHint => 'Gusa bidhaa kuiongeza • bonyeza kwa muda: idadi';
+
+  @override
+  String get caisseNoMatch => 'Hakuna bidhaa inayolingana na utafutaji wako.';
+
+  @override
+  String caisseCheckout(String montant) {
+    return 'Lipisha $montant';
+  }
+
+  @override
+  String get caisseNoName => 'Bila jina';
+
+  @override
+  String get caisseOut => 'Imeisha';
+
+  @override
+  String get caissePriceNeedsPermission =>
+      'Kubadilisha bei kunahitaji ruhusa ya « Punguzo na utoaji ».';
+
+  @override
+  String get cartTitle => 'Kikapu';
+
+  @override
+  String get cartEmpty => 'Kikapu chako ni tupu';
+
+  @override
+  String cartCount(int count) {
+    return 'Kikapu (bidhaa $count)';
+  }
+
+  @override
+  String get cartClear => 'Futa kikapu';
+
+  @override
+  String cartNormalPrice(String montant) {
+    return 'Bei ya kawaida : $montant';
+  }
+
+  @override
+  String get cartLoss => 'Kuuza kwa hasara';
 }

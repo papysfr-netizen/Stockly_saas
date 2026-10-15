@@ -10,6 +10,7 @@ import 'package:stockly_saas/core/providers/user_role_provider.dart';
 import 'package:stockly_saas/core/providers/produit_provider.dart';
 import 'package:stockly_saas/views/caisse/dialogs/ajout_panier_dialog.dart';
 import 'package:stockly_saas/views/caisse/dialogs/prix_negocie_dialog.dart';
+import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:stockly_saas/views/caisse/dialogs/paiement_dialog.dart';
 import 'package:stockly_saas/core/widgets/quick_scanner_widget.dart';
 
@@ -57,8 +58,8 @@ void ouvrirPaiementCaisse(BuildContext context, WidgetRef ref) {
   if (cartItems.isEmpty) return;
   if (entrepriseId.isEmpty) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Erreur : Aucune entreprise sélectionnée.'),
+      SnackBar(
+        content: Text(AppLocalizations.of(context).caisseNoCompany),
         backgroundColor: Colors.red,
       ),
     );
@@ -106,7 +107,7 @@ class _ProduitsViewState extends ConsumerState<ProduitsView> {
     if (stock <= 0) {
       messenger.hideCurrentSnackBar();
       messenger.showSnackBar(SnackBar(
-        content: Text('${produit.nom} est en rupture de stock !'),
+        content: Text(AppLocalizations.of(context).caisseOutOfStock(produit.nom)),
         backgroundColor: Colors.orange,
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
@@ -127,7 +128,7 @@ class _ProduitsViewState extends ConsumerState<ProduitsView> {
     if (result == CartOperationResult.stockLimitReached) {
       messenger.hideCurrentSnackBar();
       messenger.showSnackBar(SnackBar(
-        content: Text('Limite du stock atteinte ($stock)'),
+        content: Text(AppLocalizations.of(context).caisseStockLimit(stock)),
         backgroundColor: Colors.orange,
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
@@ -164,7 +165,7 @@ class _ProduitsViewState extends ConsumerState<ProduitsView> {
       if (produit.stockBoutique(ref.boutiqueVente) > 0) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${produit.nom} ajouté au panier !'),
+            content: Text(AppLocalizations.of(context).caisseAdded(produit.nom)),
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 2),
           ),
@@ -173,7 +174,7 @@ class _ProduitsViewState extends ConsumerState<ProduitsView> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Aucun produit trouvé pour le code : $codeClean'),
+          content: Text(AppLocalizations.of(context).caisseNoBarcode(codeClean)),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
         ),
@@ -204,6 +205,7 @@ class _ProduitsViewState extends ConsumerState<ProduitsView> {
     final cartItemCount = ref.watch(cartItemCountProvider);
     final totalUSD = ref.watch(cartTotalProvider);
     final boutique = ref.watch(boutiqueActiveProvider) ?? 'principale';
+    final t = AppLocalizations.of(context);
 
     // Quantité de chaque produit déjà dans le panier
     final dansPanier = <String, int>{};
@@ -221,7 +223,7 @@ class _ProduitsViewState extends ConsumerState<ProduitsView> {
             TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Rechercher un produit…',
+                hintText: t.caisseSearch,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -236,7 +238,7 @@ class _ProduitsViewState extends ConsumerState<ProduitsView> {
                       ),
                     IconButton(
                       icon: const Icon(Icons.qr_code_scanner, color: _bleuNuit),
-                      tooltip: 'Scanner un code-barres',
+                      tooltip: t.caisseScan,
                       onPressed: () async {
                         final codeScanne = await showModalBottomSheet<String>(
                           context: context,
@@ -271,15 +273,15 @@ class _ProduitsViewState extends ConsumerState<ProduitsView> {
                 error: (err, stack) => Center(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: Text('Erreur : $err', style: const TextStyle(color: Colors.red)),
+                    child: Text(t.errorPrefix('$err'), style: const TextStyle(color: Colors.red)),
                   ),
                 ),
                 data: (produits) {
                   if (produits.isEmpty) {
-                    return const Center(
+                    return Center(
                       child: Text(
-                        'Aucun produit enregistré.\nAjoutez vos produits dans l\'onglet « Stock ».',
-                        style: TextStyle(color: Colors.grey, fontSize: 14),
+                        t.caisseNoProducts,
+                        style: const TextStyle(color: Colors.grey, fontSize: 14),
                         textAlign: TextAlign.center,
                       ),
                     );
@@ -319,7 +321,7 @@ class _ProduitsViewState extends ConsumerState<ProduitsView> {
                               return Padding(
                                 padding: const EdgeInsets.only(right: 6.0),
                                 child: ChoiceChip(
-                                  label: Text(category),
+                                  label: Text(category == 'Tous' ? t.actAll : category),
                                   selected: isSelected,
                                   selectedColor: _bleuNuit,
                                   labelStyle: TextStyle(
@@ -336,16 +338,16 @@ class _ProduitsViewState extends ConsumerState<ProduitsView> {
                       Padding(
                         padding: const EdgeInsets.fromLTRB(4, 6, 4, 6),
                         child: Text(
-                          'Touchez un produit pour l\'ajouter • appui long : quantité',
+                          t.caisseHint,
                           style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                         ),
                       ),
                       Expanded(
                         child: produitsFiltres.isEmpty
-                            ? const Center(
+                            ? Center(
                                 child: Text(
-                                  'Aucun produit ne correspond à votre recherche.',
-                                  style: TextStyle(color: Colors.grey, fontSize: 14),
+                                  t.caisseNoMatch,
+                                  style: const TextStyle(color: Colors.grey, fontSize: 14),
                                 ),
                               )
                             : GridView.builder(
@@ -427,7 +429,7 @@ class _ProduitsViewState extends ConsumerState<ProduitsView> {
                         label: FittedBox(
                           fit: BoxFit.scaleDown,
                           child: Text(
-                            'Encaisser ${currencyState.formatPrice(totalUSD)}',
+                            AppLocalizations.of(context).caisseCheckout(currencyState.formatPrice(totalUSD)),
                             style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                           ),
                         ),
@@ -465,7 +467,7 @@ class _TuileProduit extends StatelessWidget {
   Widget build(BuildContext context) {
     final enRupture = stock <= 0;
     final couleur = enRupture ? Colors.grey : _couleurPour(produit.nom);
-    final nom = produit.nom.isNotEmpty ? produit.nom : 'Sans nom';
+    final nom = produit.nom.isNotEmpty ? produit.nom : AppLocalizations.of(context).caisseNoName;
 
     return Material(
       color: Colors.white,
@@ -561,7 +563,7 @@ class _TuileProduit extends StatelessWidget {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        enRupture ? 'Épuisé' : '$stock',
+                        enRupture ? AppLocalizations.of(context).caisseOut : '$stock',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
@@ -592,8 +594,8 @@ class PanierView extends ConsumerWidget {
   Future<void> _changerPrix(BuildContext context, WidgetRef ref, CartItem item) async {
     final peut = ref.read(userProfileProvider).value?.peutRemisesRetraits ?? false;
     if (!peut) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Changer le prix demande l'autorisation « Remises et retraits »."),
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(AppLocalizations.of(context).caissePriceNeedsPermission),
         backgroundColor: Colors.orange,
       ));
       return;
@@ -614,21 +616,22 @@ class PanierView extends ConsumerWidget {
     final cartItems = ref.watch(cartProvider);
     final totalUSD = ref.watch(cartTotalProvider);
     final currencyState = ref.watch(currencyProvider);
+    final t = AppLocalizations.of(context);
 
     if (cartItems.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Panier d\'achat')),
-        body: const Center(child: Text('Votre panier est vide')),
+        appBar: AppBar(title: Text(t.cartTitle)),
+        body: Center(child: Text(t.cartEmpty)),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Panier (${cartItems.length} références)'),
+        title: Text(t.cartCount(cartItems.length)),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_outline, color: Colors.red),
-            tooltip: 'Vider le panier',
+            tooltip: t.cartClear,
             onPressed: () => ref.read(cartProvider.notifier).clearCart(),
           ),
         ],
@@ -660,13 +663,13 @@ class PanierView extends ConsumerWidget {
                       Text('$prixConverti x ${item.quantite} = $totalLigne'),
                       if (item.prixNegocie)
                         Text(
-                          'Prix normal : ${currencyState.formatPrice(item.prixNormal)}',
+                          t.cartNormalPrice(currencyState.formatPrice(item.prixNormal)),
                           style: TextStyle(fontSize: 12, color: Colors.orange.shade800),
                         ),
                       if (item.aPerte)
-                        const Text(
-                          'Vente à perte',
-                          style: TextStyle(fontSize: 12, color: Colors.red, fontWeight: FontWeight.bold),
+                        Text(
+                          t.cartLoss,
+                          style: const TextStyle(fontSize: 12, color: Colors.red, fontWeight: FontWeight.bold),
                         ),
                     ],
                   ),
@@ -692,7 +695,7 @@ class PanierView extends ConsumerWidget {
                           if (result == CartOperationResult.stockLimitReached) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Limite du stock atteinte (${item.stock})'),
+                                content: Text(t.caisseStockLimit(item.stock)),
                                 backgroundColor: Colors.orange,
                               ),
                             );
@@ -730,7 +733,7 @@ class PanierView extends ConsumerWidget {
                   ),
                   icon: const Icon(Icons.payments_rounded),
                   label: Text(
-                    'Encaisser ${currencyState.formatPrice(totalUSD)}',
+                    AppLocalizations.of(context).caisseCheckout(currencyState.formatPrice(totalUSD)),
                     style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                   ),
                   onPressed: () => ouvrirPaiementCaisse(context, ref),

@@ -144,5 +144,82 @@
     }
   },
   "actSee": "Voir",
-  "actAll": "Tous"
+  "actAll": "Tous",
+  "caisseNoCompany": "Erreur : Aucune entreprise sélectionnée.",
+  "caisseOutOfStock": "{nom} est en rupture de stock !",
+  "@caisseOutOfStock": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
+  "caisseStockLimit": "Limite du stock atteinte ({count})",
+  "@caisseStockLimit": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "caisseAdded": "{nom} ajouté au panier !",
+  "@caisseAdded": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
+  "caisseNoBarcode": "Aucun produit trouvé pour le code : {code}",
+  "@caisseNoBarcode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "caisseSearch": "Rechercher un produit…",
+  "caisseScan": "Scanner un code-barres",
+  "errorPrefix": "Erreur : {message}",
+  "@errorPrefix": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "caisseNoProducts": "Aucun produit enregistré.\nAjoutez vos produits dans l'onglet « Stock ».",
+  "caisseHint": "Touchez un produit pour l'ajouter • appui long : quantité",
+  "caisseNoMatch": "Aucun produit ne correspond à votre recherche.",
+  "caisseCheckout": "Encaisser {montant}",
+  "@caisseCheckout": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "caisseNoName": "Sans nom",
+  "caisseOut": "Épuisé",
+  "caissePriceNeedsPermission": "Changer le prix demande l'autorisation « Remises et retraits ».",
+  "cartTitle": "Panier d'achat",
+  "cartEmpty": "Votre panier est vide",
+  "cartCount": "Panier ({count} références)",
+  "@cartCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cartClear": "Vider le panier",
+  "cartNormalPrice": "Prix normal : {montant}",
+  "@cartNormalPrice": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "cartLoss": "Vente à perte"
 }

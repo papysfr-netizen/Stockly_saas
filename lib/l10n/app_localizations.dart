@@ -473,6 +473,132 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Tous'**
   String get actAll;
+
+  /// No description provided for @caisseNoCompany.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur : Aucune entreprise sélectionnée.'**
+  String get caisseNoCompany;
+
+  /// No description provided for @caisseOutOfStock.
+  ///
+  /// In fr, this message translates to:
+  /// **'{nom} est en rupture de stock !'**
+  String caisseOutOfStock(String nom);
+
+  /// No description provided for @caisseStockLimit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Limite du stock atteinte ({count})'**
+  String caisseStockLimit(int count);
+
+  /// No description provided for @caisseAdded.
+  ///
+  /// In fr, this message translates to:
+  /// **'{nom} ajouté au panier !'**
+  String caisseAdded(String nom);
+
+  /// No description provided for @caisseNoBarcode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun produit trouvé pour le code : {code}'**
+  String caisseNoBarcode(String code);
+
+  /// No description provided for @caisseSearch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher un produit…'**
+  String get caisseSearch;
+
+  /// No description provided for @caisseScan.
+  ///
+  /// In fr, this message translates to:
+  /// **'Scanner un code-barres'**
+  String get caisseScan;
+
+  /// No description provided for @errorPrefix.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur : {message}'**
+  String errorPrefix(String message);
+
+  /// No description provided for @caisseNoProducts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun produit enregistré.\nAjoutez vos produits dans l\'onglet « Stock ».'**
+  String get caisseNoProducts;
+
+  /// No description provided for @caisseHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Touchez un produit pour l\'ajouter • appui long : quantité'**
+  String get caisseHint;
+
+  /// No description provided for @caisseNoMatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun produit ne correspond à votre recherche.'**
+  String get caisseNoMatch;
+
+  /// No description provided for @caisseCheckout.
+  ///
+  /// In fr, this message translates to:
+  /// **'Encaisser {montant}'**
+  String caisseCheckout(String montant);
+
+  /// No description provided for @caisseNoName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans nom'**
+  String get caisseNoName;
+
+  /// No description provided for @caisseOut.
+  ///
+  /// In fr, this message translates to:
+  /// **'Épuisé'**
+  String get caisseOut;
+
+  /// No description provided for @caissePriceNeedsPermission.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer le prix demande l\'autorisation « Remises et retraits ».'**
+  String get caissePriceNeedsPermission;
+
+  /// No description provided for @cartTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Panier d\'achat'**
+  String get cartTitle;
+
+  /// No description provided for @cartEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre panier est vide'**
+  String get cartEmpty;
+
+  /// No description provided for @cartCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Panier ({count} références)'**
+  String cartCount(int count);
+
+  /// No description provided for @cartClear.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vider le panier'**
+  String get cartClear;
+
+  /// No description provided for @cartNormalPrice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix normal : {montant}'**
+  String cartNormalPrice(String montant);
+
+  /// No description provided for @cartLoss.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vente à perte'**
+  String get cartLoss;
 }
 
 class _AppLocalizationsDelegate

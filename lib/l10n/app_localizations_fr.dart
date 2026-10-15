@@ -224,4 +224,86 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get actAll => 'Tous';
+
+  @override
+  String get caisseNoCompany => 'Erreur : Aucune entreprise sélectionnée.';
+
+  @override
+  String caisseOutOfStock(String nom) {
+    return '$nom est en rupture de stock !';
+  }
+
+  @override
+  String caisseStockLimit(int count) {
+    return 'Limite du stock atteinte ($count)';
+  }
+
+  @override
+  String caisseAdded(String nom) {
+    return '$nom ajouté au panier !';
+  }
+
+  @override
+  String caisseNoBarcode(String code) {
+    return 'Aucun produit trouvé pour le code : $code';
+  }
+
+  @override
+  String get caisseSearch => 'Rechercher un produit…';
+
+  @override
+  String get caisseScan => 'Scanner un code-barres';
+
+  @override
+  String errorPrefix(String message) {
+    return 'Erreur : $message';
+  }
+
+  @override
+  String get caisseNoProducts =>
+      'Aucun produit enregistré.\nAjoutez vos produits dans l\'onglet « Stock ».';
+
+  @override
+  String get caisseHint =>
+      'Touchez un produit pour l\'ajouter • appui long : quantité';
+
+  @override
+  String get caisseNoMatch => 'Aucun produit ne correspond à votre recherche.';
+
+  @override
+  String caisseCheckout(String montant) {
+    return 'Encaisser $montant';
+  }
+
+  @override
+  String get caisseNoName => 'Sans nom';
+
+  @override
+  String get caisseOut => 'Épuisé';
+
+  @override
+  String get caissePriceNeedsPermission =>
+      'Changer le prix demande l\'autorisation « Remises et retraits ».';
+
+  @override
+  String get cartTitle => 'Panier d\'achat';
+
+  @override
+  String get cartEmpty => 'Votre panier est vide';
+
+  @override
+  String cartCount(int count) {
+    return 'Panier ($count références)';
+  }
+
+  @override
+  String get cartClear => 'Vider le panier';
+
+  @override
+  String cartNormalPrice(String montant) {
+    return 'Prix normal : $montant';
+  }
+
+  @override
+  String get cartLoss => 'Vente à perte';
 }

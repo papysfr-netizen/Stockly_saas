@@ -223,4 +223,86 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get actAll => 'Nyonso';
+
+  @override
+  String get caisseNoCompany => 'Libunga: kompanyi eponami te.';
+
+  @override
+  String caisseOutOfStock(String nom) {
+    return '$nom esili na stock!';
+  }
+
+  @override
+  String caisseStockLimit(int count) {
+    return 'Ndelo ya stock ekoki ($count)';
+  }
+
+  @override
+  String caisseAdded(String nom) {
+    return '$nom ebakisami na panier!';
+  }
+
+  @override
+  String caisseNoBarcode(String code) {
+    return 'Eloko moko te na kode : $code';
+  }
+
+  @override
+  String get caisseSearch => 'Luka eloko…';
+
+  @override
+  String get caisseScan => 'Tanga kode-barre';
+
+  @override
+  String errorPrefix(String message) {
+    return 'Libunga : $message';
+  }
+
+  @override
+  String get caisseNoProducts =>
+      'Biloko ezali te.\nBakisa biloko na yo na « Biloko ».';
+
+  @override
+  String get caisseHint =>
+      'Simba eloko mpo na kobakisa • simba ntango molai: motango';
+
+  @override
+  String get caisseNoMatch => 'Eloko moko te ekokani na oyo olukaki.';
+
+  @override
+  String caisseCheckout(String montant) {
+    return 'Zwa mbongo $montant';
+  }
+
+  @override
+  String get caisseNoName => 'Kombo te';
+
+  @override
+  String get caisseOut => 'Esili';
+
+  @override
+  String get caissePriceNeedsPermission =>
+      'Kobongola talo esengeli ndingisa ya « Bakitisi mpe kobimisa ».';
+
+  @override
+  String get cartTitle => 'Panier';
+
+  @override
+  String get cartEmpty => 'Panier na yo ezali pamba';
+
+  @override
+  String cartCount(int count) {
+    return 'Panier (biloko $count)';
+  }
+
+  @override
+  String get cartClear => 'Longola nyonso na panier';
+
+  @override
+  String cartNormalPrice(String montant) {
+    return 'Talo ya momesano : $montant';
+  }
+
+  @override
+  String get cartLoss => 'Koteka na bobungisi';
 }
