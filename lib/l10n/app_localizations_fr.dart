@@ -1145,4 +1145,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String sumSentBy(String nom) {
     return 'Envoyé par $nom — Stockly Pro';
   }
+
+  @override
+  String get logoutQuestion => 'Se déconnecter ?';
+
+  @override
+  String get logoutWarning =>
+      'Vous devrez vous reconnecter avec votre e-mail et votre mot de passe.';
 }

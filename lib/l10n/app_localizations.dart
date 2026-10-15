@@ -1932,6 +1932,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Envoyé par {nom} — Stockly Pro'**
   String sumSentBy(String nom);
+
+  /// No description provided for @logoutQuestion.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se déconnecter ?'**
+  String get logoutQuestion;
+
+  /// No description provided for @logoutWarning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous devrez vous reconnecter avec votre e-mail et votre mot de passe.'**
+  String get logoutWarning;
 }
 
 class _AppLocalizationsDelegate

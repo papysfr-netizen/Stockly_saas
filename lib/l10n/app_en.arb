@@ -304,5 +304,7 @@
   "sumCash": "💵 Cash in the till: {montant}",
   "sumProfit": "📈 Profit: {montant}",
   "sumRate": "Rate: 1 $ = {taux} FC",
-  "sumSentBy": "Sent by {nom} — Stockly Pro"
+  "sumSentBy": "Sent by {nom} — Stockly Pro",
+  "logoutQuestion": "Log out?",
+  "logoutWarning": "You will have to log in again with your e-mail and password."
 }

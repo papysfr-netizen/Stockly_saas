@@ -1139,4 +1139,11 @@ class AppLocalizationsSw extends AppLocalizations {
   String sumSentBy(String nom) {
     return 'Imetumwa na $nom — Stockly Pro';
   }
+
+  @override
+  String get logoutQuestion => 'Ungependa kutoka?';
+
+  @override
+  String get logoutWarning =>
+      'Utahitaji kuingia tena kwa barua pepe na nenosiri lako.';
 }

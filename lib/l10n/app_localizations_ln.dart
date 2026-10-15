@@ -1142,4 +1142,11 @@ class AppLocalizationsLn extends AppLocalizations {
   String sumSentBy(String nom) {
     return 'Etindami na $nom — Stockly Pro';
   }
+
+  @override
+  String get logoutQuestion => 'Kobima?';
+
+  @override
+  String get logoutWarning =>
+      'Okozala na kokota lisusu na e-mail mpe mot de passe na yo.';
 }

@@ -304,5 +304,7 @@
   "sumCash": "💵 Mbongo na kesi : {montant}",
   "sumProfit": "📈 Litomba : {montant}",
   "sumRate": "Motuya : 1 $ = {taux} FC",
-  "sumSentBy": "Etindami na {nom} — Stockly Pro"
+  "sumSentBy": "Etindami na {nom} — Stockly Pro",
+  "logoutQuestion": "Kobima?",
+  "logoutWarning": "Okozala na kokota lisusu na e-mail mpe mot de passe na yo."
 }

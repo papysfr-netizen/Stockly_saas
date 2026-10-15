@@ -304,5 +304,7 @@
   "sumCash": "💵 Pesa ya kasha : {montant}",
   "sumProfit": "📈 Faida : {montant}",
   "sumRate": "Bei ya dola : 1 $ = {taux} FC",
-  "sumSentBy": "Imetumwa na {nom} — Stockly Pro"
+  "sumSentBy": "Imetumwa na {nom} — Stockly Pro",
+  "logoutQuestion": "Ungependa kutoka?",
+  "logoutWarning": "Utahitaji kuingia tena kwa barua pepe na nenosiri lako."
 }

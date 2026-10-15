@@ -1141,4 +1141,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String sumSentBy(String nom) {
     return 'Sent by $nom — Stockly Pro';
   }
+
+  @override
+  String get logoutQuestion => 'Log out?';
+
+  @override
+  String get logoutWarning =>
+      'You will have to log in again with your e-mail and password.';
 }

@@ -244,17 +244,18 @@ class _MonCompteCard extends StatelessWidget {
   const _MonCompteCard();
 
   Future<void> _deconnecter(BuildContext context) async {
+    final t = AppLocalizations.of(context);
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Se déconnecter ?'),
-        content: const Text('Vous devrez vous reconnecter avec votre e-mail et votre mot de passe.'),
+        title: Text(t.logoutQuestion),
+        content: Text(t.logoutWarning),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(t.cancel)),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Se déconnecter'),
+            child: Text(t.logout),
           ),
         ],
       ),
@@ -265,24 +266,25 @@ class _MonCompteCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final email = FirebaseAuth.instance.currentUser?.email ?? '';
+    final t = AppLocalizations.of(context);
     return Card(
       child: Column(
         children: [
           ListTile(
             leading: const CircleAvatar(child: Icon(Icons.person_rounded)),
-            title: const Text('Mon compte', style: TextStyle(fontWeight: FontWeight.bold)),
+            title: Text(t.myAccount, style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: email.isEmpty ? null : Text(email),
           ),
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.lock_reset_rounded),
-            title: const Text('Changer mon mot de passe'),
+            title: Text(t.changePassword),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => ChangerMotDePasseDialog.show(context),
           ),
           ListTile(
             leading: const Icon(Icons.logout_rounded, color: Colors.red),
-            title: const Text('Se déconnecter', style: TextStyle(color: Colors.red)),
+            title: Text(t.logout, style: const TextStyle(color: Colors.red)),
             onTap: () => _deconnecter(context),
           ),
         ],
