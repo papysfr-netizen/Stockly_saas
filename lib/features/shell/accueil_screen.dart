@@ -479,36 +479,37 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
     required double taux,
     double remises = 0,
   }) async {
-    const jours = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+    final l = AppLocalizations.of(context); // langue de l'application (lue avant toute attente)
+    final jours = l.sumDays.split(',');
     final now = DateTime.now();
     final date = '${jours[now.weekday - 1]} '
         '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}';
     final nomBoutique = boutique == null
-        ? 'Toutes les boutiques'
+        ? l.sumAllShops
         : ref
                 .read(boutiquesActivesProvider(_entrepriseId))
                 .where((b) => b.id == boutique)
                 .map((b) => b.nom)
                 .firstOrNull ??
-            'Boutique principale';
+            l.accMainShop;
 
     final t = StringBuffer()
       ..writeln('📊 *$nomBoutique — $date*')
-      ..writeln('Ventes : $nbVentes pour ${devise.formatPrice(ventes)}')
-      ..writeln('Encaissé : ${devise.formatPrice(encaisse)}')
-      ..writeln('Crédit : ${devise.formatPrice(credit)}')
-      ..writeln('Dépenses : ${devise.formatPrice(depenses)}');
+      ..writeln(l.sumSales(nbVentes, devise.formatPrice(ventes)))
+      ..writeln(l.sumCollected(devise.formatPrice(encaisse)))
+      ..writeln(l.sumCredit(devise.formatPrice(credit)))
+      ..writeln(l.sumExpenses(devise.formatPrice(depenses)));
     if (voirFinances) {
       t
-        ..writeln('💵 Argent en caisse : ${devise.formatPrice(solde)}')
-        ..writeln('📈 Bénéfice : ${devise.formatPrice(benefice)}');
+        ..writeln(l.sumCash(devise.formatPrice(solde)))
+        ..writeln(l.sumProfit(devise.formatPrice(benefice)));
       if (remises > 0.005) {
-        t.writeln('🏷️ Remises accordées : ${devise.formatPrice(remises)}');
+        t.writeln('🏷️ ${l.accDiscounts(devise.formatPrice(remises))}');
       }
     }
     t
-      ..writeln('Taux : 1 \$ = ${NumberFormat('#,##0', 'fr_FR').format(taux)} FC')
-      ..write('Envoyé par ${widget.currentUser.nom} — Stockly Pro');
+      ..writeln(l.sumRate(NumberFormat('#,##0', 'fr_FR').format(taux)))
+      ..write(l.sumSentBy(widget.currentUser.nom));
     final texte = t.toString();
 
     // WhatsApp d'abord (on choisit le contact), sinon le menu de partage

@@ -1872,6 +1872,66 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Langue du message'**
   String get msgLanguage;
+
+  /// No description provided for @sumDays.
+  ///
+  /// In fr, this message translates to:
+  /// **'lundi,mardi,mercredi,jeudi,vendredi,samedi,dimanche'**
+  String get sumDays;
+
+  /// No description provided for @sumAllShops.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes les boutiques'**
+  String get sumAllShops;
+
+  /// No description provided for @sumSales.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ventes : {count} pour {montant}'**
+  String sumSales(int count, String montant);
+
+  /// No description provided for @sumCollected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Encaissé : {montant}'**
+  String sumCollected(String montant);
+
+  /// No description provided for @sumCredit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Crédit : {montant}'**
+  String sumCredit(String montant);
+
+  /// No description provided for @sumExpenses.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépenses : {montant}'**
+  String sumExpenses(String montant);
+
+  /// No description provided for @sumCash.
+  ///
+  /// In fr, this message translates to:
+  /// **'💵 Argent en caisse : {montant}'**
+  String sumCash(String montant);
+
+  /// No description provided for @sumProfit.
+  ///
+  /// In fr, this message translates to:
+  /// **'📈 Bénéfice : {montant}'**
+  String sumProfit(String montant);
+
+  /// No description provided for @sumRate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taux : 1 \$ = {taux} FC'**
+  String sumRate(String taux);
+
+  /// No description provided for @sumSentBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyé par {nom} — Stockly Pro'**
+  String sumSentBy(String nom);
 }
 
 class _AppLocalizationsDelegate

@@ -294,5 +294,15 @@
   "prodSaving": "Inahifadhi...",
   "prodUpdate": "Sasisha",
   "prodSave": "Hifadhi bidhaa",
-  "msgLanguage": "Lugha ya ujumbe"
+  "msgLanguage": "Lugha ya ujumbe",
+  "sumDays": "Jumatatu,Jumanne,Jumatano,Alhamisi,Ijumaa,Jumamosi,Jumapili",
+  "sumAllShops": "Maduka yote",
+  "sumSales": "Mauzo : {count} ya {montant}",
+  "sumCollected": "Imepokelewa : {montant}",
+  "sumCredit": "Mkopo : {montant}",
+  "sumExpenses": "Matumizi : {montant}",
+  "sumCash": "💵 Pesa ya kasha : {montant}",
+  "sumProfit": "📈 Faida : {montant}",
+  "sumRate": "Bei ya dola : 1 $ = {taux} FC",
+  "sumSentBy": "Imetumwa na {nom} — Stockly Pro"
 }

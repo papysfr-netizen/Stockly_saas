@@ -1094,4 +1094,51 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get msgLanguage => 'Message language';
+
+  @override
+  String get sumDays =>
+      'Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday';
+
+  @override
+  String get sumAllShops => 'All shops';
+
+  @override
+  String sumSales(int count, String montant) {
+    return 'Sales: $count for $montant';
+  }
+
+  @override
+  String sumCollected(String montant) {
+    return 'Collected: $montant';
+  }
+
+  @override
+  String sumCredit(String montant) {
+    return 'Credit: $montant';
+  }
+
+  @override
+  String sumExpenses(String montant) {
+    return 'Expenses: $montant';
+  }
+
+  @override
+  String sumCash(String montant) {
+    return '💵 Cash in the till: $montant';
+  }
+
+  @override
+  String sumProfit(String montant) {
+    return '📈 Profit: $montant';
+  }
+
+  @override
+  String sumRate(String taux) {
+    return 'Rate: 1 \$ = $taux FC';
+  }
+
+  @override
+  String sumSentBy(String nom) {
+    return 'Sent by $nom — Stockly Pro';
+  }
 }

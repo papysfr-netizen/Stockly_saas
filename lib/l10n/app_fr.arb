@@ -859,5 +859,74 @@
   "prodSaving": "Enregistrement...",
   "prodUpdate": "Mettre à jour",
   "prodSave": "Enregistrer le produit",
-  "msgLanguage": "Langue du message"
+  "msgLanguage": "Langue du message",
+  "sumDays": "lundi,mardi,mercredi,jeudi,vendredi,samedi,dimanche",
+  "sumAllShops": "Toutes les boutiques",
+  "sumSales": "Ventes : {count} pour {montant}",
+  "@sumSales": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "sumCollected": "Encaissé : {montant}",
+  "@sumCollected": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "sumCredit": "Crédit : {montant}",
+  "@sumCredit": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "sumExpenses": "Dépenses : {montant}",
+  "@sumExpenses": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "sumCash": "💵 Argent en caisse : {montant}",
+  "@sumCash": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "sumProfit": "📈 Bénéfice : {montant}",
+  "@sumProfit": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "sumRate": "Taux : 1 $ = {taux} FC",
+  "@sumRate": {
+    "placeholders": {
+      "taux": {
+        "type": "String"
+      }
+    }
+  },
+  "sumSentBy": "Envoyé par {nom} — Stockly Pro",
+  "@sumSentBy": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      }
+    }
+  }
 }

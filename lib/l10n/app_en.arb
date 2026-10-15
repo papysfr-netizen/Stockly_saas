@@ -294,5 +294,15 @@
   "prodSaving": "Saving...",
   "prodUpdate": "Update",
   "prodSave": "Save the product",
-  "msgLanguage": "Message language"
+  "msgLanguage": "Message language",
+  "sumDays": "Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday",
+  "sumAllShops": "All shops",
+  "sumSales": "Sales: {count} for {montant}",
+  "sumCollected": "Collected: {montant}",
+  "sumCredit": "Credit: {montant}",
+  "sumExpenses": "Expenses: {montant}",
+  "sumCash": "💵 Cash in the till: {montant}",
+  "sumProfit": "📈 Profit: {montant}",
+  "sumRate": "Rate: 1 $ = {taux} FC",
+  "sumSentBy": "Sent by {nom} — Stockly Pro"
 }

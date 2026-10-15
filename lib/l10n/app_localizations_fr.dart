@@ -1099,4 +1099,50 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get msgLanguage => 'Langue du message';
+
+  @override
+  String get sumDays => 'lundi,mardi,mercredi,jeudi,vendredi,samedi,dimanche';
+
+  @override
+  String get sumAllShops => 'Toutes les boutiques';
+
+  @override
+  String sumSales(int count, String montant) {
+    return 'Ventes : $count pour $montant';
+  }
+
+  @override
+  String sumCollected(String montant) {
+    return 'Encaissé : $montant';
+  }
+
+  @override
+  String sumCredit(String montant) {
+    return 'Crédit : $montant';
+  }
+
+  @override
+  String sumExpenses(String montant) {
+    return 'Dépenses : $montant';
+  }
+
+  @override
+  String sumCash(String montant) {
+    return '💵 Argent en caisse : $montant';
+  }
+
+  @override
+  String sumProfit(String montant) {
+    return '📈 Bénéfice : $montant';
+  }
+
+  @override
+  String sumRate(String taux) {
+    return 'Taux : 1 \$ = $taux FC';
+  }
+
+  @override
+  String sumSentBy(String nom) {
+    return 'Envoyé par $nom — Stockly Pro';
+  }
 }

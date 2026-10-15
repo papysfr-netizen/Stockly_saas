@@ -1092,4 +1092,51 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get msgLanguage => 'Lugha ya ujumbe';
+
+  @override
+  String get sumDays =>
+      'Jumatatu,Jumanne,Jumatano,Alhamisi,Ijumaa,Jumamosi,Jumapili';
+
+  @override
+  String get sumAllShops => 'Maduka yote';
+
+  @override
+  String sumSales(int count, String montant) {
+    return 'Mauzo : $count ya $montant';
+  }
+
+  @override
+  String sumCollected(String montant) {
+    return 'Imepokelewa : $montant';
+  }
+
+  @override
+  String sumCredit(String montant) {
+    return 'Mkopo : $montant';
+  }
+
+  @override
+  String sumExpenses(String montant) {
+    return 'Matumizi : $montant';
+  }
+
+  @override
+  String sumCash(String montant) {
+    return '💵 Pesa ya kasha : $montant';
+  }
+
+  @override
+  String sumProfit(String montant) {
+    return '📈 Faida : $montant';
+  }
+
+  @override
+  String sumRate(String taux) {
+    return 'Bei ya dola : 1 \$ = $taux FC';
+  }
+
+  @override
+  String sumSentBy(String nom) {
+    return 'Imetumwa na $nom — Stockly Pro';
+  }
 }

@@ -294,5 +294,15 @@
   "prodSaving": "Ezali kobomba...",
   "prodUpdate": "Bongisa",
   "prodSave": "Bomba eloko",
-  "msgLanguage": "Monoko ya nsango"
+  "msgLanguage": "Monoko ya nsango",
+  "sumDays": "Mokolo ya liboso,Mokolo ya mibale,Mokolo ya misato,Mokolo ya minei,Mokolo ya mitano,Mposo,Lomingo",
+  "sumAllShops": "Ba magazini nyonso",
+  "sumSales": "Biteki : {count} ya {montant}",
+  "sumCollected": "Mbongo ezwami : {montant}",
+  "sumCredit": "Niongo : {montant}",
+  "sumExpenses": "Bibimisi : {montant}",
+  "sumCash": "💵 Mbongo na kesi : {montant}",
+  "sumProfit": "📈 Litomba : {montant}",
+  "sumRate": "Motuya : 1 $ = {taux} FC",
+  "sumSentBy": "Etindami na {nom} — Stockly Pro"
 }

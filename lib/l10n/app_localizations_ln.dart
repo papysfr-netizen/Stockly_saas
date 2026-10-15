@@ -1095,4 +1095,51 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get msgLanguage => 'Monoko ya nsango';
+
+  @override
+  String get sumDays =>
+      'Mokolo ya liboso,Mokolo ya mibale,Mokolo ya misato,Mokolo ya minei,Mokolo ya mitano,Mposo,Lomingo';
+
+  @override
+  String get sumAllShops => 'Ba magazini nyonso';
+
+  @override
+  String sumSales(int count, String montant) {
+    return 'Biteki : $count ya $montant';
+  }
+
+  @override
+  String sumCollected(String montant) {
+    return 'Mbongo ezwami : $montant';
+  }
+
+  @override
+  String sumCredit(String montant) {
+    return 'Niongo : $montant';
+  }
+
+  @override
+  String sumExpenses(String montant) {
+    return 'Bibimisi : $montant';
+  }
+
+  @override
+  String sumCash(String montant) {
+    return '💵 Mbongo na kesi : $montant';
+  }
+
+  @override
+  String sumProfit(String montant) {
+    return '📈 Litomba : $montant';
+  }
+
+  @override
+  String sumRate(String taux) {
+    return 'Motuya : 1 \$ = $taux FC';
+  }
+
+  @override
+  String sumSentBy(String nom) {
+    return 'Etindami na $nom — Stockly Pro';
+  }
 }
