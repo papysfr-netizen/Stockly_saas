@@ -15,6 +15,7 @@ import 'settings_widgets/info_card.dart';
 import 'settings_widgets/currency_card.dart';
 import 'settings_widgets/language_card.dart';
 import 'settings_widgets/imprimante_card.dart';
+import 'package:stockly_saas/features/aide/aide_screen.dart';
 import 'settings_widgets/export_card.dart';
 import 'settings_widgets/maintenance_card.dart';
 
@@ -171,6 +172,8 @@ class SettingsScreen extends ConsumerWidget {
               const LanguageCard(),
               const SizedBox(height: 16),
               const ImprimanteCard(),
+              const SizedBox(height: 16),
+              const AideCard(),
               const SizedBox(height: 16),
               // 📤 Export : seulement avec l'autorisation « voir les finances »
               if (userProfile?.peutVoirFinances == true) ...[

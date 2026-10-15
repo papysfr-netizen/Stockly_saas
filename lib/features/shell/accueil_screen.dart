@@ -24,6 +24,7 @@ import 'package:stockly_saas/features/debts/screens/depenses_screen.dart';
 import 'package:stockly_saas/features/debts/screens/home_screen.dart';
 import 'package:stockly_saas/views/caisse/caisse_screen.dart';
 import 'package:stockly_saas/features/shell/accueil_widgets.dart';
+import 'package:stockly_saas/features/aide/aide_screen.dart';
 import 'package:stockly_saas/features/comptes_clients/comptes_clients_screen.dart';
 import 'package:stockly_saas/features/debts/screens/comptabilite_screen.dart';
 import 'package:stockly_saas/features/livraisons/a_livrer_screen.dart';
@@ -359,6 +360,8 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                       ALivrerNavButton(entrepriseId: _entrepriseId),
                       _raccourci('Comptes clients', Icons.account_balance_wallet_rounded, Colors.teal,
                           () => _ouvrir(ComptesClientsScreen(entrepriseId: _entrepriseId))),
+                      _raccourci('Aide', Icons.menu_book_rounded, Colors.blueGrey,
+                          () => _ouvrir(const AideScreen())),
                       if (voirFinances)
                         _raccourci('Comptabilité', Icons.calculate_rounded, Colors.brown,
                             () => _ouvrir(ComptabiliteScreen(entrepriseId: _entrepriseId))),
