@@ -11,6 +11,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:stockly_saas/l10n/app_localizations.dart';
 
 import 'prix_boutiques_screen.dart';
 import 'transferts_screen.dart';
@@ -80,6 +81,7 @@ class MesBoutiquesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -89,8 +91,8 @@ class MesBoutiquesCard extends StatelessWidget {
           backgroundColor: Colors.indigo.shade50,
           child: Icon(Icons.storefront_rounded, color: Colors.indigo.shade700),
         ),
-        title: const Text('Mes boutiques', style: TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: const Text('Créer et gérer vos points de vente'),
+        title: Text(t.shopTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(t.shopCardSubtitle),
         trailing: const Icon(Icons.chevron_right_rounded),
         onTap: entrepriseId.isEmpty
             ? null
@@ -114,6 +116,7 @@ class BoutiquesScreen extends StatefulWidget {
 
 class _BoutiquesScreenState extends State<BoutiquesScreen> {
   static const Color _bleuNuit = Color(0xFF1E293B);
+  AppLocalizations get _t => AppLocalizations.of(context);
 
   @override
   void initState() {
@@ -127,11 +130,12 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
     final telCtrl = TextEditingController(text: data?['telephone']?.toString() ?? '');
     final formKey = GlobalKey<FormState>();
     final messenger = ScaffoldMessenger.of(context);
+    final t = _t;
 
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(id == null ? 'Nouvelle boutique' : 'Modifier la boutique'),
+        title: Text(id == null ? t.shopNew : t.shopEditTitle),
         content: Form(
           key: formKey,
           child: SingleChildScrollView(
@@ -141,29 +145,29 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
                 TextFormField(
                   controller: nomCtrl,
                   textCapitalization: TextCapitalization.words,
-                  decoration: const InputDecoration(
-                    labelText: 'Nom de la boutique *',
-                    hintText: 'Ex : Boutique Birere',
-                    prefixIcon: Icon(Icons.storefront_rounded),
+                  decoration: InputDecoration(
+                    labelText: t.shopNameLabel,
+                    hintText: t.shopNameHint,
+                    prefixIcon: const Icon(Icons.storefront_rounded),
                   ),
                   validator: (v) =>
-                      (v == null || v.trim().length < 2) ? 'Entrez un nom (2 lettres minimum)' : null,
+                      (v == null || v.trim().length < 2) ? t.shopNameError : null,
                 ),
                 const SizedBox(height: 10),
                 TextFormField(
                   controller: adresseCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Adresse (facultatif)',
-                    prefixIcon: Icon(Icons.place_outlined),
+                  decoration: InputDecoration(
+                    labelText: t.shopAddress,
+                    prefixIcon: const Icon(Icons.place_outlined),
                   ),
                 ),
                 const SizedBox(height: 10),
                 TextFormField(
                   controller: telCtrl,
                   keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                    labelText: 'Téléphone (facultatif)',
-                    prefixIcon: Icon(Icons.phone_outlined),
+                  decoration: InputDecoration(
+                    labelText: t.shopPhone,
+                    prefixIcon: const Icon(Icons.phone_outlined),
                   ),
                 ),
               ],
@@ -171,12 +175,12 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(t.cancel)),
           FilledButton(
             onPressed: () {
               if (formKey.currentState?.validate() == true) Navigator.pop(ctx, true);
             },
-            child: const Text('Enregistrer'),
+            child: Text(t.save),
           ),
         ],
       ),
@@ -188,17 +192,17 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
         await BoutiquesService.ajouter(widget.entrepriseId,
             nom: nomCtrl.text, adresse: adresseCtrl.text, telephone: telCtrl.text);
         messenger.showSnackBar(
-          SnackBar(content: Text('Boutique « ${nomCtrl.text.trim()} » créée'), backgroundColor: Colors.green),
+          SnackBar(content: Text(t.shopCreated(nomCtrl.text.trim())), backgroundColor: Colors.green),
         );
       } else {
         await BoutiquesService.modifier(widget.entrepriseId, id,
             nom: nomCtrl.text, adresse: adresseCtrl.text, telephone: telCtrl.text);
         messenger.showSnackBar(
-          const SnackBar(content: Text('Boutique modifiée'), backgroundColor: Colors.green),
+          SnackBar(content: Text(t.shopUpdated), backgroundColor: Colors.green),
         );
       }
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Erreur : $e'), backgroundColor: Colors.red));
+      messenger.showSnackBar(SnackBar(content: Text(t.errorPrefix('$e')), backgroundColor: Colors.red));
     }
   }
 
@@ -218,13 +222,14 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
 
   Future<void> _changerActif(String id, String nom, bool actif) async {
     final messenger = ScaffoldMessenger.of(context);
+    final t = _t;
     try {
       await BoutiquesService.changerActif(widget.entrepriseId, id, actif);
       messenger.showSnackBar(SnackBar(
-        content: Text(actif ? '« $nom » réactivée' : '« $nom » désactivée'),
+        content: Text(actif ? t.shopReactivated(nom) : t.shopDeactivated(nom)),
       ));
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Erreur : $e'), backgroundColor: Colors.red));
+      messenger.showSnackBar(SnackBar(content: Text(t.errorPrefix('$e')), backgroundColor: Colors.red));
     }
   }
 
@@ -233,13 +238,13 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF3F4F6),
       appBar: AppBar(
-        title: const Text('Mes boutiques', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(_t.shopTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: _bleuNuit,
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
           IconButton(
-            tooltip: 'Transferts de stock',
+            tooltip: _t.shopTransfersTooltip,
             icon: const Icon(Icons.swap_horiz_rounded),
             onPressed: _ouvrirTransferts,
           ),
@@ -250,7 +255,7 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
         foregroundColor: Colors.white,
         onPressed: () => _formulaire(),
         icon: const Icon(Icons.add_business_rounded),
-        label: const Text('Nouvelle boutique'),
+        label: Text(_t.shopNew),
       ),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: BoutiquesService.collection(widget.entrepriseId).snapshots(),
@@ -259,7 +264,7 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
-                child: Text('Impossible de charger les boutiques : ${snap.error}',
+                child: Text(_t.shopLoadError('${snap.error}'),
                     textAlign: TextAlign.center, style: TextStyle(color: Colors.red.shade700)),
               ),
             );
@@ -293,9 +298,7 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Stock de la boutique principale = stock total − stock des autres boutiques. '
-                        'Utilisez « Transférer du stock » pour approvisionner une boutique, '
-                        'et « Prix par boutique » pour adapter les prix à chaque marché.',
+                        _t.shopInfo,
                         style: TextStyle(fontSize: 13, color: Colors.blue.shade900),
                       ),
                     ),
@@ -311,10 +314,10 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
                 child: ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   leading: const Icon(Icons.local_shipping_rounded, color: Colors.white),
-                  title: const Text('Transférer du stock',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                  subtitle: const Text('Envoyer de la marchandise d\'une boutique à l\'autre',
-                      style: TextStyle(color: Colors.white70)),
+                  title: Text(_t.shopTransferTitle,
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  subtitle: Text(_t.shopTransferSubtitle,
+                      style: const TextStyle(color: Colors.white70)),
                   trailing: const Icon(Icons.chevron_right_rounded, color: Colors.white),
                   onTap: _ouvrirTransferts,
                 ),
@@ -328,10 +331,10 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
                 child: ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   leading: const Icon(Icons.sell_rounded, color: Colors.white),
-                  title: const Text('Prix par boutique',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                  subtitle: const Text('Adapter les prix de vente au marché de chaque boutique',
-                      style: TextStyle(color: Colors.white70)),
+                  title: Text(_t.shopPricesTitle,
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  subtitle: Text(_t.shopPricesSubtitle,
+                      style: const TextStyle(color: Colors.white70)),
                   trailing: const Icon(Icons.chevron_right_rounded, color: Colors.white),
                   onTap: _ouvrirPrix,
                 ),
@@ -346,7 +349,7 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
   }
 
   Widget _carte(String id, Map<String, dynamic> data) {
-    final nom = (data['nom'] ?? 'Sans nom').toString();
+    final nom = (data['nom'] ?? _t.caisseNoName).toString();
     final adresse = (data['adresse'] ?? '').toString();
     final tel = (data['telephone'] ?? '').toString();
     final principale = id == BoutiquesService.idPrincipale;
@@ -379,17 +382,17 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
               ),
               if (principale) ...[
                 const SizedBox(width: 8),
-                _badge('Principale', Colors.indigo),
+                _badge(_t.shopMainBadge, Colors.indigo),
               ],
               if (!actif) ...[
                 const SizedBox(width: 8),
-                _badge('Désactivée', Colors.grey),
+                _badge(_t.shopDisabledBadge, Colors.grey),
               ],
             ],
           ),
           subtitle: Text(
             [if (adresse.isNotEmpty) adresse, if (tel.isNotEmpty) tel].join(' • ').isEmpty
-                ? 'Aucune adresse'
+                ? _t.shopNoAddress
                 : [if (adresse.isNotEmpty) adresse, if (tel.isNotEmpty) tel].join(' • '),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -401,11 +404,11 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
               if (v == 'activer') _changerActif(id, nom, true);
             },
             itemBuilder: (_) => [
-              const PopupMenuItem(value: 'modifier', child: Text('Modifier')),
+              PopupMenuItem(value: 'modifier', child: Text(_t.edit)),
               if (!principale && actif)
-                const PopupMenuItem(value: 'desactiver', child: Text('Désactiver')),
+                PopupMenuItem(value: 'desactiver', child: Text(_t.shopDeactivate)),
               if (!principale && !actif)
-                const PopupMenuItem(value: 'activer', child: Text('Réactiver')),
+                PopupMenuItem(value: 'activer', child: Text(_t.shopReactivate)),
             ],
           ),
         ),

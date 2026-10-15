@@ -1216,4 +1216,90 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get maintTitle => 'Matengenezo na hifadhidata';
+
+  @override
+  String get shopTitle => 'Maduka yangu';
+
+  @override
+  String get shopCardSubtitle => 'Unda na usimamie maduka yako';
+
+  @override
+  String get shopNew => 'Duka jipya';
+
+  @override
+  String get shopEditTitle => 'Hariri duka';
+
+  @override
+  String get shopNameLabel => 'Jina la duka *';
+
+  @override
+  String get shopNameHint => 'Mfano: Duka la Birere';
+
+  @override
+  String get shopNameError => 'Andika jina (herufi 2 angalau)';
+
+  @override
+  String get shopAddress => 'Anwani (si lazima)';
+
+  @override
+  String get shopPhone => 'Simu (si lazima)';
+
+  @override
+  String shopCreated(String nom) {
+    return 'Duka « $nom » limeundwa';
+  }
+
+  @override
+  String get shopUpdated => 'Duka limehaririwa';
+
+  @override
+  String shopReactivated(String nom) {
+    return '« $nom » limewashwa tena';
+  }
+
+  @override
+  String shopDeactivated(String nom) {
+    return '« $nom » limezimwa';
+  }
+
+  @override
+  String get shopTransfersTooltip => 'Uhamisho wa bidhaa';
+
+  @override
+  String shopLoadError(String message) {
+    return 'Imeshindwa kupakia maduka : $message';
+  }
+
+  @override
+  String get shopInfo =>
+      'Bidhaa za duka kuu = bidhaa zote − bidhaa za maduka mengine. Tumia « Hamisha bidhaa » kupeleka bidhaa dukani, na « Bei kwa kila duka » kurekebisha bei kwa kila soko.';
+
+  @override
+  String get shopTransferTitle => 'Hamisha bidhaa';
+
+  @override
+  String get shopTransferSubtitle =>
+      'Peleka bidhaa kutoka duka moja hadi jingine';
+
+  @override
+  String get shopPricesTitle => 'Bei kwa kila duka';
+
+  @override
+  String get shopPricesSubtitle =>
+      'Rekebisha bei za kuuza kulingana na soko la kila duka';
+
+  @override
+  String get shopMainBadge => 'Kuu';
+
+  @override
+  String get shopDisabledBadge => 'Imezimwa';
+
+  @override
+  String get shopNoAddress => 'Hakuna anwani';
+
+  @override
+  String get shopDeactivate => 'Zima';
+
+  @override
+  String get shopReactivate => 'Washa tena';
 }

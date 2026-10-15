@@ -1219,4 +1219,90 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get maintTitle => 'Kobongisa mpe base de données';
+
+  @override
+  String get shopTitle => 'Magazini na ngai';
+
+  @override
+  String get shopCardSubtitle => 'Salá mpe kamba bisika na yo ya koteka';
+
+  @override
+  String get shopNew => 'Magazini ya sika';
+
+  @override
+  String get shopEditTitle => 'Bongola magazini';
+
+  @override
+  String get shopNameLabel => 'Kombo ya magazini *';
+
+  @override
+  String get shopNameHint => 'Ndakisa: Magazini ya Birere';
+
+  @override
+  String get shopNameError => 'Koma kombo (ata ba lettre 2)';
+
+  @override
+  String get shopAddress => 'Adresi (soki olingi)';
+
+  @override
+  String get shopPhone => 'Telefone (soki olingi)';
+
+  @override
+  String shopCreated(String nom) {
+    return 'Magazini « $nom » esalemi';
+  }
+
+  @override
+  String get shopUpdated => 'Magazini ebongolami';
+
+  @override
+  String shopReactivated(String nom) {
+    return '« $nom » efungwami lisusu';
+  }
+
+  @override
+  String shopDeactivated(String nom) {
+    return '« $nom » ekangami';
+  }
+
+  @override
+  String get shopTransfersTooltip => 'Botindi biloko';
+
+  @override
+  String shopLoadError(String message) {
+    return 'Ekoki te kofungola magazini : $message';
+  }
+
+  @override
+  String get shopInfo =>
+      'Biloko ya magazini monene = biloko nyonso − biloko ya magazini mosusu. Salela « Tinda biloko » mpo na kotindela magazini biloko, mpe « Talo na magazini moko na moko » mpo na kobongisa talo na zando moko na moko.';
+
+  @override
+  String get shopTransferTitle => 'Tinda biloko';
+
+  @override
+  String get shopTransferSubtitle =>
+      'Tinda biloko uta magazini moko kino na mosusu';
+
+  @override
+  String get shopPricesTitle => 'Talo na magazini moko na moko';
+
+  @override
+  String get shopPricesSubtitle =>
+      'Bongisa talo ya koteka na zando ya magazini moko na moko';
+
+  @override
+  String get shopMainBadge => 'Monene';
+
+  @override
+  String get shopDisabledBadge => 'Ekangami';
+
+  @override
+  String get shopNoAddress => 'Adresi ezali te';
+
+  @override
+  String get shopDeactivate => 'Kanga';
+
+  @override
+  String get shopReactivate => 'Fungola lisusu';
 }

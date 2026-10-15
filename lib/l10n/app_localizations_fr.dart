@@ -1222,4 +1222,90 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get maintTitle => 'Maintenance & Base de données';
+
+  @override
+  String get shopTitle => 'Mes boutiques';
+
+  @override
+  String get shopCardSubtitle => 'Créer et gérer vos points de vente';
+
+  @override
+  String get shopNew => 'Nouvelle boutique';
+
+  @override
+  String get shopEditTitle => 'Modifier la boutique';
+
+  @override
+  String get shopNameLabel => 'Nom de la boutique *';
+
+  @override
+  String get shopNameHint => 'Ex : Boutique Birere';
+
+  @override
+  String get shopNameError => 'Entrez un nom (2 lettres minimum)';
+
+  @override
+  String get shopAddress => 'Adresse (facultatif)';
+
+  @override
+  String get shopPhone => 'Téléphone (facultatif)';
+
+  @override
+  String shopCreated(String nom) {
+    return 'Boutique « $nom » créée';
+  }
+
+  @override
+  String get shopUpdated => 'Boutique modifiée';
+
+  @override
+  String shopReactivated(String nom) {
+    return '« $nom » réactivée';
+  }
+
+  @override
+  String shopDeactivated(String nom) {
+    return '« $nom » désactivée';
+  }
+
+  @override
+  String get shopTransfersTooltip => 'Transferts de stock';
+
+  @override
+  String shopLoadError(String message) {
+    return 'Impossible de charger les boutiques : $message';
+  }
+
+  @override
+  String get shopInfo =>
+      'Stock de la boutique principale = stock total − stock des autres boutiques. Utilisez « Transférer du stock » pour approvisionner une boutique, et « Prix par boutique » pour adapter les prix à chaque marché.';
+
+  @override
+  String get shopTransferTitle => 'Transférer du stock';
+
+  @override
+  String get shopTransferSubtitle =>
+      'Envoyer de la marchandise d\'une boutique à l\'autre';
+
+  @override
+  String get shopPricesTitle => 'Prix par boutique';
+
+  @override
+  String get shopPricesSubtitle =>
+      'Adapter les prix de vente au marché de chaque boutique';
+
+  @override
+  String get shopMainBadge => 'Principale';
+
+  @override
+  String get shopDisabledBadge => 'Désactivée';
+
+  @override
+  String get shopNoAddress => 'Aucune adresse';
+
+  @override
+  String get shopDeactivate => 'Désactiver';
+
+  @override
+  String get shopReactivate => 'Réactiver';
 }

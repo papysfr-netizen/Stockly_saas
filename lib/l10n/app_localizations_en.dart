@@ -1218,4 +1218,89 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get maintTitle => 'Maintenance & database';
+
+  @override
+  String get shopTitle => 'My shops';
+
+  @override
+  String get shopCardSubtitle => 'Create and manage your points of sale';
+
+  @override
+  String get shopNew => 'New shop';
+
+  @override
+  String get shopEditTitle => 'Edit shop';
+
+  @override
+  String get shopNameLabel => 'Shop name *';
+
+  @override
+  String get shopNameHint => 'E.g.: Birere Shop';
+
+  @override
+  String get shopNameError => 'Enter a name (at least 2 letters)';
+
+  @override
+  String get shopAddress => 'Address (optional)';
+
+  @override
+  String get shopPhone => 'Phone (optional)';
+
+  @override
+  String shopCreated(String nom) {
+    return 'Shop “$nom” created';
+  }
+
+  @override
+  String get shopUpdated => 'Shop updated';
+
+  @override
+  String shopReactivated(String nom) {
+    return '“$nom” reactivated';
+  }
+
+  @override
+  String shopDeactivated(String nom) {
+    return '“$nom” deactivated';
+  }
+
+  @override
+  String get shopTransfersTooltip => 'Stock transfers';
+
+  @override
+  String shopLoadError(String message) {
+    return 'Unable to load shops: $message';
+  }
+
+  @override
+  String get shopInfo =>
+      'Main shop stock = total stock − stock of the other shops. Use “Transfer stock” to supply a shop, and “Prices per shop” to adapt prices to each market.';
+
+  @override
+  String get shopTransferTitle => 'Transfer stock';
+
+  @override
+  String get shopTransferSubtitle => 'Send goods from one shop to another';
+
+  @override
+  String get shopPricesTitle => 'Prices per shop';
+
+  @override
+  String get shopPricesSubtitle =>
+      'Adapt selling prices to each shop\'s market';
+
+  @override
+  String get shopMainBadge => 'Main';
+
+  @override
+  String get shopDisabledBadge => 'Disabled';
+
+  @override
+  String get shopNoAddress => 'No address';
+
+  @override
+  String get shopDeactivate => 'Deactivate';
+
+  @override
+  String get shopReactivate => 'Reactivate';
 }

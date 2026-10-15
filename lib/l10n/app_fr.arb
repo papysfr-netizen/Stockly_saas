@@ -990,5 +990,58 @@
       }
     }
   },
-  "maintTitle": "Maintenance & Base de données"
+  "maintTitle": "Maintenance & Base de données",
+  "shopTitle": "Mes boutiques",
+  "shopCardSubtitle": "Créer et gérer vos points de vente",
+  "shopNew": "Nouvelle boutique",
+  "shopEditTitle": "Modifier la boutique",
+  "shopNameLabel": "Nom de la boutique *",
+  "shopNameHint": "Ex : Boutique Birere",
+  "shopNameError": "Entrez un nom (2 lettres minimum)",
+  "shopAddress": "Adresse (facultatif)",
+  "shopPhone": "Téléphone (facultatif)",
+  "shopCreated": "Boutique « {nom} » créée",
+  "@shopCreated": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
+  "shopUpdated": "Boutique modifiée",
+  "shopReactivated": "« {nom} » réactivée",
+  "@shopReactivated": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
+  "shopDeactivated": "« {nom} » désactivée",
+  "@shopDeactivated": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
+  "shopTransfersTooltip": "Transferts de stock",
+  "shopLoadError": "Impossible de charger les boutiques : {message}",
+  "@shopLoadError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "shopInfo": "Stock de la boutique principale = stock total − stock des autres boutiques. Utilisez « Transférer du stock » pour approvisionner une boutique, et « Prix par boutique » pour adapter les prix à chaque marché.",
+  "shopTransferTitle": "Transférer du stock",
+  "shopTransferSubtitle": "Envoyer de la marchandise d'une boutique à l'autre",
+  "shopPricesTitle": "Prix par boutique",
+  "shopPricesSubtitle": "Adapter les prix de vente au marché de chaque boutique",
+  "shopMainBadge": "Principale",
+  "shopDisabledBadge": "Désactivée",
+  "shopNoAddress": "Aucune adresse",
+  "shopDeactivate": "Désactiver",
+  "shopReactivate": "Réactiver"
 }

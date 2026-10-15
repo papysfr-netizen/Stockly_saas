@@ -2058,6 +2058,156 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Maintenance & Base de données'**
   String get maintTitle;
+
+  /// No description provided for @shopTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes boutiques'**
+  String get shopTitle;
+
+  /// No description provided for @shopCardSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer et gérer vos points de vente'**
+  String get shopCardSubtitle;
+
+  /// No description provided for @shopNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle boutique'**
+  String get shopNew;
+
+  /// No description provided for @shopEditTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier la boutique'**
+  String get shopEditTitle;
+
+  /// No description provided for @shopNameLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom de la boutique *'**
+  String get shopNameLabel;
+
+  /// No description provided for @shopNameHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex : Boutique Birere'**
+  String get shopNameHint;
+
+  /// No description provided for @shopNameError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Entrez un nom (2 lettres minimum)'**
+  String get shopNameError;
+
+  /// No description provided for @shopAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse (facultatif)'**
+  String get shopAddress;
+
+  /// No description provided for @shopPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléphone (facultatif)'**
+  String get shopPhone;
+
+  /// No description provided for @shopCreated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Boutique « {nom} » créée'**
+  String shopCreated(String nom);
+
+  /// No description provided for @shopUpdated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Boutique modifiée'**
+  String get shopUpdated;
+
+  /// No description provided for @shopReactivated.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {nom} » réactivée'**
+  String shopReactivated(String nom);
+
+  /// No description provided for @shopDeactivated.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {nom} » désactivée'**
+  String shopDeactivated(String nom);
+
+  /// No description provided for @shopTransfersTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transferts de stock'**
+  String get shopTransfersTooltip;
+
+  /// No description provided for @shopLoadError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger les boutiques : {message}'**
+  String shopLoadError(String message);
+
+  /// No description provided for @shopInfo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Stock de la boutique principale = stock total − stock des autres boutiques. Utilisez « Transférer du stock » pour approvisionner une boutique, et « Prix par boutique » pour adapter les prix à chaque marché.'**
+  String get shopInfo;
+
+  /// No description provided for @shopTransferTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transférer du stock'**
+  String get shopTransferTitle;
+
+  /// No description provided for @shopTransferSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer de la marchandise d\'une boutique à l\'autre'**
+  String get shopTransferSubtitle;
+
+  /// No description provided for @shopPricesTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix par boutique'**
+  String get shopPricesTitle;
+
+  /// No description provided for @shopPricesSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adapter les prix de vente au marché de chaque boutique'**
+  String get shopPricesSubtitle;
+
+  /// No description provided for @shopMainBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Principale'**
+  String get shopMainBadge;
+
+  /// No description provided for @shopDisabledBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désactivée'**
+  String get shopDisabledBadge;
+
+  /// No description provided for @shopNoAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune adresse'**
+  String get shopNoAddress;
+
+  /// No description provided for @shopDeactivate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désactiver'**
+  String get shopDeactivate;
+
+  /// No description provided for @shopReactivate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réactiver'**
+  String get shopReactivate;
 }
 
 class _AppLocalizationsDelegate
