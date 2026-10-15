@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,6 +33,22 @@ void main() async {
         persistenceEnabled: true,
         cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
       );
+    }
+
+    // 🐞 Crashlytics : rapports d'erreurs (APK seulement, pas au câble)
+    if (!kIsWeb) {
+      await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(!kDebugMode);
+      if (!kDebugMode) {
+        FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+        WidgetsBinding.instance.platformDispatcher.onError = (error, stack) {
+          FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+          return true;
+        };
+        // Chaque rapport porte l'identifiant de l'utilisateur connecté
+        FirebaseAuth.instance.authStateChanges().listen((u) {
+          FirebaseCrashlytics.instance.setUserIdentifier(u?.uid ?? '');
+        });
+      }
     }
   } catch (e) {
     debugPrint("Erreur d'initialisation Firebase : $e");

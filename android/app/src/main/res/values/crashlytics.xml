@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Crashlytics sans le plugin Gradle : pas d'identifiant de build obligatoire -->
+    <bool name="com.crashlytics.RequireBuildId">false</bool>
+</resources>
