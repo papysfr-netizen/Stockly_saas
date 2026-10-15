@@ -13,6 +13,7 @@ import 'package:stockly_saas/features/debts/screens/home_screen.dart';
 import 'package:stockly_saas/features/shell/accueil_screen.dart';
 import 'package:stockly_saas/screens/settings_screen.dart';
 import 'package:stockly_saas/views/caisse/caisse_screen.dart';
+import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:stockly_saas/views/financial_analysis/financial_analysis_screen.dart';
 
 class MainShell extends ConsumerStatefulWidget {
@@ -25,12 +26,13 @@ class MainShell extends ConsumerStatefulWidget {
 }
 
 class _Onglet {
+  final String cle; // identifiant fixe (ne change pas avec la langue)
   final String titre;
   final IconData icone;
   final IconData iconeActive;
   final Widget Function() ecran;
 
-  const _Onglet(this.titre, this.icone, this.iconeActive, this.ecran);
+  const _Onglet(this.cle, this.titre, this.icone, this.iconeActive, this.ecran);
 }
 
 class _MainShellState extends ConsumerState<MainShell> {
@@ -42,18 +44,19 @@ class _MainShellState extends ConsumerState<MainShell> {
     // Le Rapport (finances) n'apparaît que pour ceux qui ont l'autorisation
     final profil = ref.watch(userProfileProvider).value;
     final voirFinances = profil?.peutVoirFinances ?? false;
+    final t = AppLocalizations.of(context);
 
     final onglets = <_Onglet>[
-      _Onglet('Accueil', Icons.home_outlined, Icons.home_rounded,
+      _Onglet('Accueil', t.navAccueil, Icons.home_outlined, Icons.home_rounded,
           () => AccueilScreen(currentUser: widget.currentUser)),
-      _Onglet('Caisse', Icons.point_of_sale_outlined, Icons.point_of_sale_rounded,
+      _Onglet('Caisse', t.navCaisse, Icons.point_of_sale_outlined, Icons.point_of_sale_rounded,
           () => const CaisseScreen()),
-      _Onglet('Stock', Icons.inventory_2_outlined, Icons.inventory_2_rounded,
+      _Onglet('Stock', t.navStock, Icons.inventory_2_outlined, Icons.inventory_2_rounded,
           () => HomeScreen(currentUser: widget.currentUser)),
       if (voirFinances)
-        _Onglet('Rapport', Icons.bar_chart_outlined, Icons.bar_chart_rounded,
+        _Onglet('Rapport', t.navRapport, Icons.bar_chart_outlined, Icons.bar_chart_rounded,
             () => const FinancialAnalysisScreen()),
-      _Onglet('Paramètres', Icons.settings_outlined, Icons.settings_rounded,
+      _Onglet('Paramètres', t.navParametres, Icons.settings_outlined, Icons.settings_rounded,
           () => const SettingsScreen()),
     ];
 
@@ -70,8 +73,8 @@ class _MainShellState extends ConsumerState<MainShell> {
           index: _index,
           children: [
             for (final o in onglets)
-              _dejaOuverts.contains(o.titre)
-                  ? KeyedSubtree(key: ValueKey(o.titre), child: o.ecran())
+              _dejaOuverts.contains(o.cle)
+                  ? KeyedSubtree(key: ValueKey(o.cle), child: o.ecran())
                   : const SizedBox.shrink(),
           ],
         ),
@@ -83,7 +86,7 @@ class _MainShellState extends ConsumerState<MainShell> {
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
           onDestinationSelected: (i) => setState(() {
             _index = i;
-            _dejaOuverts.add(onglets[i].titre);
+            _dejaOuverts.add(onglets[i].cle);
           }),
           destinations: [
             for (final o in onglets)

@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -94,7 +95,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
     final nouveau = await showDialog<double>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Taux du jour'),
+        title: Text(AppLocalizations.of(ctx).tauxTitle),
         content: TextField(
           controller: ctrl,
           autofocus: true,
@@ -103,10 +104,10 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
           decoration: const InputDecoration(prefixText: '1 \$ = ', suffixText: 'FC'),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuler')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(AppLocalizations.of(ctx).cancel)),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, double.tryParse(ctrl.text.trim())),
-            child: const Text('Enregistrer'),
+            child: Text(AppLocalizations.of(ctx).save),
           ),
         ],
       ),
@@ -136,6 +137,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
     }
 
     final prenom = widget.currentUser.nom.split(' ').first;
+    final t = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF3F5F7),
@@ -181,7 +183,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              'Bonjour $prenom 👋',
+                              t.accHello(prenom),
                               style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -250,22 +252,22 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                     ),
                     child: Column(
                       children: [
-                        Text("AUJOURD'HUI",
+                        Text(t.accToday,
                             style: TextStyle(fontSize: 12, letterSpacing: 1.2, color: Colors.grey.shade600)),
                         const SizedBox(height: 4),
                         Text(
                           devise.formatPrice(ventes),
                           style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: _vert),
                         ),
-                        Text('de ventes', style: TextStyle(color: Colors.grey.shade600)),
+                        Text(t.accOfSales, style: TextStyle(color: Colors.grey.shade600)),
                         const SizedBox(height: 16),
                         Row(
                           children: [
-                            _petiteCase('Encaissé', devise.formatPrice(encaisse), Icons.payments_rounded, _vert),
+                            _petiteCase(t.accCashed, devise.formatPrice(encaisse), Icons.payments_rounded, _vert),
                             const SizedBox(width: 8),
-                            _petiteCase('Crédit', devise.formatPrice(credit), Icons.receipt_long_rounded, Colors.indigo),
+                            _petiteCase(t.accCredit, devise.formatPrice(credit), Icons.receipt_long_rounded, Colors.indigo),
                             const SizedBox(width: 8),
-                            _petiteCase('Dépenses', devise.formatPrice(totalDepenses), Icons.trending_down_rounded, Colors.red),
+                            _petiteCase(t.accExpenses, devise.formatPrice(totalDepenses), Icons.trending_down_rounded, Colors.red),
                           ],
                         ),
                         if (voirFinances) ...[
@@ -278,7 +280,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              'Argent en caisse du jour : ${devise.formatPrice(solde)}',
+                              t.accCashInDrawer(devise.formatPrice(solde)),
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
@@ -290,7 +292,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                         if (voirFinances && remises > 0.005) ...[
                           const SizedBox(height: 8),
                           Text(
-                            'Remises accordées : ${devise.formatPrice(remises)}',
+                            t.accDiscounts(devise.formatPrice(remises)),
                             style: TextStyle(color: Colors.orange.shade800, fontWeight: FontWeight.w600),
                           ),
                         ],
@@ -313,7 +315,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                               remises: remises,
                             ),
                             icon: const Icon(Icons.send_rounded, color: Color(0xFF25D366)),
-                            label: const Text('Envoyer le résumé du jour'),
+                            label: Text(t.accSendSummary),
                             style: OutlinedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -332,15 +334,15 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   child: Row(
                     children: [
-                      _grosBouton('Caisse', Icons.point_of_sale_rounded, _vert, () => _ouvrir(const CaisseScreen())),
+                      _grosBouton(t.navCaisse, Icons.point_of_sale_rounded, _vert, () => _ouvrir(const CaisseScreen())),
                       const SizedBox(width: 10),
-                      _grosBouton('Dépense', Icons.upload_rounded, Colors.red,
+                      _grosBouton(t.accExpense, Icons.upload_rounded, Colors.red,
                           voirFinances ? () => _ouvrir(const DepensesScreen()) : null),
                       const SizedBox(width: 10),
-                      _grosBouton('Crédit', Icons.menu_book_rounded, Colors.indigo,
+                      _grosBouton(t.accCredit, Icons.menu_book_rounded, Colors.indigo,
                           () => _ouvrir(const DebtManagementScreen())),
                       const SizedBox(width: 10),
-                      _grosBouton('Stock', Icons.inventory_2_rounded, _bleu,
+                      _grosBouton(t.navStock, Icons.inventory_2_rounded, _bleu,
                           () => _ouvrir(HomeScreen(currentUser: widget.currentUser))),
                     ],
                   ),
@@ -355,15 +357,15 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                     spacing: 8,
                     runSpacing: 8,
                     children: [
-                      _raccourci('Ventes', Icons.receipt_long_rounded, Colors.indigo,
+                      _raccourci(t.accSales, Icons.receipt_long_rounded, Colors.indigo,
                           () => _ouvrir(HistoriqueVentesScreen(entrepriseId: _entrepriseId))),
                       ALivrerNavButton(entrepriseId: _entrepriseId),
-                      _raccourci('Comptes clients', Icons.account_balance_wallet_rounded, Colors.teal,
+                      _raccourci(t.accClientAccounts, Icons.account_balance_wallet_rounded, Colors.teal,
                           () => _ouvrir(ComptesClientsScreen(entrepriseId: _entrepriseId))),
-                      _raccourci('Aide', Icons.menu_book_rounded, Colors.blueGrey,
+                      _raccourci(t.accHelp, Icons.menu_book_rounded, Colors.blueGrey,
                           () => _ouvrir(const AideScreen())),
                       if (voirFinances)
-                        _raccourci('Comptabilité', Icons.calculate_rounded, Colors.brown,
+                        _raccourci(t.accAccounting, Icons.calculate_rounded, Colors.brown,
                             () => _ouvrir(ComptabiliteScreen(entrepriseId: _entrepriseId))),
                     ],
                   ),
@@ -387,7 +389,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(20, 22, 20, 8),
-                  child: Text("Ventes d'aujourd'hui (${listeVentes.length})",
+                  child: Text(t.accTodaySales(listeVentes.length),
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
               ),
@@ -407,7 +409,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                         border: Border.all(color: Colors.grey.shade200),
                       ),
                       child: Text(
-                        'Pas encore de vente aujourd\'hui.\nAppuyez sur « Caisse » pour commencer.',
+                        t.accNoSales,
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.grey.shade700, height: 1.4),
                       ),
@@ -437,13 +439,13 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                           ),
                           title: Text(
                             (v['nomClient'] ?? '').toString().trim().isEmpty
-                                ? 'Client'
+                                ? t.accClient
                                 : v['nomClient'].toString(),
                             overflow: TextOverflow.ellipsis,
                           ),
                           subtitle: Text(
                             '${d == null ? '' : DateFormat('HH:mm').format(d)}'
-                            '${reste > 0.005 ? ' • reste ${devise.formatPrice(reste)}' : ''}',
+                            '${reste > 0.005 ? ' • ${t.accRemaining(devise.formatPrice(reste))}' : ''}',
                           ),
                           trailing: Text(
                             devise.formatPrice(_nombre(v['montantTotal'] ?? v['total'])),
@@ -523,7 +525,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
   Widget _etiquetteBoutique(String? id) {
     final boutiques = ref.watch(boutiquesActivesProvider(_entrepriseId));
     final nom = boutiques.where((b) => b.id == (id ?? 'principale')).map((b) => b.nom).firstOrNull ??
-        'Boutique principale';
+        AppLocalizations.of(context).accMainShop;
     return Container(
       constraints: const BoxConstraints(maxWidth: 170),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

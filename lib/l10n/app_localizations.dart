@@ -203,6 +203,168 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Ajouter des collaborateurs et gérer leurs droits'**
   String get teamManagementSubtitle;
+
+  /// No description provided for @navAccueil.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accueil'**
+  String get navAccueil;
+
+  /// No description provided for @navCaisse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Caisse'**
+  String get navCaisse;
+
+  /// No description provided for @navStock.
+  ///
+  /// In fr, this message translates to:
+  /// **'Stock'**
+  String get navStock;
+
+  /// No description provided for @navRapport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rapport'**
+  String get navRapport;
+
+  /// No description provided for @navParametres.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paramètres'**
+  String get navParametres;
+
+  /// No description provided for @accHello.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour {prenom} 👋'**
+  String accHello(String prenom);
+
+  /// No description provided for @tauxTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taux du jour'**
+  String get tauxTitle;
+
+  /// No description provided for @cancel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get cancel;
+
+  /// No description provided for @save.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get save;
+
+  /// No description provided for @accToday.
+  ///
+  /// In fr, this message translates to:
+  /// **'AUJOURD\'HUI'**
+  String get accToday;
+
+  /// No description provided for @accOfSales.
+  ///
+  /// In fr, this message translates to:
+  /// **'de ventes'**
+  String get accOfSales;
+
+  /// No description provided for @accCashed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Encaissé'**
+  String get accCashed;
+
+  /// No description provided for @accCredit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Crédit'**
+  String get accCredit;
+
+  /// No description provided for @accExpenses.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépenses'**
+  String get accExpenses;
+
+  /// No description provided for @accCashInDrawer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Argent en caisse du jour : {montant}'**
+  String accCashInDrawer(String montant);
+
+  /// No description provided for @accDiscounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remises accordées : {montant}'**
+  String accDiscounts(String montant);
+
+  /// No description provided for @accSendSummary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer le résumé du jour'**
+  String get accSendSummary;
+
+  /// No description provided for @accExpense.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépense'**
+  String get accExpense;
+
+  /// No description provided for @accSales.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ventes'**
+  String get accSales;
+
+  /// No description provided for @accClientAccounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comptes clients'**
+  String get accClientAccounts;
+
+  /// No description provided for @accAccounting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comptabilité'**
+  String get accAccounting;
+
+  /// No description provided for @accHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aide'**
+  String get accHelp;
+
+  /// No description provided for @accTodaySales.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ventes d\'aujourd\'hui ({count})'**
+  String accTodaySales(int count);
+
+  /// No description provided for @accNoSales.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore de vente aujourd\'hui.\nAppuyez sur « Caisse » pour commencer.'**
+  String get accNoSales;
+
+  /// No description provided for @accClient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Client'**
+  String get accClient;
+
+  /// No description provided for @accRemaining.
+  ///
+  /// In fr, this message translates to:
+  /// **'reste {montant}'**
+  String accRemaining(String montant);
+
+  /// No description provided for @accMainShop.
+  ///
+  /// In fr, this message translates to:
+  /// **'Boutique principale'**
+  String get accMainShop;
 }
 
 class _AppLocalizationsDelegate

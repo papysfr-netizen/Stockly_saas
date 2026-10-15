@@ -16,5 +16,67 @@
   "dbMaintenance": "Maintenance",
   "mergeDuplicates": "Fusionner les doublons",
   "teamManagement": "Gestion de l'équipe & permissions",
-  "teamManagementSubtitle": "Ajouter des collaborateurs et gérer leurs droits"
+  "teamManagementSubtitle": "Ajouter des collaborateurs et gérer leurs droits",
+  "navAccueil": "Accueil",
+  "navCaisse": "Caisse",
+  "navStock": "Stock",
+  "navRapport": "Rapport",
+  "navParametres": "Paramètres",
+  "accHello": "Bonjour {prenom} 👋",
+  "@accHello": {
+    "placeholders": {
+      "prenom": {
+        "type": "String"
+      }
+    }
+  },
+  "tauxTitle": "Taux du jour",
+  "cancel": "Annuler",
+  "save": "Enregistrer",
+  "accToday": "AUJOURD'HUI",
+  "accOfSales": "de ventes",
+  "accCashed": "Encaissé",
+  "accCredit": "Crédit",
+  "accExpenses": "Dépenses",
+  "accCashInDrawer": "Argent en caisse du jour : {montant}",
+  "@accCashInDrawer": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "accDiscounts": "Remises accordées : {montant}",
+  "@accDiscounts": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "accSendSummary": "Envoyer le résumé du jour",
+  "accExpense": "Dépense",
+  "accSales": "Ventes",
+  "accClientAccounts": "Comptes clients",
+  "accAccounting": "Comptabilité",
+  "accHelp": "Aide",
+  "accTodaySales": "Ventes d'aujourd'hui ({count})",
+  "@accTodaySales": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accNoSales": "Pas encore de vente aujourd'hui.\nAppuyez sur « Caisse » pour commencer.",
+  "accClient": "Client",
+  "accRemaining": "reste {montant}",
+  "@accRemaining": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "accMainShop": "Boutique principale"
 }

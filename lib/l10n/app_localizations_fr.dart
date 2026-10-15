@@ -59,4 +59,96 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get teamManagementSubtitle =>
       'Ajouter des collaborateurs et gérer leurs droits';
+
+  @override
+  String get navAccueil => 'Accueil';
+
+  @override
+  String get navCaisse => 'Caisse';
+
+  @override
+  String get navStock => 'Stock';
+
+  @override
+  String get navRapport => 'Rapport';
+
+  @override
+  String get navParametres => 'Paramètres';
+
+  @override
+  String accHello(String prenom) {
+    return 'Bonjour $prenom 👋';
+  }
+
+  @override
+  String get tauxTitle => 'Taux du jour';
+
+  @override
+  String get cancel => 'Annuler';
+
+  @override
+  String get save => 'Enregistrer';
+
+  @override
+  String get accToday => 'AUJOURD\'HUI';
+
+  @override
+  String get accOfSales => 'de ventes';
+
+  @override
+  String get accCashed => 'Encaissé';
+
+  @override
+  String get accCredit => 'Crédit';
+
+  @override
+  String get accExpenses => 'Dépenses';
+
+  @override
+  String accCashInDrawer(String montant) {
+    return 'Argent en caisse du jour : $montant';
+  }
+
+  @override
+  String accDiscounts(String montant) {
+    return 'Remises accordées : $montant';
+  }
+
+  @override
+  String get accSendSummary => 'Envoyer le résumé du jour';
+
+  @override
+  String get accExpense => 'Dépense';
+
+  @override
+  String get accSales => 'Ventes';
+
+  @override
+  String get accClientAccounts => 'Comptes clients';
+
+  @override
+  String get accAccounting => 'Comptabilité';
+
+  @override
+  String get accHelp => 'Aide';
+
+  @override
+  String accTodaySales(int count) {
+    return 'Ventes d\'aujourd\'hui ($count)';
+  }
+
+  @override
+  String get accNoSales =>
+      'Pas encore de vente aujourd\'hui.\nAppuyez sur « Caisse » pour commencer.';
+
+  @override
+  String get accClient => 'Client';
+
+  @override
+  String accRemaining(String montant) {
+    return 'reste $montant';
+  }
+
+  @override
+  String get accMainShop => 'Boutique principale';
 }

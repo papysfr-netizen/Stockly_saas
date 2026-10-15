@@ -58,4 +58,95 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get teamManagementSubtitle => 'Ongeza washirika na usimamie haki zao';
+
+  @override
+  String get navAccueil => 'Mwanzo';
+
+  @override
+  String get navCaisse => 'Malipo';
+
+  @override
+  String get navStock => 'Bidhaa';
+
+  @override
+  String get navRapport => 'Ripoti';
+
+  @override
+  String get navParametres => 'Mipangilio';
+
+  @override
+  String accHello(String prenom) {
+    return 'Jambo $prenom 👋';
+  }
+
+  @override
+  String get tauxTitle => 'Bei ya dola leo';
+
+  @override
+  String get cancel => 'Ghairi';
+
+  @override
+  String get save => 'Hifadhi';
+
+  @override
+  String get accToday => 'LEO';
+
+  @override
+  String get accOfSales => 'ya mauzo';
+
+  @override
+  String get accCashed => 'Imepokelewa';
+
+  @override
+  String get accCredit => 'Mkopo';
+
+  @override
+  String get accExpenses => 'Matumizi';
+
+  @override
+  String accCashInDrawer(String montant) {
+    return 'Pesa ya kasha leo : $montant';
+  }
+
+  @override
+  String accDiscounts(String montant) {
+    return 'Punguzo lililotolewa : $montant';
+  }
+
+  @override
+  String get accSendSummary => 'Tuma muhtasari wa leo';
+
+  @override
+  String get accExpense => 'Matumizi';
+
+  @override
+  String get accSales => 'Mauzo';
+
+  @override
+  String get accClientAccounts => 'Akaunti za wateja';
+
+  @override
+  String get accAccounting => 'Uhasibu';
+
+  @override
+  String get accHelp => 'Msaada';
+
+  @override
+  String accTodaySales(int count) {
+    return 'Mauzo ya leo ($count)';
+  }
+
+  @override
+  String get accNoSales => 'Bado hakuna mauzo leo.\nBonyeza « Malipo » kuanza.';
+
+  @override
+  String get accClient => 'Mteja';
+
+  @override
+  String accRemaining(String montant) {
+    return 'imebaki $montant';
+  }
+
+  @override
+  String get accMainShop => 'Duka kuu';
 }

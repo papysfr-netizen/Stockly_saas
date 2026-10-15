@@ -59,4 +59,96 @@ class AppLocalizationsLn extends AppLocalizations {
   @override
   String get teamManagementSubtitle =>
       'Bakisa basali mpe bongisa makoki na bango';
+
+  @override
+  String get navAccueil => 'Ebandeli';
+
+  @override
+  String get navCaisse => 'Kesi';
+
+  @override
+  String get navStock => 'Biloko';
+
+  @override
+  String get navRapport => 'Lapolo';
+
+  @override
+  String get navParametres => 'Mibongiseli';
+
+  @override
+  String accHello(String prenom) {
+    return 'Mbote $prenom 👋';
+  }
+
+  @override
+  String get tauxTitle => 'Motuya ya dolare lelo';
+
+  @override
+  String get cancel => 'Tika';
+
+  @override
+  String get save => 'Kobomba';
+
+  @override
+  String get accToday => 'LELO';
+
+  @override
+  String get accOfSales => 'ya biteki';
+
+  @override
+  String get accCashed => 'Mbongo ezwami';
+
+  @override
+  String get accCredit => 'Niongo';
+
+  @override
+  String get accExpenses => 'Bibimisi';
+
+  @override
+  String accCashInDrawer(String montant) {
+    return 'Mbongo na kesi lelo : $montant';
+  }
+
+  @override
+  String accDiscounts(String montant) {
+    return 'Bakitisi talo : $montant';
+  }
+
+  @override
+  String get accSendSummary => 'Tinda bokuse ya lelo';
+
+  @override
+  String get accExpense => 'Mbimisi';
+
+  @override
+  String get accSales => 'Biteki';
+
+  @override
+  String get accClientAccounts => 'Ba compte ya bakiliya';
+
+  @override
+  String get accAccounting => 'Botangi mbongo';
+
+  @override
+  String get accHelp => 'Lisalisi';
+
+  @override
+  String accTodaySales(int count) {
+    return 'Biteki ya lelo ($count)';
+  }
+
+  @override
+  String get accNoSales =>
+      'Naino biteki te lelo.\nFina « Kesi » mpo na kobanda.';
+
+  @override
+  String get accClient => 'Mosombi';
+
+  @override
+  String accRemaining(String montant) {
+    return 'etikali $montant';
+  }
+
+  @override
+  String get accMainShop => 'Magazini monene';
 }

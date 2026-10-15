@@ -59,4 +59,95 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get teamManagementSubtitle =>
       'Add collaborators and manage their rights';
+
+  @override
+  String get navAccueil => 'Home';
+
+  @override
+  String get navCaisse => 'Checkout';
+
+  @override
+  String get navStock => 'Stock';
+
+  @override
+  String get navRapport => 'Report';
+
+  @override
+  String get navParametres => 'Settings';
+
+  @override
+  String accHello(String prenom) {
+    return 'Hello $prenom 👋';
+  }
+
+  @override
+  String get tauxTitle => 'Today\'s rate';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get accToday => 'TODAY';
+
+  @override
+  String get accOfSales => 'in sales';
+
+  @override
+  String get accCashed => 'Collected';
+
+  @override
+  String get accCredit => 'Credit';
+
+  @override
+  String get accExpenses => 'Expenses';
+
+  @override
+  String accCashInDrawer(String montant) {
+    return 'Cash in the till today: $montant';
+  }
+
+  @override
+  String accDiscounts(String montant) {
+    return 'Discounts given: $montant';
+  }
+
+  @override
+  String get accSendSummary => 'Send today\'s summary';
+
+  @override
+  String get accExpense => 'Expense';
+
+  @override
+  String get accSales => 'Sales';
+
+  @override
+  String get accClientAccounts => 'Customer accounts';
+
+  @override
+  String get accAccounting => 'Accounting';
+
+  @override
+  String get accHelp => 'Help';
+
+  @override
+  String accTodaySales(int count) {
+    return 'Today\'s sales ($count)';
+  }
+
+  @override
+  String get accNoSales => 'No sales yet today.\nTap “Checkout” to start.';
+
+  @override
+  String get accClient => 'Customer';
+
+  @override
+  String accRemaining(String montant) {
+    return '$montant left';
+  }
+
+  @override
+  String get accMainShop => 'Main shop';
 }
