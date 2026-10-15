@@ -878,11 +878,15 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         'entrepriseId': widget.entrepriseId,
         'comptabilise': true,
         'coutMarchandises': coutMarchandises,
+        // 🏷️ Remises accordées (prix négocié)
+        'remiseTotale': widget.cart.fold<double>(0.0, (s, i) => s + i.remiseTotale),
         'articles': widget.cart
             .map((item) => {
                   'produitId': item.id,
                   'nom': item.nom,
                   'prixUnitaire': item.prix,
+                  'prixNormal': item.prixNormal,
+                  'remise': item.remiseTotale,
                   'prixAchat': prixAchat[item.id] ?? 0.0,
                   'quantite': item.quantite,
                   'totalItem': item.prix * item.quantite,

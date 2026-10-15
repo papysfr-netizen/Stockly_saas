@@ -9,6 +9,7 @@ import 'package:stockly_saas/core/providers/currency_provider.dart';
 import 'package:stockly_saas/core/providers/user_role_provider.dart';
 import 'package:stockly_saas/core/providers/produit_provider.dart';
 import 'package:stockly_saas/views/caisse/dialogs/ajout_panier_dialog.dart';
+import 'package:stockly_saas/views/caisse/dialogs/prix_negocie_dialog.dart';
 import 'package:stockly_saas/views/caisse/dialogs/paiement_dialog.dart';
 import 'package:stockly_saas/core/widgets/quick_scanner_widget.dart';
 
@@ -120,6 +121,7 @@ class _ProduitsViewState extends ConsumerState<ProduitsView> {
           prix,
           1,
           stock,
+          prixAchat: produit.prixAchat,
         );
 
     if (result == CartOperationResult.stockLimitReached) {
@@ -586,6 +588,27 @@ class _TuileProduit extends StatelessWidget {
 class PanierView extends ConsumerWidget {
   const PanierView({super.key});
 
+  /// 💬 Toucher une ligne : changer son prix (autorisation « Remises et retraits »)
+  Future<void> _changerPrix(BuildContext context, WidgetRef ref, CartItem item) async {
+    final peut = ref.read(userProfileProvider).value?.peutRemisesRetraits ?? false;
+    if (!peut) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Changer le prix demande l'autorisation « Remises et retraits »."),
+        backgroundColor: Colors.orange,
+      ));
+      return;
+    }
+    final nouveau = await demanderPrixNegocie(
+      context,
+      nom: item.nom,
+      prixActuel: item.prix,
+      prixNormal: item.prixNormal,
+      prixAchat: item.prixAchat,
+    );
+    if (nouveau == null) return;
+    ref.read(cartProvider.notifier).changerPrix(item.id, nouveau);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cartItems = ref.watch(cartProvider);
@@ -622,8 +645,31 @@ class PanierView extends ConsumerWidget {
                 final totalLigne = currencyState.formatPrice(item.totalPrice);
 
                 return ListTile(
+                  onTap: () => _changerPrix(context, ref, item),
+                  leading: Icon(
+                    Icons.sell_outlined,
+                    color: item.aPerte
+                        ? Colors.red
+                        : (item.prixNegocie ? Colors.orange.shade800 : Colors.grey),
+                  ),
                   title: Text(item.nom, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('$prixConverti x ${item.quantite} = $totalLigne'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('$prixConverti x ${item.quantite} = $totalLigne'),
+                      if (item.prixNegocie)
+                        Text(
+                          'Prix normal : ${currencyState.formatPrice(item.prixNormal)}',
+                          style: TextStyle(fontSize: 12, color: Colors.orange.shade800),
+                        ),
+                      if (item.aPerte)
+                        const Text(
+                          'Vente à perte',
+                          style: TextStyle(fontSize: 12, color: Colors.red, fontWeight: FontWeight.bold),
+                        ),
+                    ],
+                  ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/produit.dart';
 import '../../../core/providers/cart_provider.dart';
 import '../../../core/providers/currency_provider.dart';
+import '../../../core/providers/user_role_provider.dart';
 
 class AjoutPanierDialog extends ConsumerStatefulWidget {
   final Produit produit;
@@ -19,6 +20,9 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
   late final TextEditingController _prixController;
   String? _erreurStock;
 
+  /// Prix normal du produit dans la boutique de vente (USD)
+  double get _prixNormalUSD => (widget.produit.prixPour(ref.boutiqueVente) as num).toDouble();
+
   @override
   void initState() {
     super.initState();
@@ -26,7 +30,7 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
 
     final currencyState = ref.read(currencyProvider);
     final rate = currencyState.activeCurrencyInfo.rateToUSD;
-    final prixConverti = widget.produit.prixPour(ref.boutiqueVente) * rate;
+    final prixConverti = _prixNormalUSD * rate;
 
     _prixController = TextEditingController(
       text: prixConverti % 1 == 0
@@ -57,14 +61,51 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
     });
   }
 
+  /// Demande confirmation avant une vente à perte
+  Future<bool> _confirmerPerte() async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: Icon(Icons.warning_amber_rounded, color: Colors.red.shade700, size: 40),
+        title: const Text('Vente à perte'),
+        content: Text(
+          "Le prix de ${widget.produit.nom} est sous le prix d'achat.\n"
+          'Voulez-vous vraiment vendre à ce prix ?',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Non, corriger')),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red.shade700),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Oui, vendre'),
+          ),
+        ],
+      ),
+    );
+    return ok == true;
+  }
+
   @override
   Widget build(BuildContext context) {
     final currencyState = ref.watch(currencyProvider);
     final activeInfo = currencyState.activeCurrencyInfo;
+    final rate = activeInfo.rateToUSD > 0 ? activeInfo.rateToUSD : 1.0;
+
+    // 🔐 Changer le prix : autorisation « Remises et retraits » (patron : toujours)
+    final peutChangerPrix =
+        ref.watch(userProfileProvider).value?.peutRemisesRetraits ?? false;
+    final voirFinances = ref.watch(userProfileProvider).value?.peutVoirFinances ?? false;
 
     final prixSaisi = double.tryParse(_prixController.text.replaceAll(',', '.').trim()) ?? 0.0;
     final qteSaisie = int.tryParse(_qteController.text.replaceAll(',', '.').trim()) ?? 0;
     final sousTotalLocal = prixSaisi * qteSaisie;
+
+    final prixAchat = widget.produit.prixAchat;
+    final aPerte = peutChangerPrix &&
+        prixSaisi > 0 &&
+        prixAchat > 0 &&
+        prixSaisi / rate < prixAchat - 0.005;
+    final remiseUSD = _prixNormalUSD - prixSaisi / rate;
 
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -96,15 +137,34 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
 
             TextField(
               controller: _prixController,
+              enabled: peutChangerPrix,
               decoration: InputDecoration(
                 labelText: 'Prix unitaire (${activeInfo.code})',
                 suffixText: activeInfo.symbol,
                 border: const OutlineInputBorder(),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                helperText: peutChangerPrix
+                    ? (remiseUSD > 0.005
+                        ? 'Remise : ${(remiseUSD * rate).toStringAsFixed(2)} ${activeInfo.symbol} par pièce'
+                        : null)
+                    : 'Prix fixe (autorisation « Remises et retraits » nécessaire)',
+                helperMaxLines: 2,
+                helperStyle: TextStyle(
+                  color: peutChangerPrix ? Colors.orange.shade800 : Colors.grey.shade600,
+                ),
               ),
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               onChanged: (_) => setState(() {}),
             ),
+            if (aPerte) ...[
+              const SizedBox(height: 8),
+              Text(
+                voirFinances
+                    ? "⚠️ Vente à perte (prix d'achat : ${(prixAchat * rate).toStringAsFixed(2)} ${activeInfo.symbol})"
+                    : "⚠️ Vente à perte : ce prix est sous le prix d'achat",
+                style: TextStyle(color: Colors.red.shade700, fontWeight: FontWeight.w600),
+              ),
+            ],
             const SizedBox(height: 12),
 
             TextField(
@@ -144,35 +204,46 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF1E3A8A),
+            backgroundColor: aPerte ? Colors.red.shade700 : const Color(0xFF1E3A8A),
             foregroundColor: Colors.white,
           ),
           onPressed: _erreurStock != null
               ? null
-              : () {
-                  final rate = activeInfo.rateToUSD;
-
+              : () async {
                   final prixTexte = _prixController.text.replaceAll(',', '.').trim();
                   final qteTexte = _qteController.text.replaceAll(',', '.').trim();
 
-                  final prixSaisi = double.tryParse(prixTexte) ?? (widget.produit.prixPour(ref.boutiqueVente) * rate);
+                  final prixNormal = _prixNormalUSD;
+                  final saisi = double.tryParse(prixTexte);
                   final qte = int.tryParse(qteTexte) ?? 1;
 
-                  final prixUSD = rate > 0 ? (prixSaisi / rate) : widget.produit.prixPour(ref.boutiqueVente);
+                  // Sans autorisation : toujours le prix normal
+                  final double prixUSD = (!peutChangerPrix || saisi == null || saisi <= 0)
+                      ? prixNormal
+                      : saisi / rate;
 
-                  // Transmettre explicitement widget.produit.stockBoutique(ref.boutiqueVente)
-                  final result = ref.read(cartProvider.notifier).addProduct(
-                        widget.produit.id,
-                        widget.produit.nom,
-                        prixUSD,
-                        qte,
-                        widget.produit.stockBoutique(ref.boutiqueVente),
-                      );
+                  // ⚠️ Vente à perte : on demande confirmation
+                  if (prixAchat > 0 && prixUSD < prixAchat - 0.005) {
+                    if (!await _confirmerPerte()) return;
+                  }
+                  if (!mounted) return;
+
+                  final stock = widget.produit.stockBoutique(ref.boutiqueVente);
+                  final notifier = ref.read(cartProvider.notifier);
+                  final result = notifier.addProduct(
+                    widget.produit.id,
+                    widget.produit.nom,
+                    prixUSD,
+                    qte,
+                    stock,
+                    prixNormal: prixNormal,
+                    prixAchat: prixAchat,
+                  );
 
                   if (result == CartOperationResult.stockLimitReached) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Quantité supérieure au stock disponible (${widget.produit.stockBoutique(ref.boutiqueVente)})'),
+                        content: Text('Quantité supérieure au stock disponible ($stock)'),
                         backgroundColor: Colors.orange,
                       ),
                     );
@@ -184,10 +255,12 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
                       ),
                     );
                   } else {
+                    // Déjà dans le panier : le nouveau prix s'applique aussi
+                    if (peutChangerPrix) notifier.changerPrix(widget.produit.id, prixUSD);
                     Navigator.pop(context, true);
                   }
                 },
-          child: const Text('Ajouter'),
+          child: Text(aPerte ? 'Vendre à perte' : 'Ajouter'),
         ),
       ],
     );

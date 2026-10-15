@@ -141,7 +141,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: _streamVentes(),
         builder: (context, snap) {
-          double ventes = 0, encaisse = 0, credit = 0, cout = 0;
+          double ventes = 0, encaisse = 0, credit = 0, cout = 0, remises = 0;
           final listeVentes = <Map<String, dynamic>>[];
           for (final doc in snap.data?.docs ?? const []) {
             final v = doc.data();
@@ -153,6 +153,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
             encaisse += _nombre(v['montantPaye']);
             credit += _nombre(v['resteAPayer']);
             cout += _nombre(v['coutMarchandises']);
+            remises += _nombre(v['remiseTotale']);
             listeVentes.add(v);
           }
           listeVentes.sort((a, b) => (_date(b['date']) ?? minuit).compareTo(_date(a['date']) ?? minuit));
@@ -285,6 +286,13 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                             ),
                           ),
                         ],
+                        if (voirFinances && remises > 0.005) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            'Remises accordées : ${devise.formatPrice(remises)}',
+                            style: TextStyle(color: Colors.orange.shade800, fontWeight: FontWeight.w600),
+                          ),
+                        ],
                         const SizedBox(height: 12),
                         SizedBox(
                           width: double.infinity,
@@ -301,6 +309,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                               voirFinances: voirFinances,
                               devise: devise,
                               taux: tauxCdf,
+                              remises: remises,
                             ),
                             icon: const Icon(Icons.send_rounded, color: Color(0xFF25D366)),
                             label: const Text('Envoyer le résumé du jour'),
@@ -463,6 +472,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
     required bool voirFinances,
     required CurrencyState devise,
     required double taux,
+    double remises = 0,
   }) async {
     const jours = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
     final now = DateTime.now();
@@ -487,6 +497,9 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
       t
         ..writeln('💵 Argent en caisse : ${devise.formatPrice(solde)}')
         ..writeln('📈 Bénéfice : ${devise.formatPrice(benefice)}');
+      if (remises > 0.005) {
+        t.writeln('🏷️ Remises accordées : ${devise.formatPrice(remises)}');
+      }
     }
     t
       ..writeln('Taux : 1 \$ = ${NumberFormat('#,##0', 'fr_FR').format(taux)} FC')
