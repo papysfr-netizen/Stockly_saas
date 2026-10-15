@@ -930,5 +930,65 @@
     }
   },
   "logoutQuestion": "Se déconnecter ?",
-  "logoutWarning": "Vous devrez vous reconnecter avec votre e-mail et votre mot de passe."
+  "logoutWarning": "Vous devrez vous reconnecter avec votre e-mail et votre mot de passe.",
+  "exportDone": "Exportation Excel terminée avec succès !",
+  "exportError": "Erreur d'exportation : {message}",
+  "@exportError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "attention": "Attention",
+  "mergeConfirm": "Voulez-vous vraiment fusionner les produits en double ? Cette action est irréversible.",
+  "mergeDone": "Nettoyage des doublons terminé avec succès !",
+  "confirmBtn": "Confirmer",
+  "backfillTitle": "Rattraper le coût des anciennes ventes",
+  "backfillExplain": "Les anciennes ventes qui n'ont pas encore d'écriture « Sortie de stock » vont en recevoir une, à leur date d'origine.\n\nLe coût est calculé avec le prix d'achat ACTUEL de chaque produit.\n\nVous pouvez relancer cette opération sans risque : une vente n'est jamais comptée deux fois.",
+  "launch": "Lancer",
+  "backfillRunning": "Rattrapage en cours…",
+  "backfillNothing": "Rien à rattraper",
+  "backfillDone": "Rattrapage terminé",
+  "backfillAllDone": "Toutes les ventes ({count}) ont déjà leur écriture « Sortie de stock ».",
+  "@backfillAllDone": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "backfillResult": "{nb} vente(s) rattrapée(s) sur {total}.\n\nCoût des marchandises ajouté : {cout} $",
+  "@backfillResult": {
+    "placeholders": {
+      "nb": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "cout": {
+        "type": "String"
+      }
+    }
+  },
+  "backfillNoPrice": "⚠️ {count} article(s) sans prix d'achat : leur coût est compté à 0. Complétez leur prix d'achat puis relancez.",
+  "@backfillNoPrice": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "backfillOffline": "Enregistré sur le téléphone : l'envoi se fera au retour d'internet.",
+  "error": "Erreur",
+  "backfillFailed": "Le rattrapage n'a pas pu se faire : {message}",
+  "@backfillFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "maintTitle": "Maintenance & Base de données"
 }

@@ -1148,4 +1148,74 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get logoutWarning =>
       'You will have to log in again with your e-mail and password.';
+
+  @override
+  String get exportDone => 'Excel export completed!';
+
+  @override
+  String exportError(String message) {
+    return 'Export error: $message';
+  }
+
+  @override
+  String get attention => 'Warning';
+
+  @override
+  String get mergeConfirm =>
+      'Do you really want to merge duplicate products? This cannot be undone.';
+
+  @override
+  String get mergeDone => 'Duplicates cleaned up!';
+
+  @override
+  String get confirmBtn => 'Confirm';
+
+  @override
+  String get backfillTitle => 'Catch up the cost of old sales';
+
+  @override
+  String get backfillExplain =>
+      'Old sales without a “Stock out” entry will receive one, at their original date.\n\nThe cost is calculated with the CURRENT purchase price of each product.\n\nYou can run this again safely: a sale is never counted twice.';
+
+  @override
+  String get launch => 'Start';
+
+  @override
+  String get backfillRunning => 'Catching up…';
+
+  @override
+  String get backfillNothing => 'Nothing to catch up';
+
+  @override
+  String get backfillDone => 'Catch-up finished';
+
+  @override
+  String backfillAllDone(String count) {
+    return 'All sales ($count) already have their “Stock out” entry.';
+  }
+
+  @override
+  String backfillResult(String nb, String total, String cout) {
+    return '$nb sale(s) caught up out of $total.\n\nCost of goods added: $cout \$';
+  }
+
+  @override
+  String backfillNoPrice(String count) {
+    return '⚠️ $count item(s) without a purchase price: their cost counts as 0. Add their purchase price, then run again.';
+  }
+
+  @override
+  String get backfillOffline =>
+      'Saved on the phone: it will be sent when internet is back.';
+
+  @override
+  String get error => 'Error';
+
+  @override
+  String backfillFailed(String message) {
+    return 'The catch-up could not be done: $message';
+  }
+
+  @override
+  String get maintTitle => 'Maintenance & database';
 }

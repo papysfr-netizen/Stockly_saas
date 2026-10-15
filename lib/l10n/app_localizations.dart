@@ -1944,6 +1944,120 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Vous devrez vous reconnecter avec votre e-mail et votre mot de passe.'**
   String get logoutWarning;
+
+  /// No description provided for @exportDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exportation Excel terminée avec succès !'**
+  String get exportDone;
+
+  /// No description provided for @exportError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur d\'exportation : {message}'**
+  String exportError(String message);
+
+  /// No description provided for @attention.
+  ///
+  /// In fr, this message translates to:
+  /// **'Attention'**
+  String get attention;
+
+  /// No description provided for @mergeConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voulez-vous vraiment fusionner les produits en double ? Cette action est irréversible.'**
+  String get mergeConfirm;
+
+  /// No description provided for @mergeDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nettoyage des doublons terminé avec succès !'**
+  String get mergeDone;
+
+  /// No description provided for @confirmBtn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer'**
+  String get confirmBtn;
+
+  /// No description provided for @backfillTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rattraper le coût des anciennes ventes'**
+  String get backfillTitle;
+
+  /// No description provided for @backfillExplain.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les anciennes ventes qui n\'ont pas encore d\'écriture « Sortie de stock » vont en recevoir une, à leur date d\'origine.\n\nLe coût est calculé avec le prix d\'achat ACTUEL de chaque produit.\n\nVous pouvez relancer cette opération sans risque : une vente n\'est jamais comptée deux fois.'**
+  String get backfillExplain;
+
+  /// No description provided for @launch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lancer'**
+  String get launch;
+
+  /// No description provided for @backfillRunning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rattrapage en cours…'**
+  String get backfillRunning;
+
+  /// No description provided for @backfillNothing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien à rattraper'**
+  String get backfillNothing;
+
+  /// No description provided for @backfillDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rattrapage terminé'**
+  String get backfillDone;
+
+  /// No description provided for @backfillAllDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes les ventes ({count}) ont déjà leur écriture « Sortie de stock ».'**
+  String backfillAllDone(String count);
+
+  /// No description provided for @backfillResult.
+  ///
+  /// In fr, this message translates to:
+  /// **'{nb} vente(s) rattrapée(s) sur {total}.\n\nCoût des marchandises ajouté : {cout} \$'**
+  String backfillResult(String nb, String total, String cout);
+
+  /// No description provided for @backfillNoPrice.
+  ///
+  /// In fr, this message translates to:
+  /// **'⚠️ {count} article(s) sans prix d\'achat : leur coût est compté à 0. Complétez leur prix d\'achat puis relancez.'**
+  String backfillNoPrice(String count);
+
+  /// No description provided for @backfillOffline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistré sur le téléphone : l\'envoi se fera au retour d\'internet.'**
+  String get backfillOffline;
+
+  /// No description provided for @error.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur'**
+  String get error;
+
+  /// No description provided for @backfillFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le rattrapage n\'a pas pu se faire : {message}'**
+  String backfillFailed(String message);
+
+  /// No description provided for @maintTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Maintenance & Base de données'**
+  String get maintTitle;
 }
 
 class _AppLocalizationsDelegate

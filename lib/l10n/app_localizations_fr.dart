@@ -1152,4 +1152,74 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get logoutWarning =>
       'Vous devrez vous reconnecter avec votre e-mail et votre mot de passe.';
+
+  @override
+  String get exportDone => 'Exportation Excel terminée avec succès !';
+
+  @override
+  String exportError(String message) {
+    return 'Erreur d\'exportation : $message';
+  }
+
+  @override
+  String get attention => 'Attention';
+
+  @override
+  String get mergeConfirm =>
+      'Voulez-vous vraiment fusionner les produits en double ? Cette action est irréversible.';
+
+  @override
+  String get mergeDone => 'Nettoyage des doublons terminé avec succès !';
+
+  @override
+  String get confirmBtn => 'Confirmer';
+
+  @override
+  String get backfillTitle => 'Rattraper le coût des anciennes ventes';
+
+  @override
+  String get backfillExplain =>
+      'Les anciennes ventes qui n\'ont pas encore d\'écriture « Sortie de stock » vont en recevoir une, à leur date d\'origine.\n\nLe coût est calculé avec le prix d\'achat ACTUEL de chaque produit.\n\nVous pouvez relancer cette opération sans risque : une vente n\'est jamais comptée deux fois.';
+
+  @override
+  String get launch => 'Lancer';
+
+  @override
+  String get backfillRunning => 'Rattrapage en cours…';
+
+  @override
+  String get backfillNothing => 'Rien à rattraper';
+
+  @override
+  String get backfillDone => 'Rattrapage terminé';
+
+  @override
+  String backfillAllDone(String count) {
+    return 'Toutes les ventes ($count) ont déjà leur écriture « Sortie de stock ».';
+  }
+
+  @override
+  String backfillResult(String nb, String total, String cout) {
+    return '$nb vente(s) rattrapée(s) sur $total.\n\nCoût des marchandises ajouté : $cout \$';
+  }
+
+  @override
+  String backfillNoPrice(String count) {
+    return '⚠️ $count article(s) sans prix d\'achat : leur coût est compté à 0. Complétez leur prix d\'achat puis relancez.';
+  }
+
+  @override
+  String get backfillOffline =>
+      'Enregistré sur le téléphone : l\'envoi se fera au retour d\'internet.';
+
+  @override
+  String get error => 'Erreur';
+
+  @override
+  String backfillFailed(String message) {
+    return 'Le rattrapage n\'a pas pu se faire : $message';
+  }
+
+  @override
+  String get maintTitle => 'Maintenance & Base de données';
 }

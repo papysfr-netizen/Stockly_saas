@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/currency_provider.dart';
+import '../../l10n/app_localizations.dart';
 
 class CurrencyCard extends ConsumerWidget {
   const CurrencyCard({super.key});
@@ -8,6 +9,7 @@ class CurrencyCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currencyState = ref.watch(currencyProvider);
+    final t = AppLocalizations.of(context);
 
     return Card(
       elevation: 2,
@@ -17,14 +19,14 @@ class CurrencyCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(Icons.account_balance, color: Colors.amber),
-                SizedBox(width: 8),
+                const Icon(Icons.account_balance, color: Colors.amber),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Taux BCC & Devise Active',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    t.bccSection,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -35,7 +37,7 @@ class CurrencyCard extends ConsumerWidget {
               initialValue: currencyState.bccCdfRate.toStringAsFixed(0),
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: 'Taux de change (BCC)',
+                labelText: t.bccRate,
                 prefixIcon: const Icon(Icons.currency_exchange),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
@@ -51,7 +53,7 @@ class CurrencyCard extends ConsumerWidget {
               isExpanded: true,
               initialValue: currencyState.activeCurrency,
               decoration: InputDecoration(
-                labelText: 'Devise principale',
+                labelText: t.activeCurrency,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
               items: currencyState.currencies.values.map((curr) {

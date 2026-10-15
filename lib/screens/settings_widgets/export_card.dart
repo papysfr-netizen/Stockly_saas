@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../settings_screen.dart'; // Pour accéder au controller de maintenance
+import '../../l10n/app_localizations.dart';
 
 class ExportCard extends ConsumerWidget {
   final String entrepriseId;
@@ -8,6 +9,7 @@ class ExportCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context);
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -16,14 +18,14 @@ class ExportCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(Icons.table_chart, color: Colors.teal),
-                SizedBox(width: 10),
+                const Icon(Icons.table_chart, color: Colors.teal),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Exportation des données',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    t.reportsExport,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -40,7 +42,7 @@ class ExportCard extends ConsumerWidget {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 icon: const Icon(Icons.file_download),
-                label: const Text('Exporter le stock vers Excel'),
+                label: Text(t.exportExcel),
                 onPressed: entrepriseId.isEmpty
                     ? null
                     : () async {
@@ -51,8 +53,8 @@ class ExportCard extends ConsumerWidget {
 
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Exportation Excel terminée avec succès !"),
+                              SnackBar(
+                                content: Text(t.exportDone),
                                 backgroundColor: Colors.green,
                               ),
                             );
@@ -61,7 +63,7 @@ class ExportCard extends ConsumerWidget {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text("Erreur d'exportation : $e"),
+                                content: Text(t.exportError('$e')),
                                 backgroundColor: Colors.red,
                               ),
                             );

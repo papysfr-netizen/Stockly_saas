@@ -2,23 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/services/rattrapage_cout_service.dart';
 import '../settings_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 class MaintenanceCard extends ConsumerWidget {
   final String entrepriseId;
   const MaintenanceCard({super.key, required this.entrepriseId});
 
   void _confirmerEtNettoyerDoublons(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Attention'),
-        content: const Text(
-          'Voulez-vous vraiment fusionner les produits en double ? Cette action est irréversible.',
-        ),
+        title: Text(t.attention),
+        content: Text(t.mergeConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Annuler'),
+            child: Text(t.cancel),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -34,8 +34,8 @@ class MaintenanceCard extends ConsumerWidget {
 
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Nettoyage des doublons terminé avec succès !'),
+                    SnackBar(
+                      content: Text(t.mergeDone),
                       backgroundColor: Colors.green,
                     ),
                   );
@@ -43,12 +43,12 @@ class MaintenanceCard extends ConsumerWidget {
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
+                    SnackBar(content: Text(t.errorPrefix('$e')), backgroundColor: Colors.red),
                   );
                 }
               }
             },
-            child: const Text('Confirmer'),
+            child: Text(t.confirmBtn),
           ),
         ],
       ),
@@ -58,25 +58,20 @@ class MaintenanceCard extends ConsumerWidget {
   // ================= RATTRAPAGE DU COÛT DES ANCIENNES VENTES =================
 
   Future<void> _rattraperCouts(BuildContext context) async {
+    final t = AppLocalizations.of(context);
     final confirmer = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Rattraper le coût des anciennes ventes'),
-        content: const Text(
-          'Les anciennes ventes qui n\'ont pas encore d\'écriture « Sortie de stock » '
-          'vont en recevoir une, à leur date d\'origine.\n\n'
-          'Le coût est calculé avec le prix d\'achat ACTUEL de chaque produit.\n\n'
-          'Vous pouvez relancer cette opération sans risque : '
-          'une vente n\'est jamais comptée deux fois.',
-        ),
+        title: Text(t.backfillTitle),
+        content: Text(t.backfillExplain),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Annuler'),
+            child: Text(t.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Lancer'),
+            child: Text(t.launch),
           ),
         ],
       ),
@@ -89,12 +84,12 @@ class MaintenanceCard extends ConsumerWidget {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const AlertDialog(
+      builder: (_) => AlertDialog(
         content: Row(
           children: [
-            CircularProgressIndicator(),
-            SizedBox(width: 20),
-            Expanded(child: Text('Rattrapage en cours…')),
+            const CircularProgressIndicator(),
+            const SizedBox(width: 20),
+            Expanded(child: Text(t.backfillRunning)),
           ],
         ),
       ),
@@ -104,21 +99,19 @@ class MaintenanceCard extends ConsumerWidget {
     String message;
     try {
       final r = await RattrapageCoutService.executer(entrepriseId);
-      titre = r.ventesRattrapees == 0 ? 'Rien à rattraper' : 'Rattrapage terminé';
+      titre = r.ventesRattrapees == 0 ? t.backfillNothing : t.backfillDone;
       message = r.ventesRattrapees == 0
-          ? 'Toutes les ventes (${r.ventesAnalysees}) ont déjà leur écriture « Sortie de stock ».'
-          : '${r.ventesRattrapees} vente(s) rattrapée(s) sur ${r.ventesAnalysees}.\n\n'
-              'Coût des marchandises ajouté : ${r.coutTotal.toStringAsFixed(2)} \$';
+          ? t.backfillAllDone('${r.ventesAnalysees}')
+          : t.backfillResult('${r.ventesRattrapees}', '${r.ventesAnalysees}', r.coutTotal.toStringAsFixed(2));
       if (r.articlesSansPrix > 0) {
-        message += '\n\n⚠️ ${r.articlesSansPrix} article(s) sans prix d\'achat : '
-            'leur coût est compté à 0. Complétez leur prix d\'achat puis relancez.';
+        message += '\n\n${t.backfillNoPrice('${r.articlesSansPrix}')}';
       }
       if (r.enAttenteReseau) {
-        message += '\n\nEnregistré sur le téléphone : l\'envoi se fera au retour d\'internet.';
+        message += '\n\n${t.backfillOffline}';
       }
     } catch (e) {
-      titre = 'Erreur';
-      message = 'Le rattrapage n\'a pas pu se faire : $e';
+      titre = t.error;
+      message = t.backfillFailed('$e');
     }
 
     navigator.pop(); // ferme la fenêtre d'attente
@@ -142,6 +135,7 @@ class MaintenanceCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context);
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -153,14 +147,14 @@ class MaintenanceCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(Icons.cleaning_services, color: Colors.redAccent),
-                SizedBox(width: 10),
+                const Icon(Icons.cleaning_services, color: Colors.redAccent),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Maintenance & Base de données',
-                    style: TextStyle(
+                    t.maintTitle,
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: Colors.redAccent,
@@ -177,7 +171,7 @@ class MaintenanceCard extends ConsumerWidget {
               height: 48,
               child: ElevatedButton.icon(
                 icon: const Icon(Icons.history_rounded),
-                label: const Text('Rattraper le coût des anciennes ventes'),
+                label: Text(t.backfillTitle),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal.shade700,
                   foregroundColor: Colors.white,
@@ -192,7 +186,7 @@ class MaintenanceCard extends ConsumerWidget {
               height: 48,
               child: ElevatedButton.icon(
                 icon: const Icon(Icons.merge_type),
-                label: const Text('Fusionner les doublons'),
+                label: Text(t.mergeDuplicates),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange.shade800,
                   foregroundColor: Colors.white,

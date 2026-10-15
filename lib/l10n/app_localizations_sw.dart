@@ -1146,4 +1146,74 @@ class AppLocalizationsSw extends AppLocalizations {
   @override
   String get logoutWarning =>
       'Utahitaji kuingia tena kwa barua pepe na nenosiri lako.';
+
+  @override
+  String get exportDone => 'Uhamishaji wa Excel umekamilika!';
+
+  @override
+  String exportError(String message) {
+    return 'Kosa la kuhamisha : $message';
+  }
+
+  @override
+  String get attention => 'Tahadhari';
+
+  @override
+  String get mergeConfirm =>
+      'Unataka kweli kuunganisha bidhaa zilizorudiwa? Hatua hii haiwezi kurudishwa.';
+
+  @override
+  String get mergeDone => 'Bidhaa zilizorudiwa zimesafishwa!';
+
+  @override
+  String get confirmBtn => 'Thibitisha';
+
+  @override
+  String get backfillTitle => 'Rekebisha gharama ya mauzo ya zamani';
+
+  @override
+  String get backfillExplain =>
+      'Mauzo ya zamani yasiyo na maandishi ya « Kutoka kwa stoo » yatapewa moja, kwa tarehe yake ya asili.\n\nGharama inahesabiwa kwa bei ya kununua ya SASA ya kila bidhaa.\n\nUnaweza kurudia bila hatari: mauzo hayahesabiwi mara mbili.';
+
+  @override
+  String get launch => 'Anza';
+
+  @override
+  String get backfillRunning => 'Inarekebisha…';
+
+  @override
+  String get backfillNothing => 'Hakuna cha kurekebisha';
+
+  @override
+  String get backfillDone => 'Urekebishaji umekamilika';
+
+  @override
+  String backfillAllDone(String count) {
+    return 'Mauzo yote ($count) tayari yana maandishi ya « Kutoka kwa stoo ».';
+  }
+
+  @override
+  String backfillResult(String nb, String total, String cout) {
+    return 'Mauzo $nb yamerekebishwa kati ya $total.\n\nGharama ya bidhaa iliyoongezwa : $cout \$';
+  }
+
+  @override
+  String backfillNoPrice(String count) {
+    return '⚠️ Bidhaa $count hazina bei ya kununua: gharama yake inahesabiwa 0. Jaza bei ya kununua kisha rudia.';
+  }
+
+  @override
+  String get backfillOffline =>
+      'Imehifadhiwa kwenye simu: itatumwa mtandao ukirudi.';
+
+  @override
+  String get error => 'Kosa';
+
+  @override
+  String backfillFailed(String message) {
+    return 'Urekebishaji haukuweza kufanyika : $message';
+  }
+
+  @override
+  String get maintTitle => 'Matengenezo na hifadhidata';
 }

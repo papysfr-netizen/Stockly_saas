@@ -1149,4 +1149,74 @@ class AppLocalizationsLn extends AppLocalizations {
   @override
   String get logoutWarning =>
       'Okozala na kokota lisusu na e-mail mpe mot de passe na yo.';
+
+  @override
+  String get exportDone => 'Kobimisa na Excel esili malamu!';
+
+  @override
+  String exportError(String message) {
+    return 'Libunga na kobimisa : $message';
+  }
+
+  @override
+  String get attention => 'Keba';
+
+  @override
+  String get mergeConfirm =>
+      'Olingi solo kosangisa biloko oyo ezali mbala mibale? Ekozonga lisusu te.';
+
+  @override
+  String get mergeDone => 'Biloko ya mbala mibale esili kopetolama!';
+
+  @override
+  String get confirmBtn => 'Ndima';
+
+  @override
+  String get backfillTitle => 'Bongisa motuya ya biteki ya kala';
+
+  @override
+  String get backfillExplain =>
+      'Biteki ya kala oyo ezali naino na ekomeli « Kobima ya stock » te ekozwa yango, na mokolo na yango ya ebandeli.\n\nMotuya etangami na talo ya kosomba ya SIKOYO ya eloko moko na moko.\n\nOkoki kozongela yango kozanga likama: eteki etangamaka mbala mibale te.';
+
+  @override
+  String get launch => 'Banda';
+
+  @override
+  String get backfillRunning => 'Ezali kobongisa…';
+
+  @override
+  String get backfillNothing => 'Eloko ya kobongisa ezali te';
+
+  @override
+  String get backfillDone => 'Kobongisa esili';
+
+  @override
+  String backfillAllDone(String count) {
+    return 'Biteki nyonso ($count) ezali kala na ekomeli « Kobima ya stock ».';
+  }
+
+  @override
+  String backfillResult(String nb, String total, String cout) {
+    return 'Biteki $nb ebongisami na $total.\n\nMotuya ya biloko ebakisami : $cout \$';
+  }
+
+  @override
+  String backfillNoPrice(String count) {
+    return '⚠️ Biloko $count ezali na talo ya kosomba te: motuya na yango etangami 0. Tia talo ya kosomba sima zongela.';
+  }
+
+  @override
+  String get backfillOffline =>
+      'Ebombami na telefone: ekotindama soki internet ezongi.';
+
+  @override
+  String get error => 'Libunga';
+
+  @override
+  String backfillFailed(String message) {
+    return 'Kobongisa ekokaki kosalema te : $message';
+  }
+
+  @override
+  String get maintTitle => 'Kobongisa mpe base de données';
 }
