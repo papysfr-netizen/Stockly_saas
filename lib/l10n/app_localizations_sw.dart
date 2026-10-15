@@ -387,4 +387,164 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get validate => 'Thibitisha';
+
+  @override
+  String get payTitle => 'Maliza mauzo na malipo';
+
+  @override
+  String get payClientName => 'Jina la mteja';
+
+  @override
+  String get payPhone => 'Simu (mfano: +243...)';
+
+  @override
+  String payClientAccount(String montant) {
+    return 'Akaunti ya mteja : $montant';
+  }
+
+  @override
+  String get payUse => 'Tumia';
+
+  @override
+  String payPaidByAccount(String montant, String solde) {
+    return 'Imelipwa kwa akaunti : $montant • Salio jipya : $solde';
+  }
+
+  @override
+  String get payMethod => 'Njia';
+
+  @override
+  String get payStatus => 'Hali';
+
+  @override
+  String get payCash => 'Pesa taslimu';
+
+  @override
+  String get payCard => 'Kadi ya benki';
+
+  @override
+  String get payTransfer => 'Uhamisho wa benki';
+
+  @override
+  String get payPaid => 'Imelipwa';
+
+  @override
+  String get payDebt => 'Deni';
+
+  @override
+  String get payPartial => 'Malipo ya sehemu';
+
+  @override
+  String get payInvoiceTotal => 'Jumla ya ankara :';
+
+  @override
+  String get payPaidByClientAccount => 'Imelipwa kwa akaunti ya mteja :';
+
+  @override
+  String get payToCollect => 'Kupokea sasa :';
+
+  @override
+  String payAllIn(String code) {
+    return 'Yote kwa $code';
+  }
+
+  @override
+  String payRestIn(String code) {
+    return 'Kilichobaki kwa $code';
+  }
+
+  @override
+  String payReceived(String code) {
+    return 'Kiasi kilichopokelewa ($code)';
+  }
+
+  @override
+  String get payRemaining => 'Kinachodaiwa :';
+
+  @override
+  String payChange(String code) {
+    return 'Chenji ya kurudisha ($code) :';
+  }
+
+  @override
+  String get payDelivery => 'Utoaji';
+
+  @override
+  String get payDeliveredNow => 'Imetolewa sasa';
+
+  @override
+  String get payDeliverLater => 'Itatolewa baadaye';
+
+  @override
+  String get payPickupBefore => 'Ichukuliwe kabla ya';
+
+  @override
+  String payDeadline(String date) {
+    return 'Tarehe ya mwisho : $date — mteja ataonekana kwenye « Za kutoa ».';
+  }
+
+  @override
+  String payDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'siku $count',
+      one: 'siku 1',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payReceiptActions => 'Chaguo za risiti :';
+
+  @override
+  String get payPrintReceipt => 'Chapisha risiti';
+
+  @override
+  String get paySendWhatsApp => 'Tuma kwa WhatsApp';
+
+  @override
+  String get paySendSms => 'Tuma kwa SMS';
+
+  @override
+  String get payValidate => 'Thibitisha na pokea';
+
+  @override
+  String payBalanceChanged(String montant) {
+    return 'Salio la mteja limebadilika (lipo : $montant \$). Zima kisha washa « Tumia » ili kuhesabu upya.';
+  }
+
+  @override
+  String get payNotSaved => 'Mauzo HAYAJAHIFADHIWA';
+
+  @override
+  String payDenied(String code) {
+    return 'Seva imekataa mauzo haya (ruhusa haitoshi).\n\nHakuna kilichohifadhiwa: wala mauzo, wala bidhaa, wala kasha.\nUsitoe bidhaa bado: mjulishe msimamizi.\n\nMsimbo : $code';
+  }
+
+  @override
+  String payNotSavedOther(String detail) {
+    return 'Hakuna kilichohifadhiwa.\n\n$detail';
+  }
+
+  @override
+  String get payUnderstood => 'Nimeelewa';
+
+  @override
+  String get paySaved => 'Mauzo yamehifadhiwa!';
+
+  @override
+  String paySavedPickup(String date) {
+    return 'Mauzo yamehifadhiwa — ichukuliwe kabla ya $date.';
+  }
+
+  @override
+  String payNewBalance(String montant) {
+    return ' Salio jipya la mteja : $montant.';
+  }
+
+  @override
+  String payError(String message) {
+    return 'Kosa wakati wa kuthibitisha : $message';
+  }
 }

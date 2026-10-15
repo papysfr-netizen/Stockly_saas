@@ -731,6 +731,258 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Valider'**
   String get validate;
+
+  /// No description provided for @payTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Finaliser la vente & Règlement'**
+  String get payTitle;
+
+  /// No description provided for @payClientName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom du Client'**
+  String get payClientName;
+
+  /// No description provided for @payPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléphone (ex: +243...)'**
+  String get payPhone;
+
+  /// No description provided for @payClientAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte client : {montant}'**
+  String payClientAccount(String montant);
+
+  /// No description provided for @payUse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Utiliser'**
+  String get payUse;
+
+  /// No description provided for @payPaidByAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payé par le compte : {montant} • Nouveau solde : {solde}'**
+  String payPaidByAccount(String montant, String solde);
+
+  /// No description provided for @payMethod.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moyen'**
+  String get payMethod;
+
+  /// No description provided for @payStatus.
+  ///
+  /// In fr, this message translates to:
+  /// **'Statut'**
+  String get payStatus;
+
+  /// No description provided for @payCash.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cash'**
+  String get payCash;
+
+  /// No description provided for @payCard.
+  ///
+  /// In fr, this message translates to:
+  /// **'Carte bancaire'**
+  String get payCard;
+
+  /// No description provided for @payTransfer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Virement'**
+  String get payTransfer;
+
+  /// No description provided for @payPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payé'**
+  String get payPaid;
+
+  /// No description provided for @payDebt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dette'**
+  String get payDebt;
+
+  /// No description provided for @payPartial.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement partiel'**
+  String get payPartial;
+
+  /// No description provided for @payInvoiceTotal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total Facture :'**
+  String get payInvoiceTotal;
+
+  /// No description provided for @payPaidByClientAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payé par compte client :'**
+  String get payPaidByClientAccount;
+
+  /// No description provided for @payToCollect.
+  ///
+  /// In fr, this message translates to:
+  /// **'À encaisser maintenant :'**
+  String get payToCollect;
+
+  /// No description provided for @payAllIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout en {code}'**
+  String payAllIn(String code);
+
+  /// No description provided for @payRestIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reste en {code}'**
+  String payRestIn(String code);
+
+  /// No description provided for @payReceived.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant Perçu ({code})'**
+  String payReceived(String code);
+
+  /// No description provided for @payRemaining.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reste dû :'**
+  String get payRemaining;
+
+  /// No description provided for @payChange.
+  ///
+  /// In fr, this message translates to:
+  /// **'Monnaie à rendre ({code}) :'**
+  String payChange(String code);
+
+  /// No description provided for @payDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison'**
+  String get payDelivery;
+
+  /// No description provided for @payDeliveredNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livré maintenant'**
+  String get payDeliveredNow;
+
+  /// No description provided for @payDeliverLater.
+  ///
+  /// In fr, this message translates to:
+  /// **'À livrer plus tard'**
+  String get payDeliverLater;
+
+  /// No description provided for @payPickupBefore.
+  ///
+  /// In fr, this message translates to:
+  /// **'À retirer avant'**
+  String get payPickupBefore;
+
+  /// No description provided for @payDeadline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date limite : {date} — le client apparaîtra dans « À livrer ».'**
+  String payDeadline(String date);
+
+  /// No description provided for @payDays.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 jour} other{{count} jours}}'**
+  String payDays(int count);
+
+  /// No description provided for @payReceiptActions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actions pour le reçu :'**
+  String get payReceiptActions;
+
+  /// No description provided for @payPrintReceipt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Imprimer le reçu thermique'**
+  String get payPrintReceipt;
+
+  /// No description provided for @paySendWhatsApp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer par WhatsApp'**
+  String get paySendWhatsApp;
+
+  /// No description provided for @paySendSms.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer par SMS'**
+  String get paySendSms;
+
+  /// No description provided for @payValidate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider & Encaisser'**
+  String get payValidate;
+
+  /// No description provided for @payBalanceChanged.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le solde du client a changé (disponible : {montant} \$). Désactivez puis réactivez « Utiliser » pour recalculer.'**
+  String payBalanceChanged(String montant);
+
+  /// No description provided for @payNotSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vente NON enregistrée'**
+  String get payNotSaved;
+
+  /// No description provided for @payDenied.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le serveur a refusé cette vente (droits insuffisants).\n\nRien n\'a été enregistré : ni la vente, ni le stock, ni la caisse.\nNe donnez pas encore la marchandise : prévenez le responsable.\n\nCode : {code}'**
+  String payDenied(String code);
+
+  /// No description provided for @payNotSavedOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien n\'a été enregistré.\n\n{detail}'**
+  String payNotSavedOther(String detail);
+
+  /// No description provided for @payUnderstood.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compris'**
+  String get payUnderstood;
+
+  /// No description provided for @paySaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vente enregistrée avec succès !'**
+  String get paySaved;
+
+  /// No description provided for @paySavedPickup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vente enregistrée — à retirer avant le {date}.'**
+  String paySavedPickup(String date);
+
+  /// No description provided for @payNewBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **' Nouveau solde du client : {montant}.'**
+  String payNewBalance(String montant);
+
+  /// No description provided for @payError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de la validation : {message}'**
+  String payError(String message);
 }
 
 class _AppLocalizationsDelegate

@@ -306,5 +306,148 @@
   },
   "agreedPrice": "Prix accordé (par pièce)",
   "normalPriceBtn": "Prix normal",
-  "validate": "Valider"
+  "validate": "Valider",
+  "payTitle": "Finaliser la vente & Règlement",
+  "payClientName": "Nom du Client",
+  "payPhone": "Téléphone (ex: +243...)",
+  "payClientAccount": "Compte client : {montant}",
+  "@payClientAccount": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "payUse": "Utiliser",
+  "payPaidByAccount": "Payé par le compte : {montant} • Nouveau solde : {solde}",
+  "@payPaidByAccount": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      },
+      "solde": {
+        "type": "String"
+      }
+    }
+  },
+  "payMethod": "Moyen",
+  "payStatus": "Statut",
+  "payCash": "Cash",
+  "payCard": "Carte bancaire",
+  "payTransfer": "Virement",
+  "payPaid": "Payé",
+  "payDebt": "Dette",
+  "payPartial": "Paiement partiel",
+  "payInvoiceTotal": "Total Facture :",
+  "payPaidByClientAccount": "Payé par compte client :",
+  "payToCollect": "À encaisser maintenant :",
+  "payAllIn": "Tout en {code}",
+  "@payAllIn": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "payRestIn": "Reste en {code}",
+  "@payRestIn": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "payReceived": "Montant Perçu ({code})",
+  "@payReceived": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "payRemaining": "Reste dû :",
+  "payChange": "Monnaie à rendre ({code}) :",
+  "@payChange": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "payDelivery": "Livraison",
+  "payDeliveredNow": "Livré maintenant",
+  "payDeliverLater": "À livrer plus tard",
+  "payPickupBefore": "À retirer avant",
+  "payDeadline": "Date limite : {date} — le client apparaîtra dans « À livrer ».",
+  "@payDeadline": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "payDays": "{count, plural, =1{1 jour} other{{count} jours}}",
+  "@payDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "payReceiptActions": "Actions pour le reçu :",
+  "payPrintReceipt": "Imprimer le reçu thermique",
+  "paySendWhatsApp": "Envoyer par WhatsApp",
+  "paySendSms": "Envoyer par SMS",
+  "payValidate": "Valider & Encaisser",
+  "payBalanceChanged": "Le solde du client a changé (disponible : {montant} $). Désactivez puis réactivez « Utiliser » pour recalculer.",
+  "@payBalanceChanged": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "payNotSaved": "Vente NON enregistrée",
+  "payDenied": "Le serveur a refusé cette vente (droits insuffisants).\n\nRien n'a été enregistré : ni la vente, ni le stock, ni la caisse.\nNe donnez pas encore la marchandise : prévenez le responsable.\n\nCode : {code}",
+  "@payDenied": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "payNotSavedOther": "Rien n'a été enregistré.\n\n{detail}",
+  "@payNotSavedOther": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "payUnderstood": "Compris",
+  "paySaved": "Vente enregistrée avec succès !",
+  "paySavedPickup": "Vente enregistrée — à retirer avant le {date}.",
+  "@paySavedPickup": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "payNewBalance": " Nouveau solde du client : {montant}.",
+  "@payNewBalance": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "payError": "Erreur lors de la validation : {message}",
+  "@payError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -16,6 +16,7 @@ import 'package:stockly_saas/features/accounting/services/accounting_journal_ser
 import 'package:stockly_saas/features/comptes_clients/compte_client_service.dart';
 import 'package:stockly_saas/core/services/receipt_service.dart';
 import 'package:stockly_saas/core/utils/payment_calculator.dart';
+import 'package:stockly_saas/l10n/app_localizations.dart';
 
 // Import de ton écran de Bon de Livraison professionnel
 import '../../../screens/bon_livraison_screen.dart';
@@ -261,6 +262,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
 
     final dateLimiteApercu = DateTime.now().add(Duration(days: delaiRetraitJours));
     final soldeUtilise = _montantSoldeUtilise;
+    final t = AppLocalizations.of(context);
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -284,7 +286,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Finaliser la vente & Règlement',
+                      t.payTitle,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -305,7 +307,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                       TextField(
                         controller: _clientController,
                         decoration: InputDecoration(
-                          labelText: 'Nom du Client',
+                          labelText: t.payClientName,
                           prefixIcon: const Icon(Icons.person_outline, size: 20),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -316,7 +318,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                         controller: _telephoneController,
                         onChanged: _onTelephoneChanged,
                         decoration: InputDecoration(
-                          labelText: 'Téléphone (ex: +243...)',
+                          labelText: t.payPhone,
                           hintText: '+243...',
                           prefixIcon: const Icon(Icons.phone_outlined, size: 20),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
@@ -351,14 +353,14 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                                   const SizedBox(width: 6),
                                   Expanded(
                                     child: Text(
-                                      'Compte client : ${currencyState.formatPrice(_soldeCompte)}',
+                                      t.payClientAccount(currencyState.formatPrice(_soldeCompte)),
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: Colors.green.shade900,
                                       ),
                                     ),
                                   ),
-                                  const Text('Utiliser', style: TextStyle(fontSize: 12)),
+                                  Text(t.payUse, style: const TextStyle(fontSize: 12)),
                                   Switch(
                                     value: _utiliserSolde,
                                     activeThumbColor: Colors.green.shade700,
@@ -372,8 +374,8 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                               ),
                               if (_utiliserSolde)
                                 Text(
-                                  'Payé par le compte : ${currencyState.formatPrice(soldeUtilise)}'
-                                  ' • Nouveau solde : ${currencyState.formatPrice(_soldeCompte - soldeUtilise)}',
+                                  t.payPaidByAccount(currencyState.formatPrice(soldeUtilise),
+                                      currencyState.formatPrice(_soldeCompte - soldeUtilise)),
                                   style: TextStyle(fontSize: 12, color: Colors.green.shade900),
                                 ),
                             ],
@@ -389,7 +391,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                               initialValue: methodePaiement,
                               isExpanded: true,
                               decoration: InputDecoration(
-                                labelText: 'Moyen',
+                                labelText: t.payMethod,
                                 prefixIcon: const Icon(Icons.payment, size: 18),
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
@@ -397,7 +399,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                               items: ['Cash', 'Mobile Money', 'Carte bancaire', 'Virement']
                                   .map((m) => DropdownMenuItem(
                                         value: m,
-                                        child: Text(m, style: const TextStyle(fontSize: 12), overflow: TextOverflow.ellipsis),
+                                        child: Text(m == 'Cash' ? t.payCash : m == 'Carte bancaire' ? t.payCard : m == 'Virement' ? t.payTransfer : m, style: const TextStyle(fontSize: 12), overflow: TextOverflow.ellipsis),
                                       ))
                                   .toList(),
                               onChanged: (val) {
@@ -412,7 +414,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                               initialValue: statutPaiement,
                               isExpanded: true,
                               decoration: InputDecoration(
-                                labelText: 'Statut',
+                                labelText: t.payStatus,
                                 prefixIcon: const Icon(Icons.rule_folder_outlined, size: 18),
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
@@ -420,7 +422,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                               items: ['Payé', 'Dette', 'Acompte']
                                   .map((s) => DropdownMenuItem(
                                         value: s,
-                                        child: Text(s == 'Acompte' ? 'Paiement partiel' : s, style: const TextStyle(fontSize: 12), overflow: TextOverflow.ellipsis),
+                                        child: Text(s == 'Acompte' ? t.payPartial : (s == 'Dette' ? t.payDebt : t.payPaid), style: const TextStyle(fontSize: 12), overflow: TextOverflow.ellipsis),
                                       ))
                                   .toList(),
                               onChanged: (val) {
@@ -450,7 +452,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text('Total Facture :', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                                Text(t.payInvoiceTotal, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
                                 Flexible(
                                   child: Text(
                                     currencyState.formatPrice(widget.total),
@@ -468,7 +470,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('Payé par compte client :',
+                                  Text(t.payPaidByClientAccount,
                                       style: TextStyle(fontSize: 12, color: Colors.green.shade800)),
                                   Text('- ${currencyState.formatPrice(soldeUtilise)}',
                                       style: TextStyle(
@@ -480,8 +482,8 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Text('À encaisser maintenant :',
-                                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                                  Text(t.payToCollect,
+                                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
                                   Text(currencyState.formatPrice(_totalAPayer),
                                       style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                                 ],
@@ -496,7 +498,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                               children: [
                                 ActionChip(
                                   avatar: const Icon(Icons.attach_money, size: 15, color: Colors.teal),
-                                  label: const Text('Tout en \$', style: TextStyle(fontSize: 11)),
+                                  label: Text(t.payAllIn('\$'), style: const TextStyle(fontSize: 11)),
                                   onPressed: _payerToutUSD,
                                   backgroundColor: Colors.white,
                                   padding: EdgeInsets.zero,
@@ -504,7 +506,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                                 if (activeInfo.code != 'USD') ...[
                                   ActionChip(
                                     avatar: const Icon(Icons.currency_exchange, size: 15, color: Colors.teal),
-                                    label: Text('Tout en ${activeInfo.code}', style: const TextStyle(fontSize: 11)),
+                                    label: Text(t.payAllIn(activeInfo.code), style: const TextStyle(fontSize: 11)),
                                     onPressed: () => _payerToutLocal(activeInfo.rateToUSD),
                                     backgroundColor: Colors.white,
                                     padding: EdgeInsets.zero,
@@ -512,7 +514,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                                   if (calc.remainingUSD > 0 && paidUSD > 0)
                                     ActionChip(
                                       avatar: const Icon(Icons.add_card, size: 15, color: Colors.orange),
-                                      label: Text('Reste en ${activeInfo.code}', style: const TextStyle(fontSize: 11)),
+                                      label: Text(t.payRestIn(activeInfo.code), style: const TextStyle(fontSize: 11)),
                                       onPressed: () => _completerResteLocal(calc, activeInfo.rateToUSD),
                                       backgroundColor: Colors.orange.shade50,
                                       padding: EdgeInsets.zero,
@@ -527,7 +529,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                               controller: _verseUSDController,
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
                               decoration: InputDecoration(
-                                labelText: 'Montant Perçu (USD)',
+                                labelText: t.payReceived('USD'),
                                 prefixText: '\$ ',
                                 isDense: true,
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -546,7 +548,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                                 controller: _verseLocalController,
                                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                 decoration: InputDecoration(
-                                  labelText: 'Montant Perçu (${activeInfo.code})',
+                                  labelText: t.payReceived(activeInfo.code),
                                   suffixText: activeInfo.symbol,
                                   isDense: true,
                                   contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -566,7 +568,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                                 alignment: WrapAlignment.spaceBetween,
                                 crossAxisAlignment: WrapCrossAlignment.center,
                                 children: [
-                                  const Text('Reste dû :', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 12)),
+                                  Text(t.payRemaining, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 12)),
                                   Text(
                                     '${calc.remainingUSD.toStringAsFixed(2)} \$ (${_formatAmount(calc.remainingUSD * activeInfo.rateToUSD)} ${activeInfo.symbol})',
                                     style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 12),
@@ -577,7 +579,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Text('Monnaie à rendre (USD) :', style: TextStyle(color: Colors.green, fontWeight: FontWeight.w600, fontSize: 12)),
+                                  Text(t.payChange('USD'), style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w600, fontSize: 12)),
                                   Text(
                                     '\$ ${calc.changeInUSD.toStringAsFixed(2)}',
                                     style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12),
@@ -588,7 +590,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text('Monnaie à rendre (${activeInfo.code}) :', style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w600, fontSize: 12)),
+                                    Text(t.payChange(activeInfo.code), style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w600, fontSize: 12)),
                                     Text(
                                       '${_formatAmount(calc.changeInLocal)} ${activeInfo.symbol}',
                                       style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12),
@@ -606,7 +608,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                         initialValue: statutLivraison,
                         isExpanded: true,
                         decoration: InputDecoration(
-                          labelText: 'Livraison',
+                          labelText: t.payDelivery,
                           prefixIcon: Icon(
                             statutLivraison == 'Livré'
                                 ? Icons.check_circle_outline
@@ -617,14 +619,14 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                         ),
-                        items: const [
+                        items: [
                           DropdownMenuItem(
                             value: 'Livré',
-                            child: Text('Livré maintenant', style: TextStyle(fontSize: 13)),
+                            child: Text(t.payDeliveredNow, style: const TextStyle(fontSize: 13)),
                           ),
                           DropdownMenuItem(
                             value: 'Non livré',
-                            child: Text('À livrer plus tard', style: TextStyle(fontSize: 13)),
+                            child: Text(t.payDeliverLater, style: const TextStyle(fontSize: 13)),
                           ),
                         ],
                         onChanged: (val) {
@@ -639,12 +641,12 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                           initialValue: delaiRetraitJours,
                           isExpanded: true,
                           decoration: InputDecoration(
-                            labelText: 'À retirer avant',
+                            labelText: t.payPickupBefore,
                             prefixIcon: Icon(Icons.event, size: 18, color: Colors.orange.shade800),
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                             contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                             helperText:
-                                'Date limite : ${_formatJour(dateLimiteApercu)} — le client apparaîtra dans « À livrer ».',
+                                t.payDeadline(_formatJour(dateLimiteApercu)),
                             helperMaxLines: 2,
                             helperStyle: TextStyle(color: Colors.orange.shade800, fontSize: 11),
                           ),
@@ -652,7 +654,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                               .map((j) => DropdownMenuItem(
                                     value: j,
                                     child: Text(
-                                      j == 1 ? '1 jour' : '$j jours',
+                                      t.payDays(j),
                                       style: const TextStyle(fontSize: 13),
                                     ),
                                   ))
@@ -665,9 +667,9 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                       const Divider(height: 16),
 
                       // CHECKBOXES
-                      const Text('Actions pour le reçu :', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      Text(t.payReceiptActions, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                       CheckboxListTile(
-                        title: const Text('Imprimer le reçu thermique', style: TextStyle(fontSize: 12)),
+                        title: Text(t.payPrintReceipt, style: const TextStyle(fontSize: 12)),
                         value: imprimerRecu,
                         activeColor: Colors.teal.shade800,
                         onChanged: (val) => setState(() => imprimerRecu = val ?? true),
@@ -676,7 +678,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                         contentPadding: EdgeInsets.zero,
                       ),
                       CheckboxListTile(
-                        title: const Text('Envoyer par WhatsApp', style: TextStyle(fontSize: 12)),
+                        title: Text(t.paySendWhatsApp, style: const TextStyle(fontSize: 12)),
                         value: envoyerWhatsApp,
                         activeColor: Colors.teal.shade800,
                         onChanged: (val) => setState(() => envoyerWhatsApp = val ?? false),
@@ -685,7 +687,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                         contentPadding: EdgeInsets.zero,
                       ),
                       CheckboxListTile(
-                        title: const Text('Envoyer par SMS', style: TextStyle(fontSize: 12)),
+                        title: Text(t.paySendSms, style: const TextStyle(fontSize: 12)),
                         value: envoyerSMS,
                         activeColor: Colors.teal.shade800,
                         onChanged: (val) => setState(() => envoyerSMS = val ?? false),
@@ -706,7 +708,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                 children: [
                   TextButton(
                     onPressed: isLoading ? null : () => Navigator.pop(context),
-                    child: const Text('Annuler'),
+                    child: Text(t.cancel),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(
@@ -722,7 +724,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                             height: 20,
                             child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                           )
-                        : const Text('Valider & Encaisser', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        : Text(t.payValidate, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
@@ -784,6 +786,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
   // ================= ENREGISTREMENT ET COMPTABILISATION =================
   Future<void> _validerVente() async {
     setState(() => isLoading = true);
+    final t = AppLocalizations.of(context);
 
     final activeInfoValidation = ref.read(currencyProvider).activeCurrencyInfo;
     final double soldeUtilise = _montantSoldeUtilise;
@@ -805,9 +808,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
       if (soldeUtilise > 0.005) {
         soldeAvant = await CompteClientService.lireSolde(widget.entrepriseId, telephone);
         if (soldeAvant < soldeUtilise - 0.005) {
-          throw Exception(
-              'Le solde du client a changé (disponible : ${soldeAvant.toStringAsFixed(2)} \$). '
-              'Désactivez puis réactivez « Utiliser » pour recalculer.');
+          throw Exception(t.payBalanceChanged(soldeAvant.toStringAsFixed(2)));
         }
       }
 
@@ -1063,19 +1064,16 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
           context: context,
           builder: (ctx) => AlertDialog(
             icon: const Icon(Icons.error_outline_rounded, color: Colors.red, size: 44),
-            title: const Text('Vente NON enregistrée'),
+            title: Text(t.payNotSaved),
             content: Text(
               e.code == 'permission-denied'
-                  ? "Le serveur a refusé cette vente (droits insuffisants).\n\n"
-                      "Rien n'a été enregistré : ni la vente, ni le stock, ni la caisse.\n"
-                      "Ne donnez pas encore la marchandise : prévenez le responsable.\n\n"
-                      "Code : ${e.code}"
-                  : "Rien n'a été enregistré.\n\n${e.code} : ${e.message ?? ''}",
+                  ? t.payDenied(e.code)
+                  : t.payNotSavedOther('${e.code} : ${e.message ?? ''}'),
             ),
             actions: [
               FilledButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('Compris'),
+                child: Text(t.payUnderstood),
               ),
             ],
           ),
@@ -1174,13 +1172,13 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
       }
 
       final String texteCompte = soldeUtilise > 0.005
-          ? ' Nouveau solde du client : ${currencyState.formatPrice(soldeAvant - soldeUtilise)}.'
+          ? t.payNewBalance(currencyState.formatPrice(soldeAvant - soldeUtilise))
           : '';
       messenger.showSnackBar(
         SnackBar(
           content: Text(estLivre
-              ? 'Vente enregistrée avec succès !$texteCompte'
-              : 'Vente enregistrée — à retirer avant le ${_formatJour(finJourLimite)}.$texteCompte'),
+              ? '${t.paySaved}$texteCompte'
+              : '${t.paySavedPickup(_formatJour(finJourLimite))}$texteCompte'),
           backgroundColor: estLivre ? Colors.teal : Colors.orange.shade800,
         ),
       );
@@ -1196,7 +1194,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Erreur lors de la validation : ${e.toString().replaceFirst('Exception: ', '')}'),
+          content: Text(t.payError(e.toString().replaceFirst('Exception: ', ''))),
           backgroundColor: Colors.red,
         ),
       );

@@ -391,4 +391,164 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get validate => 'Ndima';
+
+  @override
+  String get payTitle => 'Silisa eteki mpe kofuta';
+
+  @override
+  String get payClientName => 'Kombo ya mosombi';
+
+  @override
+  String get payPhone => 'Telefone (ndakisa: +243...)';
+
+  @override
+  String payClientAccount(String montant) {
+    return 'Compte ya mosombi : $montant';
+  }
+
+  @override
+  String get payUse => 'Salela';
+
+  @override
+  String payPaidByAccount(String montant, String solde) {
+    return 'Efutami na compte : $montant • Mbongo etikali : $solde';
+  }
+
+  @override
+  String get payMethod => 'Lolenge';
+
+  @override
+  String get payStatus => 'Ezalela';
+
+  @override
+  String get payCash => 'Mbongo ya maboko';
+
+  @override
+  String get payCard => 'Karte ya banki';
+
+  @override
+  String get payTransfer => 'Kotinda na banki';
+
+  @override
+  String get payPaid => 'Efutami';
+
+  @override
+  String get payDebt => 'Niongo';
+
+  @override
+  String get payPartial => 'Kofuta ndambo';
+
+  @override
+  String get payInvoiceTotal => 'Motango ya fakture :';
+
+  @override
+  String get payPaidByClientAccount => 'Efutami na compte ya mosombi :';
+
+  @override
+  String get payToCollect => 'Kozwa sikoyo :';
+
+  @override
+  String payAllIn(String code) {
+    return 'Nyonso na $code';
+  }
+
+  @override
+  String payRestIn(String code) {
+    return 'Oyo etikali na $code';
+  }
+
+  @override
+  String payReceived(String code) {
+    return 'Mbongo ezwami ($code)';
+  }
+
+  @override
+  String get payRemaining => 'Oyo etikali kofuta :';
+
+  @override
+  String payChange(String code) {
+    return 'Mbongo ya kozongisa ($code) :';
+  }
+
+  @override
+  String get payDelivery => 'Bopesi';
+
+  @override
+  String get payDeliveredNow => 'Epesami sikoyo';
+
+  @override
+  String get payDeliverLater => 'Ekopesama na nsima';
+
+  @override
+  String get payPickupBefore => 'Kozwa liboso ya';
+
+  @override
+  String payDeadline(String date) {
+    return 'Mokolo ya suka : $date — mosombi akomonana na « Ya kopesa ».';
+  }
+
+  @override
+  String payDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'mikolo $count',
+      one: 'mokolo 1',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payReceiptActions => 'Makambo ya resi :';
+
+  @override
+  String get payPrintReceipt => 'Bimisa resi';
+
+  @override
+  String get paySendWhatsApp => 'Tinda na WhatsApp';
+
+  @override
+  String get paySendSms => 'Tinda na SMS';
+
+  @override
+  String get payValidate => 'Ndima mpe zwa mbongo';
+
+  @override
+  String payBalanceChanged(String montant) {
+    return 'Mbongo ya mosombi ebongwani (ezali : $montant \$). Kufisa mpe zongisa « Salela » mpo na kotanga lisusu.';
+  }
+
+  @override
+  String get payNotSaved => 'Eteki EBOMBAMI TE';
+
+  @override
+  String payDenied(String code) {
+    return 'Serveur eboyi eteki oyo (ndingisa ekoki te).\n\nEloko moko te ebombami: eteki te, stock te, kesi te.\nPesa naino biloko te: yebisa mokambi.\n\nKode : $code';
+  }
+
+  @override
+  String payNotSavedOther(String detail) {
+    return 'Eloko moko te ebombami.\n\n$detail';
+  }
+
+  @override
+  String get payUnderstood => 'Nayoki';
+
+  @override
+  String get paySaved => 'Eteki ebombami malamu!';
+
+  @override
+  String paySavedPickup(String date) {
+    return 'Eteki ebombami — ezwama liboso ya $date.';
+  }
+
+  @override
+  String payNewBalance(String montant) {
+    return ' Mbongo ya sika ya mosombi : $montant.';
+  }
+
+  @override
+  String payError(String message) {
+    return 'Libunga na tango ya kondima : $message';
+  }
 }

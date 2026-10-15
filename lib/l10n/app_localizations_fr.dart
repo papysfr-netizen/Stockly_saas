@@ -392,4 +392,164 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get validate => 'Valider';
+
+  @override
+  String get payTitle => 'Finaliser la vente & Règlement';
+
+  @override
+  String get payClientName => 'Nom du Client';
+
+  @override
+  String get payPhone => 'Téléphone (ex: +243...)';
+
+  @override
+  String payClientAccount(String montant) {
+    return 'Compte client : $montant';
+  }
+
+  @override
+  String get payUse => 'Utiliser';
+
+  @override
+  String payPaidByAccount(String montant, String solde) {
+    return 'Payé par le compte : $montant • Nouveau solde : $solde';
+  }
+
+  @override
+  String get payMethod => 'Moyen';
+
+  @override
+  String get payStatus => 'Statut';
+
+  @override
+  String get payCash => 'Cash';
+
+  @override
+  String get payCard => 'Carte bancaire';
+
+  @override
+  String get payTransfer => 'Virement';
+
+  @override
+  String get payPaid => 'Payé';
+
+  @override
+  String get payDebt => 'Dette';
+
+  @override
+  String get payPartial => 'Paiement partiel';
+
+  @override
+  String get payInvoiceTotal => 'Total Facture :';
+
+  @override
+  String get payPaidByClientAccount => 'Payé par compte client :';
+
+  @override
+  String get payToCollect => 'À encaisser maintenant :';
+
+  @override
+  String payAllIn(String code) {
+    return 'Tout en $code';
+  }
+
+  @override
+  String payRestIn(String code) {
+    return 'Reste en $code';
+  }
+
+  @override
+  String payReceived(String code) {
+    return 'Montant Perçu ($code)';
+  }
+
+  @override
+  String get payRemaining => 'Reste dû :';
+
+  @override
+  String payChange(String code) {
+    return 'Monnaie à rendre ($code) :';
+  }
+
+  @override
+  String get payDelivery => 'Livraison';
+
+  @override
+  String get payDeliveredNow => 'Livré maintenant';
+
+  @override
+  String get payDeliverLater => 'À livrer plus tard';
+
+  @override
+  String get payPickupBefore => 'À retirer avant';
+
+  @override
+  String payDeadline(String date) {
+    return 'Date limite : $date — le client apparaîtra dans « À livrer ».';
+  }
+
+  @override
+  String payDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jours',
+      one: '1 jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payReceiptActions => 'Actions pour le reçu :';
+
+  @override
+  String get payPrintReceipt => 'Imprimer le reçu thermique';
+
+  @override
+  String get paySendWhatsApp => 'Envoyer par WhatsApp';
+
+  @override
+  String get paySendSms => 'Envoyer par SMS';
+
+  @override
+  String get payValidate => 'Valider & Encaisser';
+
+  @override
+  String payBalanceChanged(String montant) {
+    return 'Le solde du client a changé (disponible : $montant \$). Désactivez puis réactivez « Utiliser » pour recalculer.';
+  }
+
+  @override
+  String get payNotSaved => 'Vente NON enregistrée';
+
+  @override
+  String payDenied(String code) {
+    return 'Le serveur a refusé cette vente (droits insuffisants).\n\nRien n\'a été enregistré : ni la vente, ni le stock, ni la caisse.\nNe donnez pas encore la marchandise : prévenez le responsable.\n\nCode : $code';
+  }
+
+  @override
+  String payNotSavedOther(String detail) {
+    return 'Rien n\'a été enregistré.\n\n$detail';
+  }
+
+  @override
+  String get payUnderstood => 'Compris';
+
+  @override
+  String get paySaved => 'Vente enregistrée avec succès !';
+
+  @override
+  String paySavedPickup(String date) {
+    return 'Vente enregistrée — à retirer avant le $date.';
+  }
+
+  @override
+  String payNewBalance(String montant) {
+    return ' Nouveau solde du client : $montant.';
+  }
+
+  @override
+  String payError(String message) {
+    return 'Erreur lors de la validation : $message';
+  }
 }
