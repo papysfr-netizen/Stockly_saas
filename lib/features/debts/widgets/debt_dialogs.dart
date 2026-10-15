@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stockly_saas/core/models/dette.dart';
 import 'package:stockly_saas/core/models/payment_method.dart';
 import '../controllers/debt_controller.dart';
+import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:stockly_saas/features/comptes_clients/compte_client_service.dart';
 
 class DebtDialogs {
@@ -26,6 +27,7 @@ class DebtDialogs {
     final acompteController = TextEditingController();
     final noteController = TextEditingController();
     DateTime? dateEcheanceSelectionnee;
+    final t = AppLocalizations.of(context);
 
     showDialog(
       context: context,
@@ -34,8 +36,8 @@ class DebtDialogs {
           return AlertDialog(
             title: Text(
               type == TypeDette.client
-                  ? 'Nouvelle Créance Client'
-                  : 'Nouvelle Dette Fournisseur',
+                  ? t.debtNewClient
+                  : t.debtNewSupplier,
             ),
             content: SingleChildScrollView(
               child: Column(
@@ -45,16 +47,16 @@ class DebtDialogs {
                     controller: nomController,
                     decoration: InputDecoration(
                       labelText: type == TypeDette.client
-                          ? 'Nom du Client *'
-                          : 'Nom du Fournisseur *',
+                          ? t.debtClientName
+                          : t.debtSupplierName,
                       prefixIcon: const Icon(Icons.person),
                     ),
                   ),
                   const SizedBox(height: 10),
                   TextField(
                     controller: factureController,
-                    decoration: const InputDecoration(
-                      labelText: 'N° Facture / Référence',
+                    decoration: InputDecoration(
+                      labelText: t.debtInvoiceRef,
                       prefixIcon: Icon(Icons.receipt_long),
                     ),
                   ),
@@ -63,8 +65,8 @@ class DebtDialogs {
                     controller: montantTotalController,
                     keyboardType:
                         const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(
-                      labelText: 'Montant Total *',
+                    decoration: InputDecoration(
+                      labelText: t.debtTotal,
                       prefixIcon: Icon(Icons.attach_money),
                     ),
                   ),
@@ -73,8 +75,8 @@ class DebtDialogs {
                     controller: acompteController,
                     keyboardType:
                         const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(
-                      labelText: 'Montant déjà payé (paiement partiel)',
+                    decoration: InputDecoration(
+                      labelText: t.debtAlreadyPaid,
                       prefixIcon: Icon(Icons.payments),
                       hintText: '0.0',
                     ),
@@ -112,8 +114,8 @@ class DebtDialogs {
                           Expanded(
                             child: Text(
                               dateEcheanceSelectionnee == null
-                                  ? "Sélectionner une date d'échéance"
-                                  : "Échéance : ${_formaterDate(dateEcheanceSelectionnee!)}",
+                                  ? t.debtPickDueDate
+                                  : t.debtDueDate(_formaterDate(dateEcheanceSelectionnee!)),
                               style: TextStyle(
                                 color: dateEcheanceSelectionnee == null
                                     ? Colors.grey.shade600
@@ -131,8 +133,8 @@ class DebtDialogs {
                   const SizedBox(height: 10),
                   TextField(
                     controller: noteController,
-                    decoration: const InputDecoration(
-                      labelText: 'Note / Description (Optionnel)',
+                    decoration: InputDecoration(
+                      labelText: t.debtNote,
                       prefixIcon: Icon(Icons.note),
                     ),
                   ),
@@ -142,7 +144,7 @@ class DebtDialogs {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('Annuler'),
+                child: Text(t.cancel),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -160,8 +162,8 @@ class DebtDialogs {
                   if (nom.isNotEmpty && montantTotal > 0) {
                     // 🛑 Déjà payé > total : on refuse
                     if (acompte > montantTotal + 0.005 || acompte < 0) {
-                      ScaffoldMessenger.of(dialogContext).showSnackBar(const SnackBar(
-                        content: Text('Le montant déjà payé dépasse le montant total.'),
+                      ScaffoldMessenger.of(dialogContext).showSnackBar(SnackBar(
+                        content: Text(t.debtPaidOverTotal),
                         backgroundColor: Colors.red,
                       ));
                       return;
@@ -182,7 +184,7 @@ class DebtDialogs {
                         );
                   }
                 },
-                child: const Text('Enregistrer',
+                child: Text(t.save,
                     style: TextStyle(color: Colors.white)),
               ),
             ],
@@ -205,13 +207,14 @@ class DebtDialogs {
     String? erreurMontant;
     bool enCours = false;
     final messenger = ScaffoldMessenger.of(context);
+    final t = AppLocalizations.of(context);
     final controleur = ref.read(debtControllerProvider(entrepriseId).notifier);
 
     showDialog(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (dialogContext, setDialogState) => AlertDialog(
-          title: Text('Règlement : ${dette.nomTiers}'),
+          title: Text(t.debtPaymentTitle(dette.nomTiers)),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -221,26 +224,26 @@ class DebtDialogs {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
                     child: Text(
-                      'Facture N° : ${dette.numeroFacture}',
+                      t.debtInvoiceNo(dette.numeroFacture),
                       style: const TextStyle(
                           fontWeight: FontWeight.bold, color: Colors.indigo),
                     ),
                   ),
                 Text(
-                    'Reste à payer actuel : ${dette.montantReste.toStringAsFixed(2)} $currency'),
+                    t.debtRemainingNow('${dette.montantReste.toStringAsFixed(2)} $currency')),
                 const SizedBox(height: 12),
                 TextField(
                   controller: montantPaiementController,
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
                   decoration: InputDecoration(
-                    labelText: 'Montant du Règlement',
+                    labelText: t.debtPaymentAmount,
                     border: const OutlineInputBorder(),
                     errorText: erreurMontant,
                     helperText: dette.type == TypeDette.client &&
                             CompteClientService.telephoneValide(dette.telephone)
-                        ? 'Reste : ${dette.montantReste.toStringAsFixed(2)} $currency. Un surplus peut aller sur son compte client.'
-                        : 'Maximum : ${dette.montantReste.toStringAsFixed(2)} $currency',
+                        ? t.debtHelperSurplus('${dette.montantReste.toStringAsFixed(2)} $currency')
+                        : t.debtMax('${dette.montantReste.toStringAsFixed(2)} $currency'),
                     helperMaxLines: 2,
                     errorMaxLines: 3,
                   ),
@@ -251,15 +254,15 @@ class DebtDialogs {
                 const SizedBox(height: 16),
                 DropdownButtonFormField<PaymentMethod>(
                   initialValue: modePaiementSelectionne,
-                  decoration: const InputDecoration(
-                    labelText: 'Mode de paiement',
+                  decoration: InputDecoration(
+                    labelText: t.debtPaymentMode,
                     border: OutlineInputBorder(),
                   ),
                   items: PaymentMethod.values.map((method) {
                     String label = method.name;
-                    if (method == PaymentMethod.cash) label = 'Espèces (Caisse)';
-                    if (method == PaymentMethod.bankTransfer) label = 'Virement Bancaire';
-                    if (method == PaymentMethod.check) label = 'Chèque';
+                    if (method == PaymentMethod.cash) label = t.debtCashDesk;
+                    if (method == PaymentMethod.bankTransfer) label = t.payTransfer;
+                    if (method == PaymentMethod.check) label = t.debtCheck;
 
                     return DropdownMenuItem(
                       value: method,
@@ -280,7 +283,7 @@ class DebtDialogs {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Annuler'),
+              child: Text(t.cancel),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -293,7 +296,7 @@ class DebtDialogs {
                           0.0;
                       // 🛑 Montant vide, nul ou supérieur au reste : on refuse
                       if (paye <= 0) {
-                        setDialogState(() => erreurMontant = 'Saisissez un montant.');
+                        setDialogState(() => erreurMontant = t.debtEnterAmount);
                         return;
                       }
                       // 💰 Le client donne PLUS que sa dette : le surplus peut aller sur son compte
@@ -303,8 +306,8 @@ class DebtDialogs {
                             CompteClientService.telephoneValide(dette.telephone);
                         if (!peutGarder) {
                           setDialogState(() => erreurMontant = dette.type == TypeDette.client
-                              ? 'Trop élevé. Maximum : ${dette.montantReste.toStringAsFixed(2)} $currency (client sans numéro : pas de compte client)'
-                              : 'Trop élevé. Maximum : ${dette.montantReste.toStringAsFixed(2)} $currency');
+                              ? t.debtTooHighNoPhone('${dette.montantReste.toStringAsFixed(2)} $currency')
+                              : t.debtTooHigh('${dette.montantReste.toStringAsFixed(2)} $currency'));
                           return;
                         }
                         surplus = paye - dette.montantReste;
@@ -312,21 +315,21 @@ class DebtDialogs {
                           context: dialogContext,
                           builder: (c) => AlertDialog(
                             icon: const Icon(Icons.savings_rounded, color: Colors.teal, size: 40),
-                            title: const Text('Le client donne plus'),
-                            content: Text(
-                              'Dette : ${dette.montantReste.toStringAsFixed(2)} $currency\n'
-                              'Donné : ${paye.toStringAsFixed(2)} $currency\n\n'
-                              'Mettre ${surplus.toStringAsFixed(2)} $currency sur le compte client de ${dette.nomTiers} ?\n'
-                              "Il pourra s'en servir pour ses prochains achats.",
-                            ),
+                            title: Text(t.debtGivesMore),
+                            content: Text(t.debtSurplusQuestion(
+                              '${dette.montantReste.toStringAsFixed(2)} $currency',
+                              '${paye.toStringAsFixed(2)} $currency',
+                              '${surplus.toStringAsFixed(2)} $currency',
+                              dette.nomTiers,
+                            )),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(c, false),
-                                child: const Text('Non, corriger'),
+                                child: Text(t.noCorrect),
                               ),
                               FilledButton(
                                 onPressed: () => Navigator.pop(c, true),
-                                child: const Text('Oui, sur son compte'),
+                                child: Text(t.debtYesAccount),
                               ),
                             ],
                           ),
@@ -356,25 +359,25 @@ class DebtDialogs {
                           );
                           messenger.showSnackBar(SnackBar(
                             content: Text(
-                              'Dette soldée. ${surplus.toStringAsFixed(2)} $currency mis sur le compte de ${dette.nomTiers}.'
-                              '${envoye ? '' : " (envoi dès le retour d'internet)"}',
+                              t.debtSettled('${surplus.toStringAsFixed(2)} $currency', dette.nomTiers) +
+                                  (envoye ? '' : t.debtPendingNet),
                             ),
                             backgroundColor: Colors.teal.shade700,
                           ));
                         } else {
                           messenger.showSnackBar(SnackBar(
-                            content: Text('Règlement de ${paye.toStringAsFixed(2)} $currency enregistré.'),
+                            content: Text(t.debtPaymentSaved('${paye.toStringAsFixed(2)} $currency')),
                             backgroundColor: Colors.green.shade700,
                           ));
                         }
                       } catch (e) {
                         messenger.showSnackBar(SnackBar(
-                          content: Text('Erreur : $e'),
+                          content: Text(t.errorPrefix('$e')),
                           backgroundColor: Colors.red.shade700,
                         ));
                       }
                     },
-              child: const Text('Valider le Règlement',
+              child: Text(t.debtValidatePayment,
                   style: TextStyle(color: Colors.white)),
             ),
           ],

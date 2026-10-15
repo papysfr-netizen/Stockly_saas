@@ -552,4 +552,118 @@ class AppLocalizationsFr extends AppLocalizations {
   String payError(String message) {
     return 'Erreur lors de la validation : $message';
   }
+
+  @override
+  String get debtNewClient => 'Nouvelle Créance Client';
+
+  @override
+  String get debtNewSupplier => 'Nouvelle Dette Fournisseur';
+
+  @override
+  String get debtClientName => 'Nom du Client *';
+
+  @override
+  String get debtSupplierName => 'Nom du Fournisseur *';
+
+  @override
+  String get debtInvoiceRef => 'N° Facture / Référence';
+
+  @override
+  String get debtTotal => 'Montant Total *';
+
+  @override
+  String get debtAlreadyPaid => 'Montant déjà payé (paiement partiel)';
+
+  @override
+  String get debtPickDueDate => 'Sélectionner une date d\'échéance';
+
+  @override
+  String debtDueDate(String date) {
+    return 'Échéance : $date';
+  }
+
+  @override
+  String get debtNote => 'Note / Description (Optionnel)';
+
+  @override
+  String get debtPaidOverTotal =>
+      'Le montant déjà payé dépasse le montant total.';
+
+  @override
+  String debtPaymentTitle(String nom) {
+    return 'Règlement : $nom';
+  }
+
+  @override
+  String debtInvoiceNo(String numero) {
+    return 'Facture N° : $numero';
+  }
+
+  @override
+  String debtRemainingNow(String montant) {
+    return 'Reste à payer actuel : $montant';
+  }
+
+  @override
+  String get debtPaymentAmount => 'Montant du Règlement';
+
+  @override
+  String debtHelperSurplus(String montant) {
+    return 'Reste : $montant. Un surplus peut aller sur son compte client.';
+  }
+
+  @override
+  String debtMax(String montant) {
+    return 'Maximum : $montant';
+  }
+
+  @override
+  String get debtPaymentMode => 'Mode de paiement';
+
+  @override
+  String get debtCashDesk => 'Espèces (Caisse)';
+
+  @override
+  String get debtCheck => 'Chèque';
+
+  @override
+  String get debtEnterAmount => 'Saisissez un montant.';
+
+  @override
+  String debtTooHighNoPhone(String montant) {
+    return 'Trop élevé. Maximum : $montant (client sans numéro : pas de compte client)';
+  }
+
+  @override
+  String debtTooHigh(String montant) {
+    return 'Trop élevé. Maximum : $montant';
+  }
+
+  @override
+  String get debtGivesMore => 'Le client donne plus';
+
+  @override
+  String debtSurplusQuestion(
+      String dette, String donne, String surplus, String nom) {
+    return 'Dette : $dette\nDonné : $donne\n\nMettre $surplus sur le compte client de $nom ?\nIl pourra s\'en servir pour ses prochains achats.';
+  }
+
+  @override
+  String get debtYesAccount => 'Oui, sur son compte';
+
+  @override
+  String debtSettled(String montant, String nom) {
+    return 'Dette soldée. $montant mis sur le compte de $nom.';
+  }
+
+  @override
+  String get debtPendingNet => ' (envoi dès le retour d\'internet)';
+
+  @override
+  String debtPaymentSaved(String montant) {
+    return 'Règlement de $montant enregistré.';
+  }
+
+  @override
+  String get debtValidatePayment => 'Valider le Règlement';
 }

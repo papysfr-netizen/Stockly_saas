@@ -547,4 +547,117 @@ class AppLocalizationsSw extends AppLocalizations {
   String payError(String message) {
     return 'Kosa wakati wa kuthibitisha : $message';
   }
+
+  @override
+  String get debtNewClient => 'Mkopo mpya wa mteja';
+
+  @override
+  String get debtNewSupplier => 'Deni jipya la msambazaji';
+
+  @override
+  String get debtClientName => 'Jina la mteja *';
+
+  @override
+  String get debtSupplierName => 'Jina la msambazaji *';
+
+  @override
+  String get debtInvoiceRef => 'Namba ya ankara / Rejea';
+
+  @override
+  String get debtTotal => 'Jumla ya kiasi *';
+
+  @override
+  String get debtAlreadyPaid => 'Kiasi kilicholipwa tayari (malipo ya sehemu)';
+
+  @override
+  String get debtPickDueDate => 'Chagua tarehe ya kulipa';
+
+  @override
+  String debtDueDate(String date) {
+    return 'Tarehe ya kulipa : $date';
+  }
+
+  @override
+  String get debtNote => 'Maelezo (si lazima)';
+
+  @override
+  String get debtPaidOverTotal => 'Kiasi kilicholipwa kinazidi jumla.';
+
+  @override
+  String debtPaymentTitle(String nom) {
+    return 'Malipo : $nom';
+  }
+
+  @override
+  String debtInvoiceNo(String numero) {
+    return 'Ankara Na. : $numero';
+  }
+
+  @override
+  String debtRemainingNow(String montant) {
+    return 'Kiasi kinachodaiwa sasa : $montant';
+  }
+
+  @override
+  String get debtPaymentAmount => 'Kiasi cha malipo';
+
+  @override
+  String debtHelperSurplus(String montant) {
+    return 'Kinachodaiwa : $montant. Ziada inaweza kwenda kwenye akaunti ya mteja.';
+  }
+
+  @override
+  String debtMax(String montant) {
+    return 'Kiwango cha juu : $montant';
+  }
+
+  @override
+  String get debtPaymentMode => 'Njia ya malipo';
+
+  @override
+  String get debtCashDesk => 'Pesa taslimu (kasha)';
+
+  @override
+  String get debtCheck => 'Hundi';
+
+  @override
+  String get debtEnterAmount => 'Andika kiasi.';
+
+  @override
+  String debtTooHighNoPhone(String montant) {
+    return 'Kiasi kikubwa mno. Kiwango cha juu : $montant (mteja hana namba: hakuna akaunti)';
+  }
+
+  @override
+  String debtTooHigh(String montant) {
+    return 'Kiasi kikubwa mno. Kiwango cha juu : $montant';
+  }
+
+  @override
+  String get debtGivesMore => 'Mteja anatoa zaidi';
+
+  @override
+  String debtSurplusQuestion(
+      String dette, String donne, String surplus, String nom) {
+    return 'Deni : $dette\nAmetoa : $donne\n\nWeka $surplus kwenye akaunti ya $nom?\nAtatumia kwa manunuzi yajayo.';
+  }
+
+  @override
+  String get debtYesAccount => 'Ndiyo, kwenye akaunti yake';
+
+  @override
+  String debtSettled(String montant, String nom) {
+    return 'Deni limelipwa. $montant imewekwa kwenye akaunti ya $nom.';
+  }
+
+  @override
+  String get debtPendingNet => ' (itatumwa mtandao ukirudi)';
+
+  @override
+  String debtPaymentSaved(String montant) {
+    return 'Malipo ya $montant yamehifadhiwa.';
+  }
+
+  @override
+  String get debtValidatePayment => 'Thibitisha malipo';
 }

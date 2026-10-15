@@ -551,4 +551,117 @@ class AppLocalizationsLn extends AppLocalizations {
   String payError(String message) {
     return 'Libunga na tango ya kondima : $message';
   }
+
+  @override
+  String get debtNewClient => 'Niongo ya sika ya mosombi';
+
+  @override
+  String get debtNewSupplier => 'Niongo ya sika ya mosombisi';
+
+  @override
+  String get debtClientName => 'Kombo ya mosombi *';
+
+  @override
+  String get debtSupplierName => 'Kombo ya mosombisi *';
+
+  @override
+  String get debtInvoiceRef => 'Nimero ya fakture / Référence';
+
+  @override
+  String get debtTotal => 'Motango mobimba *';
+
+  @override
+  String get debtAlreadyPaid => 'Mbongo esili kofutama (kofuta ndambo)';
+
+  @override
+  String get debtPickDueDate => 'Pona mokolo ya kofuta';
+
+  @override
+  String debtDueDate(String date) {
+    return 'Mokolo ya kofuta : $date';
+  }
+
+  @override
+  String get debtNote => 'Maloba (soki olingi)';
+
+  @override
+  String get debtPaidOverTotal => 'Mbongo efutami eleki motango mobimba.';
+
+  @override
+  String debtPaymentTitle(String nom) {
+    return 'Kofuta : $nom';
+  }
+
+  @override
+  String debtInvoiceNo(String numero) {
+    return 'Fakture nimero : $numero';
+  }
+
+  @override
+  String debtRemainingNow(String montant) {
+    return 'Oyo etikali kofuta sikoyo : $montant';
+  }
+
+  @override
+  String get debtPaymentAmount => 'Motango ya kofuta';
+
+  @override
+  String debtHelperSurplus(String montant) {
+    return 'Etikali : $montant. Oyo eleki ekoki kokende na compte ya mosombi.';
+  }
+
+  @override
+  String debtMax(String montant) {
+    return 'Motango monene : $montant';
+  }
+
+  @override
+  String get debtPaymentMode => 'Lolenge ya kofuta';
+
+  @override
+  String get debtCashDesk => 'Mbongo ya maboko (kesi)';
+
+  @override
+  String get debtCheck => 'Chèque';
+
+  @override
+  String get debtEnterAmount => 'Koma motango.';
+
+  @override
+  String debtTooHighNoPhone(String montant) {
+    return 'Eleki mingi. Motango monene : $montant (mosombi azali na nimero te: compte ezali te)';
+  }
+
+  @override
+  String debtTooHigh(String montant) {
+    return 'Eleki mingi. Motango monene : $montant';
+  }
+
+  @override
+  String get debtGivesMore => 'Mosombi apesi koleka';
+
+  @override
+  String debtSurplusQuestion(
+      String dette, String donne, String surplus, String nom) {
+    return 'Niongo : $dette\nApesi : $donne\n\nTia $surplus na compte ya $nom?\nAkoki kosalela yango mpo na bisombi oyo ekoya.';
+  }
+
+  @override
+  String get debtYesAccount => 'Iyo, na compte na ye';
+
+  @override
+  String debtSettled(String montant, String nom) {
+    return 'Niongo esili. $montant etiami na compte ya $nom.';
+  }
+
+  @override
+  String get debtPendingNet => ' (ekotindama soki internet ezongi)';
+
+  @override
+  String debtPaymentSaved(String montant) {
+    return 'Kofuta ya $montant ebombami.';
+  }
+
+  @override
+  String get debtValidatePayment => 'Ndima kofuta';
 }

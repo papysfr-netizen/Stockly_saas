@@ -983,6 +983,187 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Erreur lors de la validation : {message}'**
   String payError(String message);
+
+  /// No description provided for @debtNewClient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle Créance Client'**
+  String get debtNewClient;
+
+  /// No description provided for @debtNewSupplier.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle Dette Fournisseur'**
+  String get debtNewSupplier;
+
+  /// No description provided for @debtClientName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom du Client *'**
+  String get debtClientName;
+
+  /// No description provided for @debtSupplierName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom du Fournisseur *'**
+  String get debtSupplierName;
+
+  /// No description provided for @debtInvoiceRef.
+  ///
+  /// In fr, this message translates to:
+  /// **'N° Facture / Référence'**
+  String get debtInvoiceRef;
+
+  /// No description provided for @debtTotal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant Total *'**
+  String get debtTotal;
+
+  /// No description provided for @debtAlreadyPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant déjà payé (paiement partiel)'**
+  String get debtAlreadyPaid;
+
+  /// No description provided for @debtPickDueDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sélectionner une date d\'échéance'**
+  String get debtPickDueDate;
+
+  /// No description provided for @debtDueDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échéance : {date}'**
+  String debtDueDate(String date);
+
+  /// No description provided for @debtNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Note / Description (Optionnel)'**
+  String get debtNote;
+
+  /// No description provided for @debtPaidOverTotal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le montant déjà payé dépasse le montant total.'**
+  String get debtPaidOverTotal;
+
+  /// No description provided for @debtPaymentTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Règlement : {nom}'**
+  String debtPaymentTitle(String nom);
+
+  /// No description provided for @debtInvoiceNo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Facture N° : {numero}'**
+  String debtInvoiceNo(String numero);
+
+  /// No description provided for @debtRemainingNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reste à payer actuel : {montant}'**
+  String debtRemainingNow(String montant);
+
+  /// No description provided for @debtPaymentAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant du Règlement'**
+  String get debtPaymentAmount;
+
+  /// No description provided for @debtHelperSurplus.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reste : {montant}. Un surplus peut aller sur son compte client.'**
+  String debtHelperSurplus(String montant);
+
+  /// No description provided for @debtMax.
+  ///
+  /// In fr, this message translates to:
+  /// **'Maximum : {montant}'**
+  String debtMax(String montant);
+
+  /// No description provided for @debtPaymentMode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mode de paiement'**
+  String get debtPaymentMode;
+
+  /// No description provided for @debtCashDesk.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espèces (Caisse)'**
+  String get debtCashDesk;
+
+  /// No description provided for @debtCheck.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chèque'**
+  String get debtCheck;
+
+  /// No description provided for @debtEnterAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez un montant.'**
+  String get debtEnterAmount;
+
+  /// No description provided for @debtTooHighNoPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trop élevé. Maximum : {montant} (client sans numéro : pas de compte client)'**
+  String debtTooHighNoPhone(String montant);
+
+  /// No description provided for @debtTooHigh.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trop élevé. Maximum : {montant}'**
+  String debtTooHigh(String montant);
+
+  /// No description provided for @debtGivesMore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le client donne plus'**
+  String get debtGivesMore;
+
+  /// No description provided for @debtSurplusQuestion.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dette : {dette}\nDonné : {donne}\n\nMettre {surplus} sur le compte client de {nom} ?\nIl pourra s\'en servir pour ses prochains achats.'**
+  String debtSurplusQuestion(
+      String dette, String donne, String surplus, String nom);
+
+  /// No description provided for @debtYesAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Oui, sur son compte'**
+  String get debtYesAccount;
+
+  /// No description provided for @debtSettled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dette soldée. {montant} mis sur le compte de {nom}.'**
+  String debtSettled(String montant, String nom);
+
+  /// No description provided for @debtPendingNet.
+  ///
+  /// In fr, this message translates to:
+  /// **' (envoi dès le retour d\'internet)'**
+  String get debtPendingNet;
+
+  /// No description provided for @debtPaymentSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Règlement de {montant} enregistré.'**
+  String debtPaymentSaved(String montant);
+
+  /// No description provided for @debtValidatePayment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider le Règlement'**
+  String get debtValidatePayment;
 }
 
 class _AppLocalizationsDelegate

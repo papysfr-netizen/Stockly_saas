@@ -449,5 +449,124 @@
         "type": "String"
       }
     }
-  }
+  },
+  "debtNewClient": "Nouvelle Créance Client",
+  "debtNewSupplier": "Nouvelle Dette Fournisseur",
+  "debtClientName": "Nom du Client *",
+  "debtSupplierName": "Nom du Fournisseur *",
+  "debtInvoiceRef": "N° Facture / Référence",
+  "debtTotal": "Montant Total *",
+  "debtAlreadyPaid": "Montant déjà payé (paiement partiel)",
+  "debtPickDueDate": "Sélectionner une date d'échéance",
+  "debtDueDate": "Échéance : {date}",
+  "@debtDueDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "debtNote": "Note / Description (Optionnel)",
+  "debtPaidOverTotal": "Le montant déjà payé dépasse le montant total.",
+  "debtPaymentTitle": "Règlement : {nom}",
+  "@debtPaymentTitle": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
+  "debtInvoiceNo": "Facture N° : {numero}",
+  "@debtInvoiceNo": {
+    "placeholders": {
+      "numero": {
+        "type": "String"
+      }
+    }
+  },
+  "debtRemainingNow": "Reste à payer actuel : {montant}",
+  "@debtRemainingNow": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "debtPaymentAmount": "Montant du Règlement",
+  "debtHelperSurplus": "Reste : {montant}. Un surplus peut aller sur son compte client.",
+  "@debtHelperSurplus": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "debtMax": "Maximum : {montant}",
+  "@debtMax": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "debtPaymentMode": "Mode de paiement",
+  "debtCashDesk": "Espèces (Caisse)",
+  "debtCheck": "Chèque",
+  "debtEnterAmount": "Saisissez un montant.",
+  "debtTooHighNoPhone": "Trop élevé. Maximum : {montant} (client sans numéro : pas de compte client)",
+  "@debtTooHighNoPhone": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "debtTooHigh": "Trop élevé. Maximum : {montant}",
+  "@debtTooHigh": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "debtGivesMore": "Le client donne plus",
+  "debtSurplusQuestion": "Dette : {dette}\nDonné : {donne}\n\nMettre {surplus} sur le compte client de {nom} ?\nIl pourra s'en servir pour ses prochains achats.",
+  "@debtSurplusQuestion": {
+    "placeholders": {
+      "dette": {
+        "type": "String"
+      },
+      "donne": {
+        "type": "String"
+      },
+      "surplus": {
+        "type": "String"
+      },
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
+  "debtYesAccount": "Oui, sur son compte",
+  "debtSettled": "Dette soldée. {montant} mis sur le compte de {nom}.",
+  "@debtSettled": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      },
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
+  "debtPendingNet": " (envoi dès le retour d'internet)",
+  "debtPaymentSaved": "Règlement de {montant} enregistré.",
+  "@debtPaymentSaved": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "debtValidatePayment": "Valider le Règlement"
 }

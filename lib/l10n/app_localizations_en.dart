@@ -549,4 +549,118 @@ class AppLocalizationsEn extends AppLocalizations {
   String payError(String message) {
     return 'Error while confirming: $message';
   }
+
+  @override
+  String get debtNewClient => 'New customer credit';
+
+  @override
+  String get debtNewSupplier => 'New supplier debt';
+
+  @override
+  String get debtClientName => 'Customer name *';
+
+  @override
+  String get debtSupplierName => 'Supplier name *';
+
+  @override
+  String get debtInvoiceRef => 'Invoice no. / Reference';
+
+  @override
+  String get debtTotal => 'Total amount *';
+
+  @override
+  String get debtAlreadyPaid => 'Amount already paid (partial payment)';
+
+  @override
+  String get debtPickDueDate => 'Choose a due date';
+
+  @override
+  String debtDueDate(String date) {
+    return 'Due: $date';
+  }
+
+  @override
+  String get debtNote => 'Note / Description (optional)';
+
+  @override
+  String get debtPaidOverTotal =>
+      'The amount already paid is more than the total.';
+
+  @override
+  String debtPaymentTitle(String nom) {
+    return 'Payment: $nom';
+  }
+
+  @override
+  String debtInvoiceNo(String numero) {
+    return 'Invoice no.: $numero';
+  }
+
+  @override
+  String debtRemainingNow(String montant) {
+    return 'Amount still owed: $montant';
+  }
+
+  @override
+  String get debtPaymentAmount => 'Payment amount';
+
+  @override
+  String debtHelperSurplus(String montant) {
+    return 'Owed: $montant. Any extra can go to the customer account.';
+  }
+
+  @override
+  String debtMax(String montant) {
+    return 'Maximum: $montant';
+  }
+
+  @override
+  String get debtPaymentMode => 'Payment method';
+
+  @override
+  String get debtCashDesk => 'Cash (till)';
+
+  @override
+  String get debtCheck => 'Cheque';
+
+  @override
+  String get debtEnterAmount => 'Enter an amount.';
+
+  @override
+  String debtTooHighNoPhone(String montant) {
+    return 'Too high. Maximum: $montant (customer has no number: no customer account)';
+  }
+
+  @override
+  String debtTooHigh(String montant) {
+    return 'Too high. Maximum: $montant';
+  }
+
+  @override
+  String get debtGivesMore => 'The customer gives more';
+
+  @override
+  String debtSurplusQuestion(
+      String dette, String donne, String surplus, String nom) {
+    return 'Debt: $dette\nGiven: $donne\n\nPut $surplus on $nom\'s customer account?\nThey can use it for their next purchases.';
+  }
+
+  @override
+  String get debtYesAccount => 'Yes, to their account';
+
+  @override
+  String debtSettled(String montant, String nom) {
+    return 'Debt settled. $montant added to $nom\'s account.';
+  }
+
+  @override
+  String get debtPendingNet => ' (will be sent when internet is back)';
+
+  @override
+  String debtPaymentSaved(String montant) {
+    return 'Payment of $montant saved.';
+  }
+
+  @override
+  String get debtValidatePayment => 'Confirm payment';
 }
