@@ -149,4 +149,76 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get accMainShop => 'Duka kuu';
+
+  @override
+  String get resMorning => 'Habari za asubuhi';
+
+  @override
+  String get resAfternoon => 'Habari za mchana';
+
+  @override
+  String get resEvening => 'Habari za jioni';
+
+  @override
+  String get resNoSales => 'Bado hakuna mauzo leo. Kazi njema! 💪';
+
+  @override
+  String get resTodayPrefix => 'Leo, ';
+
+  @override
+  String resSalesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'mauzo $count',
+      one: 'mauzo 1',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get resFor => ' ya ';
+
+  @override
+  String get resGained => '. Umepata faida ya ';
+
+  @override
+  String get resLoss => '. Kwa sasa, hasara ya ';
+
+  @override
+  String get todoTitle => '📋 Ya kufanya leo';
+
+  @override
+  String get todoNothing => '✅ Hakuna cha haraka. Kila kitu kiko sawa!';
+
+  @override
+  String todoOwes(String nom, String montant) {
+    return '$nom anakudai $montant';
+  }
+
+  @override
+  String todoOtherClients(int count) {
+    return '…na wateja wengine $count';
+  }
+
+  @override
+  String todoOut(String nom) {
+    return '$nom : imeisha';
+  }
+
+  @override
+  String todoLow(int count, String nom) {
+    return 'Zimebaki $count tu za $nom';
+  }
+
+  @override
+  String todoOtherProducts(int count) {
+    return '…na bidhaa nyingine $count za kuagiza';
+  }
+
+  @override
+  String get actSee => 'Ona';
+
+  @override
+  String get actAll => 'Zote';
 }

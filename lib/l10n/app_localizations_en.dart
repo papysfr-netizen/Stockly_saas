@@ -150,4 +150,76 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accMainShop => 'Main shop';
+
+  @override
+  String get resMorning => 'Good morning';
+
+  @override
+  String get resAfternoon => 'Good afternoon';
+
+  @override
+  String get resEvening => 'Good evening';
+
+  @override
+  String get resNoSales => 'No sales yet today. Have a good working day! 💪';
+
+  @override
+  String get resTodayPrefix => 'Today, ';
+
+  @override
+  String resSalesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sales',
+      one: '1 sale',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get resFor => ' for ';
+
+  @override
+  String get resGained => '. You earned ';
+
+  @override
+  String get resLoss => '. So far, a loss of ';
+
+  @override
+  String get todoTitle => '📋 To do today';
+
+  @override
+  String get todoNothing => '✅ Nothing urgent. Everything is in order!';
+
+  @override
+  String todoOwes(String nom, String montant) {
+    return '$nom owes you $montant';
+  }
+
+  @override
+  String todoOtherClients(int count) {
+    return '…and $count more customer(s)';
+  }
+
+  @override
+  String todoOut(String nom) {
+    return '$nom: out of stock';
+  }
+
+  @override
+  String todoLow(int count, String nom) {
+    return 'Only $count $nom left';
+  }
+
+  @override
+  String todoOtherProducts(int count) {
+    return '…and $count more product(s) to reorder';
+  }
+
+  @override
+  String get actSee => 'See';
+
+  @override
+  String get actAll => 'All';
 }

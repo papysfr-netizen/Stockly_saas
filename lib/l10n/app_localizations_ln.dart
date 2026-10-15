@@ -151,4 +151,76 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get accMainShop => 'Magazini monene';
+
+  @override
+  String get resMorning => 'Mbote';
+
+  @override
+  String get resAfternoon => 'Mbote';
+
+  @override
+  String get resEvening => 'Mbote';
+
+  @override
+  String get resNoSales => 'Naino biteki te lelo. Mosala malamu! 💪';
+
+  @override
+  String get resTodayPrefix => 'Lelo, ';
+
+  @override
+  String resSalesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'biteki $count',
+      one: 'eteki 1',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get resFor => ' ya ';
+
+  @override
+  String get resGained => '. Ozwi litomba ya ';
+
+  @override
+  String get resLoss => '. Sikawa, bobungisi ya ';
+
+  @override
+  String get todoTitle => '📋 Oyo ya kosala lelo';
+
+  @override
+  String get todoNothing => '✅ Eloko ya nsoko te. Nyonso ezali malamu!';
+
+  @override
+  String todoOwes(String nom, String montant) {
+    return '$nom azali na niongo na yo $montant';
+  }
+
+  @override
+  String todoOtherClients(int count) {
+    return '…mpe bakiliya mosusu $count';
+  }
+
+  @override
+  String todoOut(String nom) {
+    return '$nom : esili';
+  }
+
+  @override
+  String todoLow(int count, String nom) {
+    return 'Etikali kaka $count ya $nom';
+  }
+
+  @override
+  String todoOtherProducts(int count) {
+    return '…mpe biloko mosusu $count ya kosomba lisusu';
+  }
+
+  @override
+  String get actSee => 'Tala';
+
+  @override
+  String get actAll => 'Nyonso';
 }

@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:stockly_saas/core/providers/currency_provider.dart';
 import 'package:stockly_saas/core/providers/produit_provider.dart';
+import 'package:stockly_saas/l10n/app_localizations.dart';
 
 double _num(Object? v) {
   if (v is num) return v.toDouble();
@@ -40,8 +41,9 @@ class ResumeDuJour extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final devise = ref.watch(currencyProvider);
+    final t = AppLocalizations.of(context);
     final heure = DateTime.now().hour;
-    final salut = heure < 12 ? 'Bonjour' : (heure < 18 ? 'Bon après-midi' : 'Bonsoir');
+    final salut = heure < 12 ? t.resMorning : (heure < 18 ? t.resAfternoon : t.resEvening);
 
     const normal = TextStyle(fontSize: 17, height: 1.45, color: Color(0xFF1F2937));
     const gras = TextStyle(fontWeight: FontWeight.bold);
@@ -50,17 +52,16 @@ class ResumeDuJour extends ConsumerWidget {
     if (nbVentes == 0) {
       morceaux = [
         TextSpan(text: '$salut $prenom. '),
-        const TextSpan(text: "Pas encore de vente aujourd'hui. "),
-        const TextSpan(text: 'Bonne journée de travail ! 💪'),
+        TextSpan(text: t.resNoSales),
       ];
     } else {
       morceaux = [
-        TextSpan(text: '$salut $prenom. Aujourd\'hui, '),
-        TextSpan(text: '$nbVentes vente${nbVentes > 1 ? 's' : ''}', style: gras),
-        const TextSpan(text: ' pour '),
+        TextSpan(text: '$salut $prenom. ${t.resTodayPrefix}'),
+        TextSpan(text: t.resSalesCount(nbVentes), style: gras),
+        TextSpan(text: t.resFor),
         TextSpan(text: devise.formatPrice(ventes), style: gras.copyWith(color: const Color(0xFF0B7A5A))),
         if (voirFinances) ...[
-          TextSpan(text: benefice >= 0 ? '. Vous avez gagné ' : '. Pour l\'instant, perte de '),
+          TextSpan(text: benefice >= 0 ? t.resGained : t.resLoss),
           TextSpan(
             text: devise.formatPrice(benefice.abs()),
             style: gras.copyWith(color: benefice >= 0 ? const Color(0xFF0B7A5A) : Colors.red),
@@ -121,6 +122,7 @@ class _AFaireAujourdhuiState extends ConsumerState<AFaireAujourdhui> {
   @override
   Widget build(BuildContext context) {
     final devise = ref.watch(currencyProvider);
+    final t = AppLocalizations.of(context);
     final produits = ref.watch(produitsStreamProvider).value ?? const [];
 
     // Produits presque épuisés dans la boutique affichée
@@ -140,8 +142,8 @@ class _AFaireAujourdhuiState extends ConsumerState<AFaireAujourdhui> {
         for (final d in snap.data?.docs ?? const []) {
           final m = d.data();
           if ((m['type'] ?? 'client').toString() != 'client') continue;
-          final nom = (m['nomTiers'] ?? m['nomClient'] ?? 'Client').toString().trim();
-          clients[nom.isEmpty ? 'Client' : nom] = (clients[nom] ?? 0) + _num(m['montantReste']);
+          final nom = (m['nomTiers'] ?? m['nomClient'] ?? t.accClient).toString().trim();
+          clients[nom.isEmpty ? t.accClient : nom] = (clients[nom] ?? 0) + _num(m['montantReste']);
         }
         final debiteurs = clients.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
 
@@ -150,8 +152,8 @@ class _AFaireAujourdhuiState extends ConsumerState<AFaireAujourdhui> {
           lignes.add(_ligne(
             icone: Icons.person_rounded,
             couleur: Colors.indigo,
-            texte: '${e.key} vous doit ${devise.formatPrice(e.value)}',
-            action: 'Voir',
+            texte: t.todoOwes(e.key, devise.formatPrice(e.value)),
+            action: t.actSee,
             onTap: widget.onOuvrirCredits,
           ));
         }
@@ -159,8 +161,8 @@ class _AFaireAujourdhuiState extends ConsumerState<AFaireAujourdhui> {
           lignes.add(_ligne(
             icone: Icons.groups_rounded,
             couleur: Colors.indigo,
-            texte: '…et ${debiteurs.length - 3} autre(s) client(s)',
-            action: 'Tous',
+            texte: t.todoOtherClients(debiteurs.length - 3),
+            action: t.actAll,
             onTap: widget.onOuvrirCredits,
           ));
         }
@@ -169,9 +171,9 @@ class _AFaireAujourdhuiState extends ConsumerState<AFaireAujourdhui> {
             icone: e.value <= 0 ? Icons.remove_shopping_cart_rounded : Icons.warning_amber_rounded,
             couleur: e.value <= 0 ? Colors.red : Colors.orange.shade800,
             texte: e.value <= 0
-                ? '${e.key} : épuisé'
-                : 'Il reste seulement ${e.value} ${e.key}',
-            action: 'Stock',
+                ? t.todoOut(e.key)
+                : t.todoLow(e.value, e.key),
+            action: t.navStock,
             onTap: widget.onOuvrirStock,
           ));
         }
@@ -179,8 +181,8 @@ class _AFaireAujourdhuiState extends ConsumerState<AFaireAujourdhui> {
           lignes.add(_ligne(
             icone: Icons.inventory_2_rounded,
             couleur: Colors.orange.shade800,
-            texte: '…et ${bas.length - 3} autre(s) produit(s) à recommander',
-            action: 'Stock',
+            texte: t.todoOtherProducts(bas.length - 3),
+            action: t.navStock,
             onTap: widget.onOuvrirStock,
           ));
         }
@@ -195,13 +197,13 @@ class _AFaireAujourdhuiState extends ConsumerState<AFaireAujourdhui> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text("📋 À faire aujourd'hui",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(t.todoTitle,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               const SizedBox(height: 6),
               if (lignes.isEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Text('✅ Rien d\'urgent. Tout est en ordre !',
+                  child: Text(t.todoNothing,
                       style: TextStyle(color: Colors.grey.shade700)),
                 )
               else

@@ -78,5 +78,71 @@
       }
     }
   },
-  "accMainShop": "Boutique principale"
+  "accMainShop": "Boutique principale",
+  "resMorning": "Bonjour",
+  "resAfternoon": "Bon après-midi",
+  "resEvening": "Bonsoir",
+  "resNoSales": "Pas encore de vente aujourd'hui. Bonne journée de travail ! 💪",
+  "resTodayPrefix": "Aujourd'hui, ",
+  "resSalesCount": "{count, plural, =1{1 vente} other{{count} ventes}}",
+  "@resSalesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "resFor": " pour ",
+  "resGained": ". Vous avez gagné ",
+  "resLoss": ". Pour l'instant, perte de ",
+  "todoTitle": "📋 À faire aujourd'hui",
+  "todoNothing": "✅ Rien d'urgent. Tout est en ordre !",
+  "todoOwes": "{nom} vous doit {montant}",
+  "@todoOwes": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      },
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "todoOtherClients": "…et {count} autre(s) client(s)",
+  "@todoOtherClients": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "todoOut": "{nom} : épuisé",
+  "@todoOut": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
+  "todoLow": "Il reste seulement {count} {nom}",
+  "@todoLow": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
+  "todoOtherProducts": "…et {count} autre(s) produit(s) à recommander",
+  "@todoOtherProducts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "actSee": "Voir",
+  "actAll": "Tous"
 }

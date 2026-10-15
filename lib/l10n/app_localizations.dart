@@ -365,6 +365,114 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Boutique principale'**
   String get accMainShop;
+
+  /// No description provided for @resMorning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour'**
+  String get resMorning;
+
+  /// No description provided for @resAfternoon.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bon après-midi'**
+  String get resAfternoon;
+
+  /// No description provided for @resEvening.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonsoir'**
+  String get resEvening;
+
+  /// No description provided for @resNoSales.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore de vente aujourd\'hui. Bonne journée de travail ! 💪'**
+  String get resNoSales;
+
+  /// No description provided for @resTodayPrefix.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aujourd\'hui, '**
+  String get resTodayPrefix;
+
+  /// No description provided for @resSalesCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 vente} other{{count} ventes}}'**
+  String resSalesCount(int count);
+
+  /// No description provided for @resFor.
+  ///
+  /// In fr, this message translates to:
+  /// **' pour '**
+  String get resFor;
+
+  /// No description provided for @resGained.
+  ///
+  /// In fr, this message translates to:
+  /// **'. Vous avez gagné '**
+  String get resGained;
+
+  /// No description provided for @resLoss.
+  ///
+  /// In fr, this message translates to:
+  /// **'. Pour l\'instant, perte de '**
+  String get resLoss;
+
+  /// No description provided for @todoTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'📋 À faire aujourd\'hui'**
+  String get todoTitle;
+
+  /// No description provided for @todoNothing.
+  ///
+  /// In fr, this message translates to:
+  /// **'✅ Rien d\'urgent. Tout est en ordre !'**
+  String get todoNothing;
+
+  /// No description provided for @todoOwes.
+  ///
+  /// In fr, this message translates to:
+  /// **'{nom} vous doit {montant}'**
+  String todoOwes(String nom, String montant);
+
+  /// No description provided for @todoOtherClients.
+  ///
+  /// In fr, this message translates to:
+  /// **'…et {count} autre(s) client(s)'**
+  String todoOtherClients(int count);
+
+  /// No description provided for @todoOut.
+  ///
+  /// In fr, this message translates to:
+  /// **'{nom} : épuisé'**
+  String todoOut(String nom);
+
+  /// No description provided for @todoLow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il reste seulement {count} {nom}'**
+  String todoLow(int count, String nom);
+
+  /// No description provided for @todoOtherProducts.
+  ///
+  /// In fr, this message translates to:
+  /// **'…et {count} autre(s) produit(s) à recommander'**
+  String todoOtherProducts(int count);
+
+  /// No description provided for @actSee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir'**
+  String get actSee;
+
+  /// No description provided for @actAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous'**
+  String get actAll;
 }
 
 class _AppLocalizationsDelegate

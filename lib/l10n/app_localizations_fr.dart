@@ -151,4 +151,77 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accMainShop => 'Boutique principale';
+
+  @override
+  String get resMorning => 'Bonjour';
+
+  @override
+  String get resAfternoon => 'Bon après-midi';
+
+  @override
+  String get resEvening => 'Bonsoir';
+
+  @override
+  String get resNoSales =>
+      'Pas encore de vente aujourd\'hui. Bonne journée de travail ! 💪';
+
+  @override
+  String get resTodayPrefix => 'Aujourd\'hui, ';
+
+  @override
+  String resSalesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ventes',
+      one: '1 vente',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get resFor => ' pour ';
+
+  @override
+  String get resGained => '. Vous avez gagné ';
+
+  @override
+  String get resLoss => '. Pour l\'instant, perte de ';
+
+  @override
+  String get todoTitle => '📋 À faire aujourd\'hui';
+
+  @override
+  String get todoNothing => '✅ Rien d\'urgent. Tout est en ordre !';
+
+  @override
+  String todoOwes(String nom, String montant) {
+    return '$nom vous doit $montant';
+  }
+
+  @override
+  String todoOtherClients(int count) {
+    return '…et $count autre(s) client(s)';
+  }
+
+  @override
+  String todoOut(String nom) {
+    return '$nom : épuisé';
+  }
+
+  @override
+  String todoLow(int count, String nom) {
+    return 'Il reste seulement $count $nom';
+  }
+
+  @override
+  String todoOtherProducts(int count) {
+    return '…et $count autre(s) produit(s) à recommander';
+  }
+
+  @override
+  String get actSee => 'Voir';
+
+  @override
+  String get actAll => 'Tous';
 }
