@@ -1674,6 +1674,198 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Modifier'**
   String get edit;
+
+  /// No description provided for @prodDefaultName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Produit sans nom'**
+  String get prodDefaultName;
+
+  /// No description provided for @prodBarcodeUsed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code-barres déjà utilisé'**
+  String get prodBarcodeUsed;
+
+  /// No description provided for @prodBarcodeUsedMsg.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce code appartient déjà à :\n\n« {nom} »\nStock : {stock}  •  Prix : {prix} \$\n\nVoulez-vous ouvrir ce produit pour le modifier (par exemple ajouter du stock) ?'**
+  String prodBarcodeUsedMsg(String nom, String stock, String prix);
+
+  /// No description provided for @prodOpenThis.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir ce produit'**
+  String get prodOpenThis;
+
+  /// No description provided for @prodNoCompany.
+  ///
+  /// In fr, this message translates to:
+  /// **'Entreprise introuvable. Déconnectez-vous puis reconnectez-vous.'**
+  String get prodNoCompany;
+
+  /// No description provided for @prodSavedOffline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistré sur le téléphone. Il sera envoyé dès que internet revient.'**
+  String get prodSavedOffline;
+
+  /// No description provided for @prodUpdated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Produit mis à jour avec succès !'**
+  String get prodUpdated;
+
+  /// No description provided for @prodAdded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Produit ajouté avec succès !'**
+  String get prodAdded;
+
+  /// No description provided for @prodSaveError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de l\'enregistrement : {message}'**
+  String prodSaveError(String message);
+
+  /// No description provided for @prodEditTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier le produit'**
+  String get prodEditTitle;
+
+  /// No description provided for @prodImportPacking.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer Packing List (Excel / CSV)'**
+  String get prodImportPacking;
+
+  /// No description provided for @prodOrManual.
+  ///
+  /// In fr, this message translates to:
+  /// **'OU SAISIE MANUELLE'**
+  String get prodOrManual;
+
+  /// No description provided for @prodImageUrl.
+  ///
+  /// In fr, this message translates to:
+  /// **'URL de l\'image'**
+  String get prodImageUrl;
+
+  /// No description provided for @prodImageUrlOpt.
+  ///
+  /// In fr, this message translates to:
+  /// **'URL de l\'image (optionnel)'**
+  String get prodImageUrlOpt;
+
+  /// No description provided for @prodName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom du produit *'**
+  String get prodName;
+
+  /// No description provided for @prodNameHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'ex: T-Shirt Coton'**
+  String get prodNameHint;
+
+  /// No description provided for @prodNameRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom obligatoire'**
+  String get prodNameRequired;
+
+  /// No description provided for @prodBarcode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code-barres'**
+  String get prodBarcode;
+
+  /// No description provided for @prodBarcodeHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Scanner / Saisir'**
+  String get prodBarcodeHint;
+
+  /// No description provided for @prodCategory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie'**
+  String get prodCategory;
+
+  /// No description provided for @prodBuyPrice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix d\'achat (\$)'**
+  String get prodBuyPrice;
+
+  /// No description provided for @prodInvalidPrice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix invalide'**
+  String get prodInvalidPrice;
+
+  /// No description provided for @prodSellPrice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix vente (\$)*'**
+  String get prodSellPrice;
+
+  /// No description provided for @prodPriceRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix requis'**
+  String get prodPriceRequired;
+
+  /// No description provided for @prodStock.
+  ///
+  /// In fr, this message translates to:
+  /// **'Stock *'**
+  String get prodStock;
+
+  /// No description provided for @prodInitialStock.
+  ///
+  /// In fr, this message translates to:
+  /// **'Stock initial *'**
+  String get prodInitialStock;
+
+  /// No description provided for @prodStockRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Stock requis'**
+  String get prodStockRequired;
+
+  /// No description provided for @prodWholeNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nombre entier'**
+  String get prodWholeNumber;
+
+  /// No description provided for @prodAlertLevel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seuil d\'alerte'**
+  String get prodAlertLevel;
+
+  /// No description provided for @prodSaving.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrement...'**
+  String get prodSaving;
+
+  /// No description provided for @prodUpdate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mettre à jour'**
+  String get prodUpdate;
+
+  /// No description provided for @prodSave.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer le produit'**
+  String get prodSave;
 }
 
 class _AppLocalizationsDelegate

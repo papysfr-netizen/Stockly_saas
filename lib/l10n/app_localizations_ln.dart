@@ -991,4 +991,105 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get edit => 'Bongisa';
+
+  @override
+  String get prodDefaultName => 'Eloko ezali na kombo te';
+
+  @override
+  String get prodBarcodeUsed => 'Kode-barre esalelami kala';
+
+  @override
+  String prodBarcodeUsedMsg(String nom, String stock, String prix) {
+    return 'Kode oyo ezali kala ya:\n\n« $nom »\nStock : $stock  •  Talo : $prix \$\n\nOlingi kofungola eloko oyo mpo na kobongisa yango (ndakisa kobakisa stock)?';
+  }
+
+  @override
+  String get prodOpenThis => 'Fungola eloko oyo';
+
+  @override
+  String get prodNoCompany => 'Kompanyi emonani te. Bima mpe kota lisusu.';
+
+  @override
+  String get prodSavedOffline =>
+      'Ebombami na telefone. Ekotindama soki internet ezongi.';
+
+  @override
+  String get prodUpdated => 'Eloko ebongisami!';
+
+  @override
+  String get prodAdded => 'Eloko ebakisami!';
+
+  @override
+  String prodSaveError(String message) {
+    return 'Libunga na tango ya kobomba : $message';
+  }
+
+  @override
+  String get prodEditTitle => 'Bongisa eloko';
+
+  @override
+  String get prodImportPacking => 'Kotisa Packing List (Excel / CSV)';
+
+  @override
+  String get prodOrManual => 'TO KOMA YO MOKO';
+
+  @override
+  String get prodImageUrl => 'Lien ya foto';
+
+  @override
+  String get prodImageUrlOpt => 'Lien ya foto (soki olingi)';
+
+  @override
+  String get prodName => 'Kombo ya eloko *';
+
+  @override
+  String get prodNameHint => 'ndakisa: T-Shirt ya coton';
+
+  @override
+  String get prodNameRequired => 'Kombo esengeli';
+
+  @override
+  String get prodBarcode => 'Kode-barre';
+
+  @override
+  String get prodBarcodeHint => 'Tanga / Koma';
+
+  @override
+  String get prodCategory => 'Lolenge';
+
+  @override
+  String get prodBuyPrice => 'Talo ya kosomba (\$)';
+
+  @override
+  String get prodInvalidPrice => 'Talo ebongi te';
+
+  @override
+  String get prodSellPrice => 'Talo ya koteka (\$)*';
+
+  @override
+  String get prodPriceRequired => 'Talo esengeli';
+
+  @override
+  String get prodStock => 'Stock *';
+
+  @override
+  String get prodInitialStock => 'Stock ya ebandeli *';
+
+  @override
+  String get prodStockRequired => 'Stock esengeli';
+
+  @override
+  String get prodWholeNumber => 'Motango mobimba';
+
+  @override
+  String get prodAlertLevel => 'Ndelo ya kokebisa';
+
+  @override
+  String get prodSaving => 'Ezali kobomba...';
+
+  @override
+  String get prodUpdate => 'Bongisa';
+
+  @override
+  String get prodSave => 'Bomba eloko';
 }

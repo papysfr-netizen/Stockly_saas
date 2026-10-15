@@ -806,5 +806,57 @@
     }
   },
   "stockAlert": "Alerte stock",
-  "edit": "Modifier"
+  "edit": "Modifier",
+  "prodDefaultName": "Produit sans nom",
+  "prodBarcodeUsed": "Code-barres déjà utilisé",
+  "prodBarcodeUsedMsg": "Ce code appartient déjà à :\n\n« {nom} »\nStock : {stock}  •  Prix : {prix} $\n\nVoulez-vous ouvrir ce produit pour le modifier (par exemple ajouter du stock) ?",
+  "@prodBarcodeUsedMsg": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      },
+      "stock": {
+        "type": "String"
+      },
+      "prix": {
+        "type": "String"
+      }
+    }
+  },
+  "prodOpenThis": "Ouvrir ce produit",
+  "prodNoCompany": "Entreprise introuvable. Déconnectez-vous puis reconnectez-vous.",
+  "prodSavedOffline": "Enregistré sur le téléphone. Il sera envoyé dès que internet revient.",
+  "prodUpdated": "Produit mis à jour avec succès !",
+  "prodAdded": "Produit ajouté avec succès !",
+  "prodSaveError": "Erreur lors de l'enregistrement : {message}",
+  "@prodSaveError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "prodEditTitle": "Modifier le produit",
+  "prodImportPacking": "Importer Packing List (Excel / CSV)",
+  "prodOrManual": "OU SAISIE MANUELLE",
+  "prodImageUrl": "URL de l'image",
+  "prodImageUrlOpt": "URL de l'image (optionnel)",
+  "prodName": "Nom du produit *",
+  "prodNameHint": "ex: T-Shirt Coton",
+  "prodNameRequired": "Nom obligatoire",
+  "prodBarcode": "Code-barres",
+  "prodBarcodeHint": "Scanner / Saisir",
+  "prodCategory": "Catégorie",
+  "prodBuyPrice": "Prix d'achat ($)",
+  "prodInvalidPrice": "Prix invalide",
+  "prodSellPrice": "Prix vente ($)*",
+  "prodPriceRequired": "Prix requis",
+  "prodStock": "Stock *",
+  "prodInitialStock": "Stock initial *",
+  "prodStockRequired": "Stock requis",
+  "prodWholeNumber": "Nombre entier",
+  "prodAlertLevel": "Seuil d'alerte",
+  "prodSaving": "Enregistrement...",
+  "prodUpdate": "Mettre à jour",
+  "prodSave": "Enregistrer le produit"
 }

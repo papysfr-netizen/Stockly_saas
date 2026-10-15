@@ -990,4 +990,105 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get edit => 'Edit';
+
+  @override
+  String get prodDefaultName => 'Unnamed product';
+
+  @override
+  String get prodBarcodeUsed => 'Barcode already used';
+
+  @override
+  String prodBarcodeUsedMsg(String nom, String stock, String prix) {
+    return 'This code already belongs to:\n\n“$nom”\nStock: $stock  •  Price: $prix \$\n\nDo you want to open this product to edit it (for example to add stock)?';
+  }
+
+  @override
+  String get prodOpenThis => 'Open this product';
+
+  @override
+  String get prodNoCompany => 'Company not found. Log out and log in again.';
+
+  @override
+  String get prodSavedOffline =>
+      'Saved on the phone. It will be sent when internet is back.';
+
+  @override
+  String get prodUpdated => 'Product updated!';
+
+  @override
+  String get prodAdded => 'Product added!';
+
+  @override
+  String prodSaveError(String message) {
+    return 'Error while saving: $message';
+  }
+
+  @override
+  String get prodEditTitle => 'Edit product';
+
+  @override
+  String get prodImportPacking => 'Import Packing List (Excel / CSV)';
+
+  @override
+  String get prodOrManual => 'OR ENTER MANUALLY';
+
+  @override
+  String get prodImageUrl => 'Image URL';
+
+  @override
+  String get prodImageUrlOpt => 'Image URL (optional)';
+
+  @override
+  String get prodName => 'Product name *';
+
+  @override
+  String get prodNameHint => 'e.g. Cotton T-shirt';
+
+  @override
+  String get prodNameRequired => 'Name required';
+
+  @override
+  String get prodBarcode => 'Barcode';
+
+  @override
+  String get prodBarcodeHint => 'Scan / Type';
+
+  @override
+  String get prodCategory => 'Category';
+
+  @override
+  String get prodBuyPrice => 'Purchase price (\$)';
+
+  @override
+  String get prodInvalidPrice => 'Invalid price';
+
+  @override
+  String get prodSellPrice => 'Selling price (\$)*';
+
+  @override
+  String get prodPriceRequired => 'Price required';
+
+  @override
+  String get prodStock => 'Stock *';
+
+  @override
+  String get prodInitialStock => 'Opening stock *';
+
+  @override
+  String get prodStockRequired => 'Stock required';
+
+  @override
+  String get prodWholeNumber => 'Whole number';
+
+  @override
+  String get prodAlertLevel => 'Alert level';
+
+  @override
+  String get prodSaving => 'Saving...';
+
+  @override
+  String get prodUpdate => 'Update';
+
+  @override
+  String get prodSave => 'Save the product';
 }

@@ -988,4 +988,105 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get edit => 'Hariri';
+
+  @override
+  String get prodDefaultName => 'Bidhaa bila jina';
+
+  @override
+  String get prodBarcodeUsed => 'Msimbo pau tayari unatumika';
+
+  @override
+  String prodBarcodeUsedMsg(String nom, String stock, String prix) {
+    return 'Msimbo huu tayari ni wa:\n\n« $nom »\nStoo : $stock  •  Bei : $prix \$\n\nUnataka kufungua bidhaa hii kuihariri (kwa mfano kuongeza stoo)?';
+  }
+
+  @override
+  String get prodOpenThis => 'Fungua bidhaa hii';
+
+  @override
+  String get prodNoCompany => 'Kampuni haipatikani. Toka kisha ingia tena.';
+
+  @override
+  String get prodSavedOffline =>
+      'Imehifadhiwa kwenye simu. Itatumwa mtandao ukirudi.';
+
+  @override
+  String get prodUpdated => 'Bidhaa imesasishwa!';
+
+  @override
+  String get prodAdded => 'Bidhaa imeongezwa!';
+
+  @override
+  String prodSaveError(String message) {
+    return 'Kosa wakati wa kuhifadhi : $message';
+  }
+
+  @override
+  String get prodEditTitle => 'Hariri bidhaa';
+
+  @override
+  String get prodImportPacking => 'Ingiza Packing List (Excel / CSV)';
+
+  @override
+  String get prodOrManual => 'AU ANDIKA MWENYEWE';
+
+  @override
+  String get prodImageUrl => 'Kiungo cha picha';
+
+  @override
+  String get prodImageUrlOpt => 'Kiungo cha picha (si lazima)';
+
+  @override
+  String get prodName => 'Jina la bidhaa *';
+
+  @override
+  String get prodNameHint => 'mfano: Fulana ya pamba';
+
+  @override
+  String get prodNameRequired => 'Jina linahitajika';
+
+  @override
+  String get prodBarcode => 'Msimbo pau';
+
+  @override
+  String get prodBarcodeHint => 'Soma / Andika';
+
+  @override
+  String get prodCategory => 'Aina';
+
+  @override
+  String get prodBuyPrice => 'Bei ya kununua (\$)';
+
+  @override
+  String get prodInvalidPrice => 'Bei si sahihi';
+
+  @override
+  String get prodSellPrice => 'Bei ya kuuza (\$)*';
+
+  @override
+  String get prodPriceRequired => 'Bei inahitajika';
+
+  @override
+  String get prodStock => 'Stoo *';
+
+  @override
+  String get prodInitialStock => 'Stoo ya mwanzo *';
+
+  @override
+  String get prodStockRequired => 'Stoo inahitajika';
+
+  @override
+  String get prodWholeNumber => 'Namba kamili';
+
+  @override
+  String get prodAlertLevel => 'Kiwango cha tahadhari';
+
+  @override
+  String get prodSaving => 'Inahifadhi...';
+
+  @override
+  String get prodUpdate => 'Sasisha';
+
+  @override
+  String get prodSave => 'Hifadhi bidhaa';
 }

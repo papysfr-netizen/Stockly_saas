@@ -994,4 +994,106 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get edit => 'Modifier';
+
+  @override
+  String get prodDefaultName => 'Produit sans nom';
+
+  @override
+  String get prodBarcodeUsed => 'Code-barres déjà utilisé';
+
+  @override
+  String prodBarcodeUsedMsg(String nom, String stock, String prix) {
+    return 'Ce code appartient déjà à :\n\n« $nom »\nStock : $stock  •  Prix : $prix \$\n\nVoulez-vous ouvrir ce produit pour le modifier (par exemple ajouter du stock) ?';
+  }
+
+  @override
+  String get prodOpenThis => 'Ouvrir ce produit';
+
+  @override
+  String get prodNoCompany =>
+      'Entreprise introuvable. Déconnectez-vous puis reconnectez-vous.';
+
+  @override
+  String get prodSavedOffline =>
+      'Enregistré sur le téléphone. Il sera envoyé dès que internet revient.';
+
+  @override
+  String get prodUpdated => 'Produit mis à jour avec succès !';
+
+  @override
+  String get prodAdded => 'Produit ajouté avec succès !';
+
+  @override
+  String prodSaveError(String message) {
+    return 'Erreur lors de l\'enregistrement : $message';
+  }
+
+  @override
+  String get prodEditTitle => 'Modifier le produit';
+
+  @override
+  String get prodImportPacking => 'Importer Packing List (Excel / CSV)';
+
+  @override
+  String get prodOrManual => 'OU SAISIE MANUELLE';
+
+  @override
+  String get prodImageUrl => 'URL de l\'image';
+
+  @override
+  String get prodImageUrlOpt => 'URL de l\'image (optionnel)';
+
+  @override
+  String get prodName => 'Nom du produit *';
+
+  @override
+  String get prodNameHint => 'ex: T-Shirt Coton';
+
+  @override
+  String get prodNameRequired => 'Nom obligatoire';
+
+  @override
+  String get prodBarcode => 'Code-barres';
+
+  @override
+  String get prodBarcodeHint => 'Scanner / Saisir';
+
+  @override
+  String get prodCategory => 'Catégorie';
+
+  @override
+  String get prodBuyPrice => 'Prix d\'achat (\$)';
+
+  @override
+  String get prodInvalidPrice => 'Prix invalide';
+
+  @override
+  String get prodSellPrice => 'Prix vente (\$)*';
+
+  @override
+  String get prodPriceRequired => 'Prix requis';
+
+  @override
+  String get prodStock => 'Stock *';
+
+  @override
+  String get prodInitialStock => 'Stock initial *';
+
+  @override
+  String get prodStockRequired => 'Stock requis';
+
+  @override
+  String get prodWholeNumber => 'Nombre entier';
+
+  @override
+  String get prodAlertLevel => 'Seuil d\'alerte';
+
+  @override
+  String get prodSaving => 'Enregistrement...';
+
+  @override
+  String get prodUpdate => 'Mettre à jour';
+
+  @override
+  String get prodSave => 'Enregistrer le produit';
 }

@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../services/packing_list_service.dart';
 import 'quick_scanner_widget.dart';
+import 'package:stockly_saas/l10n/app_localizations.dart';
 
 /// Résultat renvoyé quand l'utilisateur choisit d'ouvrir un produit
 /// qui possède déjà le code-barres scanné ou saisi.
@@ -99,6 +100,8 @@ class _AddProductModalState extends State<AddProductModal> {
   bool isLoading = false;
 
   bool get isEditing => widget.id != null && widget.id!.isNotEmpty;
+
+  AppLocalizations get _t => AppLocalizations.of(context);
 
   /// 🏬 Produit tel qu'il était à l'ouverture
   Produit? get _produitAvant => widget.product == null
@@ -244,7 +247,8 @@ class _AddProductModalState extends State<AddProductModal> {
   Future<bool> _proposerProduitExistant(
       QueryDocumentSnapshot<Map<String, dynamic>> doc) async {
     final data = doc.data();
-    final nom = (data['nom'] ?? 'Produit sans nom').toString();
+    final t = _t;
+    final nom = (data['nom'] ?? t.prodDefaultName).toString();
     final stock = data['quantite'] ?? data['stock'] ?? 0;
     final prixBrut = data['prixVente'] ?? data['prix'] ?? 0;
     final prix = prixBrut is num ? prixBrut.toStringAsFixed(2) : prixBrut.toString();
@@ -253,23 +257,17 @@ class _AddProductModalState extends State<AddProductModal> {
       context: context,
       builder: (ctx) => AlertDialog(
         icon: Icon(Icons.info_outline_rounded, color: Colors.orange.shade800, size: 36),
-        title: const Text('Code-barres déjà utilisé'),
-        content: Text(
-          'Ce code appartient déjà à :\n\n'
-          '« $nom »\n'
-          'Stock : $stock  •  Prix : $prix \$\n\n'
-          'Voulez-vous ouvrir ce produit pour le modifier '
-          '(par exemple ajouter du stock) ?',
-        ),
+        title: Text(t.prodBarcodeUsed),
+        content: Text(t.prodBarcodeUsedMsg(nom, '$stock', prix)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Annuler'),
+            child: Text(t.cancel),
           ),
           FilledButton.icon(
             onPressed: () => Navigator.pop(ctx, true),
             icon: const Icon(Icons.edit_rounded, size: 18),
-            label: const Text('Ouvrir ce produit'),
+            label: Text(t.prodOpenThis),
           ),
         ],
       ),
@@ -293,12 +291,13 @@ class _AddProductModalState extends State<AddProductModal> {
 
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
+    final t = _t;
 
     final entrepriseId = widget.entrepriseId.trim();
     if (entrepriseId.isEmpty) {
       _afficherMessage(
         messenger,
-        'Entreprise introuvable. Déconnectez-vous puis reconnectez-vous.',
+        _t.prodNoCompany,
         Colors.red.shade700,
         Icons.error_outline,
       );
@@ -393,7 +392,7 @@ class _AddProductModalState extends State<AddProductModal> {
       if (enAttenteReseau) {
         _afficherMessage(
           messenger,
-          'Enregistré sur le téléphone. Il sera envoyé dès que internet revient.',
+          t.prodSavedOffline,
           Colors.orange.shade800,
           Icons.cloud_off_rounded,
         );
@@ -401,8 +400,8 @@ class _AddProductModalState extends State<AddProductModal> {
         _afficherMessage(
           messenger,
           isEditing
-              ? 'Produit mis à jour avec succès !'
-              : 'Produit ajouté avec succès !',
+              ? t.prodUpdated
+              : t.prodAdded,
           Colors.green.shade700,
           Icons.check_circle_outline,
         );
@@ -411,7 +410,7 @@ class _AddProductModalState extends State<AddProductModal> {
       debugPrint('[Stockly] Erreur enregistrement produit : $e');
       _afficherMessage(
         messenger,
-        'Erreur lors de l\'enregistrement : $e',
+        t.prodSaveError('$e'),
         Colors.red.shade700,
         Icons.error_outline,
       );
@@ -504,7 +503,7 @@ class _AddProductModalState extends State<AddProductModal> {
                         children: [
                           Expanded(
                             child: Text(
-                              isEditing ? 'Modifier le produit' : 'Nouveau Produit',
+                              isEditing ? _t.prodEditTitle : _t.stockNewProduct,
                               style: theme.textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: -0.5,
@@ -529,7 +528,7 @@ class _AddProductModalState extends State<AddProductModal> {
                             if (entId.isEmpty) {
                               _afficherMessage(
                                 ScaffoldMessenger.of(context),
-                                'Entreprise introuvable. Déconnectez-vous puis reconnectez-vous.',
+                                _t.prodNoCompany,
                                 Colors.red.shade700,
                                 Icons.error_outline,
                               );
@@ -558,7 +557,7 @@ class _AddProductModalState extends State<AddProductModal> {
                             size: 18,
                           ),
                           label: Text(
-                            'Importer Packing List (Excel / CSV)',
+                            _t.prodImportPacking,
                             style: TextStyle(
                               color: theme.colorScheme.primary,
                               fontWeight: FontWeight.bold,
@@ -578,7 +577,7 @@ class _AddProductModalState extends State<AddProductModal> {
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 6.0),
                               child: Text(
-                                'OU SAISIE MANUELLE',
+                                _t.prodOrManual,
                                 style: theme.textTheme.labelSmall?.copyWith(
                                   color: theme.colorScheme.onSurfaceVariant,
                                   fontWeight: FontWeight.w600,
@@ -604,7 +603,7 @@ class _AddProductModalState extends State<AddProductModal> {
                                 const SizedBox(height: 10),
                                 _buildInputField(
                                   controller: _imageUrlController,
-                                  label: "URL de l'image",
+                                  label: _t.prodImageUrl,
                                   hint: "https://...",
                                   icon: Icons.link_rounded,
                                 ),
@@ -618,7 +617,7 @@ class _AddProductModalState extends State<AddProductModal> {
                               Expanded(
                                 child: _buildInputField(
                                   controller: _imageUrlController,
-                                  label: "URL de l'image (optionnel)",
+                                  label: _t.prodImageUrlOpt,
                                   hint: "https://exemple.com/image.jpg",
                                   icon: Icons.link_rounded,
                                 ),
@@ -630,12 +629,12 @@ class _AddProductModalState extends State<AddProductModal> {
                       const SizedBox(height: 14),
                       _buildInputField(
                         controller: _nomController,
-                        label: 'Nom du produit *',
-                        hint: 'ex: T-Shirt Coton',
+                        label: _t.prodName,
+                        hint: _t.prodNameHint,
                         icon: Icons.shopping_bag_outlined,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Nom obligatoire';
+                            return _t.prodNameRequired;
                           }
                           return null;
                         },
@@ -646,8 +645,8 @@ class _AddProductModalState extends State<AddProductModal> {
                           final isNarrow = constraints.maxWidth < 300;
                           final codeField = _buildInputField(
                             controller: _codeBarresController,
-                            label: 'Code-barres',
-                            hint: 'Scanner / Saisir',
+                            label: _t.prodBarcode,
+                            hint: _t.prodBarcodeHint,
                             icon: Icons.qr_code_rounded,
                             suffixIcon: IconButton(
                               constraints: const BoxConstraints(),
@@ -666,7 +665,7 @@ class _AddProductModalState extends State<AddProductModal> {
                             initialValue: _categorieSelectionnee,
                             style: theme.textTheme.bodyMedium,
                             decoration: _buildInputDecoration(
-                              label: 'Catégorie',
+                              label: _t.prodCategory,
                               icon: Icons.category_outlined,
                             ),
                             items: _categories.map((cat) {
@@ -708,7 +707,7 @@ class _AddProductModalState extends State<AddProductModal> {
                           final isNarrow = constraints.maxWidth < 300;
                           final prixAchatField = _buildInputField(
                             controller: _prixAchatController,
-                            label: "Prix d'achat (\$)",
+                            label: _t.prodBuyPrice,
                             hint: '0.00',
                             icon: Icons.attach_money_rounded,
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -717,7 +716,7 @@ class _AddProductModalState extends State<AddProductModal> {
                                 return null; // optionnel
                               }
                               if (_lireDecimal(value) == null) {
-                                return 'Prix invalide';
+                                return _t.prodInvalidPrice;
                               }
                               return null;
                             },
@@ -725,16 +724,16 @@ class _AddProductModalState extends State<AddProductModal> {
 
                           final prixVenteField = _buildInputField(
                             controller: _prixVenteController,
-                            label: 'Prix vente (\$)*',
+                            label: _t.prodSellPrice,
                             hint: '0.00',
                             icon: Icons.sell_outlined,
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return 'Prix requis';
+                                return _t.prodPriceRequired;
                               }
                               if (_lireDecimal(value) == null) {
-                                return 'Prix invalide';
+                                return _t.prodInvalidPrice;
                               }
                               return null;
                             },
@@ -766,16 +765,16 @@ class _AddProductModalState extends State<AddProductModal> {
                           final isNarrow = constraints.maxWidth < 300;
                           final quantiteField = _buildInputField(
                             controller: _quantiteController,
-                            label: isEditing ? 'Stock *' : 'Stock initial *',
+                            label: isEditing ? _t.prodStock : _t.prodInitialStock,
                             hint: '1',
                             icon: Icons.inventory_2_outlined,
                             keyboardType: TextInputType.number,
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return 'Stock requis';
+                                return _t.prodStockRequired;
                               }
                               if (_lireEntier(value) == null) {
-                                return 'Nombre entier';
+                                return _t.prodWholeNumber;
                               }
                               return null;
                             },
@@ -783,7 +782,7 @@ class _AddProductModalState extends State<AddProductModal> {
 
                           final seuilField = _buildInputField(
                             controller: _seuilAlerteController,
-                            label: "Seuil d'alerte",
+                            label: _t.prodAlertLevel,
                             hint: '5',
                             icon: Icons.warning_amber_rounded,
                             keyboardType: TextInputType.number,
@@ -840,8 +839,8 @@ class _AddProductModalState extends State<AddProductModal> {
                                 ),
                           label: Text(
                             isLoading
-                                ? 'Enregistrement...'
-                                : (isEditing ? 'Mettre à jour' : 'Enregistrer le produit'),
+                                ? _t.prodSaving
+                                : (isEditing ? _t.prodUpdate : _t.prodSave),
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
