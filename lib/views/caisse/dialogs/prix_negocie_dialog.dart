@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:stockly_saas/core/providers/currency_provider.dart';
 import 'package:stockly_saas/core/providers/user_role_provider.dart';
+import 'package:stockly_saas/l10n/app_localizations.dart';
 
 /// 💬 Fenêtre « Prix négocié ».
 /// Tous les prix reçus et renvoyés sont en USD.
@@ -70,6 +71,7 @@ class _PrixNegocieDialogState extends ConsumerState<_PrixNegocieDialog> {
     final info = ref.watch(currencyProvider).activeCurrencyInfo;
     final taux = info.rateToUSD > 0 ? info.rateToUSD : 1.0;
     final voirFinances = ref.watch(userProfileProvider).value?.peutVoirFinances ?? false;
+    final t = AppLocalizations.of(context);
 
     final saisi = double.tryParse(_ctrl.text.replaceAll(',', '.').trim());
     final prixUSD = saisi == null ? null : saisi / taux;
@@ -79,14 +81,14 @@ class _PrixNegocieDialogState extends ConsumerState<_PrixNegocieDialog> {
     final dejaNegocie = (widget.prixActuel - widget.prixNormal).abs() > 0.005;
 
     return AlertDialog(
-      title: Text('Prix pour ${widget.nom}', overflow: TextOverflow.ellipsis),
+      title: Text(t.priceFor(widget.nom), overflow: TextOverflow.ellipsis),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Prix normal : ${_texte(widget.prixNormal * taux)} ${info.symbol}',
+              t.cartNormalPrice('${_texte(widget.prixNormal * taux)} ${info.symbol}'),
               style: TextStyle(color: Colors.grey.shade700),
             ),
             const SizedBox(height: 12),
@@ -95,7 +97,7 @@ class _PrixNegocieDialogState extends ConsumerState<_PrixNegocieDialog> {
               autofocus: true,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               decoration: InputDecoration(
-                labelText: 'Prix accordé (par pièce)',
+                labelText: t.agreedPrice,
                 suffixText: info.symbol,
                 border: const OutlineInputBorder(),
               ),
@@ -104,7 +106,7 @@ class _PrixNegocieDialogState extends ConsumerState<_PrixNegocieDialog> {
             const SizedBox(height: 10),
             if (remise > 0.005)
               Text(
-                'Remise : ${_texte(remise * taux)} ${info.symbol} par pièce',
+                t.discountPerPiece('${_texte(remise * taux)} ${info.symbol}'),
                 style: TextStyle(color: Colors.orange.shade800, fontWeight: FontWeight.w600),
               ),
             if (aPerte) ...[
@@ -123,8 +125,8 @@ class _PrixNegocieDialogState extends ConsumerState<_PrixNegocieDialog> {
                     Expanded(
                       child: Text(
                         voirFinances
-                            ? "Vente à perte ! Prix d'achat : ${_texte(widget.prixAchat * taux)} ${info.symbol}"
-                            : "Vente à perte ! Ce prix est sous le prix d'achat.",
+                            ? t.lossWithCost('${_texte(widget.prixAchat * taux)} ${info.symbol}')
+                            : t.lossBelowCost,
                         style: TextStyle(color: Colors.red.shade800, fontWeight: FontWeight.w600),
                       ),
                     ),
@@ -138,17 +140,17 @@ class _PrixNegocieDialogState extends ConsumerState<_PrixNegocieDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Annuler'),
+          child: Text(t.cancel),
         ),
         if (dejaNegocie)
           TextButton(
             onPressed: () => Navigator.pop(context, widget.prixNormal),
-            child: const Text('Prix normal'),
+            child: Text(t.normalPriceBtn),
           ),
         FilledButton(
           style: aPerte ? FilledButton.styleFrom(backgroundColor: Colors.red.shade700) : null,
           onPressed: valide ? () => Navigator.pop(context, prixUSD) : null,
-          child: Text(aPerte ? 'Vendre à perte' : 'Valider'),
+          child: Text(aPerte ? t.sellAtLoss : t.validate),
         ),
       ],
     );

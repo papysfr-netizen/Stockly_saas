@@ -306,4 +306,90 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get cartLoss => 'Vente à perte';
+
+  @override
+  String addTitle(String nom) {
+    return 'Ajouter $nom';
+  }
+
+  @override
+  String lossConfirm(String nom) {
+    return 'Le prix de $nom est sous le prix d\'achat.\nVoulez-vous vraiment vendre à ce prix ?';
+  }
+
+  @override
+  String get noCorrect => 'Non, corriger';
+
+  @override
+  String get yesSell => 'Oui, vendre';
+
+  @override
+  String stockAvailable(int count) {
+    return 'Stock disponible : $count';
+  }
+
+  @override
+  String unitPrice(String code) {
+    return 'Prix unitaire ($code)';
+  }
+
+  @override
+  String discountPerPiece(String montant) {
+    return 'Remise : $montant par pièce';
+  }
+
+  @override
+  String get fixedPrice =>
+      'Prix fixe (autorisation « Remises et retraits » nécessaire)';
+
+  @override
+  String lossWithCost(String montant) {
+    return 'Vente à perte ! Prix d\'achat : $montant';
+  }
+
+  @override
+  String get lossBelowCost =>
+      'Vente à perte : ce prix est sous le prix d\'achat.';
+
+  @override
+  String get qtyInvalid => 'Quantité invalide';
+
+  @override
+  String maxAvailable(int count) {
+    return 'Max disponible : $count';
+  }
+
+  @override
+  String get quantity => 'Quantité';
+
+  @override
+  String get subtotal => 'Sous-total :';
+
+  @override
+  String qtyOverStock(int count) {
+    return 'Quantité supérieure au stock disponible ($count)';
+  }
+
+  @override
+  String get outOfStockGeneric => 'Produit en rupture de stock !';
+
+  @override
+  String get sellAtLoss => 'Vendre à perte';
+
+  @override
+  String get add => 'Ajouter';
+
+  @override
+  String priceFor(String nom) {
+    return 'Prix pour $nom';
+  }
+
+  @override
+  String get agreedPrice => 'Prix accordé (par pièce)';
+
+  @override
+  String get normalPriceBtn => 'Prix normal';
+
+  @override
+  String get validate => 'Valider';
 }

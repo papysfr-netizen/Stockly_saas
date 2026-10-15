@@ -6,6 +6,7 @@ import '../../../core/models/produit.dart';
 import '../../../core/providers/cart_provider.dart';
 import '../../../core/providers/currency_provider.dart';
 import '../../../core/providers/user_role_provider.dart';
+import 'package:stockly_saas/l10n/app_localizations.dart';
 
 class AjoutPanierDialog extends ConsumerStatefulWidget {
   final Produit produit;
@@ -52,9 +53,9 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
 
     setState(() {
       if (qte <= 0) {
-        _erreurStock = 'Quantité invalide';
+        _erreurStock = AppLocalizations.of(context).qtyInvalid;
       } else if (qte > widget.produit.stockBoutique(ref.boutiqueVente)) {
-        _erreurStock = 'Max disponible : ${widget.produit.stockBoutique(ref.boutiqueVente)}';
+        _erreurStock = AppLocalizations.of(context).maxAvailable(widget.produit.stockBoutique(ref.boutiqueVente));
       } else {
         _erreurStock = null;
       }
@@ -67,17 +68,14 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
       context: context,
       builder: (ctx) => AlertDialog(
         icon: Icon(Icons.warning_amber_rounded, color: Colors.red.shade700, size: 40),
-        title: const Text('Vente à perte'),
-        content: Text(
-          "Le prix de ${widget.produit.nom} est sous le prix d'achat.\n"
-          'Voulez-vous vraiment vendre à ce prix ?',
-        ),
+        title: Text(AppLocalizations.of(ctx).sellAtLoss),
+        content: Text(AppLocalizations.of(ctx).lossConfirm(widget.produit.nom)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Non, corriger')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(AppLocalizations.of(ctx).noCorrect)),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red.shade700),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Oui, vendre'),
+            child: Text(AppLocalizations.of(ctx).yesSell),
           ),
         ],
       ),
@@ -95,6 +93,7 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
     final peutChangerPrix =
         ref.watch(userProfileProvider).value?.peutRemisesRetraits ?? false;
     final voirFinances = ref.watch(userProfileProvider).value?.peutVoirFinances ?? false;
+    final t = AppLocalizations.of(context);
 
     final prixSaisi = double.tryParse(_prixController.text.replaceAll(',', '.').trim()) ?? 0.0;
     final qteSaisie = int.tryParse(_qteController.text.replaceAll(',', '.').trim()) ?? 0;
@@ -110,7 +109,7 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       title: Text(
-        'Ajouter ${widget.produit.nom}',
+        t.addTitle(widget.produit.nom),
         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
       ),
       content: SingleChildScrollView(
@@ -125,7 +124,7 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
-                'Stock disponible : ${widget.produit.stockBoutique(ref.boutiqueVente)}',
+                t.stockAvailable(widget.produit.stockBoutique(ref.boutiqueVente)),
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
@@ -139,15 +138,15 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
               controller: _prixController,
               enabled: peutChangerPrix,
               decoration: InputDecoration(
-                labelText: 'Prix unitaire (${activeInfo.code})',
+                labelText: t.unitPrice(activeInfo.code),
                 suffixText: activeInfo.symbol,
                 border: const OutlineInputBorder(),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 helperText: peutChangerPrix
                     ? (remiseUSD > 0.005
-                        ? 'Remise : ${(remiseUSD * rate).toStringAsFixed(2)} ${activeInfo.symbol} par pièce'
+                        ? t.discountPerPiece('${(remiseUSD * rate).toStringAsFixed(2)} ${activeInfo.symbol}')
                         : null)
-                    : 'Prix fixe (autorisation « Remises et retraits » nécessaire)',
+                    : t.fixedPrice,
                 helperMaxLines: 2,
                 helperStyle: TextStyle(
                   color: peutChangerPrix ? Colors.orange.shade800 : Colors.grey.shade600,
@@ -160,8 +159,8 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
               const SizedBox(height: 8),
               Text(
                 voirFinances
-                    ? "⚠️ Vente à perte (prix d'achat : ${(prixAchat * rate).toStringAsFixed(2)} ${activeInfo.symbol})"
-                    : "⚠️ Vente à perte : ce prix est sous le prix d'achat",
+                    ? '⚠️ ${t.lossWithCost('${(prixAchat * rate).toStringAsFixed(2)} ${activeInfo.symbol}')}'
+                    : '⚠️ ${t.lossBelowCost}',
                 style: TextStyle(color: Colors.red.shade700, fontWeight: FontWeight.w600),
               ),
             ],
@@ -170,7 +169,7 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
             TextField(
               controller: _qteController,
               decoration: InputDecoration(
-                labelText: 'Quantité',
+                labelText: t.quantity,
                 errorText: _erreurStock,
                 border: const OutlineInputBorder(),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -183,7 +182,7 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Sous-total :', style: TextStyle(fontWeight: FontWeight.w600)),
+                Text(t.subtotal, style: const TextStyle(fontWeight: FontWeight.w600)),
                 Text(
                   '${sousTotalLocal.toStringAsFixed(2)} ${activeInfo.symbol}',
                   style: const TextStyle(
@@ -200,7 +199,7 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, false),
-          child: const Text('Annuler'),
+          child: Text(t.cancel),
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
@@ -243,14 +242,14 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
                   if (result == CartOperationResult.stockLimitReached) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Quantité supérieure au stock disponible ($stock)'),
+                        content: Text(t.qtyOverStock(stock)),
                         backgroundColor: Colors.orange,
                       ),
                     );
                   } else if (result == CartOperationResult.outOfStock) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Produit en rupture de stock !'),
+                      SnackBar(
+                        content: Text(t.outOfStockGeneric),
                         backgroundColor: Colors.red,
                       ),
                     );
@@ -260,7 +259,7 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
                     Navigator.pop(context, true);
                   }
                 },
-          child: Text(aPerte ? 'Vendre à perte' : 'Ajouter'),
+          child: Text(aPerte ? t.sellAtLoss : t.add),
         ),
       ],
     );

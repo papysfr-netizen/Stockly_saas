@@ -599,6 +599,138 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Vente à perte'**
   String get cartLoss;
+
+  /// No description provided for @addTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter {nom}'**
+  String addTitle(String nom);
+
+  /// No description provided for @lossConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le prix de {nom} est sous le prix d\'achat.\nVoulez-vous vraiment vendre à ce prix ?'**
+  String lossConfirm(String nom);
+
+  /// No description provided for @noCorrect.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non, corriger'**
+  String get noCorrect;
+
+  /// No description provided for @yesSell.
+  ///
+  /// In fr, this message translates to:
+  /// **'Oui, vendre'**
+  String get yesSell;
+
+  /// No description provided for @stockAvailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Stock disponible : {count}'**
+  String stockAvailable(int count);
+
+  /// No description provided for @unitPrice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix unitaire ({code})'**
+  String unitPrice(String code);
+
+  /// No description provided for @discountPerPiece.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remise : {montant} par pièce'**
+  String discountPerPiece(String montant);
+
+  /// No description provided for @fixedPrice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix fixe (autorisation « Remises et retraits » nécessaire)'**
+  String get fixedPrice;
+
+  /// No description provided for @lossWithCost.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vente à perte ! Prix d\'achat : {montant}'**
+  String lossWithCost(String montant);
+
+  /// No description provided for @lossBelowCost.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vente à perte : ce prix est sous le prix d\'achat.'**
+  String get lossBelowCost;
+
+  /// No description provided for @qtyInvalid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quantité invalide'**
+  String get qtyInvalid;
+
+  /// No description provided for @maxAvailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Max disponible : {count}'**
+  String maxAvailable(int count);
+
+  /// No description provided for @quantity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quantité'**
+  String get quantity;
+
+  /// No description provided for @subtotal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sous-total :'**
+  String get subtotal;
+
+  /// No description provided for @qtyOverStock.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quantité supérieure au stock disponible ({count})'**
+  String qtyOverStock(int count);
+
+  /// No description provided for @outOfStockGeneric.
+  ///
+  /// In fr, this message translates to:
+  /// **'Produit en rupture de stock !'**
+  String get outOfStockGeneric;
+
+  /// No description provided for @sellAtLoss.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vendre à perte'**
+  String get sellAtLoss;
+
+  /// No description provided for @add.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter'**
+  String get add;
+
+  /// No description provided for @priceFor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix pour {nom}'**
+  String priceFor(String nom);
+
+  /// No description provided for @agreedPrice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix accordé (par pièce)'**
+  String get agreedPrice;
+
+  /// No description provided for @normalPriceBtn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix normal'**
+  String get normalPriceBtn;
+
+  /// No description provided for @validate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider'**
+  String get validate;
 }
 
 class _AppLocalizationsDelegate

@@ -302,4 +302,89 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get cartLoss => 'Kuuza kwa hasara';
+
+  @override
+  String addTitle(String nom) {
+    return 'Ongeza $nom';
+  }
+
+  @override
+  String lossConfirm(String nom) {
+    return 'Bei ya $nom iko chini ya bei ya kununua.\nUnataka kweli kuuza kwa bei hii?';
+  }
+
+  @override
+  String get noCorrect => 'Hapana, rekebisha';
+
+  @override
+  String get yesSell => 'Ndiyo, uza';
+
+  @override
+  String stockAvailable(int count) {
+    return 'Bidhaa zilizopo : $count';
+  }
+
+  @override
+  String unitPrice(String code) {
+    return 'Bei ya kipande ($code)';
+  }
+
+  @override
+  String discountPerPiece(String montant) {
+    return 'Punguzo : $montant kwa kipande';
+  }
+
+  @override
+  String get fixedPrice =>
+      'Bei isiyobadilika (ruhusa ya « Punguzo na utoaji » inahitajika)';
+
+  @override
+  String lossWithCost(String montant) {
+    return 'Unauza kwa hasara! Bei ya kununua : $montant';
+  }
+
+  @override
+  String get lossBelowCost => 'Hasara: bei hii iko chini ya bei ya kununua.';
+
+  @override
+  String get qtyInvalid => 'Idadi si sahihi';
+
+  @override
+  String maxAvailable(int count) {
+    return 'Kiwango cha juu : $count';
+  }
+
+  @override
+  String get quantity => 'Idadi';
+
+  @override
+  String get subtotal => 'Jumla ndogo :';
+
+  @override
+  String qtyOverStock(int count) {
+    return 'Idadi inazidi bidhaa zilizopo ($count)';
+  }
+
+  @override
+  String get outOfStockGeneric => 'Bidhaa imeisha!';
+
+  @override
+  String get sellAtLoss => 'Uza kwa hasara';
+
+  @override
+  String get add => 'Ongeza';
+
+  @override
+  String priceFor(String nom) {
+    return 'Bei ya $nom';
+  }
+
+  @override
+  String get agreedPrice => 'Bei iliyokubaliwa (kwa kipande)';
+
+  @override
+  String get normalPriceBtn => 'Bei ya kawaida';
+
+  @override
+  String get validate => 'Thibitisha';
 }

@@ -221,5 +221,90 @@
       }
     }
   },
-  "cartLoss": "Vente à perte"
+  "cartLoss": "Vente à perte",
+  "addTitle": "Ajouter {nom}",
+  "@addTitle": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
+  "lossConfirm": "Le prix de {nom} est sous le prix d'achat.\nVoulez-vous vraiment vendre à ce prix ?",
+  "@lossConfirm": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
+  "noCorrect": "Non, corriger",
+  "yesSell": "Oui, vendre",
+  "stockAvailable": "Stock disponible : {count}",
+  "@stockAvailable": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "unitPrice": "Prix unitaire ({code})",
+  "@unitPrice": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "discountPerPiece": "Remise : {montant} par pièce",
+  "@discountPerPiece": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "fixedPrice": "Prix fixe (autorisation « Remises et retraits » nécessaire)",
+  "lossWithCost": "Vente à perte ! Prix d'achat : {montant}",
+  "@lossWithCost": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "lossBelowCost": "Vente à perte : ce prix est sous le prix d'achat.",
+  "qtyInvalid": "Quantité invalide",
+  "maxAvailable": "Max disponible : {count}",
+  "@maxAvailable": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "quantity": "Quantité",
+  "subtotal": "Sous-total :",
+  "qtyOverStock": "Quantité supérieure au stock disponible ({count})",
+  "@qtyOverStock": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "outOfStockGeneric": "Produit en rupture de stock !",
+  "sellAtLoss": "Vendre à perte",
+  "add": "Ajouter",
+  "priceFor": "Prix pour {nom}",
+  "@priceFor": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
+  "agreedPrice": "Prix accordé (par pièce)",
+  "normalPriceBtn": "Prix normal",
+  "validate": "Valider"
 }

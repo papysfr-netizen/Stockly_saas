@@ -303,4 +303,90 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cartLoss => 'Sold at a loss';
+
+  @override
+  String addTitle(String nom) {
+    return 'Add $nom';
+  }
+
+  @override
+  String lossConfirm(String nom) {
+    return 'The price of $nom is below the purchase price.\nDo you really want to sell at this price?';
+  }
+
+  @override
+  String get noCorrect => 'No, fix it';
+
+  @override
+  String get yesSell => 'Yes, sell';
+
+  @override
+  String stockAvailable(int count) {
+    return 'Available stock: $count';
+  }
+
+  @override
+  String unitPrice(String code) {
+    return 'Unit price ($code)';
+  }
+
+  @override
+  String discountPerPiece(String montant) {
+    return 'Discount: $montant per piece';
+  }
+
+  @override
+  String get fixedPrice =>
+      'Fixed price (“Discounts and withdrawals” permission needed)';
+
+  @override
+  String lossWithCost(String montant) {
+    return 'Selling at a loss! Purchase price: $montant';
+  }
+
+  @override
+  String get lossBelowCost =>
+      'Selling at a loss: this price is below the purchase price.';
+
+  @override
+  String get qtyInvalid => 'Invalid quantity';
+
+  @override
+  String maxAvailable(int count) {
+    return 'Max available: $count';
+  }
+
+  @override
+  String get quantity => 'Quantity';
+
+  @override
+  String get subtotal => 'Subtotal:';
+
+  @override
+  String qtyOverStock(int count) {
+    return 'Quantity above available stock ($count)';
+  }
+
+  @override
+  String get outOfStockGeneric => 'Product out of stock!';
+
+  @override
+  String get sellAtLoss => 'Sell at a loss';
+
+  @override
+  String get add => 'Add';
+
+  @override
+  String priceFor(String nom) {
+    return 'Price for $nom';
+  }
+
+  @override
+  String get agreedPrice => 'Agreed price (per piece)';
+
+  @override
+  String get normalPriceBtn => 'Normal price';
+
+  @override
+  String get validate => 'Confirm';
 }

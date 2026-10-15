@@ -305,4 +305,90 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get cartLoss => 'Koteka na bobungisi';
+
+  @override
+  String addTitle(String nom) {
+    return 'Bakisa $nom';
+  }
+
+  @override
+  String lossConfirm(String nom) {
+    return 'Talo ya $nom ezali na se ya talo ya kosomba.\nOlingi solo koteka na talo oyo?';
+  }
+
+  @override
+  String get noCorrect => 'Te, bongisa';
+
+  @override
+  String get yesSell => 'Iyo, teka';
+
+  @override
+  String stockAvailable(int count) {
+    return 'Biloko ezali : $count';
+  }
+
+  @override
+  String unitPrice(String code) {
+    return 'Talo ya moko ($code)';
+  }
+
+  @override
+  String discountPerPiece(String montant) {
+    return 'Bokitisi : $montant mpo na moko';
+  }
+
+  @override
+  String get fixedPrice =>
+      'Talo ebongwanaka te (ndingisa ya « Bakitisi mpe kobimisa » esengeli)';
+
+  @override
+  String lossWithCost(String montant) {
+    return 'Ozali koteka na bobungisi! Talo ya kosomba : $montant';
+  }
+
+  @override
+  String get lossBelowCost =>
+      'Bobungisi: talo oyo ezali na se ya talo ya kosomba.';
+
+  @override
+  String get qtyInvalid => 'Motango ebongi te';
+
+  @override
+  String maxAvailable(int count) {
+    return 'Motango monene : $count';
+  }
+
+  @override
+  String get quantity => 'Motango';
+
+  @override
+  String get subtotal => 'Motango ya ndambo :';
+
+  @override
+  String qtyOverStock(int count) {
+    return 'Motango eleki stock oyo ezali ($count)';
+  }
+
+  @override
+  String get outOfStockGeneric => 'Eloko esili!';
+
+  @override
+  String get sellAtLoss => 'Teka na bobungisi';
+
+  @override
+  String get add => 'Bakisa';
+
+  @override
+  String priceFor(String nom) {
+    return 'Talo ya $nom';
+  }
+
+  @override
+  String get agreedPrice => 'Talo ya boyokani (mpo na moko)';
+
+  @override
+  String get normalPriceBtn => 'Talo ya momesano';
+
+  @override
+  String get validate => 'Ndima';
 }
