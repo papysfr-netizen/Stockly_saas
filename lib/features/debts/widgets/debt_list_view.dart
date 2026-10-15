@@ -13,6 +13,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:stockly_saas/core/models/dette.dart';
 import 'debt_dialogs.dart';
+import 'package:stockly_saas/core/services/messages_clients.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
 
 enum _Filtre { enCours, recentes, enRetard, partielles, soldees }
@@ -102,16 +103,30 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
   // RELANCE WHATSAPP
   // ------------------------------------------------------------------
   Future<void> _relancer(Dette d) async {
+    // 💬 Langue DU CLIENT (par défaut : langue de l'application)
+    final langue = await MessagesClients.choisirLangue(
+      context,
+      defaut: Localizations.localeOf(context).languageCode,
+    );
+    if (langue == null || !mounted) return;
     final date = DateFormat('dd/MM/yyyy', 'fr_FR').format(d.dateCreation);
-    final facture = d.numeroFacture.isNotEmpty ? ' (facture ${d.numeroFacture})' : '';
     final message = _isClient
-        ? 'Bonjour ${d.nomTiers},\n\n'
-            'Petit rappel amical : il reste ${_m(d.montantReste)} à régler sur votre achat du $date$facture.\n'
-            'Montant total : ${_m(d.montantInitial)} — déjà payé : ${_m(d.acomptePaye)}.\n\n'
-            'Merci pour votre confiance !'
-        : 'Bonjour ${d.nomTiers},\n\n'
-            'Concernant notre facture du $date$facture : il nous reste ${_m(d.montantReste)} à vous régler.\n'
-            'Nous revenons vers vous très bientôt pour le paiement.\n\nMerci.';
+        ? MessagesClients.relanceClient(
+            langue: langue,
+            nom: d.nomTiers,
+            reste: _m(d.montantReste),
+            date: date,
+            numero: d.numeroFacture,
+            total: _m(d.montantInitial),
+            paye: _m(d.acomptePaye),
+          )
+        : MessagesClients.relanceFournisseur(
+            langue: langue,
+            nom: d.nomTiers,
+            reste: _m(d.montantReste),
+            date: date,
+            numero: d.numeroFacture,
+          );
 
     // Numéro : chiffres seulement, 0 au début -> 243 (RDC)
     var tel = d.telephone.replaceAll(RegExp(r'[^0-9]'), '');

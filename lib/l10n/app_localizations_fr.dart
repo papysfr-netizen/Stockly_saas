@@ -1096,4 +1096,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get prodSave => 'Enregistrer le produit';
+
+  @override
+  String get msgLanguage => 'Langue du message';
 }

@@ -858,5 +858,6 @@
   "prodAlertLevel": "Seuil d'alerte",
   "prodSaving": "Enregistrement...",
   "prodUpdate": "Mettre à jour",
-  "prodSave": "Enregistrer le produit"
+  "prodSave": "Enregistrer le produit",
+  "msgLanguage": "Langue du message"
 }

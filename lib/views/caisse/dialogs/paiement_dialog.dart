@@ -17,6 +17,7 @@ import 'package:stockly_saas/features/comptes_clients/compte_client_service.dart
 import 'package:stockly_saas/core/services/receipt_service.dart';
 import 'package:stockly_saas/core/utils/payment_calculator.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
+import 'package:stockly_saas/core/services/messages_clients.dart';
 
 // Import de ton écran de Bon de Livraison professionnel
 import '../../../screens/bon_livraison_screen.dart';
@@ -59,6 +60,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
   bool imprimerRecu = true;
   bool envoyerWhatsApp = false;
   bool envoyerSMS = false;
+  String? _langueMessage; // langue du message au client (null = langue de l'application)
   bool isLoading = false;
 
   // 💰 Compte client (dépôts / avoirs)
@@ -695,6 +697,11 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                         controlAffinity: ListTileControlAffinity.leading,
                         contentPadding: EdgeInsets.zero,
                       ),
+                      if (envoyerWhatsApp || envoyerSMS)
+                        LangueMessageChoix(
+                          valeur: _langueMessage ?? Localizations.localeOf(context).languageCode,
+                          onChanged: (v) => setState(() => _langueMessage = v),
+                        ),
                     ],
                   ),
                 ),
@@ -787,6 +794,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
   Future<void> _validerVente() async {
     setState(() => isLoading = true);
     final t = AppLocalizations.of(context);
+    final langueMsg = _langueMessage ?? Localizations.localeOf(context).languageCode;
 
     final activeInfoValidation = ref.read(currencyProvider).activeCurrencyInfo;
     final double soldeUtilise = _montantSoldeUtilise;
@@ -1125,15 +1133,18 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
       if (!mounted) return;
 
       // 6. WhatsApp / SMS
-      final String msgLivraison = estLivre
-          ? ''
-          : ' Votre marchandise vous attend à la boutique : merci de la retirer avant le ${_formatJour(finJourLimite)}.';
-      final String msgCompte = soldeUtilise > 0.005
-          ? ' Payé par votre compte : ${currencyState.formatPrice(soldeUtilise)}. Nouveau solde : ${currencyState.formatPrice(soldeAvant - soldeUtilise)}.'
-          : '';
-      final String msgText =
-          "Bonjour $client, votre achat chez ${entreprise.nom} s'élève à ${currencyState.formatPrice(totalVente)}. "
-          "Payé: ${currencyState.formatPrice(verseEffective)}. Reste: ${currencyState.formatPrice(resteEffective)}.$msgCompte$msgLivraison Merci !";
+      // 💬 Message au client, dans SA langue (choisie dans la fenêtre)
+      final String msgText = MessagesClients.vente(
+        langue: langueMsg,
+        client: client,
+        boutique: entreprise.nom,
+        total: currencyState.formatPrice(totalVente),
+        paye: currencyState.formatPrice(verseEffective),
+        reste: currencyState.formatPrice(resteEffective),
+        payeCompte: soldeUtilise > 0.005 ? currencyState.formatPrice(soldeUtilise) : null,
+        nouveauSolde: soldeUtilise > 0.005 ? currencyState.formatPrice(soldeAvant - soldeUtilise) : null,
+        retirerAvant: estLivre ? null : _formatJour(finJourLimite),
+      );
 
       if (envoyerWhatsApp && telephone.isNotEmpty) {
         await _envoyerNotificationMessage(

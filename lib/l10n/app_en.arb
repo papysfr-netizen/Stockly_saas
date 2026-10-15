@@ -293,5 +293,6 @@
   "prodAlertLevel": "Alert level",
   "prodSaving": "Saving...",
   "prodUpdate": "Update",
-  "prodSave": "Save the product"
+  "prodSave": "Save the product",
+  "msgLanguage": "Message language"
 }

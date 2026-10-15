@@ -1089,4 +1089,7 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get prodSave => 'Hifadhi bidhaa';
+
+  @override
+  String get msgLanguage => 'Lugha ya ujumbe';
 }

@@ -1092,4 +1092,7 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get prodSave => 'Bomba eloko';
+
+  @override
+  String get msgLanguage => 'Monoko ya nsango';
 }

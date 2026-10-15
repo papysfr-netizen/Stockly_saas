@@ -1091,4 +1091,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get prodSave => 'Save the product';
+
+  @override
+  String get msgLanguage => 'Message language';
 }

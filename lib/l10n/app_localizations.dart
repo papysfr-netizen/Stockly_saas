@@ -1866,6 +1866,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Enregistrer le produit'**
   String get prodSave;
+
+  /// No description provided for @msgLanguage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Langue du message'**
+  String get msgLanguage;
 }
 
 class _AppLocalizationsDelegate
