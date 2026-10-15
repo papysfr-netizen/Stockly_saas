@@ -903,4 +903,91 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guideOwnerOnly => 'Owner / manager';
+
+  @override
+  String stockDeleted(String nom) {
+    return '“$nom” deleted.';
+  }
+
+  @override
+  String stockDeletedOffline(String nom) {
+    return '“$nom” deleted on the phone. It will sync when internet is back.';
+  }
+
+  @override
+  String stockDeleteError(String message) {
+    return 'Error while deleting: $message';
+  }
+
+  @override
+  String get stockAnalyzing => 'Analysing...';
+
+  @override
+  String stockImported(int count) {
+    return '$count product(s) imported or updated!';
+  }
+
+  @override
+  String stockImportError(String message) {
+    return 'Import error: $message';
+  }
+
+  @override
+  String stockConnected(String nom) {
+    return 'Signed in: $nom';
+  }
+
+  @override
+  String get stockImportTooltip => 'Import Excel / CSV / Packing List';
+
+  @override
+  String get myAccount => 'My account';
+
+  @override
+  String get changePassword => 'Change my password';
+
+  @override
+  String get logout => 'Log out';
+
+  @override
+  String get stockNoProduct => 'No product found.';
+
+  @override
+  String get stockProducts => 'Products';
+
+  @override
+  String get stockValue => 'Stock value';
+
+  @override
+  String get stockCannotDelete => 'Cannot delete';
+
+  @override
+  String stockCannotDeleteMsg(String nom, int count) {
+    return '“$nom” still has $count item(s) in stock.\n\nFirst set the stock to 0 (stock count or loss), so the loss stays visible in the accounts.';
+  }
+
+  @override
+  String get stockDeleteTitle => 'Delete the product';
+
+  @override
+  String stockDeleteConfirm(String nom) {
+    return 'Do you really want to delete “$nom”?\n\nThis cannot be undone.';
+  }
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get stockNewProduct => 'New product';
+
+  @override
+  String stockQty(int count) {
+    return 'Stock: $count';
+  }
+
+  @override
+  String get stockAlert => 'Low stock';
+
+  @override
+  String get edit => 'Edit';
 }

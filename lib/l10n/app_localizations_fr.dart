@@ -907,4 +907,91 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get guideOwnerOnly => 'Patron / gérant';
+
+  @override
+  String stockDeleted(String nom) {
+    return '« $nom » supprimé.';
+  }
+
+  @override
+  String stockDeletedOffline(String nom) {
+    return '« $nom » supprimé sur le téléphone. Envoi dès le retour d\'internet.';
+  }
+
+  @override
+  String stockDeleteError(String message) {
+    return 'Erreur lors de la suppression : $message';
+  }
+
+  @override
+  String get stockAnalyzing => 'Analyse...';
+
+  @override
+  String stockImported(int count) {
+    return '$count produit(s) importé(s) ou mis à jour avec succès !';
+  }
+
+  @override
+  String stockImportError(String message) {
+    return 'Erreur d\'importation : $message';
+  }
+
+  @override
+  String stockConnected(String nom) {
+    return 'Connecté: $nom';
+  }
+
+  @override
+  String get stockImportTooltip => 'Importer Excel / CSV / Packing List';
+
+  @override
+  String get myAccount => 'Mon compte';
+
+  @override
+  String get changePassword => 'Changer mon mot de passe';
+
+  @override
+  String get logout => 'Se déconnecter';
+
+  @override
+  String get stockNoProduct => 'Aucun produit trouvé.';
+
+  @override
+  String get stockProducts => 'Produits';
+
+  @override
+  String get stockValue => 'Valeur Stock';
+
+  @override
+  String get stockCannotDelete => 'Suppression impossible';
+
+  @override
+  String stockCannotDeleteMsg(String nom, int count) {
+    return '« $nom » a encore $count article(s) en stock.\n\nMettez d\'abord le stock à 0 (inventaire ou perte), pour que la perte reste visible dans les comptes.';
+  }
+
+  @override
+  String get stockDeleteTitle => 'Supprimer le produit';
+
+  @override
+  String stockDeleteConfirm(String nom) {
+    return 'Voulez-vous vraiment supprimer « $nom » ?\n\nCette action est définitive.';
+  }
+
+  @override
+  String get delete => 'Supprimer';
+
+  @override
+  String get stockNewProduct => 'Nouveau Produit';
+
+  @override
+  String stockQty(int count) {
+    return 'Stock: $count';
+  }
+
+  @override
+  String get stockAlert => 'Alerte stock';
+
+  @override
+  String get edit => 'Modifier';
 }

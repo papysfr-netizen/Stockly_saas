@@ -901,4 +901,91 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get guideOwnerOnly => 'Mmiliki / meneja';
+
+  @override
+  String stockDeleted(String nom) {
+    return '« $nom » imefutwa.';
+  }
+
+  @override
+  String stockDeletedOffline(String nom) {
+    return '« $nom » imefutwa kwenye simu. Itatumwa mtandao ukirudi.';
+  }
+
+  @override
+  String stockDeleteError(String message) {
+    return 'Kosa wakati wa kufuta : $message';
+  }
+
+  @override
+  String get stockAnalyzing => 'Inachambua...';
+
+  @override
+  String stockImported(int count) {
+    return 'Bidhaa $count zimeingizwa au kusasishwa!';
+  }
+
+  @override
+  String stockImportError(String message) {
+    return 'Kosa la kuingiza : $message';
+  }
+
+  @override
+  String stockConnected(String nom) {
+    return 'Umeingia: $nom';
+  }
+
+  @override
+  String get stockImportTooltip => 'Ingiza Excel / CSV / Packing List';
+
+  @override
+  String get myAccount => 'Akaunti yangu';
+
+  @override
+  String get changePassword => 'Badilisha nenosiri langu';
+
+  @override
+  String get logout => 'Toka';
+
+  @override
+  String get stockNoProduct => 'Hakuna bidhaa iliyopatikana.';
+
+  @override
+  String get stockProducts => 'Bidhaa';
+
+  @override
+  String get stockValue => 'Thamani ya bidhaa';
+
+  @override
+  String get stockCannotDelete => 'Haiwezi kufutwa';
+
+  @override
+  String stockCannotDeleteMsg(String nom, int count) {
+    return '« $nom » bado ina vipande $count kwenye stoo.\n\nKwanza weka stoo kuwa 0 (hesabu au hasara), ili hasara ionekane kwenye hesabu.';
+  }
+
+  @override
+  String get stockDeleteTitle => 'Futa bidhaa';
+
+  @override
+  String stockDeleteConfirm(String nom) {
+    return 'Unataka kweli kufuta « $nom »?\n\nHatua hii haiwezi kurudishwa.';
+  }
+
+  @override
+  String get delete => 'Futa';
+
+  @override
+  String get stockNewProduct => 'Bidhaa mpya';
+
+  @override
+  String stockQty(int count) {
+    return 'Stoo: $count';
+  }
+
+  @override
+  String get stockAlert => 'Stoo inaisha';
+
+  @override
+  String get edit => 'Hariri';
 }

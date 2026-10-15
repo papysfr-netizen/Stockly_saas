@@ -717,5 +717,94 @@
       }
     }
   },
-  "guideOwnerOnly": "Patron / gérant"
+  "guideOwnerOnly": "Patron / gérant",
+  "stockDeleted": "« {nom} » supprimé.",
+  "@stockDeleted": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
+  "stockDeletedOffline": "« {nom} » supprimé sur le téléphone. Envoi dès le retour d'internet.",
+  "@stockDeletedOffline": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
+  "stockDeleteError": "Erreur lors de la suppression : {message}",
+  "@stockDeleteError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "stockAnalyzing": "Analyse...",
+  "stockImported": "{count} produit(s) importé(s) ou mis à jour avec succès !",
+  "@stockImported": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stockImportError": "Erreur d'importation : {message}",
+  "@stockImportError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "stockConnected": "Connecté: {nom}",
+  "@stockConnected": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
+  "stockImportTooltip": "Importer Excel / CSV / Packing List",
+  "myAccount": "Mon compte",
+  "changePassword": "Changer mon mot de passe",
+  "logout": "Se déconnecter",
+  "stockNoProduct": "Aucun produit trouvé.",
+  "stockProducts": "Produits",
+  "stockValue": "Valeur Stock",
+  "stockCannotDelete": "Suppression impossible",
+  "stockCannotDeleteMsg": "« {nom} » a encore {count} article(s) en stock.\n\nMettez d'abord le stock à 0 (inventaire ou perte), pour que la perte reste visible dans les comptes.",
+  "@stockCannotDeleteMsg": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stockDeleteTitle": "Supprimer le produit",
+  "stockDeleteConfirm": "Voulez-vous vraiment supprimer « {nom} » ?\n\nCette action est définitive.",
+  "@stockDeleteConfirm": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
+  "delete": "Supprimer",
+  "stockNewProduct": "Nouveau Produit",
+  "stockQty": "Stock: {count}",
+  "@stockQty": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stockAlert": "Alerte stock",
+  "edit": "Modifier"
 }

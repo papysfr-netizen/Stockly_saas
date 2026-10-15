@@ -1536,6 +1536,144 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Patron / gérant'**
   String get guideOwnerOnly;
+
+  /// No description provided for @stockDeleted.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {nom} » supprimé.'**
+  String stockDeleted(String nom);
+
+  /// No description provided for @stockDeletedOffline.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {nom} » supprimé sur le téléphone. Envoi dès le retour d\'internet.'**
+  String stockDeletedOffline(String nom);
+
+  /// No description provided for @stockDeleteError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de la suppression : {message}'**
+  String stockDeleteError(String message);
+
+  /// No description provided for @stockAnalyzing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Analyse...'**
+  String get stockAnalyzing;
+
+  /// No description provided for @stockImported.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} produit(s) importé(s) ou mis à jour avec succès !'**
+  String stockImported(int count);
+
+  /// No description provided for @stockImportError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur d\'importation : {message}'**
+  String stockImportError(String message);
+
+  /// No description provided for @stockConnected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connecté: {nom}'**
+  String stockConnected(String nom);
+
+  /// No description provided for @stockImportTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer Excel / CSV / Packing List'**
+  String get stockImportTooltip;
+
+  /// No description provided for @myAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mon compte'**
+  String get myAccount;
+
+  /// No description provided for @changePassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer mon mot de passe'**
+  String get changePassword;
+
+  /// No description provided for @logout.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se déconnecter'**
+  String get logout;
+
+  /// No description provided for @stockNoProduct.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun produit trouvé.'**
+  String get stockNoProduct;
+
+  /// No description provided for @stockProducts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Produits'**
+  String get stockProducts;
+
+  /// No description provided for @stockValue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valeur Stock'**
+  String get stockValue;
+
+  /// No description provided for @stockCannotDelete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suppression impossible'**
+  String get stockCannotDelete;
+
+  /// No description provided for @stockCannotDeleteMsg.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {nom} » a encore {count} article(s) en stock.\n\nMettez d\'abord le stock à 0 (inventaire ou perte), pour que la perte reste visible dans les comptes.'**
+  String stockCannotDeleteMsg(String nom, int count);
+
+  /// No description provided for @stockDeleteTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer le produit'**
+  String get stockDeleteTitle;
+
+  /// No description provided for @stockDeleteConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voulez-vous vraiment supprimer « {nom} » ?\n\nCette action est définitive.'**
+  String stockDeleteConfirm(String nom);
+
+  /// No description provided for @delete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get delete;
+
+  /// No description provided for @stockNewProduct.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau Produit'**
+  String get stockNewProduct;
+
+  /// No description provided for @stockQty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Stock: {count}'**
+  String stockQty(int count);
+
+  /// No description provided for @stockAlert.
+  ///
+  /// In fr, this message translates to:
+  /// **'Alerte stock'**
+  String get stockAlert;
+
+  /// No description provided for @edit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get edit;
 }
 
 class _AppLocalizationsDelegate

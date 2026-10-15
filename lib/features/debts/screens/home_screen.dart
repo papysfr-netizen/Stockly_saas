@@ -13,6 +13,7 @@ import '../../../core/providers/entreprise_provider.dart';
 import '../../../core/services/packing_list_service.dart';
 import '../../../core/widgets/add_product_modal.dart';
 import '../../../core/widgets/changer_mot_de_passe_dialog.dart';
+import 'package:stockly_saas/l10n/app_localizations.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   final UserModel currentUser;
@@ -46,6 +47,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool get _peutVoirFinances =>
       _profil?.peutVoirFinances ?? widget.currentUser.canAccessFinance; // interrupteur « Voir les finances »
 
+  AppLocalizations get _t => AppLocalizations.of(context);
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -57,6 +60,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   /// et envoyée automatiquement au retour du réseau.
   Future<void> _supprimerProduit(String id, String nom) async {
     final messenger = ScaffoldMessenger.of(context);
+    final t = _t;
     final entrepriseId = widget.currentUser.entrepriseId;
     if (entrepriseId.isEmpty || id.isEmpty) return;
 
@@ -70,21 +74,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           .timeout(const Duration(seconds: 5));
       messenger.showSnackBar(
         SnackBar(
-          content: Text('« $nom » supprimé.'),
+          content: Text(t.stockDeleted(nom)),
           backgroundColor: Colors.green.shade700,
         ),
       );
     } on TimeoutException {
       messenger.showSnackBar(
         SnackBar(
-          content: Text('« $nom » supprimé sur le téléphone. Envoi dès le retour d\'internet.'),
+          content: Text(t.stockDeletedOffline(nom)),
           backgroundColor: Colors.orange.shade800,
         ),
       );
     } catch (e) {
       messenger.showSnackBar(
         SnackBar(
-          content: Text('Erreur lors de la suppression : $e'),
+          content: Text(t.stockDeleteError('$e')),
           backgroundColor: Colors.red,
         ),
       );
@@ -96,7 +100,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     setState(() {
       _isImporting = true;
-      _importProgressText = "Analyse...";
+      _importProgressText = _t.stockAnalyzing;
     });
 
     try {
@@ -115,7 +119,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (count > 0) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('$count produit(s) importé(s) ou mis à jour avec succès !'),
+            content: Text(_t.stockImported(count)),
             backgroundColor: Colors.green,
           ),
         );
@@ -124,7 +128,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Erreur d\'importation : $e'),
+          content: Text(_t.stockImportError('$e')),
           backgroundColor: Colors.red,
         ),
       );
@@ -144,6 +148,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final String currency = currencyState.activeCurrencyInfo.symbol;
     final produitsAsync = ref.watch(produitsStreamProvider);
     ref.watch(entrepriseProvider); // 🏪 charge les infos de la boutique dès l'accueil
+    final t = _t;
 
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
@@ -162,7 +167,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               children: [
                 Flexible(
                   child: Text(
-                    "Connecté: ${widget.currentUser.nom}",
+                    t.stockConnected(widget.currentUser.nom),
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontSize: 12, color: Colors.white70),
                   ),
@@ -204,14 +209,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   )
                 : IconButton(
                     icon: const Icon(Icons.file_upload_outlined),
-                    tooltip: 'Importer Excel / CSV / Packing List',
+                    tooltip: t.stockImportTooltip,
                     onPressed: _importerExcel,
                   ),
           ],
           // 👤 Mon compte : tout le monde (mot de passe + déconnexion)
           PopupMenuButton<String>(
             icon: const Icon(Icons.account_circle),
-            tooltip: 'Mon compte',
+            tooltip: t.myAccount,
             onSelected: (choix) {
               if (choix == 'mdp') {
                 ChangerMotDePasseDialog.show(context);
@@ -219,20 +224,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 FirebaseAuth.instance.signOut();
               }
             },
-            itemBuilder: (context) => const [
+            itemBuilder: (context) => [
               PopupMenuItem(
                 value: 'mdp',
                 child: ListTile(
-                  leading: Icon(Icons.lock_reset),
-                  title: Text('Changer mon mot de passe'),
+                  leading: const Icon(Icons.lock_reset),
+                  title: Text(t.changePassword),
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
               PopupMenuItem(
                 value: 'deco',
                 child: ListTile(
-                  leading: Icon(Icons.logout, color: Colors.red),
-                  title: Text('Se déconnecter'),
+                  leading: const Icon(Icons.logout, color: Colors.red),
+                  title: Text(t.logout),
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
@@ -249,7 +254,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               controller: _searchController,
               onChanged: (value) => setState(() => _searchQuery = value.toLowerCase()),
               decoration: InputDecoration(
-                hintText: "Rechercher un produit...",
+                hintText: t.caisseSearch,
                 prefixIcon: const Icon(Icons.search, color: Colors.blue),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
@@ -275,7 +280,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: produitsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (err, _) => Center(
-                child: Text("Erreur de chargement : $err"),
+                child: Text(t.debtLoadError('$err')),
               ),
               data: (produits) {
                 // 🏬 Boutique affichée (null = toutes les boutiques)
@@ -299,9 +304,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 }
 
                 if (filteredDocs.isEmpty) {
-                  return const Center(
-                    child: Text("Aucun produit trouvé.",
-                        style: TextStyle(color: Colors.grey)),
+                  return Center(
+                    child: Text(t.stockNoProduct,
+                        style: const TextStyle(color: Colors.grey)),
                   );
                 }
 
@@ -315,13 +320,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Row(
                         children: [
-                          _buildStatCard("Produits", "${filteredDocs.length}",
+                          _buildStatCard(t.stockProducts, "${filteredDocs.length}",
                               Icons.inventory_2, Colors.blue),
                           // 💰 Valeur du stock : Propriétaire + Gérant
                           if (_peutVoirFinances) ...[
                             const SizedBox(width: 12),
                             _buildStatCard(
-                              "Valeur Stock",
+                              t.stockValue,
                               "${valeurTotale.toStringAsFixed(0)} $currency",
                               Icons.monetization_on,
                               Colors.green,
@@ -339,7 +344,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           final produit = filteredDocs[index];
 
                           final produitWidget = ProduitCard(
-                            nom: produit.nom.isNotEmpty ? produit.nom : 'Sans nom',
+                            nom: produit.nom.isNotEmpty ? produit.nom : t.caisseNoName,
                             quantite: produit.stockBoutique(boutique),
                             prix: produit.prixPour(boutique),
                             currency: currency,
@@ -375,15 +380,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   await showDialog<void>(
                                     context: context,
                                     builder: (ctx) => AlertDialog(
-                                      title: const Text('Suppression impossible'),
-                                      content: Text(
-                                          '« ${produit.nom} » a encore ${produit.quantite} article(s) en stock.\n\n'
-                                          'Mettez d\'abord le stock à 0 (inventaire ou perte), '
-                                          'pour que la perte reste visible dans les comptes.'),
+                                      title: Text(t.stockCannotDelete),
+                                      content: Text(t.stockCannotDeleteMsg(produit.nom, produit.quantite)),
                                       actions: [
                                         ElevatedButton(
                                           onPressed: () => Navigator.pop(ctx),
-                                          child: const Text('Compris'),
+                                          child: Text(t.payUnderstood),
                                         ),
                                       ],
                                     ),
@@ -393,18 +395,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 final confirm = await showDialog<bool>(
                                   context: context,
                                   builder: (ctx) => AlertDialog(
-                                    title: const Text('Supprimer le produit'),
-                                    content: Text(
-                                        'Voulez-vous vraiment supprimer « ${produit.nom} » ?\n\nCette action est définitive.'),
+                                    title: Text(t.stockDeleteTitle),
+                                    content: Text(t.stockDeleteConfirm(produit.nom)),
                                     actions: [
                                       TextButton(
                                         onPressed: () => Navigator.pop(ctx, false),
-                                        child: const Text('Annuler'),
+                                        child: Text(t.cancel),
                                       ),
                                       ElevatedButton(
                                         style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                                         onPressed: () => Navigator.pop(ctx, true),
-                                        child: const Text('Supprimer', style: TextStyle(color: Colors.white)),
+                                        child: Text(t.delete, style: const TextStyle(color: Colors.white)),
                                       ),
                                     ],
                                   ),
@@ -441,8 +442,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 boutiqueId: ref.read(boutiqueActiveProvider), // 🏬
               ),
               icon: const Icon(Icons.add, color: Colors.white),
-              label: const Text('Nouveau Produit',
-                  style: TextStyle(color: Colors.white)),
+              label: Text(t.stockNewProduct,
+                  style: const TextStyle(color: Colors.white)),
             )
           : null,
     );
@@ -559,7 +560,7 @@ class ProduitCard extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          "Stock: $quantite",
+                          AppLocalizations.of(context).stockQty(quantite),
                           style: TextStyle(
                               fontSize: 12, color: Colors.grey.shade700),
                         ),
@@ -574,9 +575,9 @@ class ProduitCard extends StatelessWidget {
                               border: Border.all(
                                   color: Colors.red.shade200, width: 0.5),
                             ),
-                            child: const Text(
-                              'Alerte stock',
-                              style: TextStyle(
+                            child: Text(
+                              AppLocalizations.of(context).stockAlert,
+                              style: const TextStyle(
                                 color: Colors.red,
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
@@ -608,7 +609,7 @@ class ProduitCard extends StatelessWidget {
                       padding: const EdgeInsets.all(6),
                       icon: const Icon(Icons.edit, color: Colors.orange, size: 18),
                       onPressed: onEdit,
-                      tooltip: 'Modifier',
+                      tooltip: AppLocalizations.of(context).edit,
                     ),
                   ],
                 ],

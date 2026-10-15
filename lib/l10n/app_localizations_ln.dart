@@ -904,4 +904,91 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get guideOwnerOnly => 'Nkolo / mokambi';
+
+  @override
+  String stockDeleted(String nom) {
+    return '« $nom » elongwami.';
+  }
+
+  @override
+  String stockDeletedOffline(String nom) {
+    return '« $nom » elongwami na telefone. Ekotindama soki internet ezongi.';
+  }
+
+  @override
+  String stockDeleteError(String message) {
+    return 'Libunga na tango ya kolongola : $message';
+  }
+
+  @override
+  String get stockAnalyzing => 'Ezali kotala...';
+
+  @override
+  String stockImported(int count) {
+    return 'Biloko $count ekotisami to ebongisami!';
+  }
+
+  @override
+  String stockImportError(String message) {
+    return 'Libunga na kokotisa : $message';
+  }
+
+  @override
+  String stockConnected(String nom) {
+    return 'Okoti: $nom';
+  }
+
+  @override
+  String get stockImportTooltip => 'Kotisa Excel / CSV / Packing List';
+
+  @override
+  String get myAccount => 'Compte na ngai';
+
+  @override
+  String get changePassword => 'Bongola mot de passe na ngai';
+
+  @override
+  String get logout => 'Kobima';
+
+  @override
+  String get stockNoProduct => 'Eloko moko te emonani.';
+
+  @override
+  String get stockProducts => 'Biloko';
+
+  @override
+  String get stockValue => 'Motuya ya stock';
+
+  @override
+  String get stockCannotDelete => 'Ekoki kolongolama te';
+
+  @override
+  String stockCannotDeleteMsg(String nom, int count) {
+    return '« $nom » ezali naino na biloko $count na stock.\n\nTia liboso stock na 0 (botangi to bobungisi), mpo bobungisi emonana na mitango.';
+  }
+
+  @override
+  String get stockDeleteTitle => 'Longola eloko';
+
+  @override
+  String stockDeleteConfirm(String nom) {
+    return 'Olingi solo kolongola « $nom »?\n\nEkozonga lisusu te.';
+  }
+
+  @override
+  String get delete => 'Longola';
+
+  @override
+  String get stockNewProduct => 'Eloko ya sika';
+
+  @override
+  String stockQty(int count) {
+    return 'Stock: $count';
+  }
+
+  @override
+  String get stockAlert => 'Stock ezali kosila';
+
+  @override
+  String get edit => 'Bongisa';
 }
