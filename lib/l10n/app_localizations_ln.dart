@@ -664,4 +664,176 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get debtValidatePayment => 'Ndima kofuta';
+
+  @override
+  String get debtScreenTitle => 'Ba niongo';
+
+  @override
+  String get debtExport => 'Bimisa';
+
+  @override
+  String get debtExportExcel => 'Bimisa na Excel';
+
+  @override
+  String get debtPrintPdf => 'Bimisa / PDF';
+
+  @override
+  String get debtTabClients => 'Bakiliya';
+
+  @override
+  String get debtTabSuppliers => 'Basombisi';
+
+  @override
+  String debtLoadError(String message) {
+    return 'Libunga na kofungola : $message';
+  }
+
+  @override
+  String get debtAdd => 'Bakisa niongo';
+
+  @override
+  String get ageToday => 'Lelo';
+
+  @override
+  String get ageYesterday => 'Lobi';
+
+  @override
+  String ageDays(int count) {
+    return 'Mikolo $count eleki';
+  }
+
+  @override
+  String ageMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Sanza $count eleki',
+      one: 'Sanza 1 eleki',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get whatsAppError => 'Ekoki kofungola WhatsApp te na telefone oyo.';
+
+  @override
+  String get debtEmptyClients => 'Niongo ya mosombi ezali te';
+
+  @override
+  String get debtEmptySuppliers => 'Niongo ya mosombisi ezali te';
+
+  @override
+  String get debtEmptyClientsHint =>
+      'Biteki na niongo to ya ndambo ekomonana awa yango moko.';
+
+  @override
+  String get debtEmptySuppliersHint =>
+      'Bakisa awa oyo ozali na niongo epai ya basombisi na bouton « Bakisa niongo ».';
+
+  @override
+  String get noResults => 'Eloko moko te';
+
+  @override
+  String get noResultsHint => 'Meka filtre mosusu to boluki mosusu.';
+
+  @override
+  String get debtToCollect => 'KOZWA (BAKILIYA)';
+
+  @override
+  String get debtToPay => 'KOFUTA (BASOMBISI)';
+
+  @override
+  String debtOpenFiles(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'ba dosie efungwami',
+      one: 'dosie efungwami',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String debtClientsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'basombi',
+      one: 'mosombi',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String debtSuppliersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'basombisi',
+      one: 'mosombisi',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String debtLateCount(int count) {
+    return 'eleki ntango ($count)';
+  }
+
+  @override
+  String get debtSearchClients => 'Luka mosombi, fakture, telefone…';
+
+  @override
+  String get debtSearchSuppliers => 'Luka mosombisi, fakture…';
+
+  @override
+  String get filterOngoing => 'Ezali kokoba';
+
+  @override
+  String get filterRecent => 'Ya sika (< mikolo 30)';
+
+  @override
+  String get filterLate => 'Eleki ntango';
+
+  @override
+  String get filterPartial => 'Ya ndambo';
+
+  @override
+  String get filterSettled => 'Esili kofutama';
+
+  @override
+  String get statusSettled => 'Efutami';
+
+  @override
+  String get statusPartial => 'Ndambo';
+
+  @override
+  String get statusUnpaid => 'Efutami te';
+
+  @override
+  String invoiceShort(String numero) {
+    return 'Fakt. $numero';
+  }
+
+  @override
+  String paidOf(String paye, String total) {
+    return 'Efutami $paye na $total';
+  }
+
+  @override
+  String lastPayment(String date) {
+    return 'Kofuta ya suka $date';
+  }
+
+  @override
+  String get remind => 'Kundolisa';
+
+  @override
+  String get message => 'Nsango';
+
+  @override
+  String get collect => 'Zwa';
+
+  @override
+  String get pay => 'Futa';
 }

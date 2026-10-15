@@ -10,6 +10,7 @@ import 'package:stockly_saas/core/providers/user_role_provider.dart';
 import 'package:stockly_saas/core/services/report_export_service.dart';
 import 'package:stockly_saas/features/debts/widgets/debt_dialogs.dart';
 import 'package:stockly_saas/features/debts/widgets/debt_list_view.dart';
+import 'package:stockly_saas/l10n/app_localizations.dart';
 
 class DebtManagementScreen extends ConsumerWidget {
   const DebtManagementScreen({super.key});
@@ -101,9 +102,9 @@ class DebtManagementScreen extends ConsumerWidget {
           return Scaffold(
             backgroundColor: const Color(0xFFF3F4F6),
             appBar: AppBar(
-              title: const Text(
-                'Créances & Dettes',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              title: Text(
+                AppLocalizations.of(context).debtScreenTitle,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               backgroundColor: _bleuNuit,
               foregroundColor: Colors.white,
@@ -111,7 +112,7 @@ class DebtManagementScreen extends ConsumerWidget {
               actions: [
                 PopupMenuButton<String>(
                   icon: const Icon(Icons.ios_share_rounded, color: Colors.white),
-                  tooltip: 'Exporter',
+                  tooltip: AppLocalizations.of(context).debtExport,
                   onSelected: (value) {
                     final dettes = dettesAsync.value ?? [];
                     final isClientTab = DefaultTabController.of(context).index == 0;
@@ -122,35 +123,35 @@ class DebtManagementScreen extends ConsumerWidget {
                       currency: currency,
                     );
                   },
-                  itemBuilder: (context) => const [
+                  itemBuilder: (context) => [
                     PopupMenuItem(
                       value: 'excel',
                       child: Row(children: [
-                        Icon(Icons.table_chart, color: Colors.green),
-                        SizedBox(width: 8),
-                        Text('Exporter vers Excel'),
+                        const Icon(Icons.table_chart, color: Colors.green),
+                        const SizedBox(width: 8),
+                        Text(AppLocalizations.of(context).debtExportExcel),
                       ]),
                     ),
                     PopupMenuItem(
                       value: 'pdf',
                       child: Row(children: [
-                        Icon(Icons.picture_as_pdf, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text('Imprimer / PDF'),
+                        const Icon(Icons.picture_as_pdf, color: Colors.red),
+                        const SizedBox(width: 8),
+                        Text(AppLocalizations.of(context).debtPrintPdf),
                       ]),
                     ),
                   ],
                 ),
               ],
-              bottom: const TabBar(
+              bottom: TabBar(
                 indicatorColor: Colors.amber,
                 indicatorWeight: 3,
                 labelColor: Colors.white,
                 unselectedLabelColor: Colors.white60,
-                labelStyle: TextStyle(fontWeight: FontWeight.bold),
+                labelStyle: const TextStyle(fontWeight: FontWeight.bold),
                 tabs: [
-                  Tab(icon: Icon(Icons.call_received_rounded), text: 'Clients'),
-                  Tab(icon: Icon(Icons.call_made_rounded), text: 'Fournisseurs'),
+                  Tab(icon: const Icon(Icons.call_received_rounded), text: AppLocalizations.of(context).debtTabClients),
+                  Tab(icon: const Icon(Icons.call_made_rounded), text: AppLocalizations.of(context).debtTabSuppliers),
                 ],
               ),
             ),
@@ -162,7 +163,7 @@ class DebtManagementScreen extends ConsumerWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
-                        'Erreur de chargement : $err',
+                        AppLocalizations.of(context).debtLoadError('$err'),
                         style: const TextStyle(color: Colors.red),
                       ),
                     ),
@@ -201,9 +202,9 @@ class DebtManagementScreen extends ConsumerWidget {
             floatingActionButton: FloatingActionButton.extended(
               backgroundColor: _bleuNuit,
               icon: const Icon(Icons.add, color: Colors.white),
-              label: const Text(
-                'Ajouter une dette',
-                style: TextStyle(color: Colors.white),
+              label: Text(
+                AppLocalizations.of(context).debtAdd,
+                style: const TextStyle(color: Colors.white),
               ),
               onPressed: () {
                 final isClient = DefaultTabController.of(context).index == 0;

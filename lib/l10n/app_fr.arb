@@ -568,5 +568,120 @@
       }
     }
   },
-  "debtValidatePayment": "Valider le Règlement"
+  "debtValidatePayment": "Valider le Règlement",
+  "debtScreenTitle": "Créances & Dettes",
+  "debtExport": "Exporter",
+  "debtExportExcel": "Exporter vers Excel",
+  "debtPrintPdf": "Imprimer / PDF",
+  "debtTabClients": "Clients",
+  "debtTabSuppliers": "Fournisseurs",
+  "debtLoadError": "Erreur de chargement : {message}",
+  "@debtLoadError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "debtAdd": "Ajouter une dette",
+  "ageToday": "Aujourd'hui",
+  "ageYesterday": "Hier",
+  "ageDays": "Il y a {count} jours",
+  "@ageDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ageMonths": "{count, plural, =1{Il y a 1 mois} other{Il y a {count} mois}}",
+  "@ageMonths": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "whatsAppError": "Impossible d'ouvrir WhatsApp sur cet appareil.",
+  "debtEmptyClients": "Aucune créance client",
+  "debtEmptySuppliers": "Aucune dette fournisseur",
+  "debtEmptyClientsHint": "Les ventes à crédit ou partielles apparaîtront ici automatiquement.",
+  "debtEmptySuppliersHint": "Ajoutez ici ce que vous devez à vos fournisseurs avec le bouton « Ajouter une dette ».",
+  "noResults": "Aucun résultat",
+  "noResultsHint": "Essayez un autre filtre ou une autre recherche.",
+  "debtToCollect": "À RECOUVRER (CLIENTS)",
+  "debtToPay": "À PAYER (FOURNISSEURS)",
+  "debtOpenFiles": "{count, plural, =1{dossier ouvert} other{dossiers ouverts}}",
+  "@debtOpenFiles": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "debtClientsCount": "{count, plural, =1{client} other{clients}}",
+  "@debtClientsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "debtSuppliersCount": "{count, plural, =1{fournisseur} other{fournisseurs}}",
+  "@debtSuppliersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "debtLateCount": "en retard ({count})",
+  "@debtLateCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "debtSearchClients": "Rechercher un client, une facture, un téléphone…",
+  "debtSearchSuppliers": "Rechercher un fournisseur, une facture…",
+  "filterOngoing": "En cours",
+  "filterRecent": "Récentes (< 30 j)",
+  "filterLate": "En retard",
+  "filterPartial": "Partielles",
+  "filterSettled": "Soldées",
+  "statusSettled": "Soldée",
+  "statusPartial": "Partiel",
+  "statusUnpaid": "Non payée",
+  "invoiceShort": "Fact. {numero}",
+  "@invoiceShort": {
+    "placeholders": {
+      "numero": {
+        "type": "String"
+      }
+    }
+  },
+  "paidOf": "Payé {paye} sur {total}",
+  "@paidOf": {
+    "placeholders": {
+      "paye": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "lastPayment": "Dernier paiement {date}",
+  "@lastPayment": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "remind": "Relancer",
+  "message": "Message",
+  "collect": "Encaisser",
+  "pay": "Payer"
 }

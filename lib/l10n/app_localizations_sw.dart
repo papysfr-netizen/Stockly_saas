@@ -660,4 +660,177 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get debtValidatePayment => 'Thibitisha malipo';
+
+  @override
+  String get debtScreenTitle => 'Mikopo na Madeni';
+
+  @override
+  String get debtExport => 'Hamisha';
+
+  @override
+  String get debtExportExcel => 'Hamisha kwa Excel';
+
+  @override
+  String get debtPrintPdf => 'Chapisha / PDF';
+
+  @override
+  String get debtTabClients => 'Wateja';
+
+  @override
+  String get debtTabSuppliers => 'Wasambazaji';
+
+  @override
+  String debtLoadError(String message) {
+    return 'Kosa la kupakia : $message';
+  }
+
+  @override
+  String get debtAdd => 'Ongeza deni';
+
+  @override
+  String get ageToday => 'Leo';
+
+  @override
+  String get ageYesterday => 'Jana';
+
+  @override
+  String ageDays(int count) {
+    return 'Siku $count zilizopita';
+  }
+
+  @override
+  String ageMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Miezi $count iliyopita',
+      one: 'Mwezi 1 uliopita',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get whatsAppError =>
+      'Haiwezekani kufungua WhatsApp kwenye kifaa hiki.';
+
+  @override
+  String get debtEmptyClients => 'Hakuna mkopo wa mteja';
+
+  @override
+  String get debtEmptySuppliers => 'Hakuna deni la msambazaji';
+
+  @override
+  String get debtEmptyClientsHint =>
+      'Mauzo ya mkopo au ya sehemu yataonekana hapa yenyewe.';
+
+  @override
+  String get debtEmptySuppliersHint =>
+      'Ongeza hapa unachodaiwa na wasambazaji kwa kitufe « Ongeza deni ».';
+
+  @override
+  String get noResults => 'Hakuna matokeo';
+
+  @override
+  String get noResultsHint => 'Jaribu kichujio au utafutaji mwingine.';
+
+  @override
+  String get debtToCollect => 'KUDAI (WATEJA)';
+
+  @override
+  String get debtToPay => 'KULIPA (WASAMBAZAJI)';
+
+  @override
+  String debtOpenFiles(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'faili wazi',
+      one: 'faili wazi',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String debtClientsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'wateja',
+      one: 'mteja',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String debtSuppliersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'wasambazaji',
+      one: 'msambazaji',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String debtLateCount(int count) {
+    return 'zimechelewa ($count)';
+  }
+
+  @override
+  String get debtSearchClients => 'Tafuta mteja, ankara, simu…';
+
+  @override
+  String get debtSearchSuppliers => 'Tafuta msambazaji, ankara…';
+
+  @override
+  String get filterOngoing => 'Zinazoendelea';
+
+  @override
+  String get filterRecent => 'Za karibuni (< siku 30)';
+
+  @override
+  String get filterLate => 'Zimechelewa';
+
+  @override
+  String get filterPartial => 'Za sehemu';
+
+  @override
+  String get filterSettled => 'Zimelipwa';
+
+  @override
+  String get statusSettled => 'Imelipwa';
+
+  @override
+  String get statusPartial => 'Sehemu';
+
+  @override
+  String get statusUnpaid => 'Haijalipwa';
+
+  @override
+  String invoiceShort(String numero) {
+    return 'Ankara $numero';
+  }
+
+  @override
+  String paidOf(String paye, String total) {
+    return 'Imelipwa $paye kati ya $total';
+  }
+
+  @override
+  String lastPayment(String date) {
+    return 'Malipo ya mwisho $date';
+  }
+
+  @override
+  String get remind => 'Kumbusha';
+
+  @override
+  String get message => 'Ujumbe';
+
+  @override
+  String get collect => 'Pokea';
+
+  @override
+  String get pay => 'Lipa';
 }

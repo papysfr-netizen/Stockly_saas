@@ -1164,6 +1164,258 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Valider le Règlement'**
   String get debtValidatePayment;
+
+  /// No description provided for @debtScreenTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créances & Dettes'**
+  String get debtScreenTitle;
+
+  /// No description provided for @debtExport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter'**
+  String get debtExport;
+
+  /// No description provided for @debtExportExcel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter vers Excel'**
+  String get debtExportExcel;
+
+  /// No description provided for @debtPrintPdf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Imprimer / PDF'**
+  String get debtPrintPdf;
+
+  /// No description provided for @debtTabClients.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clients'**
+  String get debtTabClients;
+
+  /// No description provided for @debtTabSuppliers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fournisseurs'**
+  String get debtTabSuppliers;
+
+  /// No description provided for @debtLoadError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur de chargement : {message}'**
+  String debtLoadError(String message);
+
+  /// No description provided for @debtAdd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter une dette'**
+  String get debtAdd;
+
+  /// No description provided for @ageToday.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aujourd\'hui'**
+  String get ageToday;
+
+  /// No description provided for @ageYesterday.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hier'**
+  String get ageYesterday;
+
+  /// No description provided for @ageDays.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il y a {count} jours'**
+  String ageDays(int count);
+
+  /// No description provided for @ageMonths.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Il y a 1 mois} other{Il y a {count} mois}}'**
+  String ageMonths(int count);
+
+  /// No description provided for @whatsAppError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible d\'ouvrir WhatsApp sur cet appareil.'**
+  String get whatsAppError;
+
+  /// No description provided for @debtEmptyClients.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune créance client'**
+  String get debtEmptyClients;
+
+  /// No description provided for @debtEmptySuppliers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune dette fournisseur'**
+  String get debtEmptySuppliers;
+
+  /// No description provided for @debtEmptyClientsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les ventes à crédit ou partielles apparaîtront ici automatiquement.'**
+  String get debtEmptyClientsHint;
+
+  /// No description provided for @debtEmptySuppliersHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajoutez ici ce que vous devez à vos fournisseurs avec le bouton « Ajouter une dette ».'**
+  String get debtEmptySuppliersHint;
+
+  /// No description provided for @noResults.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun résultat'**
+  String get noResults;
+
+  /// No description provided for @noResultsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Essayez un autre filtre ou une autre recherche.'**
+  String get noResultsHint;
+
+  /// No description provided for @debtToCollect.
+  ///
+  /// In fr, this message translates to:
+  /// **'À RECOUVRER (CLIENTS)'**
+  String get debtToCollect;
+
+  /// No description provided for @debtToPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'À PAYER (FOURNISSEURS)'**
+  String get debtToPay;
+
+  /// No description provided for @debtOpenFiles.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{dossier ouvert} other{dossiers ouverts}}'**
+  String debtOpenFiles(int count);
+
+  /// No description provided for @debtClientsCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{client} other{clients}}'**
+  String debtClientsCount(int count);
+
+  /// No description provided for @debtSuppliersCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{fournisseur} other{fournisseurs}}'**
+  String debtSuppliersCount(int count);
+
+  /// No description provided for @debtLateCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'en retard ({count})'**
+  String debtLateCount(int count);
+
+  /// No description provided for @debtSearchClients.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher un client, une facture, un téléphone…'**
+  String get debtSearchClients;
+
+  /// No description provided for @debtSearchSuppliers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher un fournisseur, une facture…'**
+  String get debtSearchSuppliers;
+
+  /// No description provided for @filterOngoing.
+  ///
+  /// In fr, this message translates to:
+  /// **'En cours'**
+  String get filterOngoing;
+
+  /// No description provided for @filterRecent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Récentes (< 30 j)'**
+  String get filterRecent;
+
+  /// No description provided for @filterLate.
+  ///
+  /// In fr, this message translates to:
+  /// **'En retard'**
+  String get filterLate;
+
+  /// No description provided for @filterPartial.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partielles'**
+  String get filterPartial;
+
+  /// No description provided for @filterSettled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Soldées'**
+  String get filterSettled;
+
+  /// No description provided for @statusSettled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Soldée'**
+  String get statusSettled;
+
+  /// No description provided for @statusPartial.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partiel'**
+  String get statusPartial;
+
+  /// No description provided for @statusUnpaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non payée'**
+  String get statusUnpaid;
+
+  /// No description provided for @invoiceShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fact. {numero}'**
+  String invoiceShort(String numero);
+
+  /// No description provided for @paidOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payé {paye} sur {total}'**
+  String paidOf(String paye, String total);
+
+  /// No description provided for @lastPayment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernier paiement {date}'**
+  String lastPayment(String date);
+
+  /// No description provided for @remind.
+  ///
+  /// In fr, this message translates to:
+  /// **'Relancer'**
+  String get remind;
+
+  /// No description provided for @message.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message'**
+  String get message;
+
+  /// No description provided for @collect.
+  ///
+  /// In fr, this message translates to:
+  /// **'Encaisser'**
+  String get collect;
+
+  /// No description provided for @pay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer'**
+  String get pay;
 }
 
 class _AppLocalizationsDelegate

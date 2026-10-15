@@ -13,6 +13,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:stockly_saas/core/models/dette.dart';
 import 'debt_dialogs.dart';
+import 'package:stockly_saas/l10n/app_localizations.dart';
 
 enum _Filtre { enCours, recentes, enRetard, partielles, soldees }
 
@@ -56,6 +57,8 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
 
   String _m(double v) => '${_nf.format(v)} ${widget.currency}';
 
+  AppLocalizations get _t => AppLocalizations.of(context);
+
   int _age(Dette d) => DateTime.now().difference(d.dateCreation).inDays;
 
   /// En retard : échéance dépassée, ou plus de 30 jours sans être soldée.
@@ -63,11 +66,11 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
 
   String _ageTexte(Dette d) {
     final j = _age(d);
-    if (j <= 0) return "Aujourd'hui";
-    if (j == 1) return 'Hier';
-    if (j < 30) return 'Il y a $j jours';
+    if (j <= 0) return _t.ageToday;
+    if (j == 1) return _t.ageYesterday;
+    if (j < 30) return _t.ageDays(j);
     final mois = j ~/ 30;
-    return mois == 1 ? 'Il y a 1 mois' : 'Il y a $mois mois';
+    return _t.ageMonths(mois);
   }
 
   bool _correspond(Dette d) {
@@ -119,7 +122,7 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!ok && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Impossible d'ouvrir WhatsApp sur cet appareil.")),
+        SnackBar(content: Text(_t.whatsAppError)),
       );
     }
   }
@@ -154,14 +157,14 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
         if (widget.liste.isEmpty)
           _etatVide(
             _isClient ? Icons.handshake_outlined : Icons.local_shipping_outlined,
-            _isClient ? 'Aucune créance client' : 'Aucune dette fournisseur',
+            _isClient ? _t.debtEmptyClients : _t.debtEmptySuppliers,
             _isClient
-                ? 'Les ventes à crédit ou partielles apparaîtront ici automatiquement.'
-                : 'Ajoutez ici ce que vous devez à vos fournisseurs avec le bouton « Ajouter une dette ».',
+                ? _t.debtEmptyClientsHint
+                : _t.debtEmptySuppliersHint,
           )
         else if (visibles.isEmpty)
-          _etatVide(Icons.search_off_rounded, 'Aucun résultat',
-              'Essayez un autre filtre ou une autre recherche.')
+          _etatVide(Icons.search_off_rounded, _t.noResults,
+              _t.noResultsHint)
         else
           ...visibles.map(_carte),
       ],
@@ -195,7 +198,7 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
                   color: Colors.white70, size: 16),
               const SizedBox(width: 6),
               Text(
-                _isClient ? 'À RECOUVRER (CLIENTS)' : 'À PAYER (FOURNISSEURS)',
+                _isClient ? _t.debtToCollect : _t.debtToPay,
                 style: const TextStyle(
                     color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1),
               ),
@@ -213,8 +216,8 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
           const SizedBox(height: 12),
           Row(
             children: [
-              _infoSynthese('$nbDossiers', nbDossiers > 1 ? 'dossiers ouverts' : 'dossier ouvert'),
-              _infoSynthese('$nbTiers', _isClient ? (nbTiers > 1 ? 'clients' : 'client') : (nbTiers > 1 ? 'fournisseurs' : 'fournisseur')),
+              _infoSynthese('$nbDossiers', _t.debtOpenFiles(nbDossiers)),
+              _infoSynthese('$nbTiers', _isClient ? _t.debtClientsCount(nbTiers) : _t.debtSuppliersCount(nbTiers)),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,7 +234,7 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
                         ),
                       ),
                     ),
-                    Text('en retard ($nbRetard)',
+                    Text(_t.debtLateCount(nbRetard),
                         style: const TextStyle(color: Colors.white70, fontSize: 11)),
                   ],
                 ),
@@ -262,8 +265,8 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
       onChanged: (v) => setState(() => _texte = v.trim()),
       decoration: InputDecoration(
         hintText: _isClient
-            ? 'Rechercher un client, une facture, un téléphone…'
-            : 'Rechercher un fournisseur, une facture…',
+            ? _t.debtSearchClients
+            : _t.debtSearchSuppliers,
         prefixIcon: const Icon(Icons.search_rounded),
         suffixIcon: _texte.isEmpty
             ? null
@@ -291,12 +294,12 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
   }
 
   Widget _filtres() {
-    const libelles = {
-      _Filtre.enCours: 'En cours',
-      _Filtre.recentes: 'Récentes (< 30 j)',
-      _Filtre.enRetard: 'En retard',
-      _Filtre.partielles: 'Partielles',
-      _Filtre.soldees: 'Soldées',
+    final libelles = {
+      _Filtre.enCours: _t.filterOngoing,
+      _Filtre.recentes: _t.filterRecent,
+      _Filtre.enRetard: _t.filterLate,
+      _Filtre.partielles: _t.filterPartial,
+      _Filtre.soldees: _t.filterSettled,
     };
     return SizedBox(
       height: 36,
@@ -356,16 +359,16 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
     final String libelleStatut;
     if (d.estSolde) {
       couleurStatut = _vert;
-      libelleStatut = 'Soldée';
+      libelleStatut = _t.statusSettled;
     } else if (retard) {
       couleurStatut = _rouge;
-      libelleStatut = 'En retard';
+      libelleStatut = _t.filterLate;
     } else if (d.acomptePaye > 0.005) {
       couleurStatut = Colors.orange.shade800;
-      libelleStatut = 'Partiel';
+      libelleStatut = _t.statusPartial;
     } else {
       couleurStatut = Colors.blueGrey.shade600;
-      libelleStatut = 'Non payée';
+      libelleStatut = _t.statusUnpaid;
     }
 
     final initiale = d.nomTiers.trim().isEmpty ? '?' : d.nomTiers.trim()[0].toUpperCase();
@@ -408,7 +411,7 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
                       const SizedBox(height: 2),
                       Text(
                         [
-                          if (d.numeroFacture.isNotEmpty) 'Fact. ${d.numeroFacture}',
+                          if (d.numeroFacture.isNotEmpty) _t.invoiceShort(d.numeroFacture),
                           _ageTexte(d),
                         ].join(' • '),
                         maxLines: 1,
@@ -462,7 +465,7 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
               children: [
                 Expanded(
                   child: Text(
-                    'Payé ${_nf.format(d.acomptePaye)} sur ${_m(d.montantInitial)}',
+                    _t.paidOf(_nf.format(d.acomptePaye), _m(d.montantInitial)),
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -482,12 +485,12 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
                   if (d.dateEcheance != null)
                     _petiteInfo(
                       Icons.event_rounded,
-                      'Échéance ${DateFormat('dd/MM/yyyy').format(d.dateEcheance!)}',
+                      _t.debtDueDate(DateFormat('dd/MM/yyyy').format(d.dateEcheance!)),
                       couleur: d.estEnRetard ? _rouge : null,
                     ),
                   if (d.dernierPaiement != null)
                     _petiteInfo(Icons.history_rounded,
-                        'Dernier paiement ${DateFormat('dd/MM/yyyy').format(d.dernierPaiement!)}'),
+                        _t.lastPayment(DateFormat('dd/MM/yyyy').format(d.dernierPaiement!))),
                   if (d.note.isNotEmpty) _petiteInfo(Icons.notes_rounded, d.note),
                 ],
               ),
@@ -503,7 +506,7 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
                   TextButton.icon(
                     onPressed: () => _relancer(d),
                     icon: const Icon(Icons.chat_rounded, size: 18, color: Color(0xFF25D366)),
-                    label: Text(_isClient ? 'Relancer' : 'Message',
+                    label: Text(_isClient ? _t.remind : _t.message,
                         style: const TextStyle(color: Color(0xFF128C7E), fontWeight: FontWeight.w600)),
                   ),
                   const SizedBox(width: 4),
@@ -516,7 +519,7 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
                     onPressed: () => DebtDialogs.afficherPaiement(
                         context, ref, widget.entrepriseId, d, widget.currency),
                     icon: const Icon(Icons.payments_rounded, size: 18),
-                    label: Text(_isClient ? 'Encaisser' : 'Payer'),
+                    label: Text(_isClient ? _t.collect : _t.pay),
                   ),
                 ],
               ),

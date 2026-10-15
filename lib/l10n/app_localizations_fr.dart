@@ -666,4 +666,177 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get debtValidatePayment => 'Valider le Règlement';
+
+  @override
+  String get debtScreenTitle => 'Créances & Dettes';
+
+  @override
+  String get debtExport => 'Exporter';
+
+  @override
+  String get debtExportExcel => 'Exporter vers Excel';
+
+  @override
+  String get debtPrintPdf => 'Imprimer / PDF';
+
+  @override
+  String get debtTabClients => 'Clients';
+
+  @override
+  String get debtTabSuppliers => 'Fournisseurs';
+
+  @override
+  String debtLoadError(String message) {
+    return 'Erreur de chargement : $message';
+  }
+
+  @override
+  String get debtAdd => 'Ajouter une dette';
+
+  @override
+  String get ageToday => 'Aujourd\'hui';
+
+  @override
+  String get ageYesterday => 'Hier';
+
+  @override
+  String ageDays(int count) {
+    return 'Il y a $count jours';
+  }
+
+  @override
+  String ageMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Il y a $count mois',
+      one: 'Il y a 1 mois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get whatsAppError => 'Impossible d\'ouvrir WhatsApp sur cet appareil.';
+
+  @override
+  String get debtEmptyClients => 'Aucune créance client';
+
+  @override
+  String get debtEmptySuppliers => 'Aucune dette fournisseur';
+
+  @override
+  String get debtEmptyClientsHint =>
+      'Les ventes à crédit ou partielles apparaîtront ici automatiquement.';
+
+  @override
+  String get debtEmptySuppliersHint =>
+      'Ajoutez ici ce que vous devez à vos fournisseurs avec le bouton « Ajouter une dette ».';
+
+  @override
+  String get noResults => 'Aucun résultat';
+
+  @override
+  String get noResultsHint => 'Essayez un autre filtre ou une autre recherche.';
+
+  @override
+  String get debtToCollect => 'À RECOUVRER (CLIENTS)';
+
+  @override
+  String get debtToPay => 'À PAYER (FOURNISSEURS)';
+
+  @override
+  String debtOpenFiles(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'dossiers ouverts',
+      one: 'dossier ouvert',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String debtClientsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'clients',
+      one: 'client',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String debtSuppliersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'fournisseurs',
+      one: 'fournisseur',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String debtLateCount(int count) {
+    return 'en retard ($count)';
+  }
+
+  @override
+  String get debtSearchClients =>
+      'Rechercher un client, une facture, un téléphone…';
+
+  @override
+  String get debtSearchSuppliers => 'Rechercher un fournisseur, une facture…';
+
+  @override
+  String get filterOngoing => 'En cours';
+
+  @override
+  String get filterRecent => 'Récentes (< 30 j)';
+
+  @override
+  String get filterLate => 'En retard';
+
+  @override
+  String get filterPartial => 'Partielles';
+
+  @override
+  String get filterSettled => 'Soldées';
+
+  @override
+  String get statusSettled => 'Soldée';
+
+  @override
+  String get statusPartial => 'Partiel';
+
+  @override
+  String get statusUnpaid => 'Non payée';
+
+  @override
+  String invoiceShort(String numero) {
+    return 'Fact. $numero';
+  }
+
+  @override
+  String paidOf(String paye, String total) {
+    return 'Payé $paye sur $total';
+  }
+
+  @override
+  String lastPayment(String date) {
+    return 'Dernier paiement $date';
+  }
+
+  @override
+  String get remind => 'Relancer';
+
+  @override
+  String get message => 'Message';
+
+  @override
+  String get collect => 'Encaisser';
+
+  @override
+  String get pay => 'Payer';
 }
