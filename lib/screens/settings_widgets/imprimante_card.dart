@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:stockly_saas/core/services/imprimante_reglages.dart';
 import 'package:stockly_saas/core/services/receipt_service.dart';
+import 'package:stockly_saas/l10n/app_localizations.dart';
 
 /// 🖨️ Carte « Imprimante » des Paramètres (visible par tout le monde).
 class ImprimanteCard extends StatefulWidget {
@@ -31,6 +32,7 @@ class _ImprimanteCardState extends State<ImprimanteCard> {
   Future<void> _essai() async {
     if (_essaiEnCours) return;
     final messenger = ScaffoldMessenger.of(context);
+    final t = AppLocalizations.of(context);
     setState(() => _essaiEnCours = true);
     try {
       await ReceiptService.imprimerTicket(
@@ -46,7 +48,7 @@ class _ImprimanteCardState extends State<ImprimanteCard> {
       );
     } catch (e) {
       messenger.showSnackBar(SnackBar(
-        content: Text('Impression impossible : $e'),
+        content: Text(t.printFailed('$e')),
         backgroundColor: Colors.red,
       ));
     } finally {
@@ -76,6 +78,7 @@ class _ImprimanteCardState extends State<ImprimanteCard> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -87,7 +90,7 @@ class _ImprimanteCardState extends State<ImprimanteCard> {
                 Icon(Icons.print_rounded, color: Colors.indigo.shade400),
                 const SizedBox(width: 8),
                 Text(
-                  'Imprimante',
+                  t.printerTitle,
                   style: Theme.of(context)
                       .textTheme
                       .titleMedium
@@ -97,18 +100,18 @@ class _ImprimanteCardState extends State<ImprimanteCard> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Réglages de ce téléphone seulement',
+              t.printerPhoneOnly,
               style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
             ),
             const SizedBox(height: 16),
-            const Text('Largeur du papier'),
+            Text(t.printerPaperWidth),
             const SizedBox(height: 8),
             SizedBox(
               width: double.infinity,
               child: SegmentedButton<int>(
-                segments: const [
-                  ButtonSegment(value: 58, label: Text('58 mm (petite)')),
-                  ButtonSegment(value: 80, label: Text('80 mm (grande)')),
+                segments: [
+                  ButtonSegment(value: 58, label: Text(t.printer58)),
+                  ButtonSegment(value: 80, label: Text(t.printer80)),
                 ],
                 selected: {_reglages.papierMm},
                 onSelectionChanged: (v) =>
@@ -116,18 +119,18 @@ class _ImprimanteCardState extends State<ImprimanteCard> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text('Après une vente, le reçu…'),
+            Text(t.printerAfterSale),
             _choixMode(
               'android',
               Icons.print_outlined,
-              "S'imprime",
-              "Fenêtre d'impression d'Android (imprimante installée sur le téléphone)",
+              t.printerPrints,
+              t.printerPrintsHint,
             ),
             _choixMode(
               'partager',
               Icons.share_rounded,
-              'Est envoyé en PDF',
-              "WhatsApp, Bluetooth, e-mail… (quand il n'y a pas d'imprimante)",
+              t.printerPdf,
+              t.printerPdfHint,
             ),
             const SizedBox(height: 8),
             SizedBox(
@@ -141,7 +144,7 @@ class _ImprimanteCardState extends State<ImprimanteCard> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.receipt_long_rounded),
-                label: const Text("Imprimer un reçu d'essai"),
+                label: Text(t.printerTest),
               ),
             ),
           ],

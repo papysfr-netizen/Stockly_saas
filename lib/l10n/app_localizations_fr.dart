@@ -839,4 +839,72 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get pay => 'Payer';
+
+  @override
+  String printFailed(String message) {
+    return 'Impression impossible : $message';
+  }
+
+  @override
+  String get printerTitle => 'Imprimante';
+
+  @override
+  String get printerPhoneOnly => 'Réglages de ce téléphone seulement';
+
+  @override
+  String get printerPaperWidth => 'Largeur du papier';
+
+  @override
+  String get printer58 => '58 mm (petite)';
+
+  @override
+  String get printer80 => '80 mm (grande)';
+
+  @override
+  String get printerAfterSale => 'Après une vente, le reçu…';
+
+  @override
+  String get printerPrints => 'S\'imprime';
+
+  @override
+  String get printerPrintsHint =>
+      'Fenêtre d\'impression d\'Android (imprimante installée sur le téléphone)';
+
+  @override
+  String get printerPdf => 'Est envoyé en PDF';
+
+  @override
+  String get printerPdfHint =>
+      'WhatsApp, Bluetooth, e-mail… (quand il n\'y a pas d\'imprimante)';
+
+  @override
+  String get printerTest => 'Imprimer un reçu d\'essai';
+
+  @override
+  String get crashTest => 'Tester les rapports d\'erreurs';
+
+  @override
+  String get crashDebugOnly =>
+      'Les rapports ne partent que depuis l\'APK (pas au câble).';
+
+  @override
+  String get crashSent =>
+      'Rapport de test envoyé. Il apparaît dans Firebase sous quelques minutes.';
+
+  @override
+  String get guideTitle => 'Guide d\'utilisation';
+
+  @override
+  String get guideSubtitle => 'Comment vendre, encaisser une dette, imprimer…';
+
+  @override
+  String get guideSearch => 'Chercher : dette, taux, imprimer…';
+
+  @override
+  String guideNotFound(String mot) {
+    return 'Rien trouvé pour « $mot ».';
+  }
+
+  @override
+  String get guideOwnerOnly => 'Patron / gérant';
 }

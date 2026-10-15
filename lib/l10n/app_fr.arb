@@ -683,5 +683,39 @@
   "remind": "Relancer",
   "message": "Message",
   "collect": "Encaisser",
-  "pay": "Payer"
+  "pay": "Payer",
+  "printFailed": "Impression impossible : {message}",
+  "@printFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "printerTitle": "Imprimante",
+  "printerPhoneOnly": "Réglages de ce téléphone seulement",
+  "printerPaperWidth": "Largeur du papier",
+  "printer58": "58 mm (petite)",
+  "printer80": "80 mm (grande)",
+  "printerAfterSale": "Après une vente, le reçu…",
+  "printerPrints": "S'imprime",
+  "printerPrintsHint": "Fenêtre d'impression d'Android (imprimante installée sur le téléphone)",
+  "printerPdf": "Est envoyé en PDF",
+  "printerPdfHint": "WhatsApp, Bluetooth, e-mail… (quand il n'y a pas d'imprimante)",
+  "printerTest": "Imprimer un reçu d'essai",
+  "crashTest": "Tester les rapports d'erreurs",
+  "crashDebugOnly": "Les rapports ne partent que depuis l'APK (pas au câble).",
+  "crashSent": "Rapport de test envoyé. Il apparaît dans Firebase sous quelques minutes.",
+  "guideTitle": "Guide d'utilisation",
+  "guideSubtitle": "Comment vendre, encaisser une dette, imprimer…",
+  "guideSearch": "Chercher : dette, taux, imprimer…",
+  "guideNotFound": "Rien trouvé pour « {mot} ».",
+  "@guideNotFound": {
+    "placeholders": {
+      "mot": {
+        "type": "String"
+      }
+    }
+  },
+  "guideOwnerOnly": "Patron / gérant"
 }

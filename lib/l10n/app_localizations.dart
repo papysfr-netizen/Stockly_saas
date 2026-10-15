@@ -1416,6 +1416,126 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Payer'**
   String get pay;
+
+  /// No description provided for @printFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impression impossible : {message}'**
+  String printFailed(String message);
+
+  /// No description provided for @printerTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Imprimante'**
+  String get printerTitle;
+
+  /// No description provided for @printerPhoneOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réglages de ce téléphone seulement'**
+  String get printerPhoneOnly;
+
+  /// No description provided for @printerPaperWidth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Largeur du papier'**
+  String get printerPaperWidth;
+
+  /// No description provided for @printer58.
+  ///
+  /// In fr, this message translates to:
+  /// **'58 mm (petite)'**
+  String get printer58;
+
+  /// No description provided for @printer80.
+  ///
+  /// In fr, this message translates to:
+  /// **'80 mm (grande)'**
+  String get printer80;
+
+  /// No description provided for @printerAfterSale.
+  ///
+  /// In fr, this message translates to:
+  /// **'Après une vente, le reçu…'**
+  String get printerAfterSale;
+
+  /// No description provided for @printerPrints.
+  ///
+  /// In fr, this message translates to:
+  /// **'S\'imprime'**
+  String get printerPrints;
+
+  /// No description provided for @printerPrintsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fenêtre d\'impression d\'Android (imprimante installée sur le téléphone)'**
+  String get printerPrintsHint;
+
+  /// No description provided for @printerPdf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Est envoyé en PDF'**
+  String get printerPdf;
+
+  /// No description provided for @printerPdfHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'WhatsApp, Bluetooth, e-mail… (quand il n\'y a pas d\'imprimante)'**
+  String get printerPdfHint;
+
+  /// No description provided for @printerTest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Imprimer un reçu d\'essai'**
+  String get printerTest;
+
+  /// No description provided for @crashTest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tester les rapports d\'erreurs'**
+  String get crashTest;
+
+  /// No description provided for @crashDebugOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les rapports ne partent que depuis l\'APK (pas au câble).'**
+  String get crashDebugOnly;
+
+  /// No description provided for @crashSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rapport de test envoyé. Il apparaît dans Firebase sous quelques minutes.'**
+  String get crashSent;
+
+  /// No description provided for @guideTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Guide d\'utilisation'**
+  String get guideTitle;
+
+  /// No description provided for @guideSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comment vendre, encaisser une dette, imprimer…'**
+  String get guideSubtitle;
+
+  /// No description provided for @guideSearch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chercher : dette, taux, imprimer…'**
+  String get guideSearch;
+
+  /// No description provided for @guideNotFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien trouvé pour « {mot} ».'**
+  String guideNotFound(String mot);
+
+  /// No description provided for @guideOwnerOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Patron / gérant'**
+  String get guideOwnerOnly;
 }
 
 class _AppLocalizationsDelegate

@@ -835,4 +835,72 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pay => 'Pay';
+
+  @override
+  String printFailed(String message) {
+    return 'Printing failed: $message';
+  }
+
+  @override
+  String get printerTitle => 'Printer';
+
+  @override
+  String get printerPhoneOnly => 'Settings for this phone only';
+
+  @override
+  String get printerPaperWidth => 'Paper width';
+
+  @override
+  String get printer58 => '58 mm (small)';
+
+  @override
+  String get printer80 => '80 mm (large)';
+
+  @override
+  String get printerAfterSale => 'After a sale, the receipt…';
+
+  @override
+  String get printerPrints => 'Is printed';
+
+  @override
+  String get printerPrintsHint =>
+      'Android print window (printer set up on the phone)';
+
+  @override
+  String get printerPdf => 'Is sent as PDF';
+
+  @override
+  String get printerPdfHint =>
+      'WhatsApp, Bluetooth, e-mail… (when there is no printer)';
+
+  @override
+  String get printerTest => 'Print a test receipt';
+
+  @override
+  String get crashTest => 'Test error reports';
+
+  @override
+  String get crashDebugOnly =>
+      'Reports are only sent from the APK (not over the cable).';
+
+  @override
+  String get crashSent =>
+      'Test report sent. It appears in Firebase within a few minutes.';
+
+  @override
+  String get guideTitle => 'User guide';
+
+  @override
+  String get guideSubtitle => 'How to sell, collect a debt, print…';
+
+  @override
+  String get guideSearch => 'Search: debt, rate, print…';
+
+  @override
+  String guideNotFound(String mot) {
+    return 'Nothing found for “$mot”.';
+  }
+
+  @override
+  String get guideOwnerOnly => 'Owner / manager';
 }

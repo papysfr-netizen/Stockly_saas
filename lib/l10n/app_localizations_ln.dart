@@ -836,4 +836,72 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get pay => 'Futa';
+
+  @override
+  String printFailed(String message) {
+    return 'Ekoki kobimisa te : $message';
+  }
+
+  @override
+  String get printerTitle => 'Masini ya kobimisa';
+
+  @override
+  String get printerPhoneOnly => 'Mibongiseli ya telefone oyo kaka';
+
+  @override
+  String get printerPaperWidth => 'Monene ya papie';
+
+  @override
+  String get printer58 => '58 mm (moke)';
+
+  @override
+  String get printer80 => '80 mm (monene)';
+
+  @override
+  String get printerAfterSale => 'Sima ya eteki, resi…';
+
+  @override
+  String get printerPrints => 'Ebimi na papie';
+
+  @override
+  String get printerPrintsHint =>
+      'Lininisa ya kobimisa ya Android (masini etiami na telefone)';
+
+  @override
+  String get printerPdf => 'Etindami lokola PDF';
+
+  @override
+  String get printerPdfHint =>
+      'WhatsApp, Bluetooth, e-mail… (soki masini ezali te)';
+
+  @override
+  String get printerTest => 'Bimisa resi ya komeka';
+
+  @override
+  String get crashTest => 'Meka ba lapolo ya mabunga';
+
+  @override
+  String get crashDebugOnly =>
+      'Ba lapolo etindamaka kaka na APK (na nsinga te).';
+
+  @override
+  String get crashSent =>
+      'Lapolo ya komeka etindami. Ekomonana na Firebase sima ya miniti mwa moke.';
+
+  @override
+  String get guideTitle => 'Litambwisi ya kosalela';
+
+  @override
+  String get guideSubtitle => 'Ndenge ya koteka, kozwa niongo, kobimisa…';
+
+  @override
+  String get guideSearch => 'Luka: niongo, motuya ya dolare, kobimisa…';
+
+  @override
+  String guideNotFound(String mot) {
+    return 'Eloko moko te emonani mpo na « $mot ».';
+  }
+
+  @override
+  String get guideOwnerOnly => 'Nkolo / mokambi';
 }

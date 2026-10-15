@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:stockly_saas/core/providers/user_role_provider.dart';
+import 'package:stockly_saas/l10n/app_localizations.dart';
 
 /// 🐞 Bouton du patron : envoie un faux rapport d'erreur à Crashlytics
 /// pour vérifier que les rapports arrivent bien dans la console Firebase.
@@ -14,16 +15,17 @@ class TestCrashlyticsBouton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profil = ref.watch(userProfileProvider).value;
     if (profil == null || !profil.role.isOwner) return const SizedBox.shrink();
+    final t = AppLocalizations.of(context);
 
     return Center(
       child: TextButton.icon(
         icon: const Icon(Icons.bug_report_outlined, size: 18),
-        label: const Text("Tester les rapports d'erreurs"),
+        label: Text(t.crashTest),
         onPressed: () async {
           final messenger = ScaffoldMessenger.of(context);
           if (kDebugMode) {
-            messenger.showSnackBar(const SnackBar(
-              content: Text("Les rapports ne partent que depuis l'APK (pas au câble)."),
+            messenger.showSnackBar(SnackBar(
+              content: Text(t.crashDebugOnly),
             ));
             return;
           }
@@ -33,8 +35,8 @@ class TestCrashlyticsBouton extends ConsumerWidget {
             reason: 'Bouton de test (Paramètres)',
           );
           await FirebaseCrashlytics.instance.sendUnsentReports();
-          messenger.showSnackBar(const SnackBar(
-            content: Text('Rapport de test envoyé. Il apparaît dans Firebase sous quelques minutes.'),
+          messenger.showSnackBar(SnackBar(
+            content: Text(t.crashSent),
             backgroundColor: Colors.green,
           ));
         },

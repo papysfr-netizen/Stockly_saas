@@ -833,4 +833,72 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get pay => 'Lipa';
+
+  @override
+  String printFailed(String message) {
+    return 'Imeshindwa kuchapisha : $message';
+  }
+
+  @override
+  String get printerTitle => 'Printa';
+
+  @override
+  String get printerPhoneOnly => 'Mipangilio ya simu hii tu';
+
+  @override
+  String get printerPaperWidth => 'Upana wa karatasi';
+
+  @override
+  String get printer58 => '58 mm (ndogo)';
+
+  @override
+  String get printer80 => '80 mm (kubwa)';
+
+  @override
+  String get printerAfterSale => 'Baada ya mauzo, risiti…';
+
+  @override
+  String get printerPrints => 'Inachapishwa';
+
+  @override
+  String get printerPrintsHint =>
+      'Dirisha la kuchapisha la Android (printa iliyowekwa kwenye simu)';
+
+  @override
+  String get printerPdf => 'Inatumwa kama PDF';
+
+  @override
+  String get printerPdfHint =>
+      'WhatsApp, Bluetooth, barua pepe… (wakati hakuna printa)';
+
+  @override
+  String get printerTest => 'Chapisha risiti ya majaribio';
+
+  @override
+  String get crashTest => 'Jaribu ripoti za makosa';
+
+  @override
+  String get crashDebugOnly =>
+      'Ripoti zinatumwa tu kutoka kwa APK (si kwa waya).';
+
+  @override
+  String get crashSent =>
+      'Ripoti ya majaribio imetumwa. Itaonekana kwenye Firebase baada ya dakika chache.';
+
+  @override
+  String get guideTitle => 'Mwongozo wa matumizi';
+
+  @override
+  String get guideSubtitle => 'Jinsi ya kuuza, kupokea deni, kuchapisha…';
+
+  @override
+  String get guideSearch => 'Tafuta: deni, bei ya dola, chapisha…';
+
+  @override
+  String guideNotFound(String mot) {
+    return 'Hakuna kilichopatikana kwa « $mot ».';
+  }
+
+  @override
+  String get guideOwnerOnly => 'Mmiliki / meneja';
 }

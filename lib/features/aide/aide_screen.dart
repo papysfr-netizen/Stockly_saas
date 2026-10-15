@@ -6,6 +6,8 @@
 // ============================================================================
 import 'package:flutter/material.dart';
 
+import 'package:stockly_saas/l10n/app_localizations.dart';
+
 const _vert = Color(0xFF0B7A5A);
 
 class _Rubrique {
@@ -259,7 +261,7 @@ class _AideScreenState extends State<AideScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF3F5F7),
       appBar: AppBar(
-        title: const Text("Guide d'utilisation"),
+        title: Text(AppLocalizations.of(context).guideTitle),
         backgroundColor: _vert,
         foregroundColor: Colors.white,
       ),
@@ -268,7 +270,7 @@ class _AideScreenState extends State<AideScreen> {
         children: [
           TextField(
             decoration: InputDecoration(
-              hintText: 'Chercher : dette, taux, imprimer…',
+              hintText: AppLocalizations.of(context).guideSearch,
               prefixIcon: const Icon(Icons.search_rounded),
               filled: true,
               fillColor: Colors.white,
@@ -284,7 +286,7 @@ class _AideScreenState extends State<AideScreen> {
             Padding(
               padding: const EdgeInsets.all(24),
               child: Text(
-                'Rien trouvé pour « $_recherche ».',
+                AppLocalizations.of(context).guideNotFound(_recherche),
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey.shade700),
               ),
@@ -323,7 +325,7 @@ class _CarteRubrique extends StatelessWidget {
           ),
           title: Text(r.titre, style: const TextStyle(fontWeight: FontWeight.w600)),
           subtitle: r.patron
-              ? Text('Patron / gérant', style: TextStyle(fontSize: 12, color: Colors.grey.shade600))
+              ? Text(AppLocalizations.of(context).guideOwnerOnly, style: TextStyle(fontSize: 12, color: Colors.grey.shade600))
               : null,
           childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           expandedCrossAxisAlignment: CrossAxisAlignment.start,
@@ -384,8 +386,8 @@ class AideCard extends StatelessWidget {
           backgroundColor: Color(0x1F0B7A5A),
           child: Icon(Icons.menu_book_rounded, color: _vert),
         ),
-        title: const Text("Guide d'utilisation", style: TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: const Text('Comment vendre, encaisser une dette, imprimer…'),
+        title: Text(AppLocalizations.of(context).guideTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(AppLocalizations.of(context).guideSubtitle),
         trailing: const Icon(Icons.chevron_right_rounded),
         onTap: () => Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => const AideScreen()),
