@@ -578,7 +578,7 @@ class AppLocalizationsSw extends AppLocalizations {
   }
 
   @override
-  String get debtNote => 'Maelezo (si lazima)';
+  String get debtNote => 'Sababu (si lazima)';
 
   @override
   String get debtPaidOverTotal => 'Kiasi kilicholipwa kinazidi jumla.';
@@ -1653,4 +1653,10 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get ddNoPayments => 'Bado hakuna malipo.';
+
+  @override
+  String get payMotif => 'Sababu ya mkopo (si lazima)';
+
+  @override
+  String get payMotifHint => 'Mfano: atalipa Ijumaa baada ya soko';
 }

@@ -580,7 +580,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get debtNote => 'Note / Description (optional)';
+  String get debtNote => 'Reason (optional)';
 
   @override
   String get debtPaidOverTotal =>
@@ -1654,4 +1654,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ddNoPayments => 'No payments yet.';
+
+  @override
+  String get payMotif => 'Reason for credit (optional)';
+
+  @override
+  String get payMotifHint => 'E.g. will pay Friday after the market';
 }

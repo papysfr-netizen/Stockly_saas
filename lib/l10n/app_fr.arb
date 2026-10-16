@@ -466,7 +466,7 @@
       }
     }
   },
-  "debtNote": "Note / Description (Optionnel)",
+  "debtNote": "Motif (facultatif)",
   "debtPaidOverTotal": "Le montant déjà payé dépasse le montant total.",
   "debtPaymentTitle": "Règlement : {nom}",
   "@debtPaymentTitle": {
@@ -1272,5 +1272,7 @@
   },
   "ddPayments": "Historique des paiements",
   "ddPaidBefore": "Payé avant (à la vente ou plus tôt)",
-  "ddNoPayments": "Aucun paiement pour l'instant."
+  "ddNoPayments": "Aucun paiement pour l'instant.",
+  "payMotif": "Motif du crédit (facultatif)",
+  "payMotifHint": "Ex : paiera vendredi après le marché"
 }

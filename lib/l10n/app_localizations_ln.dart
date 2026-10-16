@@ -582,7 +582,7 @@ class AppLocalizationsLn extends AppLocalizations {
   }
 
   @override
-  String get debtNote => 'Maloba (soki olingi)';
+  String get debtNote => 'Ntina (soki olingi)';
 
   @override
   String get debtPaidOverTotal => 'Mbongo efutami eleki motango mobimba.';
@@ -1657,4 +1657,10 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get ddNoPayments => 'Bofuti moko te naino.';
+
+  @override
+  String get payMotif => 'Ntina ya niongo (soki olingi)';
+
+  @override
+  String get payMotifHint => 'Ndakisa: akofuta mokolo ya mitano sima ya zando';
 }

@@ -156,7 +156,7 @@
   "debtAlreadyPaid": "Mbongo esili kofutama (kofuta ndambo)",
   "debtPickDueDate": "Pona mokolo ya kofuta",
   "debtDueDate": "Mokolo ya kofuta : {date}",
-  "debtNote": "Maloba (soki olingi)",
+  "debtNote": "Ntina (soki olingi)",
   "debtPaidOverTotal": "Mbongo efutami eleki motango mobimba.",
   "debtPaymentTitle": "Kofuta : {nom}",
   "debtInvoiceNo": "Fakture nimero : {numero}",
@@ -451,5 +451,7 @@
   "ddDate": "Mokolo : {date}",
   "ddPayments": "Lisolo ya bofuti",
   "ddPaidBefore": "Efutamaki liboso (na eteki to liboso)",
-  "ddNoPayments": "Bofuti moko te naino."
+  "ddNoPayments": "Bofuti moko te naino.",
+  "payMotif": "Ntina ya niongo (soki olingi)",
+  "payMotifHint": "Ndakisa: akofuta mokolo ya mitano sima ya zando"
 }

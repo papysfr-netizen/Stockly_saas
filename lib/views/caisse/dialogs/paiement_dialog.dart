@@ -49,6 +49,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
   final _telephoneController = TextEditingController();
   final _verseUSDController = TextEditingController();
   final _verseLocalController = TextEditingController();
+  final _motifController = TextEditingController(); // 📝 motif du crédit
 
   String statutPaiement = 'Payé';
   String methodePaiement = 'Cash';
@@ -96,6 +97,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
     _telephoneController.dispose();
     _verseUSDController.dispose();
     _verseLocalController.dispose();
+    _motifController.dispose();
     super.dispose();
   }
 
@@ -605,6 +607,24 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                       ),
                       const SizedBox(height: 10),
 
+                      // 📝 MOTIF DU CRÉDIT (seulement si le client ne paie pas tout)
+                      if (!calc.isFullyPaid) ...[
+                        TextField(
+                          controller: _motifController,
+                          textCapitalization: TextCapitalization.sentences,
+                          minLines: 1,
+                          maxLines: 2,
+                          decoration: InputDecoration(
+                            labelText: t.payMotif,
+                            hintText: t.payMotifHint,
+                            prefixIcon: const Icon(Icons.notes_rounded, size: 18),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                      ],
+
                       // 🚚 STATUT LIVRAISON
                       DropdownButtonFormField<String>(
                         initialValue: statutLivraison,
@@ -1013,7 +1033,21 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
           'montantReste': resteEffective,
           'type': 'client',
           'statut': verseEffective > 0 ? 'partiel' : 'non_paye',
-          'note': 'Créance issue de la vente #${venteRef.id.substring(0, 6)}',
+          // 📝 Motif écrit par le vendeur (sinon la phrase automatique)
+          'note': _motifController.text.trim().isNotEmpty
+              ? _motifController.text.trim()
+              : 'Créance issue de la vente #${venteRef.id.substring(0, 6)}',
+          // 🧾 Historique : l'acompte versé à la caisse
+          if (verseEffective > 0.005)
+            'paiements': [
+              {
+                'date': now,
+                'montant': verseEffective,
+                'methode': methodeEnregistree,
+                'parNom': vendeurNom,
+                'parUid': widget.userId,
+              }
+            ],
           'entrepriseId': widget.entrepriseId,
           'comptabilise': true,
           'createdAt': now,

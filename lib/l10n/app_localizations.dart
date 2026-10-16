@@ -1041,7 +1041,7 @@ abstract class AppLocalizations {
   /// No description provided for @debtNote.
   ///
   /// In fr, this message translates to:
-  /// **'Note / Description (Optionnel)'**
+  /// **'Motif (facultatif)'**
   String get debtNote;
 
   /// No description provided for @debtPaidOverTotal.
@@ -2814,6 +2814,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Aucun paiement pour l\'instant.'**
   String get ddNoPayments;
+
+  /// No description provided for @payMotif.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif du crédit (facultatif)'**
+  String get payMotif;
+
+  /// No description provided for @payMotifHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex : paiera vendredi après le marché'**
+  String get payMotifHint;
 }
 
 class _AppLocalizationsDelegate

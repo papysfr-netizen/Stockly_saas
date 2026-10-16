@@ -156,7 +156,7 @@
   "debtAlreadyPaid": "Kiasi kilicholipwa tayari (malipo ya sehemu)",
   "debtPickDueDate": "Chagua tarehe ya kulipa",
   "debtDueDate": "Tarehe ya kulipa : {date}",
-  "debtNote": "Maelezo (si lazima)",
+  "debtNote": "Sababu (si lazima)",
   "debtPaidOverTotal": "Kiasi kilicholipwa kinazidi jumla.",
   "debtPaymentTitle": "Malipo : {nom}",
   "debtInvoiceNo": "Ankara Na. : {numero}",
@@ -451,5 +451,7 @@
   "ddDate": "Tarehe : {date}",
   "ddPayments": "Historia ya malipo",
   "ddPaidBefore": "Ililipwa mapema (wakati wa mauzo au kabla)",
-  "ddNoPayments": "Bado hakuna malipo."
+  "ddNoPayments": "Bado hakuna malipo.",
+  "payMotif": "Sababu ya mkopo (si lazima)",
+  "payMotifHint": "Mfano: atalipa Ijumaa baada ya soko"
 }
