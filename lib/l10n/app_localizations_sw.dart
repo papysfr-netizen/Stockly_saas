@@ -1302,4 +1302,168 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get shopReactivate => 'Washa tena';
+
+  @override
+  String get teamTitle => 'Usimamizi wa timu';
+
+  @override
+  String get teamOwnerOnly => 'Ruhusa ni ya mmiliki wa duka pekee.';
+
+  @override
+  String get teamNoMembers =>
+      'Bado hakuna mfanyakazi.\nBonyeza « Mwanachama mpya » kuunda akaunti ya keshia au meneja.';
+
+  @override
+  String get teamNewMember => 'Mwanachama mpya';
+
+  @override
+  String get teamAccountCreated => 'Akaunti imeundwa';
+
+  @override
+  String teamGiveInfo(String nom) {
+    return 'Mpe $nom taarifa hizi :';
+  }
+
+  @override
+  String get teamLogin => 'Jina la kuingia';
+
+  @override
+  String get teamPassword => 'Nenosiri';
+
+  @override
+  String get teamNoteNow => 'Ziandike sasa: nenosiri halitaonyeshwa tena.';
+
+  @override
+  String get teamCopy => 'Nakili';
+
+  @override
+  String get teamCopied => 'Imenakiliwa!';
+
+  @override
+  String get teamFullName => 'Jina kamili';
+
+  @override
+  String get teamNameRequired => 'Jina linahitajika';
+
+  @override
+  String get teamLoginLabel => 'Jina la kuingia (mfano: grace)';
+
+  @override
+  String teamLoginPreview(String login) {
+    return 'Kuingia : $login';
+  }
+
+  @override
+  String get teamLoginMin => 'Herufi au namba 3 angalau';
+
+  @override
+  String get teamPasswordMin => 'Herufi 6 angalau';
+
+  @override
+  String get teamRole => 'Kazi';
+
+  @override
+  String get teamRoleLabel => 'Kazi:';
+
+  @override
+  String get roleOwner => 'Mmiliki';
+
+  @override
+  String get roleManager => 'Meneja';
+
+  @override
+  String get roleCashier => 'Keshia';
+
+  @override
+  String get teamManagerInfo =>
+      'Meneja ana ruhusa zote kwa kawaida. Unaweza kuondoa baadhi baadaye.';
+
+  @override
+  String get teamCashierInfo =>
+      'Keshia hana ruhusa maalum kwa kawaida. Unaweza kumpa baadaye.';
+
+  @override
+  String get teamCreateAccount => 'Unda akaunti';
+
+  @override
+  String teamYou(String nom) {
+    return '$nom (wewe)';
+  }
+
+  @override
+  String get teamOwnerAll => 'Mmiliki ana haki zote.';
+
+  @override
+  String get teamRoleChanged => 'Kazi imebadilishwa';
+
+  @override
+  String get teamActive => 'Akaunti hai';
+
+  @override
+  String get teamCanLogin => 'Anaweza kuingia';
+
+  @override
+  String get teamDisabledInfo => 'Imezimwa: hawezi kufanya kazi tena';
+
+  @override
+  String get teamReactivated => 'Akaunti imewashwa tena';
+
+  @override
+  String get teamDeactivated => 'Akaunti imezimwa';
+
+  @override
+  String teamPermissions(int count, int total) {
+    return 'Ruhusa ($count/$total)';
+  }
+
+  @override
+  String get teamManagerDefault =>
+      'Kwa kawaida kwa meneja: kila kitu kinaruhusiwa';
+
+  @override
+  String get teamCashierDefault => 'Kwa kawaida kwa keshia: hakuna maalum';
+
+  @override
+  String teamPermGranted(String perm, String nom) {
+    return '« $perm » imeruhusiwa kwa $nom';
+  }
+
+  @override
+  String teamPermRemoved(String perm, String nom) {
+    return '« $perm » imeondolewa kwa $nom';
+  }
+
+  @override
+  String get permFinances => 'Kuona fedha';
+
+  @override
+  String get permFinancesDesc =>
+      'Faida na hasara, uhasibu, bei za kununua na faida.';
+
+  @override
+  String get permReturns => 'Marejesho na kufuta';
+
+  @override
+  String get permReturnsDesc =>
+      'Andika marejesho au futa mauzo ambayo bidhaa hazijachukuliwa.';
+
+  @override
+  String get permStock => 'Kusimamia bidhaa';
+
+  @override
+  String get permStockDesc => 'Ongeza, hariri, futa bidhaa, leta faili.';
+
+  @override
+  String get permDiscounts => 'Punguzo na utoaji';
+
+  @override
+  String get permDiscountsDesc =>
+      'Kubadilisha bei kwenye malipo na kutoa pesa kwenye akaunti ya mteja.';
+
+  @override
+  String get permMaintenance => 'Matengenezo ya data';
+
+  @override
+  String get permMaintenanceDesc =>
+      'Mipangilio: rekebisha gharama, unganisha nakala.';
 }

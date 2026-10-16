@@ -2208,6 +2208,294 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Réactiver'**
   String get shopReactivate;
+
+  /// No description provided for @teamTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gestion de l\'équipe'**
+  String get teamTitle;
+
+  /// No description provided for @teamOwnerOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accès réservé au propriétaire de la boutique.'**
+  String get teamOwnerOnly;
+
+  /// No description provided for @teamNoMembers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun employé pour l\'instant.\nAppuyez sur « Nouveau membre » pour créer le compte d\'un caissier ou d\'un gérant.'**
+  String get teamNoMembers;
+
+  /// No description provided for @teamNewMember.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau membre'**
+  String get teamNewMember;
+
+  /// No description provided for @teamAccountCreated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte créé'**
+  String get teamAccountCreated;
+
+  /// No description provided for @teamGiveInfo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Donnez ces informations à {nom} :'**
+  String teamGiveInfo(String nom);
+
+  /// No description provided for @teamLogin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Identifiant'**
+  String get teamLogin;
+
+  /// No description provided for @teamPassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe'**
+  String get teamPassword;
+
+  /// No description provided for @teamNoteNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notez-les maintenant : le mot de passe ne sera plus affiché.'**
+  String get teamNoteNow;
+
+  /// No description provided for @teamCopy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Copier'**
+  String get teamCopy;
+
+  /// No description provided for @teamCopied.
+  ///
+  /// In fr, this message translates to:
+  /// **'Copié !'**
+  String get teamCopied;
+
+  /// No description provided for @teamFullName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom complet'**
+  String get teamFullName;
+
+  /// No description provided for @teamNameRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom obligatoire'**
+  String get teamNameRequired;
+
+  /// No description provided for @teamLoginLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Identifiant (ex : grace)'**
+  String get teamLoginLabel;
+
+  /// No description provided for @teamLoginPreview.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connexion : {login}'**
+  String teamLoginPreview(String login);
+
+  /// No description provided for @teamLoginMin.
+  ///
+  /// In fr, this message translates to:
+  /// **'3 lettres ou chiffres minimum'**
+  String get teamLoginMin;
+
+  /// No description provided for @teamPasswordMin.
+  ///
+  /// In fr, this message translates to:
+  /// **'6 caractères minimum'**
+  String get teamPasswordMin;
+
+  /// No description provided for @teamRole.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rôle'**
+  String get teamRole;
+
+  /// No description provided for @teamRoleLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rôle :'**
+  String get teamRoleLabel;
+
+  /// No description provided for @roleOwner.
+  ///
+  /// In fr, this message translates to:
+  /// **'Propriétaire'**
+  String get roleOwner;
+
+  /// No description provided for @roleManager.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gérant'**
+  String get roleManager;
+
+  /// No description provided for @roleCashier.
+  ///
+  /// In fr, this message translates to:
+  /// **'Caissier'**
+  String get roleCashier;
+
+  /// No description provided for @teamManagerInfo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un gérant a toutes les autorisations par défaut. Vous pourrez en retirer ensuite.'**
+  String get teamManagerInfo;
+
+  /// No description provided for @teamCashierInfo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un caissier n\'a aucune autorisation spéciale par défaut. Vous pourrez en donner ensuite.'**
+  String get teamCashierInfo;
+
+  /// No description provided for @teamCreateAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer le compte'**
+  String get teamCreateAccount;
+
+  /// No description provided for @teamYou.
+  ///
+  /// In fr, this message translates to:
+  /// **'{nom} (vous)'**
+  String teamYou(String nom);
+
+  /// No description provided for @teamOwnerAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le propriétaire a tous les droits.'**
+  String get teamOwnerAll;
+
+  /// No description provided for @teamRoleChanged.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rôle modifié'**
+  String get teamRoleChanged;
+
+  /// No description provided for @teamActive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte actif'**
+  String get teamActive;
+
+  /// No description provided for @teamCanLogin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Peut se connecter'**
+  String get teamCanLogin;
+
+  /// No description provided for @teamDisabledInfo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désactivé : ne peut plus travailler'**
+  String get teamDisabledInfo;
+
+  /// No description provided for @teamReactivated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte réactivé'**
+  String get teamReactivated;
+
+  /// No description provided for @teamDeactivated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte désactivé'**
+  String get teamDeactivated;
+
+  /// No description provided for @teamPermissions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autorisations ({count}/{total})'**
+  String teamPermissions(int count, int total);
+
+  /// No description provided for @teamManagerDefault.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par défaut pour un gérant : tout est autorisé'**
+  String get teamManagerDefault;
+
+  /// No description provided for @teamCashierDefault.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par défaut pour un caissier : rien de spécial'**
+  String get teamCashierDefault;
+
+  /// No description provided for @teamPermGranted.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {perm} » autorisé pour {nom}'**
+  String teamPermGranted(String perm, String nom);
+
+  /// No description provided for @teamPermRemoved.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {perm} » retiré à {nom}'**
+  String teamPermRemoved(String perm, String nom);
+
+  /// No description provided for @permFinances.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir les finances'**
+  String get permFinances;
+
+  /// No description provided for @permFinancesDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'P&L, comptabilité, prix d\'achat et marges.'**
+  String get permFinancesDesc;
+
+  /// No description provided for @permReturns.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retours et annulations'**
+  String get permReturns;
+
+  /// No description provided for @permReturnsDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer un retour ou annuler une vente non retirée.'**
+  String get permReturnsDesc;
+
+  /// No description provided for @permStock.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gérer le stock'**
+  String get permStock;
+
+  /// No description provided for @permStockDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter, modifier, supprimer des produits, importer un fichier.'**
+  String get permStockDesc;
+
+  /// No description provided for @permDiscounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remises et retraits'**
+  String get permDiscounts;
+
+  /// No description provided for @permDiscountsDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer les prix à la caisse et retirer de l\'argent d\'un compte client.'**
+  String get permDiscountsDesc;
+
+  /// No description provided for @permMaintenance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Maintenance des données'**
+  String get permMaintenance;
+
+  /// No description provided for @permMaintenanceDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paramètres : rattraper les coûts, fusionner les doublons.'**
+  String get permMaintenanceDesc;
 }
 
 class _AppLocalizationsDelegate

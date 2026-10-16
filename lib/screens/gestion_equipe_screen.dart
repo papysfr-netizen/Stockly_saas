@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/providers/user_role_provider.dart';
 import '../core/services/equipe_service.dart';
 import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
+import 'package:stockly_saas/l10n/app_localizations.dart';
 
 /// Membres de la boutique (collection users, même entrepriseId)
 final membresEquipeProvider = StreamProvider.family<
@@ -24,29 +25,30 @@ class GestionEquipeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(userProfileProvider);
+    final t = AppLocalizations.of(context);
 
     return profileAsync.when(
       loading: () => Scaffold(
-        appBar: AppBar(title: const Text('Gestion de l\'Équipe')),
+        appBar: AppBar(title: Text(t.teamTitle)),
         body: const Center(child: CircularProgressIndicator()),
       ),
       error: (err, _) => Scaffold(
-        appBar: AppBar(title: const Text('Gestion de l\'Équipe')),
-        body: Center(child: Text('Erreur : $err')),
+        appBar: AppBar(title: Text(t.teamTitle)),
+        body: Center(child: Text(t.errorPrefix('$err'))),
       ),
       data: (profile) {
         final entrepriseId = profile.entrepriseId;
 
         if (!profile.role.peutGererEquipe) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Gestion de l\'Équipe')),
-            body: const Center(
+            appBar: AppBar(title: Text(t.teamTitle)),
+            body: Center(
               child: Padding(
-                padding: EdgeInsets.all(24),
+                padding: const EdgeInsets.all(24),
                 child: Text(
-                  'Accès réservé au propriétaire de la boutique.',
+                  t.teamOwnerOnly,
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16),
+                  style: const TextStyle(fontSize: 16),
                 ),
               ),
             ),
@@ -56,13 +58,13 @@ class GestionEquipeScreen extends ConsumerWidget {
         final membresAsync = ref.watch(membresEquipeProvider(entrepriseId));
 
         return Scaffold(
-          appBar: AppBar(title: const Text('Gestion de l\'Équipe')),
+          appBar: AppBar(title: Text(t.teamTitle)),
           body: membresAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (err, _) => Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
-                child: Text('Erreur : $err', textAlign: TextAlign.center),
+                child: Text(t.errorPrefix('$err'), textAlign: TextAlign.center),
               ),
             ),
             data: (docs) {
@@ -80,11 +82,10 @@ class GestionEquipeScreen extends ConsumerWidget {
                   if (membres.length <= 1)
                     Card(
                       color: Colors.blue.shade50,
-                      child: const Padding(
-                        padding: EdgeInsets.all(16),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
                         child: Text(
-                          'Aucun employé pour l\'instant.\n'
-                          'Appuyez sur « Nouveau membre » pour créer le compte d\'un caissier ou d\'un gérant.',
+                          t.teamNoMembers,
                         ),
                       ),
                     ),
@@ -98,7 +99,7 @@ class GestionEquipeScreen extends ConsumerWidget {
           ),
           floatingActionButton: FloatingActionButton.extended(
             icon: const Icon(Icons.person_add_alt_1),
-            label: const Text('Nouveau membre'),
+            label: Text(t.teamNewMember),
             onPressed: () => _ouvrirCreation(context, entrepriseId),
           ),
         );
@@ -107,6 +108,7 @@ class GestionEquipeScreen extends ConsumerWidget {
   }
 
   Future<void> _ouvrirCreation(BuildContext context, String entrepriseId) async {
+    final t = AppLocalizations.of(context);
     final login = await showDialog<_CompteCree>(
       context: context,
       barrierDismissible: false,
@@ -121,41 +123,41 @@ class GestionEquipeScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         icon: Icon(Icons.check_circle, color: Colors.green.shade700, size: 40),
-        title: const Text('Compte créé'),
+        title: Text(t.teamAccountCreated),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Donnez ces informations à ${login.nom} :'),
+            Text(t.teamGiveInfo(login.nom)),
             const SizedBox(height: 16),
-            const Text('Identifiant', style: TextStyle(color: Colors.grey)),
+            Text(t.teamLogin, style: const TextStyle(color: Colors.grey)),
             SelectableText(
               login.login,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const Text('Mot de passe', style: TextStyle(color: Colors.grey)),
+            Text(t.teamPassword, style: const TextStyle(color: Colors.grey)),
             SelectableText(
               login.motDePasse,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Notez-les maintenant : le mot de passe ne sera plus affiché.',
-              style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+            Text(
+              t.teamNoteNow,
+              style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
             ),
           ],
         ),
         actions: [
           TextButton.icon(
             icon: const Icon(Icons.copy, size: 18),
-            label: const Text('Copier'),
+            label: Text(t.teamCopy),
             onPressed: () {
               Clipboard.setData(ClipboardData(
-                text: 'Stockly\nIdentifiant : ${login.login}\nMot de passe : ${login.motDePasse}',
+                text: 'Stockly\n${t.teamLogin} : ${login.login}\n${t.teamPassword} : ${login.motDePasse}',
               ));
               ScaffoldMessenger.of(ctx).showSnackBar(
-                const SnackBar(content: Text('Copié !')),
+                SnackBar(content: Text(t.teamCopied)),
               );
             },
           ),
@@ -230,12 +232,13 @@ class _DialogueCreationState extends State<_DialogueCreation> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     final apercu = EquipeService.nettoyer(_identifiant.text).isEmpty
         ? '…'
         : EquipeService.loginPour(_identifiant.text, widget.entrepriseId);
 
     return AlertDialog(
-      title: const Text('Nouveau membre'),
+      title: Text(t.teamNewMember),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -245,24 +248,24 @@ class _DialogueCreationState extends State<_DialogueCreation> {
               TextFormField(
                 controller: _nom,
                 textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(
-                  labelText: 'Nom complet',
-                  prefixIcon: Icon(Icons.person_outline),
+                decoration: InputDecoration(
+                  labelText: t.teamFullName,
+                  prefixIcon: const Icon(Icons.person_outline),
                 ),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'Nom obligatoire' : null,
+                validator: (v) => (v == null || v.trim().isEmpty) ? t.teamNameRequired : null,
               ),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _identifiant,
                 decoration: InputDecoration(
-                  labelText: 'Identifiant (ex : grace)',
+                  labelText: t.teamLoginLabel,
                   prefixIcon: const Icon(Icons.badge_outlined),
-                  helperText: 'Connexion : $apercu',
+                  helperText: t.teamLoginPreview(apercu),
                 ),
                 onChanged: (_) => setState(() {}),
                 validator: (v) {
                   final n = EquipeService.nettoyer(v ?? '');
-                  if (n.length < 3) return '3 lettres ou chiffres minimum';
+                  if (n.length < 3) return t.teamLoginMin;
                   return null;
                 },
               ),
@@ -271,33 +274,33 @@ class _DialogueCreationState extends State<_DialogueCreation> {
                 controller: _motDePasse,
                 obscureText: !_voirMotDePasse,
                 decoration: InputDecoration(
-                  labelText: 'Mot de passe',
+                  labelText: t.teamPassword,
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
                     icon: Icon(_voirMotDePasse ? Icons.visibility_off : Icons.visibility),
                     onPressed: () => setState(() => _voirMotDePasse = !_voirMotDePasse),
                   ),
                 ),
-                validator: (v) => (v == null || v.length < 6) ? '6 caractères minimum' : null,
+                validator: (v) => (v == null || v.length < 6) ? t.teamPasswordMin : null,
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 initialValue: _role,
-                decoration: const InputDecoration(
-                  labelText: 'Rôle',
-                  prefixIcon: Icon(Icons.work_outline),
+                decoration: InputDecoration(
+                  labelText: t.teamRole,
+                  prefixIcon: const Icon(Icons.work_outline),
                 ),
-                items: const [
-                  DropdownMenuItem(value: 'caissier', child: Text('Caissier')),
-                  DropdownMenuItem(value: 'gerant', child: Text('Gérant')),
+                items: [
+                  DropdownMenuItem(value: 'caissier', child: Text(t.roleCashier)),
+                  DropdownMenuItem(value: 'gerant', child: Text(t.roleManager)),
                 ],
                 onChanged: _enCours ? null : (v) => setState(() => _role = v ?? 'caissier'),
               ),
               const SizedBox(height: 8),
               Text(
                 _role == 'gerant'
-                    ? 'Un gérant a toutes les autorisations par défaut. Vous pourrez en retirer ensuite.'
-                    : 'Un caissier n\'a aucune autorisation spéciale par défaut. Vous pourrez en donner ensuite.',
+                    ? t.teamManagerInfo
+                    : t.teamCashierInfo,
                 style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
               ),
               if (_erreur != null) ...[
@@ -311,7 +314,7 @@ class _DialogueCreationState extends State<_DialogueCreation> {
       actions: [
         TextButton(
           onPressed: _enCours ? null : () => Navigator.pop(context),
-          child: const Text('Annuler'),
+          child: Text(t.cancel),
         ),
         FilledButton(
           onPressed: _enCours ? null : _creer,
@@ -321,7 +324,7 @@ class _DialogueCreationState extends State<_DialogueCreation> {
                   height: 18,
                   child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                 )
-              : const Text('Créer le compte'),
+              : Text(t.teamCreateAccount),
         ),
       ],
     );
@@ -344,11 +347,12 @@ class _CarteMembre extends StatelessWidget {
 
   Future<void> _action(BuildContext context, Future<void> Function() action, String succes) async {
     final messenger = ScaffoldMessenger.of(context);
+    final t = AppLocalizations.of(context);
     try {
       await action();
       messenger.showSnackBar(SnackBar(content: Text(succes), backgroundColor: Colors.green));
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Erreur : $e'), backgroundColor: Colors.red));
+      messenger.showSnackBar(SnackBar(content: Text(t.errorPrefix('$e')), backgroundColor: Colors.red));
     }
   }
 
@@ -363,10 +367,39 @@ class _CarteMembre extends StatelessWidget {
     return UserProfile.valeurParDefaut(role, cle);
   }
 
+  /// Nom du rôle dans la langue choisie
+  static String _nomRole(AppLocalizations t, UserRole role) =>
+      role.isOwner ? t.roleOwner : (role.isGerant ? t.roleManager : t.roleCashier);
+
+  /// Titre d'une autorisation dans la langue choisie
+  static String _titrePerm(AppLocalizations t, String cle) =>
+      {
+        Permissions.voirFinances: t.permFinances,
+        Permissions.retours: t.permReturns,
+        Permissions.gererStock: t.permStock,
+        Permissions.remisesRetraits: t.permDiscounts,
+        Permissions.maintenance: t.permMaintenance,
+      }[cle] ??
+      Permissions.titres[cle] ??
+      cle;
+
+  /// Explication d'une autorisation dans la langue choisie
+  static String _descPerm(AppLocalizations t, String cle) =>
+      {
+        Permissions.voirFinances: t.permFinancesDesc,
+        Permissions.retours: t.permReturnsDesc,
+        Permissions.gererStock: t.permStockDesc,
+        Permissions.remisesRetraits: t.permDiscountsDesc,
+        Permissions.maintenance: t.permMaintenanceDesc,
+      }[cle] ??
+      Permissions.descriptions[cle] ??
+      '';
+
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     final data = doc.data();
-    final nom = (data['nom'] ?? 'Sans nom').toString();
+    final nom = (data['nom'] ?? t.caisseNoName).toString();
     final role = UserRole.fromString(data['role']?.toString());
     final login = (data['identifiant'] ?? data['email'] ?? '').toString();
     final actif = data['estActif'] as bool? ?? true;
@@ -401,7 +434,7 @@ class _CarteMembre extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        estMoi ? '$nom (vous)' : nom,
+                        estMoi ? t.teamYou(nom) : nom,
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                       if (login.isNotEmpty)
@@ -410,35 +443,35 @@ class _CarteMembre extends StatelessWidget {
                   ),
                 ),
                 Chip(
-                  label: Text(role.label, style: const TextStyle(color: Colors.white, fontSize: 12)),
+                  label: Text(_nomRole(t, role), style: const TextStyle(color: Colors.white, fontSize: 12)),
                   backgroundColor: actif ? couleur : Colors.grey,
                   visualDensity: VisualDensity.compact,
                 ),
               ],
             ),
             if (role.isOwner)
-              const Padding(
-                padding: EdgeInsets.only(top: 8),
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
                 child: Text(
-                  'Le propriétaire a tous les droits.',
-                  style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
+                  t.teamOwnerAll,
+                  style: const TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
                 ),
               )
             else ...[
               const Divider(height: 20),
               Row(
                 children: [
-                  const Text('Rôle :'),
+                  Text(t.teamRoleLabel),
                   const SizedBox(width: 12),
                   DropdownButton<String>(
                     value: role.isGerant ? 'gerant' : 'caissier',
-                    items: const [
-                      DropdownMenuItem(value: 'caissier', child: Text('Caissier')),
-                      DropdownMenuItem(value: 'gerant', child: Text('Gérant')),
+                    items: [
+                      DropdownMenuItem(value: 'caissier', child: Text(t.roleCashier)),
+                      DropdownMenuItem(value: 'gerant', child: Text(t.roleManager)),
                     ],
                     onChanged: (v) {
                       if (v == null) return;
-                      _action(context, () => EquipeService.changerRole(doc.id, v), 'Rôle modifié');
+                      _action(context, () => EquipeService.changerRole(doc.id, v), t.teamRoleChanged);
                     },
                   ),
                 ],
@@ -452,13 +485,13 @@ class _CarteMembre extends StatelessWidget {
               ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Compte actif'),
-                subtitle: Text(actif ? 'Peut se connecter' : 'Désactivé : ne peut plus travailler'),
+                title: Text(t.teamActive),
+                subtitle: Text(actif ? t.teamCanLogin : t.teamDisabledInfo),
                 value: actif,
                 onChanged: (v) => _action(
                   context,
                   () => EquipeService.changerActif(doc.id, v),
-                  v ? 'Compte réactivé' : 'Compte désactivé',
+                  v ? t.teamReactivated : t.teamDeactivated,
                 ),
               ),
 
@@ -470,13 +503,13 @@ class _CarteMembre extends StatelessWidget {
                   childrenPadding: EdgeInsets.zero,
                   leading: Icon(Icons.verified_user_outlined, color: couleur),
                   title: Text(
-                    'Autorisations ($nbAutorisees/${Permissions.toutes.length})',
+                    t.teamPermissions(nbAutorisees, Permissions.toutes.length),
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   subtitle: Text(
                     role.isGerant
-                        ? 'Par défaut pour un gérant : tout est autorisé'
-                        : 'Par défaut pour un caissier : rien de spécial',
+                        ? t.teamManagerDefault
+                        : t.teamCashierDefault,
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
                   ),
                   children: [
@@ -485,9 +518,9 @@ class _CarteMembre extends StatelessWidget {
                         contentPadding: EdgeInsets.zero,
                         dense: true,
                         secondary: Icon(_icones[cle], size: 22),
-                        title: Text(Permissions.titres[cle] ?? cle),
+                        title: Text(_titrePerm(t, cle)),
                         subtitle: Text(
-                          Permissions.descriptions[cle] ?? '',
+                          _descPerm(t, cle),
                           style: const TextStyle(fontSize: 12),
                         ),
                         value: _valeur(permissions, cle, role),
@@ -495,8 +528,8 @@ class _CarteMembre extends StatelessWidget {
                           context,
                           () => EquipeService.changerPermission(doc.id, cle, v),
                           v
-                              ? '« ${Permissions.titres[cle]} » autorisé pour $nom'
-                              : '« ${Permissions.titres[cle]} » retiré à $nom',
+                              ? t.teamPermGranted(_titrePerm(t, cle), nom)
+                              : t.teamPermRemoved(_titrePerm(t, cle), nom),
                         ),
                       ),
                   ],

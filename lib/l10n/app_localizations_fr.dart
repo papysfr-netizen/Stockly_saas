@@ -1308,4 +1308,170 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get shopReactivate => 'Réactiver';
+
+  @override
+  String get teamTitle => 'Gestion de l\'équipe';
+
+  @override
+  String get teamOwnerOnly => 'Accès réservé au propriétaire de la boutique.';
+
+  @override
+  String get teamNoMembers =>
+      'Aucun employé pour l\'instant.\nAppuyez sur « Nouveau membre » pour créer le compte d\'un caissier ou d\'un gérant.';
+
+  @override
+  String get teamNewMember => 'Nouveau membre';
+
+  @override
+  String get teamAccountCreated => 'Compte créé';
+
+  @override
+  String teamGiveInfo(String nom) {
+    return 'Donnez ces informations à $nom :';
+  }
+
+  @override
+  String get teamLogin => 'Identifiant';
+
+  @override
+  String get teamPassword => 'Mot de passe';
+
+  @override
+  String get teamNoteNow =>
+      'Notez-les maintenant : le mot de passe ne sera plus affiché.';
+
+  @override
+  String get teamCopy => 'Copier';
+
+  @override
+  String get teamCopied => 'Copié !';
+
+  @override
+  String get teamFullName => 'Nom complet';
+
+  @override
+  String get teamNameRequired => 'Nom obligatoire';
+
+  @override
+  String get teamLoginLabel => 'Identifiant (ex : grace)';
+
+  @override
+  String teamLoginPreview(String login) {
+    return 'Connexion : $login';
+  }
+
+  @override
+  String get teamLoginMin => '3 lettres ou chiffres minimum';
+
+  @override
+  String get teamPasswordMin => '6 caractères minimum';
+
+  @override
+  String get teamRole => 'Rôle';
+
+  @override
+  String get teamRoleLabel => 'Rôle :';
+
+  @override
+  String get roleOwner => 'Propriétaire';
+
+  @override
+  String get roleManager => 'Gérant';
+
+  @override
+  String get roleCashier => 'Caissier';
+
+  @override
+  String get teamManagerInfo =>
+      'Un gérant a toutes les autorisations par défaut. Vous pourrez en retirer ensuite.';
+
+  @override
+  String get teamCashierInfo =>
+      'Un caissier n\'a aucune autorisation spéciale par défaut. Vous pourrez en donner ensuite.';
+
+  @override
+  String get teamCreateAccount => 'Créer le compte';
+
+  @override
+  String teamYou(String nom) {
+    return '$nom (vous)';
+  }
+
+  @override
+  String get teamOwnerAll => 'Le propriétaire a tous les droits.';
+
+  @override
+  String get teamRoleChanged => 'Rôle modifié';
+
+  @override
+  String get teamActive => 'Compte actif';
+
+  @override
+  String get teamCanLogin => 'Peut se connecter';
+
+  @override
+  String get teamDisabledInfo => 'Désactivé : ne peut plus travailler';
+
+  @override
+  String get teamReactivated => 'Compte réactivé';
+
+  @override
+  String get teamDeactivated => 'Compte désactivé';
+
+  @override
+  String teamPermissions(int count, int total) {
+    return 'Autorisations ($count/$total)';
+  }
+
+  @override
+  String get teamManagerDefault =>
+      'Par défaut pour un gérant : tout est autorisé';
+
+  @override
+  String get teamCashierDefault =>
+      'Par défaut pour un caissier : rien de spécial';
+
+  @override
+  String teamPermGranted(String perm, String nom) {
+    return '« $perm » autorisé pour $nom';
+  }
+
+  @override
+  String teamPermRemoved(String perm, String nom) {
+    return '« $perm » retiré à $nom';
+  }
+
+  @override
+  String get permFinances => 'Voir les finances';
+
+  @override
+  String get permFinancesDesc => 'P&L, comptabilité, prix d\'achat et marges.';
+
+  @override
+  String get permReturns => 'Retours et annulations';
+
+  @override
+  String get permReturnsDesc =>
+      'Enregistrer un retour ou annuler une vente non retirée.';
+
+  @override
+  String get permStock => 'Gérer le stock';
+
+  @override
+  String get permStockDesc =>
+      'Ajouter, modifier, supprimer des produits, importer un fichier.';
+
+  @override
+  String get permDiscounts => 'Remises et retraits';
+
+  @override
+  String get permDiscountsDesc =>
+      'Changer les prix à la caisse et retirer de l\'argent d\'un compte client.';
+
+  @override
+  String get permMaintenance => 'Maintenance des données';
+
+  @override
+  String get permMaintenanceDesc =>
+      'Paramètres : rattraper les coûts, fusionner les doublons.';
 }

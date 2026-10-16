@@ -1303,4 +1303,168 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shopReactivate => 'Reactivate';
+
+  @override
+  String get teamTitle => 'Team management';
+
+  @override
+  String get teamOwnerOnly => 'Access reserved for the shop owner.';
+
+  @override
+  String get teamNoMembers =>
+      'No employees yet.\nTap “New member” to create an account for a cashier or a manager.';
+
+  @override
+  String get teamNewMember => 'New member';
+
+  @override
+  String get teamAccountCreated => 'Account created';
+
+  @override
+  String teamGiveInfo(String nom) {
+    return 'Give this information to $nom:';
+  }
+
+  @override
+  String get teamLogin => 'Username';
+
+  @override
+  String get teamPassword => 'Password';
+
+  @override
+  String get teamNoteNow =>
+      'Write them down now: the password will not be shown again.';
+
+  @override
+  String get teamCopy => 'Copy';
+
+  @override
+  String get teamCopied => 'Copied!';
+
+  @override
+  String get teamFullName => 'Full name';
+
+  @override
+  String get teamNameRequired => 'Name required';
+
+  @override
+  String get teamLoginLabel => 'Username (e.g. grace)';
+
+  @override
+  String teamLoginPreview(String login) {
+    return 'Sign-in: $login';
+  }
+
+  @override
+  String get teamLoginMin => 'At least 3 letters or digits';
+
+  @override
+  String get teamPasswordMin => 'At least 6 characters';
+
+  @override
+  String get teamRole => 'Role';
+
+  @override
+  String get teamRoleLabel => 'Role:';
+
+  @override
+  String get roleOwner => 'Owner';
+
+  @override
+  String get roleManager => 'Manager';
+
+  @override
+  String get roleCashier => 'Cashier';
+
+  @override
+  String get teamManagerInfo =>
+      'A manager has all permissions by default. You can remove some later.';
+
+  @override
+  String get teamCashierInfo =>
+      'A cashier has no special permissions by default. You can grant some later.';
+
+  @override
+  String get teamCreateAccount => 'Create account';
+
+  @override
+  String teamYou(String nom) {
+    return '$nom (you)';
+  }
+
+  @override
+  String get teamOwnerAll => 'The owner has all rights.';
+
+  @override
+  String get teamRoleChanged => 'Role changed';
+
+  @override
+  String get teamActive => 'Active account';
+
+  @override
+  String get teamCanLogin => 'Can sign in';
+
+  @override
+  String get teamDisabledInfo => 'Disabled: can no longer work';
+
+  @override
+  String get teamReactivated => 'Account reactivated';
+
+  @override
+  String get teamDeactivated => 'Account disabled';
+
+  @override
+  String teamPermissions(int count, int total) {
+    return 'Permissions ($count/$total)';
+  }
+
+  @override
+  String get teamManagerDefault => 'Default for a manager: everything allowed';
+
+  @override
+  String get teamCashierDefault => 'Default for a cashier: nothing special';
+
+  @override
+  String teamPermGranted(String perm, String nom) {
+    return '“$perm” allowed for $nom';
+  }
+
+  @override
+  String teamPermRemoved(String perm, String nom) {
+    return '“$perm” removed from $nom';
+  }
+
+  @override
+  String get permFinances => 'View finances';
+
+  @override
+  String get permFinancesDesc =>
+      'P&L, accounting, purchase prices and margins.';
+
+  @override
+  String get permReturns => 'Returns and cancellations';
+
+  @override
+  String get permReturnsDesc =>
+      'Record a return or cancel a sale not yet picked up.';
+
+  @override
+  String get permStock => 'Manage stock';
+
+  @override
+  String get permStockDesc => 'Add, edit, delete products, import a file.';
+
+  @override
+  String get permDiscounts => 'Discounts and withdrawals';
+
+  @override
+  String get permDiscountsDesc =>
+      'Change prices at checkout and withdraw money from a customer account.';
+
+  @override
+  String get permMaintenance => 'Data maintenance';
+
+  @override
+  String get permMaintenanceDesc =>
+      'Settings: fill in missing costs, merge duplicates.';
 }

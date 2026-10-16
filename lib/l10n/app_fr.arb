@@ -1043,5 +1043,104 @@
   "shopDisabledBadge": "Désactivée",
   "shopNoAddress": "Aucune adresse",
   "shopDeactivate": "Désactiver",
-  "shopReactivate": "Réactiver"
+  "shopReactivate": "Réactiver",
+  "teamTitle": "Gestion de l'équipe",
+  "teamOwnerOnly": "Accès réservé au propriétaire de la boutique.",
+  "teamNoMembers": "Aucun employé pour l'instant.\nAppuyez sur « Nouveau membre » pour créer le compte d'un caissier ou d'un gérant.",
+  "teamNewMember": "Nouveau membre",
+  "teamAccountCreated": "Compte créé",
+  "teamGiveInfo": "Donnez ces informations à {nom} :",
+  "@teamGiveInfo": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
+  "teamLogin": "Identifiant",
+  "teamPassword": "Mot de passe",
+  "teamNoteNow": "Notez-les maintenant : le mot de passe ne sera plus affiché.",
+  "teamCopy": "Copier",
+  "teamCopied": "Copié !",
+  "teamFullName": "Nom complet",
+  "teamNameRequired": "Nom obligatoire",
+  "teamLoginLabel": "Identifiant (ex : grace)",
+  "teamLoginPreview": "Connexion : {login}",
+  "@teamLoginPreview": {
+    "placeholders": {
+      "login": {
+        "type": "String"
+      }
+    }
+  },
+  "teamLoginMin": "3 lettres ou chiffres minimum",
+  "teamPasswordMin": "6 caractères minimum",
+  "teamRole": "Rôle",
+  "teamRoleLabel": "Rôle :",
+  "roleOwner": "Propriétaire",
+  "roleManager": "Gérant",
+  "roleCashier": "Caissier",
+  "teamManagerInfo": "Un gérant a toutes les autorisations par défaut. Vous pourrez en retirer ensuite.",
+  "teamCashierInfo": "Un caissier n'a aucune autorisation spéciale par défaut. Vous pourrez en donner ensuite.",
+  "teamCreateAccount": "Créer le compte",
+  "teamYou": "{nom} (vous)",
+  "@teamYou": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
+  "teamOwnerAll": "Le propriétaire a tous les droits.",
+  "teamRoleChanged": "Rôle modifié",
+  "teamActive": "Compte actif",
+  "teamCanLogin": "Peut se connecter",
+  "teamDisabledInfo": "Désactivé : ne peut plus travailler",
+  "teamReactivated": "Compte réactivé",
+  "teamDeactivated": "Compte désactivé",
+  "teamPermissions": "Autorisations ({count}/{total})",
+  "@teamPermissions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "teamManagerDefault": "Par défaut pour un gérant : tout est autorisé",
+  "teamCashierDefault": "Par défaut pour un caissier : rien de spécial",
+  "teamPermGranted": "« {perm} » autorisé pour {nom}",
+  "@teamPermGranted": {
+    "placeholders": {
+      "perm": {
+        "type": "String"
+      },
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
+  "teamPermRemoved": "« {perm} » retiré à {nom}",
+  "@teamPermRemoved": {
+    "placeholders": {
+      "perm": {
+        "type": "String"
+      },
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
+  "permFinances": "Voir les finances",
+  "permFinancesDesc": "P&L, comptabilité, prix d'achat et marges.",
+  "permReturns": "Retours et annulations",
+  "permReturnsDesc": "Enregistrer un retour ou annuler une vente non retirée.",
+  "permStock": "Gérer le stock",
+  "permStockDesc": "Ajouter, modifier, supprimer des produits, importer un fichier.",
+  "permDiscounts": "Remises et retraits",
+  "permDiscountsDesc": "Changer les prix à la caisse et retirer de l'argent d'un compte client.",
+  "permMaintenance": "Maintenance des données",
+  "permMaintenanceDesc": "Paramètres : rattraper les coûts, fusionner les doublons."
 }

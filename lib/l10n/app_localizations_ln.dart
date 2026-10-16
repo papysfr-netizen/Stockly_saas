@@ -1305,4 +1305,169 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get shopReactivate => 'Fungola lisusu';
+
+  @override
+  String get teamTitle => 'Bokambi ya ekipe';
+
+  @override
+  String get teamOwnerOnly => 'Kaka nkolo ya magazini nde akoki kokota awa.';
+
+  @override
+  String get teamNoMembers =>
+      'Mosali moko te naino.\nFina « Mosali ya sika » mpo na kosala compte ya kesie to ya mokambi.';
+
+  @override
+  String get teamNewMember => 'Mosali ya sika';
+
+  @override
+  String get teamAccountCreated => 'Compte esalemi';
+
+  @override
+  String teamGiveInfo(String nom) {
+    return 'Pesa $nom makambo oyo :';
+  }
+
+  @override
+  String get teamLogin => 'Kombo ya kokota';
+
+  @override
+  String get teamPassword => 'Mot de passe';
+
+  @override
+  String get teamNoteNow =>
+      'Koma yango sikawa : mot de passe ekomonana lisusu te.';
+
+  @override
+  String get teamCopy => 'Kopi';
+
+  @override
+  String get teamCopied => 'Ekopiami!';
+
+  @override
+  String get teamFullName => 'Kombo mobimba';
+
+  @override
+  String get teamNameRequired => 'Kombo esengeli';
+
+  @override
+  String get teamLoginLabel => 'Kombo ya kokota (ndakisa: grace)';
+
+  @override
+  String teamLoginPreview(String login) {
+    return 'Kokota : $login';
+  }
+
+  @override
+  String get teamLoginMin => 'Ata ba lettre to ba chiffre 3';
+
+  @override
+  String get teamPasswordMin => 'Ata ba caractère 6';
+
+  @override
+  String get teamRole => 'Mosala';
+
+  @override
+  String get teamRoleLabel => 'Mosala:';
+
+  @override
+  String get roleOwner => 'Nkolo';
+
+  @override
+  String get roleManager => 'Mokambi';
+
+  @override
+  String get roleCashier => 'Kesie';
+
+  @override
+  String get teamManagerInfo =>
+      'Mokambi azali na ndingisa nyonso. Okoki kolongola mosusu sima.';
+
+  @override
+  String get teamCashierInfo =>
+      'Kesie azali na ndingisa moko te ya sipesiale. Okoki kopesa ye sima.';
+
+  @override
+  String get teamCreateAccount => 'Salá compte';
+
+  @override
+  String teamYou(String nom) {
+    return '$nom (yo)';
+  }
+
+  @override
+  String get teamOwnerAll => 'Nkolo azali na makoki nyonso.';
+
+  @override
+  String get teamRoleChanged => 'Mosala ebongwani';
+
+  @override
+  String get teamActive => 'Compte ezali kosala';
+
+  @override
+  String get teamCanLogin => 'Akoki kokota';
+
+  @override
+  String get teamDisabledInfo => 'Ekangami : akoki kosala lisusu te';
+
+  @override
+  String get teamReactivated => 'Compte efungwami lisusu';
+
+  @override
+  String get teamDeactivated => 'Compte ekangami';
+
+  @override
+  String teamPermissions(int count, int total) {
+    return 'Ndingisa ($count/$total)';
+  }
+
+  @override
+  String get teamManagerDefault => 'Mpo na mokambi : nyonso endimami';
+
+  @override
+  String get teamCashierDefault => 'Mpo na kesie : eloko ya sipesiale te';
+
+  @override
+  String teamPermGranted(String perm, String nom) {
+    return '« $perm » endimami mpo na $nom';
+  }
+
+  @override
+  String teamPermRemoved(String perm, String nom) {
+    return '« $perm » elongolami epai ya $nom';
+  }
+
+  @override
+  String get permFinances => 'Kotala mbongo';
+
+  @override
+  String get permFinancesDesc =>
+      'Litomba mpe bobungisi, botangi mbongo, talo ya kosomba mpe matomba.';
+
+  @override
+  String get permReturns => 'Bozongisi mpe kolongola';
+
+  @override
+  String get permReturnsDesc =>
+      'Koma bozongisi to longola eteki oyo biloko ezwami naino te.';
+
+  @override
+  String get permStock => 'Kokamba biloko';
+
+  @override
+  String get permStockDesc =>
+      'Bakisa, bongola, longola biloko, kotisa fichier.';
+
+  @override
+  String get permDiscounts => 'Bakitisi mpe kobimisa';
+
+  @override
+  String get permDiscountsDesc =>
+      'Kobongola talo na kesi mpe kobimisa mbongo na compte ya mosombi.';
+
+  @override
+  String get permMaintenance => 'Kobongisa ba données';
+
+  @override
+  String get permMaintenanceDesc =>
+      'Mibongiseli : kobongisa ba prix ya kosomba, kosangisa biloko mibale.';
 }
