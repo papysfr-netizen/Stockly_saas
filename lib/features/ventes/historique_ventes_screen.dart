@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:stockly_saas/l10n/app_localizations.dart';
 
 import '../../core/providers/cart_provider.dart';
 import '../../core/providers/settings_provider.dart' show settingsProvider;
@@ -52,14 +53,20 @@ String _numeroFacture(String id) =>
 
 String _vendeur(Map<String, dynamic> d) => (d['vendeurNom'] ?? '').toString().trim();
 
+/// Nom du client à l'écran (« Client Divers » enregistré → traduit)
+String _client(AppLocalizations t, Map<String, dynamic> d) {
+  final n = (d['nomClient'] ?? '').toString().trim();
+  return (n.isEmpty || n == 'Client Divers') ? t.histWalkIn : n;
+}
+
 enum _Periode { aujourdhui, semaine, mois, tout }
 
 extension on _Periode {
-  String get label => switch (this) {
-        _Periode.aujourdhui => "Aujourd'hui",
-        _Periode.semaine => '7 jours',
-        _Periode.mois => '30 jours',
-        _Periode.tout => 'Tout',
+  String label(AppLocalizations t) => switch (this) {
+        _Periode.aujourdhui => t.histToday,
+        _Periode.semaine => t.hist7Days,
+        _Periode.mois => t.hist30Days,
+        _Periode.tout => t.histAllTime,
       };
 }
 
@@ -122,10 +129,11 @@ class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen>
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(historiqueVentesProvider(widget.entrepriseId));
+    final l = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Historique des ventes'),
+        title: Text(l.histTitle),
         backgroundColor: Colors.indigo.shade700,
         foregroundColor: Colors.white,
       ),
@@ -138,7 +146,7 @@ class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen>
               controller: _rechercheCtrl,
               onChanged: (v) => setState(() => _recherche = v.trim().toLowerCase()),
               decoration: InputDecoration(
-                hintText: 'Client, téléphone ou n° de facture…',
+                hintText: l.histSearch,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _recherche.isNotEmpty
                     ? IconButton(
@@ -162,7 +170,7 @@ class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen>
                   .map((p) => Padding(
                         padding: const EdgeInsets.only(right: 6),
                         child: ChoiceChip(
-                          label: Text(p.label),
+                          label: Text(p.label(l)),
                           selected: _periode == p,
                           onSelected: (_) => setState(() => _periode = p),
                         ),
@@ -177,7 +185,7 @@ class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen>
               error: (e, _) => Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24),
-                  child: Text('Erreur de chargement : $e', textAlign: TextAlign.center),
+                  child: Text(l.histLoadError('$e'), textAlign: TextAlign.center),
                 ),
               ),
               data: (docs) {
@@ -225,7 +233,7 @@ class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen>
                               padding: const EdgeInsets.only(right: 6),
                               child: ChoiceChip(
                                 avatar: const Icon(Icons.groups, size: 16),
-                                label: const Text('Tous'),
+                                label: Text(l.actAll),
                                 selected: filtre == null,
                                 onSelected: (_) => setState(() => _vendeurFiltre = null),
                               ),
@@ -257,7 +265,7 @@ class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen>
                             Padding(
                               padding: const EdgeInsets.only(bottom: 6),
                               child: Text(
-                                'Ventes de $filtre',
+                                l.histSalesOf(filtre),
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.indigo.shade900,
@@ -266,15 +274,15 @@ class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen>
                             ),
                           Row(
                             children: [
-                              _Resume(titre: 'Ventes', valeur: '${ventes.length}'),
-                              _Resume(titre: 'Total', valeur: ref.formatPrice(total)),
+                              _Resume(titre: l.accSales, valeur: '${ventes.length}'),
+                              _Resume(titre: l.histTotal, valeur: ref.formatPrice(total)),
                               _Resume(
-                                titre: 'Encaissé',
+                                titre: l.accCashed,
                                 valeur: ref.formatPrice(encaisse),
                                 couleur: Colors.green.shade800,
                               ),
                               _Resume(
-                                titre: 'Reste',
+                                titre: l.histRemaining,
                                 valeur: ref.formatPrice(reste),
                                 couleur: reste > 0.005 ? Colors.red : Colors.grey.shade700,
                               ),
@@ -286,9 +294,9 @@ class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen>
 
                     Expanded(
                       child: ventes.isEmpty
-                          ? const Center(
-                              child: Text('Aucune vente pour cette recherche.',
-                                  style: TextStyle(color: Colors.grey)),
+                          ? Center(
+                              child: Text(l.histNoResult,
+                                  style: const TextStyle(color: Colors.grey)),
                             )
                           : ListView.builder(
                               padding: const EdgeInsets.fromLTRB(12, 0, 12, 24),
@@ -362,34 +370,34 @@ Widget _badge(String texte, Color couleur) => Container(
       ),
     );
 
-Widget _badgePaiement(Map<String, dynamic> d) {
+Widget _badgePaiement(AppLocalizations t, Map<String, dynamic> d) {
   final reste = _num(d['resteAPayer']);
   final total = _num(d['montantTotal']);
-  if (reste <= 0.005) return _badge('Payé', Colors.green.shade700);
-  if (reste < total - 0.005) return _badge('Partiel', Colors.orange.shade800);
-  return _badge('Dette', Colors.red);
+  if (reste <= 0.005) return _badge(t.histPaid, Colors.green.shade700);
+  if (reste < total - 0.005) return _badge(t.histPartial, Colors.orange.shade800);
+  return _badge(t.histDebt, Colors.red);
 }
 
-Widget _badgeLivraison(Map<String, dynamic> d) {
+Widget _badgeLivraison(AppLocalizations t, Map<String, dynamic> d) {
   final statut = (d['statutLivraison'] ?? 'Livré').toString();
-  if (statut == 'Annulé') return _badge('Annulée', Colors.red.shade800);
+  if (statut == 'Annulé') return _badge(t.histCancelledSale, Colors.red.shade800);
   return statut == 'Non livré'
-      ? _badge('À livrer', Colors.brown)
-      : _badge('Livré', Colors.blueGrey);
+      ? _badge(t.histToDeliver, Colors.brown)
+      : _badge(t.histDelivered, Colors.blueGrey);
 }
 
-List<Widget> _badges(Map<String, dynamic> d) {
+List<Widget> _badges(AppLocalizations t, Map<String, dynamic> d) {
   final statutRetour = (d['statutRetour'] ?? '').toString();
   final statutAnnulation = (d['statutAnnulation'] ?? '').toString();
   final statutLivraison = (d['statutLivraison'] ?? '').toString();
   return [
-    _badgePaiement(d),
-    _badgeLivraison(d),
+    _badgePaiement(t, d),
+    _badgeLivraison(t, d),
     if (statutAnnulation == 'partiel' ||
         (statutAnnulation == 'total' && statutLivraison != 'Annulé'))
-      _badge('Annulation partielle', Colors.red.shade700),
-    if (statutRetour == 'total') _badge('Retour total', Colors.deepOrange.shade700),
-    if (statutRetour == 'partiel') _badge('Retour partiel', Colors.deepOrange.shade700),
+      _badge(t.histPartialCancel, Colors.red.shade700),
+    if (statutRetour == 'total') _badge(t.histFullReturn, Colors.deepOrange.shade700),
+    if (statutRetour == 'partiel') _badge(t.histPartialReturn, Colors.deepOrange.shade700),
   ];
 }
 
@@ -428,6 +436,7 @@ class _LigneVente extends ConsumerWidget {
   // 📄 Facture PDF : imprimer ou partager
   Future<void> _facturePdf(BuildContext context, WidgetRef ref) async {
     final messenger = ScaffoldMessenger.of(context);
+    final t = AppLocalizations.of(context);
     final boutique = ref.read(settingsProvider);
     String formatPrix(double v) => ref.formatPrice(v);
 
@@ -441,16 +450,16 @@ class _LigneVente extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 8),
-            Text('Facture ${_numeroFacture(venteId)}',
+            Text(t.histInvoice(_numeroFacture(venteId)),
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             ListTile(
               leading: const Icon(Icons.print, color: Colors.teal),
-              title: const Text('Imprimer'),
+              title: Text(t.histPrint),
               onTap: () => Navigator.pop(ctx, 'imprimer'),
             ),
             ListTile(
               leading: const Icon(Icons.share, color: Colors.green),
-              title: const Text('Partager (WhatsApp, e-mail…)'),
+              title: Text(t.histShare),
               onTap: () => Navigator.pop(ctx, 'partager'),
             ),
             const SizedBox(height: 8),
@@ -496,7 +505,7 @@ class _LigneVente extends ConsumerWidget {
     } catch (e) {
       messenger.showSnackBar(
         SnackBar(
-          content: Text('Impossible de créer la facture : $e'),
+          content: Text(t.histInvoiceError('$e')),
           backgroundColor: Colors.red,
         ),
       );
@@ -518,7 +527,8 @@ class _LigneVente extends ConsumerWidget {
   }
 
   void _ouvrirDetail(BuildContext context, WidgetRef ref) {
-    final client = (data['nomClient'] ?? 'Client Divers').toString();
+    final t = AppLocalizations.of(context);
+    final client = _client(t, data);
     final tel = (data['telephoneClient'] ?? '').toString();
     final total = _num(data['montantTotal']);
     final reste = _num(data['resteAPayer']);
@@ -552,7 +562,7 @@ class _LigneVente extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Facture ${_numeroFacture(venteId)}',
+                    t.histInvoice(_numeroFacture(venteId)),
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -575,15 +585,15 @@ class _LigneVente extends ConsumerWidget {
                 child: Text(tel),
               ),
             const SizedBox(height: 10),
-            Wrap(spacing: 6, runSpacing: 4, children: _badges(data)),
+            Wrap(spacing: 6, runSpacing: 4, children: _badges(t, data)),
             if (livre && dateLiv is Timestamp)
               Padding(
                 padding: const EdgeInsets.only(top: 6),
-                child: Text('Livré le ${_formatDate(dateLiv.toDate())}',
+                child: Text(t.histDeliveredOn(_formatDate(dateLiv.toDate())),
                     style: TextStyle(color: Colors.grey.shade700, fontSize: 12)),
               ),
             const Divider(height: 24),
-            const Text('Articles', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(t.histItems, style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 6),
             for (var i = 0; i < articles.length; i++)
               Padding(
@@ -597,7 +607,7 @@ class _LigneVente extends ConsumerWidget {
                           Text('${articles[i]['quantite']} × ${articles[i]['nom']}'),
                           if (retournees[i] > 0)
                             Text(
-                              '↩ ${retournees[i]} retourné(s)',
+                              t.histReturnedQty(retournees[i]),
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.deepOrange.shade700,
@@ -606,7 +616,7 @@ class _LigneVente extends ConsumerWidget {
                             ),
                           if (annulees[i] > 0)
                             Text(
-                              '✕ ${annulees[i]} annulé(s)',
+                              t.histCancelledQty(annulees[i]),
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.red.shade700,
@@ -621,22 +631,22 @@ class _LigneVente extends ConsumerWidget {
                 ),
               ),
             const Divider(height: 24),
-            _ligneMontant('Total', ref.formatPrice(total), gras: true),
+            _ligneMontant(t.histTotal, ref.formatPrice(total), gras: true),
             if (montantRetourne > 0.005)
-              _ligneMontant('Retourné', '- ${ref.formatPrice(montantRetourne)}',
+              _ligneMontant(t.histReturned, '- ${ref.formatPrice(montantRetourne)}',
                   couleur: Colors.deepOrange.shade700),
             if (montantAnnule > 0.005)
-              _ligneMontant('Annulé', '- ${ref.formatPrice(montantAnnule)}',
+              _ligneMontant(t.histCancelled, '- ${ref.formatPrice(montantAnnule)}',
                   couleur: Colors.red.shade700),
             if (montantRetourne > 0.005 || montantAnnule > 0.005)
-              _ligneMontant('Total net', ref.formatPrice(_totalNet(data)), gras: true),
-            _ligneMontant('Payé', ref.formatPrice(total - reste)),
+              _ligneMontant(t.histNetTotal, ref.formatPrice(_totalNet(data)), gras: true),
+            _ligneMontant(t.histPaid, ref.formatPrice(total - reste)),
             if (reste > 0.005)
-              _ligneMontant('Reste à payer', ref.formatPrice(reste), couleur: Colors.red),
-            _ligneMontant('Moyen', (data['methodePaiement'] ?? '-').toString()),
+              _ligneMontant(t.histToPay, ref.formatPrice(reste), couleur: Colors.red),
+            _ligneMontant(t.histMethod, (data['methodePaiement'] ?? '-').toString()),
             const Divider(height: 24),
-            _ligneMontant('Vendu par', vendeur.isEmpty ? '—' : vendeur),
-            if (livre) _ligneMontant('Livré par', livreur.isEmpty ? '—' : livreur),
+            _ligneMontant(t.histSoldBy, vendeur.isEmpty ? '—' : vendeur),
+            if (livre) _ligneMontant(t.histDeliveredBy, livreur.isEmpty ? '—' : livreur),
             const SizedBox(height: 18),
 
             // 📄 Facture PDF
@@ -649,8 +659,8 @@ class _LigneVente extends ConsumerWidget {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 icon: const Icon(Icons.picture_as_pdf),
-                label: const Text('Facture PDF (imprimer / WhatsApp)',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                label: Text(t.histPdfButton,
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
                 onPressed: () {
                   Navigator.pop(ctx);
                   _facturePdf(context, ref);
@@ -661,7 +671,7 @@ class _LigneVente extends ConsumerWidget {
 
             OutlinedButton.icon(
               icon: const Icon(Icons.description_outlined),
-              label: const Text('Bon de livraison'),
+              label: Text(t.histDeliveryNote),
               onPressed: () {
                 final items = articles
                     .map((a) => CartItem(
@@ -696,7 +706,7 @@ class _LigneVente extends ConsumerWidget {
                 side: BorderSide(color: Colors.deepOrange.shade300),
               ),
               icon: const Icon(Icons.assignment_return),
-              label: const Text('Retour de marchandise'),
+              label: Text(t.histReturnGoods),
               onPressed: () {
                 Navigator.pop(ctx);
                 _ouvrirEcranRetour(context, annulation: false);
@@ -712,7 +722,7 @@ class _LigneVente extends ConsumerWidget {
                   side: BorderSide(color: Colors.red.shade300),
                 ),
                 icon: const Icon(Icons.cancel_outlined),
-                label: const Text('Annuler la vente (non retirée)'),
+                label: Text(t.histCancelSale),
                 onPressed: () {
                   Navigator.pop(ctx);
                   _ouvrirEcranRetour(context, annulation: true);
@@ -745,7 +755,8 @@ class _LigneVente extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final client = (data['nomClient'] ?? 'Client Divers').toString();
+    final t = AppLocalizations.of(context);
+    final client = _client(t, data);
     final total = _totalNet(data);
     final vendeur = _vendeur(data);
     final annulee = (data['statutLivraison'] ?? '').toString() == 'Annulé';
@@ -769,16 +780,16 @@ class _LigneVente extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '${_formatDate(_dateVente(data))} • ${_numeroFacture(venteId)} • $nbArticles article(s)',
+                '${_formatDate(_dateVente(data))} • ${_numeroFacture(venteId)} • ${t.histArticles(nbArticles)}',
                 style: const TextStyle(fontSize: 12),
               ),
               if (vendeur.isNotEmpty)
                 Text(
-                  'par $vendeur',
+                  t.histBy(vendeur),
                   style: TextStyle(fontSize: 12, color: Colors.indigo.shade700),
                 ),
               const SizedBox(height: 4),
-              Wrap(spacing: 6, runSpacing: 4, children: _badges(data)),
+              Wrap(spacing: 6, runSpacing: 4, children: _badges(t, data)),
             ],
           ),
         ),

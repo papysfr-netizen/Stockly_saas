@@ -2496,6 +2496,258 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Paramètres : rattraper les coûts, fusionner les doublons.'**
   String get permMaintenanceDesc;
+
+  /// No description provided for @histTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Historique des ventes'**
+  String get histTitle;
+
+  /// No description provided for @histSearch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Client, téléphone ou n° de facture…'**
+  String get histSearch;
+
+  /// No description provided for @histToday.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aujourd\'hui'**
+  String get histToday;
+
+  /// No description provided for @hist7Days.
+  ///
+  /// In fr, this message translates to:
+  /// **'7 jours'**
+  String get hist7Days;
+
+  /// No description provided for @hist30Days.
+  ///
+  /// In fr, this message translates to:
+  /// **'30 jours'**
+  String get hist30Days;
+
+  /// No description provided for @histAllTime.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout'**
+  String get histAllTime;
+
+  /// No description provided for @histLoadError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur de chargement : {message}'**
+  String histLoadError(String message);
+
+  /// No description provided for @histSalesOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ventes de {nom}'**
+  String histSalesOf(String nom);
+
+  /// No description provided for @histTotal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total'**
+  String get histTotal;
+
+  /// No description provided for @histRemaining.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reste'**
+  String get histRemaining;
+
+  /// No description provided for @histNoResult.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune vente pour cette recherche.'**
+  String get histNoResult;
+
+  /// No description provided for @histPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payé'**
+  String get histPaid;
+
+  /// No description provided for @histPartial.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partiel'**
+  String get histPartial;
+
+  /// No description provided for @histDebt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dette'**
+  String get histDebt;
+
+  /// No description provided for @histCancelledSale.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annulée'**
+  String get histCancelledSale;
+
+  /// No description provided for @histToDeliver.
+  ///
+  /// In fr, this message translates to:
+  /// **'À livrer'**
+  String get histToDeliver;
+
+  /// No description provided for @histDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livré'**
+  String get histDelivered;
+
+  /// No description provided for @histPartialCancel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annulation partielle'**
+  String get histPartialCancel;
+
+  /// No description provided for @histFullReturn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour total'**
+  String get histFullReturn;
+
+  /// No description provided for @histPartialReturn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour partiel'**
+  String get histPartialReturn;
+
+  /// No description provided for @histInvoice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Facture {numero}'**
+  String histInvoice(String numero);
+
+  /// No description provided for @histPrint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Imprimer'**
+  String get histPrint;
+
+  /// No description provided for @histShare.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager (WhatsApp, e-mail…)'**
+  String get histShare;
+
+  /// No description provided for @histInvoiceError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de créer la facture : {message}'**
+  String histInvoiceError(String message);
+
+  /// No description provided for @histDeliveredOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livré le {date}'**
+  String histDeliveredOn(String date);
+
+  /// No description provided for @histItems.
+  ///
+  /// In fr, this message translates to:
+  /// **'Articles'**
+  String get histItems;
+
+  /// No description provided for @histReturnedQty.
+  ///
+  /// In fr, this message translates to:
+  /// **'↩ {count} retourné(s)'**
+  String histReturnedQty(int count);
+
+  /// No description provided for @histCancelledQty.
+  ///
+  /// In fr, this message translates to:
+  /// **'✕ {count} annulé(s)'**
+  String histCancelledQty(int count);
+
+  /// No description provided for @histReturned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retourné'**
+  String get histReturned;
+
+  /// No description provided for @histCancelled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annulé'**
+  String get histCancelled;
+
+  /// No description provided for @histNetTotal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total net'**
+  String get histNetTotal;
+
+  /// No description provided for @histToPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reste à payer'**
+  String get histToPay;
+
+  /// No description provided for @histMethod.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moyen'**
+  String get histMethod;
+
+  /// No description provided for @histSoldBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vendu par'**
+  String get histSoldBy;
+
+  /// No description provided for @histDeliveredBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livré par'**
+  String get histDeliveredBy;
+
+  /// No description provided for @histPdfButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Facture PDF (imprimer / WhatsApp)'**
+  String get histPdfButton;
+
+  /// No description provided for @histDeliveryNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bon de livraison'**
+  String get histDeliveryNote;
+
+  /// No description provided for @histReturnGoods.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour de marchandise'**
+  String get histReturnGoods;
+
+  /// No description provided for @histCancelSale.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler la vente (non retirée)'**
+  String get histCancelSale;
+
+  /// No description provided for @histArticles.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 article} other{{count} articles}}'**
+  String histArticles(int count);
+
+  /// No description provided for @histBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'par {nom}'**
+  String histBy(String nom);
+
+  /// No description provided for @histWalkIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Client divers'**
+  String get histWalkIn;
 }
 
 class _AppLocalizationsDelegate

@@ -1474,4 +1474,154 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get permMaintenanceDesc =>
       'Paramètres : rattraper les coûts, fusionner les doublons.';
+
+  @override
+  String get histTitle => 'Historique des ventes';
+
+  @override
+  String get histSearch => 'Client, téléphone ou n° de facture…';
+
+  @override
+  String get histToday => 'Aujourd\'hui';
+
+  @override
+  String get hist7Days => '7 jours';
+
+  @override
+  String get hist30Days => '30 jours';
+
+  @override
+  String get histAllTime => 'Tout';
+
+  @override
+  String histLoadError(String message) {
+    return 'Erreur de chargement : $message';
+  }
+
+  @override
+  String histSalesOf(String nom) {
+    return 'Ventes de $nom';
+  }
+
+  @override
+  String get histTotal => 'Total';
+
+  @override
+  String get histRemaining => 'Reste';
+
+  @override
+  String get histNoResult => 'Aucune vente pour cette recherche.';
+
+  @override
+  String get histPaid => 'Payé';
+
+  @override
+  String get histPartial => 'Partiel';
+
+  @override
+  String get histDebt => 'Dette';
+
+  @override
+  String get histCancelledSale => 'Annulée';
+
+  @override
+  String get histToDeliver => 'À livrer';
+
+  @override
+  String get histDelivered => 'Livré';
+
+  @override
+  String get histPartialCancel => 'Annulation partielle';
+
+  @override
+  String get histFullReturn => 'Retour total';
+
+  @override
+  String get histPartialReturn => 'Retour partiel';
+
+  @override
+  String histInvoice(String numero) {
+    return 'Facture $numero';
+  }
+
+  @override
+  String get histPrint => 'Imprimer';
+
+  @override
+  String get histShare => 'Partager (WhatsApp, e-mail…)';
+
+  @override
+  String histInvoiceError(String message) {
+    return 'Impossible de créer la facture : $message';
+  }
+
+  @override
+  String histDeliveredOn(String date) {
+    return 'Livré le $date';
+  }
+
+  @override
+  String get histItems => 'Articles';
+
+  @override
+  String histReturnedQty(int count) {
+    return '↩ $count retourné(s)';
+  }
+
+  @override
+  String histCancelledQty(int count) {
+    return '✕ $count annulé(s)';
+  }
+
+  @override
+  String get histReturned => 'Retourné';
+
+  @override
+  String get histCancelled => 'Annulé';
+
+  @override
+  String get histNetTotal => 'Total net';
+
+  @override
+  String get histToPay => 'Reste à payer';
+
+  @override
+  String get histMethod => 'Moyen';
+
+  @override
+  String get histSoldBy => 'Vendu par';
+
+  @override
+  String get histDeliveredBy => 'Livré par';
+
+  @override
+  String get histPdfButton => 'Facture PDF (imprimer / WhatsApp)';
+
+  @override
+  String get histDeliveryNote => 'Bon de livraison';
+
+  @override
+  String get histReturnGoods => 'Retour de marchandise';
+
+  @override
+  String get histCancelSale => 'Annuler la vente (non retirée)';
+
+  @override
+  String histArticles(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count articles',
+      one: '1 article',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String histBy(String nom) {
+    return 'par $nom';
+  }
+
+  @override
+  String get histWalkIn => 'Client divers';
 }

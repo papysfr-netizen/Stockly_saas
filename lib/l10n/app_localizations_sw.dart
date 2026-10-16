@@ -1466,4 +1466,154 @@ class AppLocalizationsSw extends AppLocalizations {
   @override
   String get permMaintenanceDesc =>
       'Mipangilio: rekebisha gharama, unganisha nakala.';
+
+  @override
+  String get histTitle => 'Historia ya mauzo';
+
+  @override
+  String get histSearch => 'Mteja, simu au namba ya ankara…';
+
+  @override
+  String get histToday => 'Leo';
+
+  @override
+  String get hist7Days => 'Siku 7';
+
+  @override
+  String get hist30Days => 'Siku 30';
+
+  @override
+  String get histAllTime => 'Zote';
+
+  @override
+  String histLoadError(String message) {
+    return 'Kosa la kupakia : $message';
+  }
+
+  @override
+  String histSalesOf(String nom) {
+    return 'Mauzo ya $nom';
+  }
+
+  @override
+  String get histTotal => 'Jumla';
+
+  @override
+  String get histRemaining => 'Baki';
+
+  @override
+  String get histNoResult => 'Hakuna mauzo kwa utafutaji huu.';
+
+  @override
+  String get histPaid => 'Imelipwa';
+
+  @override
+  String get histPartial => 'Sehemu';
+
+  @override
+  String get histDebt => 'Deni';
+
+  @override
+  String get histCancelledSale => 'Imefutwa';
+
+  @override
+  String get histToDeliver => 'Ya kupeleka';
+
+  @override
+  String get histDelivered => 'Imepelekwa';
+
+  @override
+  String get histPartialCancel => 'Imefutwa sehemu';
+
+  @override
+  String get histFullReturn => 'Imerudishwa yote';
+
+  @override
+  String get histPartialReturn => 'Imerudishwa sehemu';
+
+  @override
+  String histInvoice(String numero) {
+    return 'Ankara $numero';
+  }
+
+  @override
+  String get histPrint => 'Chapisha';
+
+  @override
+  String get histShare => 'Shiriki (WhatsApp, barua pepe…)';
+
+  @override
+  String histInvoiceError(String message) {
+    return 'Imeshindwa kuunda ankara : $message';
+  }
+
+  @override
+  String histDeliveredOn(String date) {
+    return 'Imepelekwa tarehe $date';
+  }
+
+  @override
+  String get histItems => 'Bidhaa';
+
+  @override
+  String histReturnedQty(int count) {
+    return '↩ $count imerudishwa';
+  }
+
+  @override
+  String histCancelledQty(int count) {
+    return '✕ $count imefutwa';
+  }
+
+  @override
+  String get histReturned => 'Imerudishwa';
+
+  @override
+  String get histCancelled => 'Imefutwa';
+
+  @override
+  String get histNetTotal => 'Jumla halisi';
+
+  @override
+  String get histToPay => 'Baki ya kulipa';
+
+  @override
+  String get histMethod => 'Njia';
+
+  @override
+  String get histSoldBy => 'Imeuzwa na';
+
+  @override
+  String get histDeliveredBy => 'Imepelekwa na';
+
+  @override
+  String get histPdfButton => 'Ankara PDF (chapisha / WhatsApp)';
+
+  @override
+  String get histDeliveryNote => 'Hati ya kupeleka';
+
+  @override
+  String get histReturnGoods => 'Rudisha bidhaa';
+
+  @override
+  String get histCancelSale => 'Futa mauzo (hayajachukuliwa)';
+
+  @override
+  String histArticles(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'bidhaa $count',
+      one: 'bidhaa 1',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String histBy(String nom) {
+    return 'na $nom';
+  }
+
+  @override
+  String get histWalkIn => 'Mteja wa kawaida';
 }

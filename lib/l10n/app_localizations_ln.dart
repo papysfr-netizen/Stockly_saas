@@ -1470,4 +1470,154 @@ class AppLocalizationsLn extends AppLocalizations {
   @override
   String get permMaintenanceDesc =>
       'Mibongiseli : kobongisa ba prix ya kosomba, kosangisa biloko mibale.';
+
+  @override
+  String get histTitle => 'Lisolo ya biteki';
+
+  @override
+  String get histSearch => 'Mosombi, telefone to nimero ya fakture…';
+
+  @override
+  String get histToday => 'Lelo';
+
+  @override
+  String get hist7Days => 'Mikolo 7';
+
+  @override
+  String get hist30Days => 'Mikolo 30';
+
+  @override
+  String get histAllTime => 'Nyonso';
+
+  @override
+  String histLoadError(String message) {
+    return 'Libunga na kofungola : $message';
+  }
+
+  @override
+  String histSalesOf(String nom) {
+    return 'Biteki ya $nom';
+  }
+
+  @override
+  String get histTotal => 'Nyonso';
+
+  @override
+  String get histRemaining => 'Etikali';
+
+  @override
+  String get histNoResult => 'Eteki moko te mpo na boluki oyo.';
+
+  @override
+  String get histPaid => 'Efutami';
+
+  @override
+  String get histPartial => 'Ndambo';
+
+  @override
+  String get histDebt => 'Niongo';
+
+  @override
+  String get histCancelledSale => 'Elongolami';
+
+  @override
+  String get histToDeliver => 'Ya kopesa';
+
+  @override
+  String get histDelivered => 'Epesami';
+
+  @override
+  String get histPartialCancel => 'Elongolami ndambo';
+
+  @override
+  String get histFullReturn => 'Ezongisami nyonso';
+
+  @override
+  String get histPartialReturn => 'Ezongisami ndambo';
+
+  @override
+  String histInvoice(String numero) {
+    return 'Fakture $numero';
+  }
+
+  @override
+  String get histPrint => 'Kobimisa na papier';
+
+  @override
+  String get histShare => 'Kabola (WhatsApp, e-mail…)';
+
+  @override
+  String histInvoiceError(String message) {
+    return 'Ekoki te kosala fakture : $message';
+  }
+
+  @override
+  String histDeliveredOn(String date) {
+    return 'Epesami mokolo $date';
+  }
+
+  @override
+  String get histItems => 'Biloko';
+
+  @override
+  String histReturnedQty(int count) {
+    return '↩ $count ezongisami';
+  }
+
+  @override
+  String histCancelledQty(int count) {
+    return '✕ $count elongolami';
+  }
+
+  @override
+  String get histReturned => 'Ezongisami';
+
+  @override
+  String get histCancelled => 'Elongolami';
+
+  @override
+  String get histNetTotal => 'Nyonso ya solo';
+
+  @override
+  String get histToPay => 'Etikali kofuta';
+
+  @override
+  String get histMethod => 'Lolenge';
+
+  @override
+  String get histSoldBy => 'Eteki na';
+
+  @override
+  String get histDeliveredBy => 'Epesami na';
+
+  @override
+  String get histPdfButton => 'Fakture PDF (kobimisa / WhatsApp)';
+
+  @override
+  String get histDeliveryNote => 'Mokanda ya kopesa';
+
+  @override
+  String get histReturnGoods => 'Kozongisa biloko';
+
+  @override
+  String get histCancelSale => 'Longola eteki (ezwami naino te)';
+
+  @override
+  String histArticles(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'biloko $count',
+      one: 'eloko 1',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String histBy(String nom) {
+    return 'na $nom';
+  }
+
+  @override
+  String get histWalkIn => 'Mosombi ya nzela';
 }

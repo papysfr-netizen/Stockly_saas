@@ -1467,4 +1467,154 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get permMaintenanceDesc =>
       'Settings: fill in missing costs, merge duplicates.';
+
+  @override
+  String get histTitle => 'Sales history';
+
+  @override
+  String get histSearch => 'Customer, phone or invoice no.…';
+
+  @override
+  String get histToday => 'Today';
+
+  @override
+  String get hist7Days => '7 days';
+
+  @override
+  String get hist30Days => '30 days';
+
+  @override
+  String get histAllTime => 'All';
+
+  @override
+  String histLoadError(String message) {
+    return 'Loading error: $message';
+  }
+
+  @override
+  String histSalesOf(String nom) {
+    return 'Sales by $nom';
+  }
+
+  @override
+  String get histTotal => 'Total';
+
+  @override
+  String get histRemaining => 'Remaining';
+
+  @override
+  String get histNoResult => 'No sales for this search.';
+
+  @override
+  String get histPaid => 'Paid';
+
+  @override
+  String get histPartial => 'Partial';
+
+  @override
+  String get histDebt => 'Debt';
+
+  @override
+  String get histCancelledSale => 'Cancelled';
+
+  @override
+  String get histToDeliver => 'To deliver';
+
+  @override
+  String get histDelivered => 'Delivered';
+
+  @override
+  String get histPartialCancel => 'Partly cancelled';
+
+  @override
+  String get histFullReturn => 'Fully returned';
+
+  @override
+  String get histPartialReturn => 'Partly returned';
+
+  @override
+  String histInvoice(String numero) {
+    return 'Invoice $numero';
+  }
+
+  @override
+  String get histPrint => 'Print';
+
+  @override
+  String get histShare => 'Share (WhatsApp, e-mail…)';
+
+  @override
+  String histInvoiceError(String message) {
+    return 'Unable to create the invoice: $message';
+  }
+
+  @override
+  String histDeliveredOn(String date) {
+    return 'Delivered on $date';
+  }
+
+  @override
+  String get histItems => 'Items';
+
+  @override
+  String histReturnedQty(int count) {
+    return '↩ $count returned';
+  }
+
+  @override
+  String histCancelledQty(int count) {
+    return '✕ $count cancelled';
+  }
+
+  @override
+  String get histReturned => 'Returned';
+
+  @override
+  String get histCancelled => 'Cancelled';
+
+  @override
+  String get histNetTotal => 'Net total';
+
+  @override
+  String get histToPay => 'Left to pay';
+
+  @override
+  String get histMethod => 'Method';
+
+  @override
+  String get histSoldBy => 'Sold by';
+
+  @override
+  String get histDeliveredBy => 'Delivered by';
+
+  @override
+  String get histPdfButton => 'PDF invoice (print / WhatsApp)';
+
+  @override
+  String get histDeliveryNote => 'Delivery note';
+
+  @override
+  String get histReturnGoods => 'Return goods';
+
+  @override
+  String get histCancelSale => 'Cancel the sale (not picked up)';
+
+  @override
+  String histArticles(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String histBy(String nom) {
+    return 'by $nom';
+  }
+
+  @override
+  String get histWalkIn => 'Walk-in customer';
 }

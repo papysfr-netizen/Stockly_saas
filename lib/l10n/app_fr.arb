@@ -1142,5 +1142,110 @@
   "permDiscounts": "Remises et retraits",
   "permDiscountsDesc": "Changer les prix à la caisse et retirer de l'argent d'un compte client.",
   "permMaintenance": "Maintenance des données",
-  "permMaintenanceDesc": "Paramètres : rattraper les coûts, fusionner les doublons."
+  "permMaintenanceDesc": "Paramètres : rattraper les coûts, fusionner les doublons.",
+  "histTitle": "Historique des ventes",
+  "histSearch": "Client, téléphone ou n° de facture…",
+  "histToday": "Aujourd'hui",
+  "hist7Days": "7 jours",
+  "hist30Days": "30 jours",
+  "histAllTime": "Tout",
+  "histLoadError": "Erreur de chargement : {message}",
+  "@histLoadError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "histSalesOf": "Ventes de {nom}",
+  "@histSalesOf": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
+  "histTotal": "Total",
+  "histRemaining": "Reste",
+  "histNoResult": "Aucune vente pour cette recherche.",
+  "histPaid": "Payé",
+  "histPartial": "Partiel",
+  "histDebt": "Dette",
+  "histCancelledSale": "Annulée",
+  "histToDeliver": "À livrer",
+  "histDelivered": "Livré",
+  "histPartialCancel": "Annulation partielle",
+  "histFullReturn": "Retour total",
+  "histPartialReturn": "Retour partiel",
+  "histInvoice": "Facture {numero}",
+  "@histInvoice": {
+    "placeholders": {
+      "numero": {
+        "type": "String"
+      }
+    }
+  },
+  "histPrint": "Imprimer",
+  "histShare": "Partager (WhatsApp, e-mail…)",
+  "histInvoiceError": "Impossible de créer la facture : {message}",
+  "@histInvoiceError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "histDeliveredOn": "Livré le {date}",
+  "@histDeliveredOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "histItems": "Articles",
+  "histReturnedQty": "↩ {count} retourné(s)",
+  "@histReturnedQty": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "histCancelledQty": "✕ {count} annulé(s)",
+  "@histCancelledQty": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "histReturned": "Retourné",
+  "histCancelled": "Annulé",
+  "histNetTotal": "Total net",
+  "histToPay": "Reste à payer",
+  "histMethod": "Moyen",
+  "histSoldBy": "Vendu par",
+  "histDeliveredBy": "Livré par",
+  "histPdfButton": "Facture PDF (imprimer / WhatsApp)",
+  "histDeliveryNote": "Bon de livraison",
+  "histReturnGoods": "Retour de marchandise",
+  "histCancelSale": "Annuler la vente (non retirée)",
+  "histArticles": "{count, plural, =1{1 article} other{{count} articles}}",
+  "@histArticles": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "histBy": "par {nom}",
+  "@histBy": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
+  "histWalkIn": "Client divers"
 }
