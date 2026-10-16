@@ -455,5 +455,20 @@
   "payMotif": "Reason for credit (optional)",
   "payMotifHint": "E.g. will pay Friday after the market",
   "accDebtsCollected": "Debts collected: {montant}",
-  "accDebtsCollectedTitle": "Debts collected today ({count})"
+  "accDebtsCollectedTitle": "Debts collected today ({count})",
+  "repChoiceTitle": "Which summary to send?",
+  "repShort": "Short summary",
+  "repShortHint": "Today's totals",
+  "repDetailed": "Detailed report",
+  "repDetailedHint": "Each sale, products, sellers, expenses, debts, stock",
+  "repSales": "🛒 SALES ({count}): {montant}",
+  "repProducts": "📦 PRODUCTS SOLD",
+  "repBySeller": "👤 BY SELLER",
+  "repByMethod": "💳 BY PAYMENT METHOD",
+  "repExpenses": "💸 EXPENSES ({montant})",
+  "repDebtsCollected": "💰 DEBTS COLLECTED ({montant})",
+  "repNewCredits": "📝 NEW CREDITS ({montant})",
+  "repToReorder": "⚠️ TO REORDER",
+  "repCredit": "credit {montant}",
+  "repMore": "…and {count} more"
 }

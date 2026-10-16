@@ -1670,4 +1670,62 @@ class AppLocalizationsEn extends AppLocalizations {
   String accDebtsCollectedTitle(int count) {
     return 'Debts collected today ($count)';
   }
+
+  @override
+  String get repChoiceTitle => 'Which summary to send?';
+
+  @override
+  String get repShort => 'Short summary';
+
+  @override
+  String get repShortHint => 'Today\'s totals';
+
+  @override
+  String get repDetailed => 'Detailed report';
+
+  @override
+  String get repDetailedHint =>
+      'Each sale, products, sellers, expenses, debts, stock';
+
+  @override
+  String repSales(int count, String montant) {
+    return '🛒 SALES ($count): $montant';
+  }
+
+  @override
+  String get repProducts => '📦 PRODUCTS SOLD';
+
+  @override
+  String get repBySeller => '👤 BY SELLER';
+
+  @override
+  String get repByMethod => '💳 BY PAYMENT METHOD';
+
+  @override
+  String repExpenses(String montant) {
+    return '💸 EXPENSES ($montant)';
+  }
+
+  @override
+  String repDebtsCollected(String montant) {
+    return '💰 DEBTS COLLECTED ($montant)';
+  }
+
+  @override
+  String repNewCredits(String montant) {
+    return '📝 NEW CREDITS ($montant)';
+  }
+
+  @override
+  String get repToReorder => '⚠️ TO REORDER';
+
+  @override
+  String repCredit(String montant) {
+    return 'credit $montant';
+  }
+
+  @override
+  String repMore(int count) {
+    return '…and $count more';
+  }
 }

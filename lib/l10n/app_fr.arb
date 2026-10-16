@@ -1290,5 +1290,65 @@
         "type": "int"
       }
     }
+  },
+  "repChoiceTitle": "Quel résumé envoyer ?",
+  "repShort": "Résumé court",
+  "repShortHint": "Les totaux du jour",
+  "repDetailed": "Rapport détaillé",
+  "repDetailedHint": "Chaque vente, produits, vendeurs, dépenses, dettes, stock",
+  "repSales": "🛒 VENTES ({count}) : {montant}",
+  "@repSales": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "repProducts": "📦 PRODUITS VENDUS",
+  "repBySeller": "👤 PAR VENDEUR",
+  "repByMethod": "💳 PAR MOYEN DE PAIEMENT",
+  "repExpenses": "💸 DÉPENSES ({montant})",
+  "@repExpenses": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "repDebtsCollected": "💰 DETTES ENCAISSÉES ({montant})",
+  "@repDebtsCollected": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "repNewCredits": "📝 NOUVEAUX CRÉDITS ({montant})",
+  "@repNewCredits": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "repToReorder": "⚠️ À RECOMMANDER",
+  "repCredit": "crédit {montant}",
+  "@repCredit": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "repMore": "…et {count} autre(s)",
+  "@repMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

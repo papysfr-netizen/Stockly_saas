@@ -455,5 +455,20 @@
   "payMotif": "Sababu ya mkopo (si lazima)",
   "payMotifHint": "Mfano: atalipa Ijumaa baada ya soko",
   "accDebtsCollected": "Madeni yaliyolipwa : {montant}",
-  "accDebtsCollectedTitle": "Madeni yaliyolipwa leo ({count})"
+  "accDebtsCollectedTitle": "Madeni yaliyolipwa leo ({count})",
+  "repChoiceTitle": "Tuma muhtasari upi?",
+  "repShort": "Muhtasari mfupi",
+  "repShortHint": "Jumla za leo",
+  "repDetailed": "Ripoti kamili",
+  "repDetailedHint": "Kila mauzo, bidhaa, wauzaji, matumizi, madeni, akiba",
+  "repSales": "🛒 MAUZO ({count}) : {montant}",
+  "repProducts": "📦 BIDHAA ZILIZOUZWA",
+  "repBySeller": "👤 KWA MUUZAJI",
+  "repByMethod": "💳 KWA NJIA YA MALIPO",
+  "repExpenses": "💸 MATUMIZI ({montant})",
+  "repDebtsCollected": "💰 MADENI YALIYOLIPWA ({montant})",
+  "repNewCredits": "📝 MIKOPO MIPYA ({montant})",
+  "repToReorder": "⚠️ YA KUAGIZA",
+  "repCredit": "mkopo {montant}",
+  "repMore": "…na {count} zaidi"
 }

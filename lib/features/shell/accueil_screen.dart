@@ -25,6 +25,8 @@ import 'package:stockly_saas/features/debts/screens/depenses_screen.dart';
 import 'package:stockly_saas/features/debts/screens/home_screen.dart';
 import 'package:stockly_saas/views/caisse/caisse_screen.dart';
 import 'package:stockly_saas/features/shell/accueil_widgets.dart';
+import 'package:stockly_saas/features/shell/rapport_jour.dart';
+import 'package:stockly_saas/core/providers/produit_provider.dart';
 import 'package:stockly_saas/features/aide/aide_screen.dart';
 import 'package:stockly_saas/features/comptes_clients/comptes_clients_screen.dart';
 import 'package:stockly_saas/features/debts/screens/comptabilite_screen.dart';
@@ -362,6 +364,8 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                               taux: tauxCdf,
                               remises: remises,
                               dettesEncaissees: dettesEncaissees,
+                              listeVentes: listeVentes,
+                              encaissementsDettes: encaissementsDettes,
                             ),
                             icon: const Icon(Icons.send_rounded, color: Color(0xFF25D366)),
                             label: Text(t.accSendSummary),
@@ -573,8 +577,43 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
     required double taux,
     double remises = 0,
     double dettesEncaissees = 0,
+    List<Map<String, dynamic>> listeVentes = const [],
+    List<Map<String, dynamic>> encaissementsDettes = const [],
   }) async {
     final l = AppLocalizations.of(context); // langue de l'application (lue avant toute attente)
+    // 📊 Résumé court ou rapport détaillé ?
+    final choix = await showModalBottomSheet<String>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+              child: Text(l.repChoiceTitle,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            ),
+            ListTile(
+              leading: const Icon(Icons.short_text_rounded, color: Colors.teal),
+              title: Text(l.repShort),
+              subtitle: Text(l.repShortHint),
+              onTap: () => Navigator.pop(ctx, 'court'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.article_rounded, color: Colors.indigo),
+              title: Text(l.repDetailed),
+              subtitle: Text(l.repDetailedHint),
+              onTap: () => Navigator.pop(ctx, 'detail'),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+    if (choix == null || !mounted) return;
     final jours = l.sumDays.split(',');
     final now = DateTime.now();
     final date = '${jours[now.weekday - 1]} '
@@ -608,7 +647,31 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
     t
       ..writeln(l.sumRate(NumberFormat('#,##0', 'fr_FR').format(taux)))
       ..write(l.sumSentBy(widget.currentUser.nom));
-    final texte = t.toString();
+    final resumeCourt = t.toString();
+    String texte = resumeCourt;
+    if (choix == 'detail') {
+      final minuit = DateTime(now.year, now.month, now.day);
+      final depJour = (ref.read(depensesStreamProvider).value ?? const [])
+          .where((d) => !d.date.isBefore(minuit) && _memeBoutique(boutique, d.boutiqueId))
+          .toList();
+      final stockBas = <MapEntry<String, num>>[];
+      for (final p in ref.read(produitsStreamProvider).value ?? const []) {
+        final num stock = p.stockBoutique(boutique);
+        final seuil = p.toMap()['seuilAlerte'];
+        final num limite = (seuil is num && seuil > 0) ? seuil : 5;
+        if (stock <= limite) stockBas.add(MapEntry(p.nom, stock));
+      }
+      texte = await RapportJour.detail(
+        l: l,
+        resumeCourt: resumeCourt,
+        entrepriseId: _entrepriseId,
+        ventes: listeVentes,
+        depenses: depJour,
+        dettesEncaissees: encaissementsDettes,
+        stockBas: stockBas,
+        prix: devise.formatPrice,
+      );
+    }
 
     // WhatsApp d'abord (on choisit le contact), sinon le menu de partage
     try {

@@ -1669,4 +1669,62 @@ class AppLocalizationsSw extends AppLocalizations {
   String accDebtsCollectedTitle(int count) {
     return 'Madeni yaliyolipwa leo ($count)';
   }
+
+  @override
+  String get repChoiceTitle => 'Tuma muhtasari upi?';
+
+  @override
+  String get repShort => 'Muhtasari mfupi';
+
+  @override
+  String get repShortHint => 'Jumla za leo';
+
+  @override
+  String get repDetailed => 'Ripoti kamili';
+
+  @override
+  String get repDetailedHint =>
+      'Kila mauzo, bidhaa, wauzaji, matumizi, madeni, akiba';
+
+  @override
+  String repSales(int count, String montant) {
+    return '🛒 MAUZO ($count) : $montant';
+  }
+
+  @override
+  String get repProducts => '📦 BIDHAA ZILIZOUZWA';
+
+  @override
+  String get repBySeller => '👤 KWA MUUZAJI';
+
+  @override
+  String get repByMethod => '💳 KWA NJIA YA MALIPO';
+
+  @override
+  String repExpenses(String montant) {
+    return '💸 MATUMIZI ($montant)';
+  }
+
+  @override
+  String repDebtsCollected(String montant) {
+    return '💰 MADENI YALIYOLIPWA ($montant)';
+  }
+
+  @override
+  String repNewCredits(String montant) {
+    return '📝 MIKOPO MIPYA ($montant)';
+  }
+
+  @override
+  String get repToReorder => '⚠️ YA KUAGIZA';
+
+  @override
+  String repCredit(String montant) {
+    return 'mkopo $montant';
+  }
+
+  @override
+  String repMore(int count) {
+    return '…na $count zaidi';
+  }
 }

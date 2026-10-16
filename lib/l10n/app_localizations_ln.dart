@@ -1673,4 +1673,62 @@ class AppLocalizationsLn extends AppLocalizations {
   String accDebtsCollectedTitle(int count) {
     return 'Baniongo efutami lelo ($count)';
   }
+
+  @override
+  String get repChoiceTitle => 'Bokuse nini otinda?';
+
+  @override
+  String get repShort => 'Bokuse ya mokuse';
+
+  @override
+  String get repShortHint => 'Ba total ya lelo';
+
+  @override
+  String get repDetailed => 'Lapolo ya mobimba';
+
+  @override
+  String get repDetailedHint =>
+      'Eteki moko moko, biloko, bateki, bibimisi, baniongo, stock';
+
+  @override
+  String repSales(int count, String montant) {
+    return '🛒 BITEKI ($count) : $montant';
+  }
+
+  @override
+  String get repProducts => '📦 BILOKO ETEKAMI';
+
+  @override
+  String get repBySeller => '👤 NA MOTEKI';
+
+  @override
+  String get repByMethod => '💳 NA LOLENGE YA KOFUTA';
+
+  @override
+  String repExpenses(String montant) {
+    return '💸 BIBIMISI ($montant)';
+  }
+
+  @override
+  String repDebtsCollected(String montant) {
+    return '💰 BANIONGO EFUTAMI ($montant)';
+  }
+
+  @override
+  String repNewCredits(String montant) {
+    return '📝 BANIONGO YA SIKA ($montant)';
+  }
+
+  @override
+  String get repToReorder => '⚠️ YA KOSOMBA LISUSU';
+
+  @override
+  String repCredit(String montant) {
+    return 'niongo $montant';
+  }
+
+  @override
+  String repMore(int count) {
+    return '…mpe $count mosusu';
+  }
 }

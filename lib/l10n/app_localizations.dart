@@ -2838,6 +2838,96 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Dettes encaissées aujourd\'hui ({count})'**
   String accDebtsCollectedTitle(int count);
+
+  /// No description provided for @repChoiceTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quel résumé envoyer ?'**
+  String get repChoiceTitle;
+
+  /// No description provided for @repShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Résumé court'**
+  String get repShort;
+
+  /// No description provided for @repShortHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les totaux du jour'**
+  String get repShortHint;
+
+  /// No description provided for @repDetailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rapport détaillé'**
+  String get repDetailed;
+
+  /// No description provided for @repDetailedHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chaque vente, produits, vendeurs, dépenses, dettes, stock'**
+  String get repDetailedHint;
+
+  /// No description provided for @repSales.
+  ///
+  /// In fr, this message translates to:
+  /// **'🛒 VENTES ({count}) : {montant}'**
+  String repSales(int count, String montant);
+
+  /// No description provided for @repProducts.
+  ///
+  /// In fr, this message translates to:
+  /// **'📦 PRODUITS VENDUS'**
+  String get repProducts;
+
+  /// No description provided for @repBySeller.
+  ///
+  /// In fr, this message translates to:
+  /// **'👤 PAR VENDEUR'**
+  String get repBySeller;
+
+  /// No description provided for @repByMethod.
+  ///
+  /// In fr, this message translates to:
+  /// **'💳 PAR MOYEN DE PAIEMENT'**
+  String get repByMethod;
+
+  /// No description provided for @repExpenses.
+  ///
+  /// In fr, this message translates to:
+  /// **'💸 DÉPENSES ({montant})'**
+  String repExpenses(String montant);
+
+  /// No description provided for @repDebtsCollected.
+  ///
+  /// In fr, this message translates to:
+  /// **'💰 DETTES ENCAISSÉES ({montant})'**
+  String repDebtsCollected(String montant);
+
+  /// No description provided for @repNewCredits.
+  ///
+  /// In fr, this message translates to:
+  /// **'📝 NOUVEAUX CRÉDITS ({montant})'**
+  String repNewCredits(String montant);
+
+  /// No description provided for @repToReorder.
+  ///
+  /// In fr, this message translates to:
+  /// **'⚠️ À RECOMMANDER'**
+  String get repToReorder;
+
+  /// No description provided for @repCredit.
+  ///
+  /// In fr, this message translates to:
+  /// **'crédit {montant}'**
+  String repCredit(String montant);
+
+  /// No description provided for @repMore.
+  ///
+  /// In fr, this message translates to:
+  /// **'…et {count} autre(s)'**
+  String repMore(int count);
 }
 
 class _AppLocalizationsDelegate

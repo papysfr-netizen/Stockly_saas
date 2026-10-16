@@ -455,5 +455,20 @@
   "payMotif": "Ntina ya niongo (soki olingi)",
   "payMotifHint": "Ndakisa: akofuta mokolo ya mitano sima ya zando",
   "accDebtsCollected": "Baniongo efutami : {montant}",
-  "accDebtsCollectedTitle": "Baniongo efutami lelo ({count})"
+  "accDebtsCollectedTitle": "Baniongo efutami lelo ({count})",
+  "repChoiceTitle": "Bokuse nini otinda?",
+  "repShort": "Bokuse ya mokuse",
+  "repShortHint": "Ba total ya lelo",
+  "repDetailed": "Lapolo ya mobimba",
+  "repDetailedHint": "Eteki moko moko, biloko, bateki, bibimisi, baniongo, stock",
+  "repSales": "🛒 BITEKI ({count}) : {montant}",
+  "repProducts": "📦 BILOKO ETEKAMI",
+  "repBySeller": "👤 NA MOTEKI",
+  "repByMethod": "💳 NA LOLENGE YA KOFUTA",
+  "repExpenses": "💸 BIBIMISI ({montant})",
+  "repDebtsCollected": "💰 BANIONGO EFUTAMI ({montant})",
+  "repNewCredits": "📝 BANIONGO YA SIKA ({montant})",
+  "repToReorder": "⚠️ YA KOSOMBA LISUSU",
+  "repCredit": "niongo {montant}",
+  "repMore": "…mpe {count} mosusu"
 }
