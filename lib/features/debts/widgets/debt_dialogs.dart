@@ -347,6 +347,9 @@ class DebtDialogs {
                           montantPaye: payeDette,
                           paymentMethod: modePaiementSelectionne,
                         );
+                        // ⚠️ Le contrôleur garde l'erreur pour lui : on la fait remonter
+                        final etat = ref.read(debtControllerProvider(entrepriseId));
+                        if (etat.hasError) throw etat.error!;
                         if (surplus > 0) {
                           final envoye = await CompteClientService.depot(
                             entrepriseId: entrepriseId,

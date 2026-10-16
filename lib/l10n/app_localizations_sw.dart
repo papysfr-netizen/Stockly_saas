@@ -1644,4 +1644,13 @@ class AppLocalizationsSw extends AppLocalizations {
   String ddDate(String date) {
     return 'Tarehe : $date';
   }
+
+  @override
+  String get ddPayments => 'Historia ya malipo';
+
+  @override
+  String get ddPaidBefore => 'Ililipwa mapema (wakati wa mauzo au kabla)';
+
+  @override
+  String get ddNoPayments => 'Bado hakuna malipo.';
 }

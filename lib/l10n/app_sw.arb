@@ -448,5 +448,8 @@
   "ddPdf": "Ankara PDF",
   "ddDetails": "Maelezo",
   "ddDiscount": "Punguzo : {montant}",
-  "ddDate": "Tarehe : {date}"
+  "ddDate": "Tarehe : {date}",
+  "ddPayments": "Historia ya malipo",
+  "ddPaidBefore": "Ililipwa mapema (wakati wa mauzo au kabla)",
+  "ddNoPayments": "Bado hakuna malipo."
 }

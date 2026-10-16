@@ -448,5 +448,8 @@
   "ddPdf": "Fakture PDF",
   "ddDetails": "Makambo",
   "ddDiscount": "Bakitisi talo : {montant}",
-  "ddDate": "Mokolo : {date}"
+  "ddDate": "Mokolo : {date}",
+  "ddPayments": "Lisolo ya bofuti",
+  "ddPaidBefore": "Efutamaki liboso (na eteki to liboso)",
+  "ddNoPayments": "Bofuti moko te naino."
 }

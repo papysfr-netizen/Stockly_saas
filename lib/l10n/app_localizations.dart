@@ -2796,6 +2796,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Date : {date}'**
   String ddDate(String date);
+
+  /// No description provided for @ddPayments.
+  ///
+  /// In fr, this message translates to:
+  /// **'Historique des paiements'**
+  String get ddPayments;
+
+  /// No description provided for @ddPaidBefore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payé avant (à la vente ou plus tôt)'**
+  String get ddPaidBefore;
+
+  /// No description provided for @ddNoPayments.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun paiement pour l\'instant.'**
+  String get ddNoPayments;
 }
 
 class _AppLocalizationsDelegate

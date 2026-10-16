@@ -1269,5 +1269,8 @@
         "type": "String"
       }
     }
-  }
+  },
+  "ddPayments": "Historique des paiements",
+  "ddPaidBefore": "Payé avant (à la vente ou plus tôt)",
+  "ddNoPayments": "Aucun paiement pour l'instant."
 }

@@ -12,6 +12,8 @@ class Dette {
   final String numeroFacture;
   /// Identifiant complet de la vente liée ('' si dette ajoutée à la main)
   final String venteId;
+  /// Historique des paiements : {date, montant, methode, parNom, parUid}
+  final List<Map<String, dynamic>> paiements;
   final double montantInitial;
   final double acomptePaye;
   final double montantReste;
@@ -30,6 +32,7 @@ class Dette {
     this.telephone = '',
     required this.numeroFacture,
     this.venteId = '',
+    this.paiements = const [],
     required this.montantInitial,
     required this.acomptePaye,
     required this.montantReste,
@@ -83,6 +86,12 @@ class Dette {
     if (value is num) return value != 0;
     if (value is String) return value.toLowerCase() == 'true';
     return defaultValue;
+  }
+
+  /// Liste des paiements (ignore ce qui n'est pas une fiche valide)
+  static List<Map<String, dynamic>> _parsePaiements(dynamic v) {
+    if (v is! List) return const [];
+    return v.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
   }
 
   /// Factory pour construire une instance depuis une Map / JSON
@@ -158,6 +167,7 @@ class Dette {
       telephone: (json['telephone'] ?? json['telephoneClient'] ?? json['tel'] ?? '').toString(),
       numeroFacture: numeroFactureResolved,
       venteId: (json['venteId'] ?? '').toString(),
+      paiements: _parsePaiements(json['paiements']),
       montantInitial: montantInitialResolved,
       acomptePaye: finalAcompte,
       montantReste: montantResteResolved,
@@ -239,6 +249,7 @@ class Dette {
     String? telephone,
     String? numeroFacture,
     String? venteId,
+    List<Map<String, dynamic>>? paiements,
     double? montantInitial,
     double? acomptePaye,
     double? montantReste,
@@ -257,6 +268,7 @@ class Dette {
       telephone: telephone ?? this.telephone,
       numeroFacture: numeroFacture ?? this.numeroFacture,
       venteId: venteId ?? this.venteId,
+      paiements: paiements ?? this.paiements,
       montantInitial: montantInitial ?? this.montantInitial,
       acomptePaye: acomptePaye ?? this.acomptePaye,
       montantReste: montantReste ?? this.montantReste,

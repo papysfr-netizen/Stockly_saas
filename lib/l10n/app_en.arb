@@ -448,5 +448,8 @@
   "ddPdf": "PDF invoice",
   "ddDetails": "Details",
   "ddDiscount": "Discount given: {montant}",
-  "ddDate": "Date: {date}"
+  "ddDate": "Date: {date}",
+  "ddPayments": "Payment history",
+  "ddPaidBefore": "Paid earlier (at the sale or before)",
+  "ddNoPayments": "No payments yet."
 }

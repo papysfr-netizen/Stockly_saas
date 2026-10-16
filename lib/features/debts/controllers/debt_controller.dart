@@ -1,8 +1,11 @@
 // lib/features/debts/controllers/debt_controller.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rxdart/rxdart.dart';
+
+import 'package:stockly_saas/core/services/utilisateur_service.dart';
 
 import 'package:stockly_saas/features/accounting/models/journal_entry.dart';
 import 'package:stockly_saas/core/models/payment_method.dart';
@@ -73,6 +76,29 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
   /// Arrondi financier à 2 décimales
   double _roundMoney(double value) => (value * 100).roundToDouble() / 100;
 
+  /// Nom de la personne connectée (pour l'historique des paiements)
+  Future<String> _nomConnecte() async {
+    try {
+      final dynamic n = await nomUtilisateurConnecte();
+      final s = (n ?? '').toString().trim();
+      return s == 'null' ? '' : s;
+    } catch (_) {
+      return '';
+    }
+  }
+
+  /// Une ligne de l'historique des paiements
+  Map<String, dynamic> _lignePaiement(
+      DateTime date, double montant, PaymentMethod methode, String parNom) {
+    return {
+      'date': Timestamp.fromDate(date),
+      'montant': montant,
+      'methode': methode.name,
+      'parNom': parNom,
+      'parUid': FirebaseAuth.instance.currentUser?.uid ?? '',
+    };
+  }
+
   /// Détermine le code de journal selon le moyen de paiement (SYSCOHADA)
   String _getJournalCodeForPayment(PaymentMethod method) {
     switch (method) {
@@ -133,6 +159,7 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
         throw ArgumentError('Le montant total doit être strictement supérieur à zéro.');
       }
 
+      final parNom = await _nomConnecte();
       final db = FirebaseFirestore.instance;
       final batch = db.batch();
       final targetRef = _getTargetRef(entrepriseId, type).doc();
@@ -168,7 +195,12 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
         comptabilise: true,
       );
 
-      batch.set(targetRef, dette.toFirestore());
+      batch.set(targetRef, {
+        ...dette.toFirestore(),
+        // 🧾 Historique : l'acompte versé à la création
+        if (pureAcompte > 0)
+          'paiements': [_lignePaiement(now, pureAcompte, paymentMethod, parNom)],
+      });
 
       // 2. Écriture d'engagement comptable (SYSCOHADA)
       final ecritureEngagementRef = _ecrituresRef(entrepriseId).doc();
@@ -276,6 +308,7 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
         throw ArgumentError('Le montant payé doit être strictement positif.');
       }
 
+      final parNom = await _nomConnecte();
       final db = FirebaseFirestore.instance;
 
       await db.runTransaction((transaction) async {
@@ -324,6 +357,10 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
           'statut': nouveauStatut,
           'dernierPaiement': FieldValue.serverTimestamp(),
           'updatedAt': FieldValue.serverTimestamp(),
+          // 🧾 Historique des paiements
+          'paiements': FieldValue.arrayUnion([
+            _lignePaiement(now, montantEffectif, paymentMethod, parNom),
+          ]),
         });
 
         final ecritureRef = _ecrituresRef(entrepriseId).doc();

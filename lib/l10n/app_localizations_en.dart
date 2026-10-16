@@ -1645,4 +1645,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String ddDate(String date) {
     return 'Date: $date';
   }
+
+  @override
+  String get ddPayments => 'Payment history';
+
+  @override
+  String get ddPaidBefore => 'Paid earlier (at the sale or before)';
+
+  @override
+  String get ddNoPayments => 'No payments yet.';
 }

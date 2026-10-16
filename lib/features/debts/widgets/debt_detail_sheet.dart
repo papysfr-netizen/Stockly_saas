@@ -253,6 +253,12 @@ class _DetteDetailSheetState extends ConsumerState<DetteDetailSheet> {
                 ),
               ),
 
+              // ---- Historique des paiements
+              const SizedBox(height: 16),
+              Text(t.ddPayments, style: const TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              ..._historique(t),
+
               // ---- Motif
               if (motif.isNotEmpty) ...[
                 const SizedBox(height: 14),
@@ -321,6 +327,74 @@ class _DetteDetailSheetState extends ConsumerState<DetteDetailSheet> {
             ],
           );
         },
+      ),
+    );
+  }
+
+  String _methode(AppLocalizations t, String m) {
+    switch (m) {
+      case 'cash':
+        return t.debtCashDesk;
+      case 'bankTransfer':
+        return t.payTransfer;
+      case 'check':
+        return t.debtCheck;
+      case 'mobileMoney':
+        return 'Mobile Money';
+      default:
+        return m;
+    }
+  }
+
+  /// Historique des paiements (+ « payé avant » pour ce qui date d'avant l'historique)
+  List<Widget> _historique(AppLocalizations t) {
+    int quand(Map<String, dynamic> p) {
+      final v = p['date'];
+      return v is Timestamp ? v.millisecondsSinceEpoch : 0;
+    }
+
+    final liste = [..._d.paiements]..sort((a, b) => quand(a).compareTo(quand(b)));
+    final dansHistorique = liste.fold<double>(0, (s, p) => s + _num(p['montant']));
+    final avant = _d.acomptePaye - dansHistorique;
+    final format = DateFormat('dd/MM/yyyy HH:mm');
+
+    if (liste.isEmpty && avant <= 0.005) {
+      return [Text(t.ddNoPayments, style: TextStyle(color: Colors.grey.shade600))];
+    }
+    return [
+      if (avant > 0.005) _paiementLigne(t.ddPaidBefore, '', avant),
+      for (final p in liste)
+        _paiementLigne(
+          p['date'] is Timestamp ? format.format((p['date'] as Timestamp).toDate()) : '—',
+          [
+            _methode(t, (p['methode'] ?? '').toString()),
+            (p['parNom'] ?? '').toString().trim(),
+          ].where((s) => s.isNotEmpty).join(' • '),
+          _num(p['montant']),
+        ),
+    ];
+  }
+
+  Widget _paiementLigne(String titre, String detail, double montant) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          const Icon(Icons.check_circle_rounded, size: 16, color: _vert),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(titre, style: const TextStyle(fontWeight: FontWeight.w600)),
+                if (detail.isNotEmpty)
+                  Text(detail, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+              ],
+            ),
+          ),
+          Text('+ ${widget.format(montant)}',
+              style: const TextStyle(color: _vert, fontWeight: FontWeight.bold)),
+        ],
       ),
     );
   }

@@ -1648,4 +1648,13 @@ class AppLocalizationsLn extends AppLocalizations {
   String ddDate(String date) {
     return 'Mokolo : $date';
   }
+
+  @override
+  String get ddPayments => 'Lisolo ya bofuti';
+
+  @override
+  String get ddPaidBefore => 'Efutamaki liboso (na eteki to liboso)';
+
+  @override
+  String get ddNoPayments => 'Bofuti moko te naino.';
 }
