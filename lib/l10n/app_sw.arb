@@ -440,5 +440,13 @@
   "histCancelSale": "Futa mauzo (hayajachukuliwa)",
   "histArticles": "{count, plural, =1{bidhaa 1} other{bidhaa {count}}}",
   "histBy": "na {nom}",
-  "histWalkIn": "Mteja wa kawaida"
+  "histWalkIn": "Mteja wa kawaida",
+  "ddMotif": "Sababu",
+  "ddNoItems": "Hakuna bidhaa: deni liliongezwa kwa mkono.",
+  "ddItemsError": "Imeshindwa kupakia bidhaa.",
+  "ddCall": "Piga simu",
+  "ddPdf": "Ankara PDF",
+  "ddDetails": "Maelezo",
+  "ddDiscount": "Punguzo : {montant}",
+  "ddDate": "Tarehe : {date}"
 }

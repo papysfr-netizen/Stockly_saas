@@ -440,5 +440,13 @@
   "histCancelSale": "Cancel the sale (not picked up)",
   "histArticles": "{count, plural, =1{1 item} other{{count} items}}",
   "histBy": "by {nom}",
-  "histWalkIn": "Walk-in customer"
+  "histWalkIn": "Walk-in customer",
+  "ddMotif": "Reason",
+  "ddNoItems": "No items: debt added manually.",
+  "ddItemsError": "Unable to load the items.",
+  "ddCall": "Call",
+  "ddPdf": "PDF invoice",
+  "ddDetails": "Details",
+  "ddDiscount": "Discount given: {montant}",
+  "ddDate": "Date: {date}"
 }

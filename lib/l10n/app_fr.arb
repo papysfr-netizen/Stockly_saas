@@ -1247,5 +1247,27 @@
       }
     }
   },
-  "histWalkIn": "Client divers"
+  "histWalkIn": "Client divers",
+  "ddMotif": "Motif",
+  "ddNoItems": "Aucun article : dette ajoutée à la main.",
+  "ddItemsError": "Impossible de charger les articles.",
+  "ddCall": "Appeler",
+  "ddPdf": "Facture PDF",
+  "ddDetails": "Détails",
+  "ddDiscount": "Remise accordée : {montant}",
+  "@ddDiscount": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "ddDate": "Date : {date}",
+  "@ddDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  }
 }

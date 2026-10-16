@@ -2748,6 +2748,54 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Client divers'**
   String get histWalkIn;
+
+  /// No description provided for @ddMotif.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif'**
+  String get ddMotif;
+
+  /// No description provided for @ddNoItems.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun article : dette ajoutée à la main.'**
+  String get ddNoItems;
+
+  /// No description provided for @ddItemsError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger les articles.'**
+  String get ddItemsError;
+
+  /// No description provided for @ddCall.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appeler'**
+  String get ddCall;
+
+  /// No description provided for @ddPdf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Facture PDF'**
+  String get ddPdf;
+
+  /// No description provided for @ddDetails.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détails'**
+  String get ddDetails;
+
+  /// No description provided for @ddDiscount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remise accordée : {montant}'**
+  String ddDiscount(String montant);
+
+  /// No description provided for @ddDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date : {date}'**
+  String ddDate(String date);
 }
 
 class _AppLocalizationsDelegate

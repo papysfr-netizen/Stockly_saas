@@ -1616,4 +1616,32 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get histWalkIn => 'Mteja wa kawaida';
+
+  @override
+  String get ddMotif => 'Sababu';
+
+  @override
+  String get ddNoItems => 'Hakuna bidhaa: deni liliongezwa kwa mkono.';
+
+  @override
+  String get ddItemsError => 'Imeshindwa kupakia bidhaa.';
+
+  @override
+  String get ddCall => 'Piga simu';
+
+  @override
+  String get ddPdf => 'Ankara PDF';
+
+  @override
+  String get ddDetails => 'Maelezo';
+
+  @override
+  String ddDiscount(String montant) {
+    return 'Punguzo : $montant';
+  }
+
+  @override
+  String ddDate(String date) {
+    return 'Tarehe : $date';
+  }
 }

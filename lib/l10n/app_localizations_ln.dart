@@ -1620,4 +1620,32 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get histWalkIn => 'Mosombi ya nzela';
+
+  @override
+  String get ddMotif => 'Ntina';
+
+  @override
+  String get ddNoItems => 'Eloko moko te : niongo ebakisami na loboko.';
+
+  @override
+  String get ddItemsError => 'Ekoki te kofungola biloko.';
+
+  @override
+  String get ddCall => 'Benga';
+
+  @override
+  String get ddPdf => 'Fakture PDF';
+
+  @override
+  String get ddDetails => 'Makambo';
+
+  @override
+  String ddDiscount(String montant) {
+    return 'Bakitisi talo : $montant';
+  }
+
+  @override
+  String ddDate(String date) {
+    return 'Mokolo : $date';
+  }
 }

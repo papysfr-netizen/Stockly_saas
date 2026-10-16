@@ -440,5 +440,13 @@
   "histCancelSale": "Longola eteki (ezwami naino te)",
   "histArticles": "{count, plural, =1{eloko 1} other{biloko {count}}}",
   "histBy": "na {nom}",
-  "histWalkIn": "Mosombi ya nzela"
+  "histWalkIn": "Mosombi ya nzela",
+  "ddMotif": "Ntina",
+  "ddNoItems": "Eloko moko te : niongo ebakisami na loboko.",
+  "ddItemsError": "Ekoki te kofungola biloko.",
+  "ddCall": "Benga",
+  "ddPdf": "Fakture PDF",
+  "ddDetails": "Makambo",
+  "ddDiscount": "Bakitisi talo : {montant}",
+  "ddDate": "Mokolo : {date}"
 }

@@ -1624,4 +1624,32 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get histWalkIn => 'Client divers';
+
+  @override
+  String get ddMotif => 'Motif';
+
+  @override
+  String get ddNoItems => 'Aucun article : dette ajoutée à la main.';
+
+  @override
+  String get ddItemsError => 'Impossible de charger les articles.';
+
+  @override
+  String get ddCall => 'Appeler';
+
+  @override
+  String get ddPdf => 'Facture PDF';
+
+  @override
+  String get ddDetails => 'Détails';
+
+  @override
+  String ddDiscount(String montant) {
+    return 'Remise accordée : $montant';
+  }
+
+  @override
+  String ddDate(String date) {
+    return 'Date : $date';
+  }
 }

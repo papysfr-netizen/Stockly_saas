@@ -13,6 +13,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:stockly_saas/core/models/dette.dart';
 import 'debt_dialogs.dart';
+import 'debt_detail_sheet.dart';
 import 'package:stockly_saas/core/services/messages_clients.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
 
@@ -97,6 +98,21 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
     return d.nomTiers.toLowerCase().contains(t) ||
         d.numeroFacture.toLowerCase().contains(t) ||
         d.telephone.contains(t);
+  }
+
+  // ------------------------------------------------------------------
+  // 📋 FICHE DE DÉTAIL
+  // ------------------------------------------------------------------
+  void _ouvrirDetail(Dette d) {
+    DetteDetailSheet.ouvrir(
+      context,
+      entrepriseId: widget.entrepriseId,
+      dette: d,
+      format: _m,
+      onEncaisser: () => DebtDialogs.afficherPaiement(
+          context, ref, widget.entrepriseId, d, widget.currency),
+      onRelancer: () => _relancer(d),
+    );
   }
 
   // ------------------------------------------------------------------
@@ -388,7 +404,10 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
 
     final initiale = d.nomTiers.trim().isEmpty ? '?' : d.nomTiers.trim()[0].toUpperCase();
 
-    return Container(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => _ouvrirDetail(d),
+      child: Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -491,7 +510,7 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
             ),
 
             // Ligne 3 : échéance / dernier paiement / note
-            if (d.dateEcheance != null || d.dernierPaiement != null || d.note.isNotEmpty) ...[
+            if (d.dateEcheance != null || d.dernierPaiement != null || motifDette(d).isNotEmpty) ...[
               const SizedBox(height: 8),
               Wrap(
                 spacing: 12,
@@ -506,7 +525,7 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
                   if (d.dernierPaiement != null)
                     _petiteInfo(Icons.history_rounded,
                         _t.lastPayment(DateFormat('dd/MM/yyyy').format(d.dernierPaiement!))),
-                  if (d.note.isNotEmpty) _petiteInfo(Icons.notes_rounded, d.note),
+                  if (motifDette(d).isNotEmpty) _petiteInfo(Icons.notes_rounded, motifDette(d)),
                 ],
               ),
             ],
@@ -518,6 +537,12 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  IconButton(
+                    tooltip: _t.ddDetails,
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () => _ouvrirDetail(d),
+                    icon: const Icon(Icons.receipt_long_rounded, color: _bleuNuit),
+                  ),
                   TextButton.icon(
                     onPressed: () => _relancer(d),
                     icon: const Icon(Icons.chat_rounded, size: 18, color: Color(0xFF25D366)),
@@ -543,6 +568,7 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
           ],
         ),
       ),
+    ),
     );
   }
 

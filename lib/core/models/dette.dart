@@ -10,6 +10,8 @@ class Dette {
   final String nomTiers;
   final String telephone;
   final String numeroFacture;
+  /// Identifiant complet de la vente liée ('' si dette ajoutée à la main)
+  final String venteId;
   final double montantInitial;
   final double acomptePaye;
   final double montantReste;
@@ -27,6 +29,7 @@ class Dette {
     required this.nomTiers,
     this.telephone = '',
     required this.numeroFacture,
+    this.venteId = '',
     required this.montantInitial,
     required this.acomptePaye,
     required this.montantReste,
@@ -154,6 +157,7 @@ class Dette {
       nomTiers: nomTiersResolved,
       telephone: (json['telephone'] ?? json['telephoneClient'] ?? json['tel'] ?? '').toString(),
       numeroFacture: numeroFactureResolved,
+      venteId: (json['venteId'] ?? '').toString(),
       montantInitial: montantInitialResolved,
       acomptePaye: finalAcompte,
       montantReste: montantResteResolved,
@@ -188,6 +192,7 @@ class Dette {
       'nomTiers': nomTiers,
       'telephone': telephone,
       'numeroFacture': numeroFacture,
+      if (venteId.isNotEmpty) 'venteId': venteId,
       'montantInitial': montantInitial,
       'acomptePaye': acomptePaye,
       'montantReste': montantReste,
@@ -209,6 +214,7 @@ class Dette {
       'nomTiers': nomTiers,
       'telephone': telephone,
       'numeroFacture': numeroFacture,
+      if (venteId.isNotEmpty) 'venteId': venteId,
       'montantInitial': montantInitial,
       'acomptePaye': acomptePaye,
       'montantReste': montantReste,
@@ -232,6 +238,7 @@ class Dette {
     String? nomTiers,
     String? telephone,
     String? numeroFacture,
+    String? venteId,
     double? montantInitial,
     double? acomptePaye,
     double? montantReste,
@@ -249,6 +256,7 @@ class Dette {
       nomTiers: nomTiers ?? this.nomTiers,
       telephone: telephone ?? this.telephone,
       numeroFacture: numeroFacture ?? this.numeroFacture,
+      venteId: venteId ?? this.venteId,
       montantInitial: montantInitial ?? this.montantInitial,
       acomptePaye: acomptePaye ?? this.acomptePaye,
       montantReste: montantReste ?? this.montantReste,
