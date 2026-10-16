@@ -2826,6 +2826,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Ex : paiera vendredi après le marché'**
   String get payMotifHint;
+
+  /// No description provided for @accDebtsCollected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dettes encaissées : {montant}'**
+  String accDebtsCollected(String montant);
+
+  /// No description provided for @accDebtsCollectedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dettes encaissées aujourd\'hui ({count})'**
+  String accDebtsCollectedTitle(int count);
 }
 
 class _AppLocalizationsDelegate

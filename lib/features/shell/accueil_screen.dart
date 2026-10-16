@@ -45,6 +45,7 @@ class AccueilScreen extends ConsumerStatefulWidget {
 
 class _AccueilScreenState extends ConsumerState<AccueilScreen> {
   Stream<QuerySnapshot<Map<String, dynamic>>>? _ventesDuJour;
+  Stream<QuerySnapshot<Map<String, dynamic>>>? _dettesPayeesDuJour; // 💰
   DateTime? _jour;
 
   String get _entrepriseId => widget.currentUser.entrepriseId;
@@ -61,8 +62,21 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
           .collection('ventes')
           .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(aujourdhui))
           .snapshots();
+      // 💰 Créances payées aujourd'hui (au moins un paiement depuis minuit)
+      _dettesPayeesDuJour = FirebaseFirestore.instance
+          .collection('entreprises')
+          .doc(_entrepriseId)
+          .collection('creances')
+          .where('dernierPaiement', isGreaterThanOrEqualTo: Timestamp.fromDate(aujourdhui))
+          .snapshots();
     }
     return _ventesDuJour!;
+  }
+
+  /// 💰 Créances payées aujourd'hui (recréé avec les ventes si on change de jour)
+  Stream<QuerySnapshot<Map<String, dynamic>>> get _streamDettesPayees {
+    _streamVentes();
+    return _dettesPayeesDuJour!;
   }
 
   // ---------- Lecture sûre des valeurs ----------
@@ -142,6 +156,8 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF3F5F7),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: _streamDettesPayees,
+        builder: (context, snapDettes) => StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: _streamVentes(),
         builder: (context, snap) {
           double ventes = 0, encaisse = 0, credit = 0, cout = 0, remises = 0;
@@ -160,7 +176,32 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
             listeVentes.add(v);
           }
           listeVentes.sort((a, b) => (_date(b['date']) ?? minuit).compareTo(_date(a['date']) ?? minuit));
-          final solde = encaisse - totalDepenses;
+          // 💰 Dettes encaissées aujourd'hui (historique des paiements)
+          double dettesEncaissees = 0;
+          final encaissementsDettes = <Map<String, dynamic>>[];
+          for (final doc in snapDettes.data?.docs ?? const []) {
+            final c = doc.data();
+            final creation = c['dateCreation'] ?? c['createdAt'];
+            final paiements = c['paiements'];
+            if (paiements is! List) continue;
+            for (final p in paiements.whereType<Map>()) {
+              final quand = _date(p['date']);
+              if (quand == null || quand.isBefore(minuit)) continue;
+              // Acompte donné à la vente : déjà compté dans « Encaissé »
+              if (creation is Timestamp && p['date'] == creation) continue;
+              final montant = _nombre(p['montant']);
+              dettesEncaissees += montant;
+              encaissementsDettes.add({
+                'nom': (c['nomTiers'] ?? c['nomClient'] ?? '').toString(),
+                'date': quand,
+                'montant': montant,
+                'parNom': (p['parNom'] ?? '').toString(),
+              });
+            }
+          }
+          encaissementsDettes.sort(
+              (a, b) => (b['date'] as DateTime).compareTo(a['date'] as DateTime));
+          final solde = encaisse + dettesEncaissees - totalDepenses;
 
           return CustomScrollView(
             slivers: [
@@ -270,6 +311,13 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                             _petiteCase(t.accExpenses, devise.formatPrice(totalDepenses), Icons.trending_down_rounded, Colors.red),
                           ],
                         ),
+                        if (dettesEncaissees > 0.005) ...[
+                          const SizedBox(height: 10),
+                          Text(
+                            t.accDebtsCollected(devise.formatPrice(dettesEncaissees)),
+                            style: const TextStyle(color: Colors.teal, fontWeight: FontWeight.w600),
+                          ),
+                        ],
                         if (voirFinances) ...[
                           const SizedBox(height: 12),
                           Container(
@@ -313,6 +361,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                               devise: devise,
                               taux: tauxCdf,
                               remises: remises,
+                              dettesEncaissees: dettesEncaissees,
                             ),
                             icon: const Icon(Icons.send_rounded, color: Color(0xFF25D366)),
                             label: Text(t.accSendSummary),
@@ -456,10 +505,55 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                     );
                   },
                 ),
+              // ---------- 💰 Dettes encaissées aujourd'hui ----------
+              if (encaissementsDettes.isNotEmpty) ...[
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
+                    child: Text(t.accDebtsCollectedTitle(encaissementsDettes.length),
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+                SliverList.builder(
+                  itemCount: encaissementsDettes.length,
+                  itemBuilder: (context, i) {
+                    final e = encaissementsDettes[i];
+                    final nom = (e['nom'] as String).trim();
+                    final par = (e['parNom'] as String).trim();
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
+                        child: ListTile(
+                          onTap: () => _ouvrir(const DebtManagementScreen()),
+                          leading: CircleAvatar(
+                            backgroundColor: Colors.teal.withValues(alpha: 0.12),
+                            child: const Icon(Icons.call_received_rounded, color: Colors.teal),
+                          ),
+                          title: Text(nom.isEmpty ? t.accClient : nom, overflow: TextOverflow.ellipsis),
+                          subtitle: Text(
+                            '${DateFormat('HH:mm').format(e['date'] as DateTime)}'
+                            '${par.isEmpty ? '' : ' • $par'}',
+                          ),
+                          trailing: Text(
+                            '+ ${devise.formatPrice(e['montant'] as double)}',
+                            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.teal),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
               const SliverToBoxAdapter(child: SizedBox(height: 24)),
             ],
           );
         },
+      ),
       ),
     );
   }
@@ -478,6 +572,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
     required CurrencyState devise,
     required double taux,
     double remises = 0,
+    double dettesEncaissees = 0,
   }) async {
     final l = AppLocalizations.of(context); // langue de l'application (lue avant toute attente)
     final jours = l.sumDays.split(',');
@@ -499,6 +594,9 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
       ..writeln(l.sumCollected(devise.formatPrice(encaisse)))
       ..writeln(l.sumCredit(devise.formatPrice(credit)))
       ..writeln(l.sumExpenses(devise.formatPrice(depenses)));
+    if (dettesEncaissees > 0.005) {
+      t.writeln('💰 ${l.accDebtsCollected(devise.formatPrice(dettesEncaissees))}');
+    }
     if (voirFinances) {
       t
         ..writeln(l.sumCash(devise.formatPrice(solde)))

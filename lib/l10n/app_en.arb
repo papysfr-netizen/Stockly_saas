@@ -453,5 +453,7 @@
   "ddPaidBefore": "Paid earlier (at the sale or before)",
   "ddNoPayments": "No payments yet.",
   "payMotif": "Reason for credit (optional)",
-  "payMotifHint": "E.g. will pay Friday after the market"
+  "payMotifHint": "E.g. will pay Friday after the market",
+  "accDebtsCollected": "Debts collected: {montant}",
+  "accDebtsCollectedTitle": "Debts collected today ({count})"
 }

@@ -1274,5 +1274,21 @@
   "ddPaidBefore": "Payé avant (à la vente ou plus tôt)",
   "ddNoPayments": "Aucun paiement pour l'instant.",
   "payMotif": "Motif du crédit (facultatif)",
-  "payMotifHint": "Ex : paiera vendredi après le marché"
+  "payMotifHint": "Ex : paiera vendredi après le marché",
+  "accDebtsCollected": "Dettes encaissées : {montant}",
+  "@accDebtsCollected": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "accDebtsCollectedTitle": "Dettes encaissées aujourd'hui ({count})",
+  "@accDebtsCollectedTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

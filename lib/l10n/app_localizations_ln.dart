@@ -1663,4 +1663,14 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get payMotifHint => 'Ndakisa: akofuta mokolo ya mitano sima ya zando';
+
+  @override
+  String accDebtsCollected(String montant) {
+    return 'Baniongo efutami : $montant';
+  }
+
+  @override
+  String accDebtsCollectedTitle(int count) {
+    return 'Baniongo efutami lelo ($count)';
+  }
 }

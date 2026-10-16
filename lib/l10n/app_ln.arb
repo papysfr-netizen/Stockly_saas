@@ -453,5 +453,7 @@
   "ddPaidBefore": "Efutamaki liboso (na eteki to liboso)",
   "ddNoPayments": "Bofuti moko te naino.",
   "payMotif": "Ntina ya niongo (soki olingi)",
-  "payMotifHint": "Ndakisa: akofuta mokolo ya mitano sima ya zando"
+  "payMotifHint": "Ndakisa: akofuta mokolo ya mitano sima ya zando",
+  "accDebtsCollected": "Baniongo efutami : {montant}",
+  "accDebtsCollectedTitle": "Baniongo efutami lelo ({count})"
 }

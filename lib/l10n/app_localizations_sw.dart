@@ -1659,4 +1659,14 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get payMotifHint => 'Mfano: atalipa Ijumaa baada ya soko';
+
+  @override
+  String accDebtsCollected(String montant) {
+    return 'Madeni yaliyolipwa : $montant';
+  }
+
+  @override
+  String accDebtsCollectedTitle(int count) {
+    return 'Madeni yaliyolipwa leo ($count)';
+  }
 }

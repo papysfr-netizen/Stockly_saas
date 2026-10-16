@@ -453,5 +453,7 @@
   "ddPaidBefore": "Ililipwa mapema (wakati wa mauzo au kabla)",
   "ddNoPayments": "Bado hakuna malipo.",
   "payMotif": "Sababu ya mkopo (si lazima)",
-  "payMotifHint": "Mfano: atalipa Ijumaa baada ya soko"
+  "payMotifHint": "Mfano: atalipa Ijumaa baada ya soko",
+  "accDebtsCollected": "Madeni yaliyolipwa : {montant}",
+  "accDebtsCollectedTitle": "Madeni yaliyolipwa leo ({count})"
 }

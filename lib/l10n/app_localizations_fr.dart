@@ -1667,4 +1667,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payMotifHint => 'Ex : paiera vendredi après le marché';
+
+  @override
+  String accDebtsCollected(String montant) {
+    return 'Dettes encaissées : $montant';
+  }
+
+  @override
+  String accDebtsCollectedTitle(int count) {
+    return 'Dettes encaissées aujourd\'hui ($count)';
+  }
 }
