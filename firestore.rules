@@ -77,6 +77,26 @@ service cloud.firestore {
       return estProprietaireDe(entId) || (b == '' ? 'principale' : b) == maBoutique();
     }
 
+    // Paiement ou retour sur une dette (employé non gérant) :
+    //  - seuls les champs du paiement changent
+    //  - le reste ne peut que baisser, sans passer sous 0,
+    //    et pas plus que ce qui a été payé (acomptePaye) ou rendu (montantRetour)
+    function paiementValide() {
+      let avant = resource.data;
+      let apres = request.resource.data;
+      let resteAvant = avant.get('montantReste', avant.get('montantRestant', avant.get('montantInitial', 0)));
+      let baisse = resteAvant - apres.get('montantReste', 0);
+      let paye = apres.get('acomptePaye', 0) - avant.get('acomptePaye', 0);
+      let rendu = apres.get('montantRetour', 0) - avant.get('montantRetour', 0);
+      return apres.diff(avant).affectedKeys().hasOnly(['montantReste', 'montantRestant', 'acomptePaye',
+                 'statut', 'dernierPaiement', 'updatedAt', 'paiements', 'montantRetour'])
+        && apres.get('montantReste', 0) >= 0
+        && baisse >= 0
+        && paye >= 0
+        && rendu >= 0
+        && baisse <= paye + rendu + 0.02;
+    }
+
     // ---------- Profils utilisateurs ----------
     match /users/{userId} {
 
@@ -178,12 +198,15 @@ service cloud.firestore {
           allow update, delete: if false;
         }
       }
+      // 🔒 Créances / dettes : Gérant+ = tout ; les autres = paiement ou retour seulement
       match /creances/{docId} {
-        allow read, create, update: if estMembre(entId);
+        allow read, create: if estMembre(entId);
+        allow update: if estGerantOuPlus(entId) || (estMembre(entId) && paiementValide());
         allow delete: if estGerantOuPlus(entId);
       }
       match /dettes/{docId} {
-        allow read, create, update: if estMembre(entId);
+        allow read, create: if estMembre(entId);
+        allow update: if estGerantOuPlus(entId) || (estMembre(entId) && paiementValide());
         allow delete: if estGerantOuPlus(entId);
       }
 
