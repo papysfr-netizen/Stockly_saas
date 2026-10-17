@@ -1727,4 +1727,228 @@ class AppLocalizationsSw extends AppLocalizations {
   String repMore(int count) {
     return '…na $count zaidi';
   }
+
+  @override
+  String get retCancelTitle => 'Futa mauzo';
+
+  @override
+  String get retNoCancelRight =>
+      'Meneja na mmiliki pekee ndio wanaweza kufuta mauzo.';
+
+  @override
+  String get retNoReturnRight =>
+      'Meneja na mmiliki pekee ndio wanaweza kuandika marejesho.';
+
+  @override
+  String retTooLate(String date, int jours, int limite) {
+    return 'Muda wa kurudisha umepita: mauzo ya $date (siku $jours zilizopita, kikomo siku $limite).\n\nMmiliki pekee ndiye anaweza kukubali marejesho haya.';
+  }
+
+  @override
+  String get retNothingToCancel =>
+      'Hakuna cha kufuta kwenye mauzo haya.\n\nBidhaa zote zimeshakabidhiwa kwa mteja au kufutwa. Akizirudisha, tumia « Rudisha bidhaa ».';
+
+  @override
+  String get retNothingToReturn =>
+      'Hakuna cha kurudisha kwenye mauzo haya.\n\nAma kila kitu kimeshirudishwa, ama bidhaa bado hazijakabidhiwa kwa mteja (hapo, tumia « Futa mauzo »).';
+
+  @override
+  String get retModeAvoirHint =>
+      'Kiasi kinaongezwa kwenye akaunti ya mteja: ataweza kukitumia kwenye malipo.';
+
+  @override
+  String get retModeKeepHint =>
+      'Duka linabaki na pesa (malipo ya awali hayarudishwi).';
+
+  @override
+  String get retModeCashHint => 'Pesa zinatoka kwenye kasha.';
+
+  @override
+  String retSaleOf(String date, String age) {
+    return 'Mauzo ya $date • $age';
+  }
+
+  @override
+  String retInvoiceAmount(String montant) {
+    return 'Ankara : $montant';
+  }
+
+  @override
+  String retStillOwes(String montant) {
+    return 'Mteja bado anadaiwa : $montant';
+  }
+
+  @override
+  String get retCancelInfo =>
+      'Bidhaa hazikuchukuliwa kamwe na mteja: zinarudi kwenye akiba na mauzo yanafutwa kwa bidhaa hizi.';
+
+  @override
+  String retLateAccepted(int jours) {
+    return 'Muda umepita (siku $jours): marejesho yamekubaliwa kipekee na mmiliki.';
+  }
+
+  @override
+  String get retItemsToCancel => 'Bidhaa za kufuta';
+
+  @override
+  String get retItemsReturned => 'Bidhaa zilizorudishwa';
+
+  @override
+  String retPrice(String montant) {
+    return 'Bei : $montant';
+  }
+
+  @override
+  String retNotPicked(int count) {
+    return 'haijachukuliwa : $count';
+  }
+
+  @override
+  String retReturnable(int count) {
+    return 'inarudishika : $count';
+  }
+
+  @override
+  String retAlreadyReturned(int count) {
+    return 'imeshirudishwa : $count';
+  }
+
+  @override
+  String get retResell => 'Rudisha sokoni';
+
+  @override
+  String get retDamaged => 'Imeharibika (hasara)';
+
+  @override
+  String get retCancelAll => 'Futa zote';
+
+  @override
+  String get retCancelReason => 'Sababu ya kufuta *';
+
+  @override
+  String get retReturnReason => 'Sababu ya kurudisha *';
+
+  @override
+  String get retCancelHint => 'Mfano: mteja hakuja, muda umepita…';
+
+  @override
+  String get retReturnHint => 'Mfano: saizi isiyofaa, kasoro ya utengenezaji…';
+
+  @override
+  String retCancelledAmount(String montant) {
+    return 'Kiasi kilichofutwa : $montant';
+  }
+
+  @override
+  String retReturnAmount(String montant) {
+    return 'Kiasi cha marejesho : $montant';
+  }
+
+  @override
+  String retDeducted(String montant) {
+    return 'Kimetolewa kwenye deni la mteja : $montant';
+  }
+
+  @override
+  String retAlreadyPaid(String montant) {
+    return 'Tayari kimelipwa na mteja : $montant';
+  }
+
+  @override
+  String retToGiveBack(String montant) {
+    return 'Kumrudishia mteja : $montant';
+  }
+
+  @override
+  String get retCash => 'Pesa taslimu';
+
+  @override
+  String get retCredit => 'Salio';
+
+  @override
+  String get retKeep => 'Baki nazo';
+
+  @override
+  String get retPhoneLabel => 'Simu ya akaunti ya mteja *';
+
+  @override
+  String get retPhoneError => 'Salio linahitaji simu ya mteja';
+
+  @override
+  String get retChooseItems => 'Chagua bidhaa';
+
+  @override
+  String retValidateCancel(String montant) {
+    return 'Thibitisha kufuta ($montant)';
+  }
+
+  @override
+  String retValidateReturn(String montant) {
+    return 'Thibitisha marejesho ($montant)';
+  }
+
+  @override
+  String get retNeedReason => 'Andika sababu ili kuthibitisha.';
+
+  @override
+  String get retConfirmCancel => 'Thibitisha kufuta';
+
+  @override
+  String get retConfirmReturn => 'Thibitisha marejesho';
+
+  @override
+  String get retDamagedShort => 'imeharibika';
+
+  @override
+  String retAmount(String montant) {
+    return 'Kiasi : $montant';
+  }
+
+  @override
+  String retDamagedCount(int count) {
+    return 'Vipande $count vilivyoharibika: havirudi kwenye akiba.';
+  }
+
+  @override
+  String retCreditTo(String montant, String tel) {
+    return 'Salio la $montant limewekwa kwenye akaunti $tel.';
+  }
+
+  @override
+  String get retIrreversible => 'Operesheni hii haiwezi kutenduliwa.';
+
+  @override
+  String get retBack => 'Rudi';
+
+  @override
+  String get retValidate => 'Thibitisha';
+
+  @override
+  String get retCancelSaved => 'Kufuta kumehifadhiwa.';
+
+  @override
+  String get retReturnSaved => 'Marejesho yamehifadhiwa.';
+
+  @override
+  String retGiveCash(String montant) {
+    return 'Mrudishie mteja $montant pesa taslimu.';
+  }
+
+  @override
+  String retCreditAdded(String montant, String solde) {
+    return 'Salio la $montant limeongezwa kwenye akaunti ya mteja (salio jipya : $solde).';
+  }
+
+  @override
+  String retDepositKept(String montant) {
+    return 'Malipo ya awali ya $montant yamebaki dukani.';
+  }
+
+  @override
+  String retDebtReduced(String montant) {
+    return 'Deni la mteja limepunguzwa kwa $montant.';
+  }
+
+  @override
+  String get retOffline => '(itatumwa intaneti ikirudi)';
 }

@@ -10,6 +10,7 @@ import '../../core/providers/user_role_provider.dart';
 import '../../core/services/utilisateur_service.dart';
 import '../../core/utils/currency_extension.dart';
 import '../comptes_clients/compte_client_service.dart';
+import 'package:stockly_saas/l10n/app_localizations.dart';
 
 // ============================================================================
 // ↩️ RETOUR DE MARCHANDISE  /  ✖️ ANNULATION DE VENTE NON RETIRÉE
@@ -67,6 +68,16 @@ class RetourVenteScreen extends ConsumerStatefulWidget {
 
 class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
   static const int delaiJours = 7;
+
+  AppLocalizations get _t => AppLocalizations.of(context);
+
+  /// « Aujourd'hui », « Hier », « Il y a 3 jours »… dans la langue choisie
+  String _age(AppLocalizations t, int jours) {
+    if (jours <= 0) return t.ageToday;
+    if (jours == 1) return t.ageYesterday;
+    if (jours < 30) return t.ageDays(jours);
+    return t.ageMonths(jours ~/ 30);
+  }
 
   late final List<Map<String, dynamic>> _articles;
   late final List<int> _livrees;
@@ -165,13 +176,13 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_annulation ? 'Annuler la vente' : 'Retour de marchandise'),
+        title: Text(_annulation ? _t.retCancelTitle : _t.histReturnGoods),
         backgroundColor: _couleur,
         foregroundColor: Colors.white,
       ),
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Erreur : $e')),
+        error: (e, _) => Center(child: Text(_t.errorPrefix('$e'))),
         data: (profile) => _corps(
           peutRetour: profile.peutFaireRetours,
           estPatron: profile.role.peutGererEquipe,
@@ -197,7 +208,11 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
   }
 
   Widget _corps({required bool peutRetour, required bool estPatron}) {
-    final client = (widget.data['nomClient'] ?? 'Client').toString();
+    final t = _t;
+    final nomClient = (widget.data['nomClient'] ?? '').toString().trim();
+    final client = nomClient.isEmpty
+        ? t.accClient
+        : (nomClient == 'Client Divers' ? t.histWalkIn : nomClient);
     final dateVente = _dateVente;
     final jours = DateTime.now().difference(dateVente).inDays;
     final horsDelai = !_annulation && jours > delaiJours;
@@ -206,16 +221,14 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
       return _message(
         Icons.lock_outline,
         _annulation
-            ? 'Seuls le gérant et le patron peuvent annuler une vente.'
-            : 'Seuls le gérant et le patron peuvent enregistrer un retour.',
+            ? t.retNoCancelRight
+            : t.retNoReturnRight,
       );
     }
     if (horsDelai && !estPatron) {
       return _message(
         Icons.timer_off_outlined,
-        'Délai de retour dépassé : vente du ${_jour(dateVente)} '
-        '(il y a $jours jours, limite $delaiJours jours).\n\n'
-        'Seul le patron peut accepter ce retour.',
+        t.retTooLate(_jour(dateVente), jours, delaiJours),
         couleur: Colors.red.shade300,
       );
     }
@@ -223,12 +236,8 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
       return _message(
         Icons.info_outline,
         _annulation
-            ? 'Rien à annuler sur cette vente.\n\n'
-                'Toute la marchandise a déjà été remise au client ou déjà annulée. '
-                "S'il la rapporte, utilisez « Retour de marchandise »."
-            : 'Rien à retourner sur cette vente.\n\n'
-                "Soit tout a déjà été retourné, soit la marchandise n'a pas encore "
-                'été remise au client (dans ce cas, utilisez « Annuler la vente »).',
+            ? t.retNothingToCancel
+            : t.retNothingToReturn,
       );
     }
 
@@ -240,14 +249,13 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
     final String explicationMode;
     switch (_mode) {
       case 'avoir':
-        explicationMode =
-            'Le montant est ajouté au compte client : il pourra l\'utiliser en Caisse.';
+        explicationMode = t.retModeAvoirHint;
         break;
       case 'garder':
-        explicationMode = "La boutique garde l'argent (acompte non remboursé).";
+        explicationMode = t.retModeKeepHint;
         break;
       default:
-        explicationMode = "L'argent sort de la caisse.";
+        explicationMode = t.retModeCashHint;
     }
 
     return ListView(
@@ -262,12 +270,12 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
               children: [
                 Text(client, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
-                Text('Vente du ${_jour(dateVente)} (il y a $jours jour${jours > 1 ? 's' : ''})',
+                Text(t.retSaleOf(_jour(dateVente), _age(t, jours)),
                     style: TextStyle(color: Colors.grey.shade700)),
-                Text('Facture : ${ref.formatPrice(_nombre(widget.data['montantTotal']))}',
+                Text(t.retInvoiceAmount(ref.formatPrice(_nombre(widget.data['montantTotal']))),
                     style: TextStyle(color: Colors.grey.shade700)),
                 if (_detteVente > 0.005)
-                  Text('Le client doit encore : ${ref.formatPrice(_detteVente)}',
+                  Text(t.retStillOwes(ref.formatPrice(_detteVente)),
                       style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
               ],
             ),
@@ -283,7 +291,7 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
               border: Border.all(color: Colors.red.shade200),
             ),
             child: Text(
-              'Marchandise jamais retirée par le client : elle revient en stock et la vente est annulée pour ces articles.',
+              t.retCancelInfo,
               style: TextStyle(color: Colors.red.shade900),
             ),
           ),
@@ -297,12 +305,12 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
               border: Border.all(color: Colors.orange.shade300),
             ),
             child: Text(
-              'Hors délai ($jours jours) : retour accepté exceptionnellement par le patron.',
+              t.retLateAccepted(jours),
               style: TextStyle(color: Colors.orange.shade900, fontWeight: FontWeight.bold),
             ),
           ),
         const SizedBox(height: 14),
-        Text(_annulation ? 'Articles à annuler' : 'Articles rapportés',
+        Text(_annulation ? t.retItemsToCancel : t.retItemsReturned,
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         const SizedBox(height: 6),
 
@@ -325,11 +333,11 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
                                   style: const TextStyle(fontWeight: FontWeight.w600)),
                               Text(
                                 _annulation
-                                    ? 'Prix : ${ref.formatPrice(_nombre(_articles[i]['prixUnitaire']))}'
-                                        ' • non retiré : ${_max[i]}'
-                                    : 'Prix : ${ref.formatPrice(_nombre(_articles[i]['prixUnitaire']))}'
-                                        ' • retournable : ${_max[i]}'
-                                        '${_dejaRetournees[i] > 0 ? ' (déjà retourné : ${_dejaRetournees[i]})' : ''}',
+                                    ? '${t.retPrice(ref.formatPrice(_nombre(_articles[i]['prixUnitaire'])))}'
+                                        ' • ${t.retNotPicked(_max[i])}'
+                                    : '${t.retPrice(ref.formatPrice(_nombre(_articles[i]['prixUnitaire'])))}'
+                                        ' • ${t.retReturnable(_max[i])}'
+                                        '${_dejaRetournees[i] > 0 ? ' (${t.retAlreadyReturned(_dejaRetournees[i])})' : ''}',
                                 style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
                               ),
                             ],
@@ -358,12 +366,12 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
                         spacing: 8,
                         children: [
                           ChoiceChip(
-                            label: const Text('Remettre en vente'),
+                            label: Text(t.retResell),
                             selected: !_abime[i],
                             onSelected: (_) => setState(() => _abime[i] = false),
                           ),
                           ChoiceChip(
-                            label: const Text('Abîmé (perte)'),
+                            label: Text(t.retDamaged),
                             selected: _abime[i],
                             selectedColor: Colors.red.shade100,
                             onSelected: (_) => setState(() => _abime[i] = true),
@@ -380,7 +388,7 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
             alignment: Alignment.centerRight,
             child: TextButton.icon(
               icon: const Icon(Icons.select_all),
-              label: const Text('Tout annuler'),
+              label: Text(t.retCancelAll),
               onPressed: () => setState(() {
                 for (var i = 0; i < _qte.length; i++) {
                   _qte[i] = _max[i];
@@ -395,10 +403,10 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
           controller: _motifCtrl,
           onChanged: (_) => setState(() {}),
           decoration: InputDecoration(
-            labelText: _annulation ? "Motif de l'annulation *" : 'Motif du retour *',
+            labelText: _annulation ? t.retCancelReason : t.retReturnReason,
             hintText: _annulation
-                ? 'Ex : client jamais venu, délai dépassé…'
-                : 'Ex : mauvaise taille, défaut de fabrication…',
+                ? t.retCancelHint
+                : t.retReturnHint,
             border: const OutlineInputBorder(),
           ),
         ),
@@ -417,42 +425,42 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
               children: [
                 Text(
                   _annulation
-                      ? 'Montant annulé : ${ref.formatPrice(montant)}'
-                      : 'Montant du retour : ${ref.formatPrice(montant)}',
+                      ? t.retCancelledAmount(ref.formatPrice(montant))
+                      : t.retReturnAmount(ref.formatPrice(montant)),
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 if (reduction > 0.005)
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
-                    child: Text('Déduit de la dette du client : ${ref.formatPrice(reduction)}'),
+                    child: Text(t.retDeducted(ref.formatPrice(reduction))),
                   ),
                 if (aRembourser > 0.005) ...[
                   Padding(
                     padding: const EdgeInsets.only(top: 4, bottom: 8),
                     child: Text(
                       _annulation
-                          ? 'Déjà payé par le client : ${ref.formatPrice(aRembourser)}'
-                          : 'À rendre au client : ${ref.formatPrice(aRembourser)}',
+                          ? t.retAlreadyPaid(ref.formatPrice(aRembourser))
+                          : t.retToGiveBack(ref.formatPrice(aRembourser)),
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
                   SegmentedButton<String>(
                     segments: [
-                      const ButtonSegment(
+                      ButtonSegment(
                         value: 'especes',
-                        label: Text('Espèces'),
-                        icon: Icon(Icons.payments_outlined),
+                        label: Text(t.retCash),
+                        icon: const Icon(Icons.payments_outlined),
                       ),
-                      const ButtonSegment(
+                      ButtonSegment(
                         value: 'avoir',
-                        label: Text('Avoir'),
-                        icon: Icon(Icons.card_giftcard),
+                        label: Text(t.retCredit),
+                        icon: const Icon(Icons.card_giftcard),
                       ),
                       if (_annulation)
-                        const ButtonSegment(
+                        ButtonSegment(
                           value: 'garder',
-                          label: Text('Garder'),
-                          icon: Icon(Icons.store_outlined),
+                          label: Text(t.retKeep),
+                          icon: const Icon(Icons.store_outlined),
                         ),
                     ],
                     selected: {_mode},
@@ -468,12 +476,12 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
                       keyboardType: TextInputType.phone,
                       onChanged: (_) => setState(() {}),
                       decoration: InputDecoration(
-                        labelText: 'Téléphone du compte client *',
+                        labelText: t.retPhoneLabel,
                         prefixIcon: const Icon(Icons.account_balance_wallet),
                         isDense: true,
                         border: const OutlineInputBorder(),
                         errorText: _avoirSansTelephone
-                            ? 'Un avoir a besoin du téléphone du client'
+                            ? t.retPhoneError
                             : null,
                       ),
                     ),
@@ -505,10 +513,10 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
                 : Icon(_annulation ? Icons.cancel_outlined : Icons.assignment_return),
             label: Text(
               montant <= 0
-                  ? 'Choisissez les articles'
+                  ? t.retChooseItems
                   : _annulation
-                      ? "Valider l'annulation (${ref.formatPrice(montant)})"
-                      : 'Valider le retour (${ref.formatPrice(montant)})',
+                      ? t.retValidateCancel(ref.formatPrice(montant))
+                      : t.retValidateReturn(ref.formatPrice(montant)),
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
@@ -516,7 +524,7 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
         if (montant > 0 && !motifOk)
           Padding(
             padding: const EdgeInsets.only(top: 6),
-            child: Text('Indiquez le motif pour valider.',
+            child: Text(t.retNeedReason,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
           ),
@@ -532,10 +540,11 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
         if (_qte[i] > 0 && _abime[i]) _qte[i]
     ].fold<int>(0, (s, q) => s + q);
 
+    final t = _t;
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(_annulation ? "Confirmer l'annulation" : 'Confirmer le retour'),
+        title: Text(_annulation ? t.retConfirmCancel : t.retConfirmReturn),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -543,32 +552,32 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
             for (var i = 0; i < _articles.length; i++)
               if (_qte[i] > 0)
                 Text('• ${_qte[i]} × ${_articles[i]['nom']}'
-                    '${_abime[i] ? '  (abîmé)' : ''}'),
+                    '${_abime[i] ? '  (${t.retDamagedShort})' : ''}'),
             const SizedBox(height: 10),
-            Text('Montant : ${ref.formatPrice(montant)}',
+            Text(t.retAmount(ref.formatPrice(montant)),
                 style: const TextStyle(fontWeight: FontWeight.bold)),
             if (nbAbimes > 0)
-              Text('$nbAbimes pièce(s) abîmée(s) : ne reviennent pas en stock.',
+              Text(t.retDamagedCount(nbAbimes),
                   style: TextStyle(color: Colors.red.shade700, fontSize: 12)),
             if (_mode == 'avoir' && _aRembourserPrevu > 0.005)
               Text(
-                'Avoir de ${ref.formatPrice(_aRembourserPrevu)} versé sur le compte ${_telAvoirCtrl.text.trim()}.',
+                t.retCreditTo(ref.formatPrice(_aRembourserPrevu), _telAvoirCtrl.text.trim()),
                 style: TextStyle(color: Colors.green.shade800, fontSize: 12),
               ),
             const SizedBox(height: 6),
-            const Text('Cette opération ne peut pas être annulée.',
-                style: TextStyle(fontSize: 12)),
+            Text(t.retIrreversible,
+                style: const TextStyle(fontSize: 12)),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Retour')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(t.retBack)),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: _couleur,
               foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Valider'),
+            child: Text(t.retValidate),
           ),
         ],
       ),
@@ -598,6 +607,7 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
     setState(() => _enCours = true);
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
+    final t = _t;
 
     final db = FirebaseFirestore.instance;
     final entRef = db.collection('entreprises').doc(widget.entrepriseId);
@@ -860,30 +870,29 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
     } catch (e) {
       if (mounted) setState(() => _enCours = false);
       messenger.showSnackBar(
-        SnackBar(content: Text('Erreur : $e'), backgroundColor: Colors.red),
+        SnackBar(content: Text(t.errorPrefix('$e')), backgroundColor: Colors.red),
       );
       return;
     }
 
-    final debut = _annulation ? 'Annulation enregistrée.' : 'Retour enregistré.';
+    final debut = _annulation ? t.retCancelSaved : t.retReturnSaved;
     final String texte;
     switch (mode) {
       case 'especes':
-        texte = '$debut Rendez ${ref.formatPrice(aRembourser)} au client en espèces.';
+        texte = '$debut ${t.retGiveCash(ref.formatPrice(aRembourser))}';
         break;
       case 'avoir':
-        texte = '$debut Avoir de ${ref.formatPrice(aRembourser)} ajouté au compte client '
-            '(nouveau solde : ${ref.formatPrice(soldeAvantAvoir + aRembourser)}).';
+        texte = '$debut ${t.retCreditAdded(ref.formatPrice(aRembourser), ref.formatPrice(soldeAvantAvoir + aRembourser))}';
         break;
       case 'garder':
-        texte = '$debut Acompte de ${ref.formatPrice(aRembourser)} conservé par la boutique.';
+        texte = '$debut ${t.retDepositKept(ref.formatPrice(aRembourser))}';
         break;
       default:
-        texte = '$debut Dette du client diminuée de ${ref.formatPrice(reduction)}.';
+        texte = '$debut ${t.retDebtReduced(ref.formatPrice(reduction))}';
     }
     messenger.showSnackBar(
       SnackBar(
-        content: Text(horsLigne ? "$texte (envoi dès le retour d'internet)" : texte),
+        content: Text(horsLigne ? '$texte ${t.retOffline}' : texte),
         backgroundColor: horsLigne ? Colors.orange.shade800 : Colors.green.shade700,
         duration: const Duration(seconds: 6),
       ),

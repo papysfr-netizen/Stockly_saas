@@ -2928,6 +2928,348 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'…et {count} autre(s)'**
   String repMore(int count);
+
+  /// No description provided for @retCancelTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler la vente'**
+  String get retCancelTitle;
+
+  /// No description provided for @retNoCancelRight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seuls le gérant et le patron peuvent annuler une vente.'**
+  String get retNoCancelRight;
+
+  /// No description provided for @retNoReturnRight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seuls le gérant et le patron peuvent enregistrer un retour.'**
+  String get retNoReturnRight;
+
+  /// No description provided for @retTooLate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Délai de retour dépassé : vente du {date} (il y a {jours} jours, limite {limite} jours).\n\nSeul le patron peut accepter ce retour.'**
+  String retTooLate(String date, int jours, int limite);
+
+  /// No description provided for @retNothingToCancel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien à annuler sur cette vente.\n\nToute la marchandise a déjà été remise au client ou déjà annulée. S\'il la rapporte, utilisez « Retour de marchandise ».'**
+  String get retNothingToCancel;
+
+  /// No description provided for @retNothingToReturn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien à retourner sur cette vente.\n\nSoit tout a déjà été retourné, soit la marchandise n\'a pas encore été remise au client (dans ce cas, utilisez « Annuler la vente »).'**
+  String get retNothingToReturn;
+
+  /// No description provided for @retModeAvoirHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le montant est ajouté au compte client : il pourra l\'utiliser en Caisse.'**
+  String get retModeAvoirHint;
+
+  /// No description provided for @retModeKeepHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'La boutique garde l\'argent (acompte non remboursé).'**
+  String get retModeKeepHint;
+
+  /// No description provided for @retModeCashHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'argent sort de la caisse.'**
+  String get retModeCashHint;
+
+  /// No description provided for @retSaleOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vente du {date} • {age}'**
+  String retSaleOf(String date, String age);
+
+  /// No description provided for @retInvoiceAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Facture : {montant}'**
+  String retInvoiceAmount(String montant);
+
+  /// No description provided for @retStillOwes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le client doit encore : {montant}'**
+  String retStillOwes(String montant);
+
+  /// No description provided for @retCancelInfo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marchandise jamais retirée par le client : elle revient en stock et la vente est annulée pour ces articles.'**
+  String get retCancelInfo;
+
+  /// No description provided for @retLateAccepted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hors délai ({jours} jours) : retour accepté exceptionnellement par le patron.'**
+  String retLateAccepted(int jours);
+
+  /// No description provided for @retItemsToCancel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Articles à annuler'**
+  String get retItemsToCancel;
+
+  /// No description provided for @retItemsReturned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Articles rapportés'**
+  String get retItemsReturned;
+
+  /// No description provided for @retPrice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix : {montant}'**
+  String retPrice(String montant);
+
+  /// No description provided for @retNotPicked.
+  ///
+  /// In fr, this message translates to:
+  /// **'non retiré : {count}'**
+  String retNotPicked(int count);
+
+  /// No description provided for @retReturnable.
+  ///
+  /// In fr, this message translates to:
+  /// **'retournable : {count}'**
+  String retReturnable(int count);
+
+  /// No description provided for @retAlreadyReturned.
+  ///
+  /// In fr, this message translates to:
+  /// **'déjà retourné : {count}'**
+  String retAlreadyReturned(int count);
+
+  /// No description provided for @retResell.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remettre en vente'**
+  String get retResell;
+
+  /// No description provided for @retDamaged.
+  ///
+  /// In fr, this message translates to:
+  /// **'Abîmé (perte)'**
+  String get retDamaged;
+
+  /// No description provided for @retCancelAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout annuler'**
+  String get retCancelAll;
+
+  /// No description provided for @retCancelReason.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif de l\'annulation *'**
+  String get retCancelReason;
+
+  /// No description provided for @retReturnReason.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif du retour *'**
+  String get retReturnReason;
+
+  /// No description provided for @retCancelHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex : client jamais venu, délai dépassé…'**
+  String get retCancelHint;
+
+  /// No description provided for @retReturnHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex : mauvaise taille, défaut de fabrication…'**
+  String get retReturnHint;
+
+  /// No description provided for @retCancelledAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant annulé : {montant}'**
+  String retCancelledAmount(String montant);
+
+  /// No description provided for @retReturnAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant du retour : {montant}'**
+  String retReturnAmount(String montant);
+
+  /// No description provided for @retDeducted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déduit de la dette du client : {montant}'**
+  String retDeducted(String montant);
+
+  /// No description provided for @retAlreadyPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déjà payé par le client : {montant}'**
+  String retAlreadyPaid(String montant);
+
+  /// No description provided for @retToGiveBack.
+  ///
+  /// In fr, this message translates to:
+  /// **'À rendre au client : {montant}'**
+  String retToGiveBack(String montant);
+
+  /// No description provided for @retCash.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espèces'**
+  String get retCash;
+
+  /// No description provided for @retCredit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avoir'**
+  String get retCredit;
+
+  /// No description provided for @retKeep.
+  ///
+  /// In fr, this message translates to:
+  /// **'Garder'**
+  String get retKeep;
+
+  /// No description provided for @retPhoneLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléphone du compte client *'**
+  String get retPhoneLabel;
+
+  /// No description provided for @retPhoneError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un avoir a besoin du téléphone du client'**
+  String get retPhoneError;
+
+  /// No description provided for @retChooseItems.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez les articles'**
+  String get retChooseItems;
+
+  /// No description provided for @retValidateCancel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider l\'annulation ({montant})'**
+  String retValidateCancel(String montant);
+
+  /// No description provided for @retValidateReturn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider le retour ({montant})'**
+  String retValidateReturn(String montant);
+
+  /// No description provided for @retNeedReason.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez le motif pour valider.'**
+  String get retNeedReason;
+
+  /// No description provided for @retConfirmCancel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer l\'annulation'**
+  String get retConfirmCancel;
+
+  /// No description provided for @retConfirmReturn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer le retour'**
+  String get retConfirmReturn;
+
+  /// No description provided for @retDamagedShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'abîmé'**
+  String get retDamagedShort;
+
+  /// No description provided for @retAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant : {montant}'**
+  String retAmount(String montant);
+
+  /// No description provided for @retDamagedCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} pièce(s) abîmée(s) : ne reviennent pas en stock.'**
+  String retDamagedCount(int count);
+
+  /// No description provided for @retCreditTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avoir de {montant} versé sur le compte {tel}.'**
+  String retCreditTo(String montant, String tel);
+
+  /// No description provided for @retIrreversible.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette opération ne peut pas être annulée.'**
+  String get retIrreversible;
+
+  /// No description provided for @retBack.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour'**
+  String get retBack;
+
+  /// No description provided for @retValidate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider'**
+  String get retValidate;
+
+  /// No description provided for @retCancelSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annulation enregistrée.'**
+  String get retCancelSaved;
+
+  /// No description provided for @retReturnSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour enregistré.'**
+  String get retReturnSaved;
+
+  /// No description provided for @retGiveCash.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rendez {montant} au client en espèces.'**
+  String retGiveCash(String montant);
+
+  /// No description provided for @retCreditAdded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avoir de {montant} ajouté au compte client (nouveau solde : {solde}).'**
+  String retCreditAdded(String montant, String solde);
+
+  /// No description provided for @retDepositKept.
+  ///
+  /// In fr, this message translates to:
+  /// **'Acompte de {montant} conservé par la boutique.'**
+  String retDepositKept(String montant);
+
+  /// No description provided for @retDebtReduced.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dette du client diminuée de {montant}.'**
+  String retDebtReduced(String montant);
+
+  /// No description provided for @retOffline.
+  ///
+  /// In fr, this message translates to:
+  /// **'(envoi dès le retour d\'internet)'**
+  String get retOffline;
 }
 
 class _AppLocalizationsDelegate

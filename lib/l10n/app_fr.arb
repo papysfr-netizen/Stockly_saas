@@ -1350,5 +1350,238 @@
         "type": "int"
       }
     }
-  }
+  },
+  "retCancelTitle": "Annuler la vente",
+  "retNoCancelRight": "Seuls le gérant et le patron peuvent annuler une vente.",
+  "retNoReturnRight": "Seuls le gérant et le patron peuvent enregistrer un retour.",
+  "retTooLate": "Délai de retour dépassé : vente du {date} (il y a {jours} jours, limite {limite} jours).\n\nSeul le patron peut accepter ce retour.",
+  "@retTooLate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "jours": {
+        "type": "int"
+      },
+      "limite": {
+        "type": "int"
+      }
+    }
+  },
+  "retNothingToCancel": "Rien à annuler sur cette vente.\n\nToute la marchandise a déjà été remise au client ou déjà annulée. S'il la rapporte, utilisez « Retour de marchandise ».",
+  "retNothingToReturn": "Rien à retourner sur cette vente.\n\nSoit tout a déjà été retourné, soit la marchandise n'a pas encore été remise au client (dans ce cas, utilisez « Annuler la vente »).",
+  "retModeAvoirHint": "Le montant est ajouté au compte client : il pourra l'utiliser en Caisse.",
+  "retModeKeepHint": "La boutique garde l'argent (acompte non remboursé).",
+  "retModeCashHint": "L'argent sort de la caisse.",
+  "retSaleOf": "Vente du {date} • {age}",
+  "@retSaleOf": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "age": {
+        "type": "String"
+      }
+    }
+  },
+  "retInvoiceAmount": "Facture : {montant}",
+  "@retInvoiceAmount": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "retStillOwes": "Le client doit encore : {montant}",
+  "@retStillOwes": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "retCancelInfo": "Marchandise jamais retirée par le client : elle revient en stock et la vente est annulée pour ces articles.",
+  "retLateAccepted": "Hors délai ({jours} jours) : retour accepté exceptionnellement par le patron.",
+  "@retLateAccepted": {
+    "placeholders": {
+      "jours": {
+        "type": "int"
+      }
+    }
+  },
+  "retItemsToCancel": "Articles à annuler",
+  "retItemsReturned": "Articles rapportés",
+  "retPrice": "Prix : {montant}",
+  "@retPrice": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "retNotPicked": "non retiré : {count}",
+  "@retNotPicked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "retReturnable": "retournable : {count}",
+  "@retReturnable": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "retAlreadyReturned": "déjà retourné : {count}",
+  "@retAlreadyReturned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "retResell": "Remettre en vente",
+  "retDamaged": "Abîmé (perte)",
+  "retCancelAll": "Tout annuler",
+  "retCancelReason": "Motif de l'annulation *",
+  "retReturnReason": "Motif du retour *",
+  "retCancelHint": "Ex : client jamais venu, délai dépassé…",
+  "retReturnHint": "Ex : mauvaise taille, défaut de fabrication…",
+  "retCancelledAmount": "Montant annulé : {montant}",
+  "@retCancelledAmount": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "retReturnAmount": "Montant du retour : {montant}",
+  "@retReturnAmount": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "retDeducted": "Déduit de la dette du client : {montant}",
+  "@retDeducted": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "retAlreadyPaid": "Déjà payé par le client : {montant}",
+  "@retAlreadyPaid": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "retToGiveBack": "À rendre au client : {montant}",
+  "@retToGiveBack": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "retCash": "Espèces",
+  "retCredit": "Avoir",
+  "retKeep": "Garder",
+  "retPhoneLabel": "Téléphone du compte client *",
+  "retPhoneError": "Un avoir a besoin du téléphone du client",
+  "retChooseItems": "Choisissez les articles",
+  "retValidateCancel": "Valider l'annulation ({montant})",
+  "@retValidateCancel": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "retValidateReturn": "Valider le retour ({montant})",
+  "@retValidateReturn": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "retNeedReason": "Indiquez le motif pour valider.",
+  "retConfirmCancel": "Confirmer l'annulation",
+  "retConfirmReturn": "Confirmer le retour",
+  "retDamagedShort": "abîmé",
+  "retAmount": "Montant : {montant}",
+  "@retAmount": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "retDamagedCount": "{count} pièce(s) abîmée(s) : ne reviennent pas en stock.",
+  "@retDamagedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "retCreditTo": "Avoir de {montant} versé sur le compte {tel}.",
+  "@retCreditTo": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      },
+      "tel": {
+        "type": "String"
+      }
+    }
+  },
+  "retIrreversible": "Cette opération ne peut pas être annulée.",
+  "retBack": "Retour",
+  "retValidate": "Valider",
+  "retCancelSaved": "Annulation enregistrée.",
+  "retReturnSaved": "Retour enregistré.",
+  "retGiveCash": "Rendez {montant} au client en espèces.",
+  "@retGiveCash": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "retCreditAdded": "Avoir de {montant} ajouté au compte client (nouveau solde : {solde}).",
+  "@retCreditAdded": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      },
+      "solde": {
+        "type": "String"
+      }
+    }
+  },
+  "retDepositKept": "Acompte de {montant} conservé par la boutique.",
+  "@retDepositKept": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "retDebtReduced": "Dette du client diminuée de {montant}.",
+  "@retDebtReduced": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "retOffline": "(envoi dès le retour d'internet)"
 }

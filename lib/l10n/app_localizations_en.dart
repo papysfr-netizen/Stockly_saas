@@ -1728,4 +1728,228 @@ class AppLocalizationsEn extends AppLocalizations {
   String repMore(int count) {
     return '…and $count more';
   }
+
+  @override
+  String get retCancelTitle => 'Cancel the sale';
+
+  @override
+  String get retNoCancelRight =>
+      'Only the manager and the owner can cancel a sale.';
+
+  @override
+  String get retNoReturnRight =>
+      'Only the manager and the owner can record a return.';
+
+  @override
+  String retTooLate(String date, int jours, int limite) {
+    return 'Return period exceeded: sale of $date ($jours days ago, limit $limite days).\n\nOnly the owner can accept this return.';
+  }
+
+  @override
+  String get retNothingToCancel =>
+      'Nothing to cancel on this sale.\n\nAll the goods have already been handed to the customer or cancelled. If they bring them back, use “Return goods”.';
+
+  @override
+  String get retNothingToReturn =>
+      'Nothing to return on this sale.\n\nEither everything has already been returned, or the goods have not yet been handed to the customer (in that case, use “Cancel the sale”).';
+
+  @override
+  String get retModeAvoirHint =>
+      'The amount is added to the customer account: they can use it at checkout.';
+
+  @override
+  String get retModeKeepHint =>
+      'The shop keeps the money (deposit not refunded).';
+
+  @override
+  String get retModeCashHint => 'The money comes out of the till.';
+
+  @override
+  String retSaleOf(String date, String age) {
+    return 'Sale of $date • $age';
+  }
+
+  @override
+  String retInvoiceAmount(String montant) {
+    return 'Invoice: $montant';
+  }
+
+  @override
+  String retStillOwes(String montant) {
+    return 'The customer still owes: $montant';
+  }
+
+  @override
+  String get retCancelInfo =>
+      'Goods never picked up by the customer: they go back into stock and the sale is cancelled for these items.';
+
+  @override
+  String retLateAccepted(int jours) {
+    return 'Late ($jours days): return accepted exceptionally by the owner.';
+  }
+
+  @override
+  String get retItemsToCancel => 'Items to cancel';
+
+  @override
+  String get retItemsReturned => 'Returned items';
+
+  @override
+  String retPrice(String montant) {
+    return 'Price: $montant';
+  }
+
+  @override
+  String retNotPicked(int count) {
+    return 'not picked up: $count';
+  }
+
+  @override
+  String retReturnable(int count) {
+    return 'returnable: $count';
+  }
+
+  @override
+  String retAlreadyReturned(int count) {
+    return 'already returned: $count';
+  }
+
+  @override
+  String get retResell => 'Put back on sale';
+
+  @override
+  String get retDamaged => 'Damaged (loss)';
+
+  @override
+  String get retCancelAll => 'Cancel all';
+
+  @override
+  String get retCancelReason => 'Reason for cancellation *';
+
+  @override
+  String get retReturnReason => 'Reason for return *';
+
+  @override
+  String get retCancelHint => 'E.g. customer never came, deadline passed…';
+
+  @override
+  String get retReturnHint => 'E.g. wrong size, manufacturing defect…';
+
+  @override
+  String retCancelledAmount(String montant) {
+    return 'Amount cancelled: $montant';
+  }
+
+  @override
+  String retReturnAmount(String montant) {
+    return 'Return amount: $montant';
+  }
+
+  @override
+  String retDeducted(String montant) {
+    return 'Deducted from the customer\'s debt: $montant';
+  }
+
+  @override
+  String retAlreadyPaid(String montant) {
+    return 'Already paid by the customer: $montant';
+  }
+
+  @override
+  String retToGiveBack(String montant) {
+    return 'To give back to the customer: $montant';
+  }
+
+  @override
+  String get retCash => 'Cash';
+
+  @override
+  String get retCredit => 'Store credit';
+
+  @override
+  String get retKeep => 'Keep';
+
+  @override
+  String get retPhoneLabel => 'Customer account phone *';
+
+  @override
+  String get retPhoneError => 'Store credit needs the customer\'s phone';
+
+  @override
+  String get retChooseItems => 'Choose the items';
+
+  @override
+  String retValidateCancel(String montant) {
+    return 'Confirm cancellation ($montant)';
+  }
+
+  @override
+  String retValidateReturn(String montant) {
+    return 'Confirm return ($montant)';
+  }
+
+  @override
+  String get retNeedReason => 'Enter the reason to confirm.';
+
+  @override
+  String get retConfirmCancel => 'Confirm the cancellation';
+
+  @override
+  String get retConfirmReturn => 'Confirm the return';
+
+  @override
+  String get retDamagedShort => 'damaged';
+
+  @override
+  String retAmount(String montant) {
+    return 'Amount: $montant';
+  }
+
+  @override
+  String retDamagedCount(int count) {
+    return '$count damaged item(s): not returned to stock.';
+  }
+
+  @override
+  String retCreditTo(String montant, String tel) {
+    return 'Store credit of $montant added to account $tel.';
+  }
+
+  @override
+  String get retIrreversible => 'This operation cannot be undone.';
+
+  @override
+  String get retBack => 'Back';
+
+  @override
+  String get retValidate => 'Confirm';
+
+  @override
+  String get retCancelSaved => 'Cancellation saved.';
+
+  @override
+  String get retReturnSaved => 'Return saved.';
+
+  @override
+  String retGiveCash(String montant) {
+    return 'Give $montant back to the customer in cash.';
+  }
+
+  @override
+  String retCreditAdded(String montant, String solde) {
+    return 'Store credit of $montant added to the customer account (new balance: $solde).';
+  }
+
+  @override
+  String retDepositKept(String montant) {
+    return 'Deposit of $montant kept by the shop.';
+  }
+
+  @override
+  String retDebtReduced(String montant) {
+    return 'Customer\'s debt reduced by $montant.';
+  }
+
+  @override
+  String get retOffline => '(will be sent when internet is back)';
 }

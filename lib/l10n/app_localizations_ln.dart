@@ -1731,4 +1731,228 @@ class AppLocalizationsLn extends AppLocalizations {
   String repMore(int count) {
     return '…mpe $count mosusu';
   }
+
+  @override
+  String get retCancelTitle => 'Longola eteki';
+
+  @override
+  String get retNoCancelRight =>
+      'Kaka mokambi mpe nkolo nde bakoki kolongola eteki.';
+
+  @override
+  String get retNoReturnRight =>
+      'Kaka mokambi mpe nkolo nde bakoki kokoma bozongisi.';
+
+  @override
+  String retTooLate(String date, int jours, int limite) {
+    return 'Ntango ya kozongisa eleki : eteki ya $date (mikolo $jours eleki, ndelo mikolo $limite).\n\nKaka nkolo nde akoki kondima bozongisi oyo.';
+  }
+
+  @override
+  String get retNothingToCancel =>
+      'Eloko te ya kolongola na eteki oyo.\n\nBiloko nyonso esilaki kopesama na mosombi to kolongolama. Soki azongisi yango, salela « Kozongisa biloko ».';
+
+  @override
+  String get retNothingToReturn =>
+      'Eloko te ya kozongisa na eteki oyo.\n\nTo nyonso ezongisamaki, to biloko epesami naino te na mosombi (na likambo yango, salela « Longola eteki »).';
+
+  @override
+  String get retModeAvoirHint =>
+      'Mbongo ebakisami na compte ya mosombi : akoki kosalela yango na kesi.';
+
+  @override
+  String get retModeKeepHint =>
+      'Magazini ebombi mbongo (avance ezongisami te).';
+
+  @override
+  String get retModeCashHint => 'Mbongo ebimi na kesi.';
+
+  @override
+  String retSaleOf(String date, String age) {
+    return 'Eteki ya $date • $age';
+  }
+
+  @override
+  String retInvoiceAmount(String montant) {
+    return 'Fakture : $montant';
+  }
+
+  @override
+  String retStillOwes(String montant) {
+    return 'Mosombi azali naino na niongo : $montant';
+  }
+
+  @override
+  String get retCancelInfo =>
+      'Biloko mosombi azwaki yango te : ezongi na stock mpe eteki elongolami mpo na biloko oyo.';
+
+  @override
+  String retLateAccepted(int jours) {
+    return 'Ntango eleki (mikolo $jours) : bozongisi endimami na nkolo lokola likambo ya sipesiale.';
+  }
+
+  @override
+  String get retItemsToCancel => 'Biloko ya kolongola';
+
+  @override
+  String get retItemsReturned => 'Biloko ezongisami';
+
+  @override
+  String retPrice(String montant) {
+    return 'Talo : $montant';
+  }
+
+  @override
+  String retNotPicked(int count) {
+    return 'ezwami te : $count';
+  }
+
+  @override
+  String retReturnable(int count) {
+    return 'ekoki kozongisama : $count';
+  }
+
+  @override
+  String retAlreadyReturned(int count) {
+    return 'esilaki kozongisama : $count';
+  }
+
+  @override
+  String get retResell => 'Zongisa na koteka';
+
+  @override
+  String get retDamaged => 'Ebebi (bobungisi)';
+
+  @override
+  String get retCancelAll => 'Longola nyonso';
+
+  @override
+  String get retCancelReason => 'Ntina ya kolongola *';
+
+  @override
+  String get retReturnReason => 'Ntina ya kozongisa *';
+
+  @override
+  String get retCancelHint => 'Ndakisa : mosombi ayaki te, ntango eleki…';
+
+  @override
+  String get retReturnHint => 'Ndakisa : bonene ebongi te, mabe ya kosala…';
+
+  @override
+  String retCancelledAmount(String montant) {
+    return 'Mbongo elongolami : $montant';
+  }
+
+  @override
+  String retReturnAmount(String montant) {
+    return 'Mbongo ya bozongisi : $montant';
+  }
+
+  @override
+  String retDeducted(String montant) {
+    return 'Elongolami na niongo ya mosombi : $montant';
+  }
+
+  @override
+  String retAlreadyPaid(String montant) {
+    return 'Mosombi asilaki kofuta : $montant';
+  }
+
+  @override
+  String retToGiveBack(String montant) {
+    return 'Ya kozongisela mosombi : $montant';
+  }
+
+  @override
+  String get retCash => 'Mbongo ya maboko';
+
+  @override
+  String get retCredit => 'Avoir';
+
+  @override
+  String get retKeep => 'Bomba';
+
+  @override
+  String get retPhoneLabel => 'Telefone ya compte ya mosombi *';
+
+  @override
+  String get retPhoneError => 'Avoir esengeli telefone ya mosombi';
+
+  @override
+  String get retChooseItems => 'Pona biloko';
+
+  @override
+  String retValidateCancel(String montant) {
+    return 'Ndima bolongoli ($montant)';
+  }
+
+  @override
+  String retValidateReturn(String montant) {
+    return 'Ndima bozongisi ($montant)';
+  }
+
+  @override
+  String get retNeedReason => 'Koma ntina mpo na kondima.';
+
+  @override
+  String get retConfirmCancel => 'Ndima bolongoli';
+
+  @override
+  String get retConfirmReturn => 'Ndima bozongisi';
+
+  @override
+  String get retDamagedShort => 'ebebi';
+
+  @override
+  String retAmount(String montant) {
+    return 'Mbongo : $montant';
+  }
+
+  @override
+  String retDamagedCount(int count) {
+    return 'Biloko $count ebebi : ezongi na stock te.';
+  }
+
+  @override
+  String retCreditTo(String montant, String tel) {
+    return 'Avoir ya $montant etiami na compte $tel.';
+  }
+
+  @override
+  String get retIrreversible => 'Mosala oyo ekoki kozongisama te.';
+
+  @override
+  String get retBack => 'Zonga';
+
+  @override
+  String get retValidate => 'Ndima';
+
+  @override
+  String get retCancelSaved => 'Bolongoli ebombami.';
+
+  @override
+  String get retReturnSaved => 'Bozongisi ebombami.';
+
+  @override
+  String retGiveCash(String montant) {
+    return 'Zongisela mosombi $montant na mbongo ya maboko.';
+  }
+
+  @override
+  String retCreditAdded(String montant, String solde) {
+    return 'Avoir ya $montant ebakisami na compte ya mosombi (solde ya sika : $solde).';
+  }
+
+  @override
+  String retDepositKept(String montant) {
+    return 'Avance ya $montant ebombami na magazini.';
+  }
+
+  @override
+  String retDebtReduced(String montant) {
+    return 'Niongo ya mosombi ekiti na $montant.';
+  }
+
+  @override
+  String get retOffline => '(ekotindama ntango internet ekozonga)';
 }
