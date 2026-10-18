@@ -241,7 +241,8 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
         ],
       );
 
-      batch.set(ecritureEngagementRef, engagementEntry.toFirestore());
+      batch.set(ecritureEngagementRef,
+          {...engagementEntry.toFirestore(), 'boutiqueId': boutiqueId}); // 🏬 compta
 
       // 3. Écriture d'acompte comptable
       if (pureAcompte > 0) {
@@ -285,7 +286,8 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
           montantEncaisse: isClient ? pureAcompte : 0.0,
         );
 
-        batch.set(ecritureAcompteRef, acompteEntry.toFirestore());
+        batch.set(ecritureAcompteRef,
+            {...acompteEntry.toFirestore(), 'boutiqueId': boutiqueId}); // 🏬 compta
       }
 
       await batch.commit();
@@ -402,7 +404,10 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
           montantEncaisse: isClient ? montantEffectif : 0.0,
         );
 
-        transaction.set(ecritureRef, journalEntry.toFirestore());
+        transaction.set(ecritureRef, {
+          ...journalEntry.toFirestore(),
+          'boutiqueId': dette.boutiqueId.isEmpty ? 'principale' : dette.boutiqueId, // 🏬 compta
+        });
       });
     });
   }

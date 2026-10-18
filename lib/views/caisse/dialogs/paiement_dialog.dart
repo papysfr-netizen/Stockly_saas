@@ -979,6 +979,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         'date': now,
         'lines': lines,
         'montantEncaisse': verseCash,
+        'boutiqueId': _boutiqueVente, // 🏬 compta
       });
 
       // 2 bis. Coût des marchandises vendues
@@ -994,6 +995,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
           'entrepriseId': widget.entrepriseId,
           'reference': venteRef.id,
           'description': 'Sortie de stock (coût des marchandises) - $client',
+          'boutiqueId': _boutiqueVente, // 🏬 compta
           'date': now,
           'lines': [
             {

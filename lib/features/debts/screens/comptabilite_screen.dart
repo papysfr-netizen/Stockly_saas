@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:stockly_saas/features/boutiques/compta_boutique.dart';
+import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
+import 'package:stockly_saas/core/providers/user_role_provider.dart';
 
 import 'package:stockly_saas/features/accounting/models/journal_entry.dart';
 import 'package:stockly_saas/core/models/payment_method.dart';
@@ -22,8 +25,13 @@ final ecrituresComptablesProvider =
       .collection('ecritures_comptables')
       .orderBy('date', descending: true)
       .snapshots()
-      .map((snapshot) =>
-          snapshot.docs.map((doc) => JournalEntry.fromFirestore(doc)).toList());
+      .map((snapshot) {
+        // 🏬 On note la boutique de chaque écriture (pour le filtre)
+        for (final doc in snapshot.docs) {
+          noterInfosEcriture(doc.id, doc.data());
+        }
+        return snapshot.docs.map((doc) => JournalEntry.fromFirestore(doc)).toList();
+      });
 });
 
 /// Controller pour les opérations d'écriture et de synchronisation comptable
@@ -153,6 +161,7 @@ class ComptabiliteController extends FamilyAsyncNotifier<void, String> {
           'reference': doc.id,
           'lines': lines,
           'montantEncaisse': verse,
+          'boutiqueId': (data['boutiqueId'] ?? 'principale').toString(), // 🏬
         });
         operationCount++;
 
@@ -207,6 +216,7 @@ class ComptabiliteController extends FamilyAsyncNotifier<void, String> {
         'description': 'Extourne / Annulation : ${entry.description}',
         'date': FieldValue.serverTimestamp(),
         'reference': 'EXT-${entry.id}',
+        'boutiqueId': boutiqueEcriture(entry.id), // 🏬 même boutique
         'lines': reversedLines,
       });
 
@@ -262,6 +272,16 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    // 🏬 Patron / gérant : les anciennes écritures reçoivent leur boutique
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final futur = ref.read(userProfileProvider.future);
+      try {
+        final profil = await futur.timeout(const Duration(seconds: 10));
+        if (!profil.role.isAdminOrOwner) return;
+        await rattraperBoutiquesEcritures(profil.entrepriseId);
+      } catch (_) {}
+    });
   }
 
   @override
@@ -398,6 +418,7 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
     final currencyState = ref.watch(currencyProvider);
 
     final isSyncing = controllerState.isLoading;
+    final boutique = ref.watch(boutiqueActiveProvider); // 🏬
 
     return Scaffold(
       appBar: AppBar(
@@ -473,7 +494,11 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
             ),
           ),
         ),
-        data: (ecritures) {
+        data: (toutes) {
+          // 🏬 Seulement les écritures de la boutique affichée
+          final ecritures = boutique == null
+              ? toutes
+              : toutes.where((e) => boutiqueEcriture(e.id) == boutique).toList();
           return TabBarView(
             controller: _tabController,
             children: [

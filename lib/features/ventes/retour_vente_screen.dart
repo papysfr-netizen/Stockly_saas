@@ -808,6 +808,7 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
       'entrepriseId': widget.entrepriseId,
       'reference': widget.venteId,
       'retourId': retourRef.id,
+      'boutiqueId': (widget.data['boutiqueId'] ?? 'principale').toString(), // 🏬 compta
       'type': _annulation ? 'annulation' : 'retour',
       'description': _annulation
           ? 'Annulation de vente (non retirée) - $client ($motif)'
@@ -826,6 +827,7 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
         'entrepriseId': widget.entrepriseId,
         'reference': widget.venteId,
         'retourId': retourRef.id,
+        'boutiqueId': (widget.data['boutiqueId'] ?? 'principale').toString(), // 🏬 compta
         'type': _annulation ? 'annulation' : 'retour',
         'description': 'Retour en stock (coût des marchandises) - $client',
         'date': now,
