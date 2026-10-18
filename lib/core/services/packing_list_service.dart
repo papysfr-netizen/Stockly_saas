@@ -272,6 +272,17 @@ class LigneImport {
   int stockActuel = 0;
   String raison = '';
 
+  // 🟠 Cas douteux : produit qui ressemble à un produit existant
+  bool douteux = false;
+  String doute = '';
+  String? idCandidat;
+  String nomCandidat = '';
+  String codeCandidat = '';
+  bool codeCandidatVide = true;
+  int stockCandidat = 0;
+  /// null = pas encore choisi ; true = même produit ; false = nouveau produit
+  bool? memeProduit;
+
   LigneImport({
     required this.numeroLigne,
     required this.nom,
@@ -281,10 +292,37 @@ class LigneImport {
     required this.prixVente,
   });
 
+  /// 🟠 Choix de l'utilisateur pour un cas douteux
+  void choisir(bool meme) {
+    memeProduit = meme;
+    if (meme) {
+      statut = StatutLigne.existant;
+      idExistant = idCandidat;
+      nomExistant = nomCandidat;
+      stockActuel = stockCandidat;
+      codeExistantVide = codeCandidatVide;
+    } else {
+      statut = StatutLigne.nouveau;
+      idExistant = null;
+      nomExistant = '';
+      stockActuel = 0;
+    }
+  }
+
   int nouveauStock(ModeImport mode) {
     if (statut == StatutLigne.nouveau) return quantite;
     return mode == ModeImport.arrivage ? stockActuel + quantite : quantite;
   }
+}
+
+// Code-barres d'un produit enregistré
+String _codeDe(Map<String, dynamic> data) =>
+    (data['codeBarre'] ?? data['code_barre'] ?? '').toString().trim();
+
+// Même nom ? (sans tenir compte des majuscules, accents, espaces et ponctuation)
+bool _memeNom(String a, String b) {
+  String cle(String s) => normaliserTexte(s).replaceAll(RegExp(r'[^a-z0-9]'), '');
+  return cle(a) == cle(b);
 }
 
 // 🏬 Stock d'un produit dans une boutique
@@ -325,6 +363,11 @@ class AnalyseImport {
   int get nbNouveaux => lignes.where((l) => l.statut == StatutLigne.nouveau).length;
   int get nbExistants => lignes.where((l) => l.statut == StatutLigne.existant).length;
   int get nbIgnores => lignes.where((l) => l.statut == StatutLigne.ignore).length;
+
+  /// 🟠 Cas douteux sur lesquels l'utilisateur n'a pas encore choisi
+  int get nbAChoisir => lignes
+      .where((l) => l.douteux && l.memeProduit == null && l.statut != StatutLigne.ignore)
+      .length;
 }
 
 class ResultatImport {
@@ -500,18 +543,27 @@ class PackingListService {
         continue;
       }
 
-      // Recherche du produit existant : code-barres d'abord, puis nom
+      // Recherche du produit existant : code-barres, puis nom.
+      // 🟠 Cas douteux (même code + autre nom, ou même nom + autre code) :
+      //    c'est l'utilisateur qui choisit dans l'aperçu.
+      final parLeCode = ligne.codeBarre.isNotEmpty ? parCode[ligne.codeBarre] : null;
+      final parLeNom = parNom[normaliserTexte(ligne.nom)];
       QueryDocumentSnapshot<Map<String, dynamic>>? existant;
-      if (ligne.codeBarre.isNotEmpty) existant = parCode[ligne.codeBarre];
-      if (existant == null) {
-        final candidat = parNom[normaliserTexte(ligne.nom)];
-        if (candidat != null) {
-          final codeCandidat =
-              (candidat.data()['codeBarre'] ?? candidat.data()['code_barre'] ?? '').toString().trim();
-          // Même nom mais code-barres différent = autre article : on ne mélange pas
-          if (ligne.codeBarre.isEmpty || codeCandidat.isEmpty || codeCandidat == ligne.codeBarre) {
-            existant = candidat;
-          }
+      QueryDocumentSnapshot<Map<String, dynamic>>? douteux;
+      if (parLeCode != null) {
+        if (_memeNom((parLeCode.data()['nom'] ?? '').toString(), ligne.nom)) {
+          existant = parLeCode;
+        } else {
+          douteux = parLeCode;
+          ligne.doute = 'même code, nom différent';
+        }
+      } else if (parLeNom != null) {
+        final codeCandidat = _codeDe(parLeNom.data());
+        if (ligne.codeBarre.isEmpty || codeCandidat.isEmpty || codeCandidat == ligne.codeBarre) {
+          existant = parLeNom;
+        } else {
+          douteux = parLeNom;
+          ligne.doute = 'même nom, code différent';
         }
       }
 
@@ -525,6 +577,15 @@ class PackingListService {
             (data['codeBarre'] ?? data['code_barre'] ?? '').toString().trim().isEmpty;
       } else {
         ligne.statut = StatutLigne.nouveau;
+        if (douteux != null) {
+          final data = douteux.data();
+          ligne.douteux = true;
+          ligne.idCandidat = douteux.id;
+          ligne.nomCandidat = (data['nom'] ?? '').toString();
+          ligne.codeCandidat = _codeDe(data);
+          ligne.stockCandidat = _stockDans(data, boutiqueId);
+          ligne.codeCandidatVide = ligne.codeCandidat.isEmpty;
+        }
       }
 
       dejaVu[cle] = ligne;

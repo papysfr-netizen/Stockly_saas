@@ -23,7 +23,7 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
   Future<void> _importer() async {
     final a = widget.analyse;
     final aEcrire = a.nbNouveaux + a.nbExistants;
-    if (aEcrire == 0) return;
+    if (aEcrire == 0 || a.nbAChoisir > 0) return;
 
     final ok = await showDialog<bool>(
       context: context,
@@ -112,7 +112,71 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
     );
   }
 
+  /// 🟠 Cas douteux : l'utilisateur choisit « même produit » ou « nouveau produit »
+  Widget _tuileDouteuse(LigneImport l) {
+    final choisi = l.memeProduit;
+    return Card(
+      color: Colors.orange.shade50,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: choisi == null ? Colors.orange.shade700 : Colors.orange.shade200,
+          width: choisi == null ? 2 : 1,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.help_rounded, color: Colors.orange.shade800, size: 20),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text('À vérifier : ${l.doute}',
+                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange.shade900)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text('📄 Fichier : ${l.nom}', style: const TextStyle(fontWeight: FontWeight.w600)),
+            Text('Code : ${l.codeBarre.isEmpty ? '—' : l.codeBarre} • Qté : ${l.quantite}',
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade700)),
+            const SizedBox(height: 6),
+            Text('📦 Déjà en stock : ${l.nomCandidat}', style: const TextStyle(fontWeight: FontWeight.w600)),
+            Text('Code : ${l.codeCandidat.isEmpty ? '—' : l.codeCandidat} • Stock : ${l.stockCandidat}',
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade700)),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: [
+                ChoiceChip(
+                  label: const Text('Même produit'),
+                  selected: choisi == true,
+                  onSelected: _enCours ? null : (_) => setState(() => l.choisir(true)),
+                ),
+                ChoiceChip(
+                  label: const Text('Nouveau produit'),
+                  selected: choisi == false,
+                  onSelected: _enCours ? null : (_) => setState(() => l.choisir(false)),
+                ),
+              ],
+            ),
+            if (choisi == true)
+              Text('Stock : ${l.stockActuel} → ${l.nouveauStock(_mode)}',
+                  style: TextStyle(fontSize: 12, color: Colors.blue.shade700)),
+            if (choisi == false)
+              Text('Un nouveau produit sera créé (${l.quantite} pièce(s)).',
+                  style: TextStyle(fontSize: 12, color: Colors.green.shade700)),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _tuile(LigneImport l) {
+    if (l.douteux && l.statut != StatutLigne.ignore) return _tuileDouteuse(l);
     switch (l.statut) {
       case StatutLigne.nouveau:
         return ListTile(
@@ -153,6 +217,9 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
   Widget build(BuildContext context) {
     final a = widget.analyse;
     final aEcrire = a.nbNouveaux + a.nbExistants;
+    // 🟠 Cas douteux (affichés en haut de la liste)
+    final douteux = a.lignes.where((l) => l.douteux && l.statut != StatutLigne.ignore).toList();
+    final autres = a.lignes.where((l) => !(l.douteux && l.statut != StatutLigne.ignore));
 
     return PopScope(
       canPop: !_enCours,
@@ -256,9 +323,51 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
                         avatar: const Icon(Icons.block, color: Colors.grey, size: 18),
                         label: Text('${a.nbIgnores} ignoré(s)'),
                       ),
+                      if (a.nbAChoisir > 0)
+                        Chip(
+                          backgroundColor: Colors.orange.shade100,
+                          avatar: Icon(Icons.help_rounded, color: Colors.orange.shade800, size: 18),
+                          label: Text('${a.nbAChoisir} à vérifier'),
+                        ),
                     ],
                   ),
                   const Divider(height: 24),
+
+                  // 🟠 Cas douteux : explication + choix pour tous
+                  if (douteux.isNotEmpty) ...[
+                    Text(
+                      a.nbAChoisir > 0
+                          ? '${a.nbAChoisir} produit(s) à vérifier (en orange) : choisissez pour chacun.'
+                          : 'Produits vérifiés ✔ (vous pouvez encore changer)',
+                      style: TextStyle(color: Colors.orange.shade900, fontWeight: FontWeight.w600),
+                    ),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        TextButton(
+                          onPressed: _enCours
+                              ? null
+                              : () => setState(() {
+                                    for (final l in douteux) {
+                                      l.choisir(true);
+                                    }
+                                  }),
+                          child: const Text('Tous : même produit'),
+                        ),
+                        TextButton(
+                          onPressed: _enCours
+                              ? null
+                              : () => setState(() {
+                                    for (final l in douteux) {
+                                      l.choisir(false);
+                                    }
+                                  }),
+                          child: const Text('Tous : nouveau produit'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                  ],
 
                   if (a.lignes.isEmpty)
                     const Padding(
@@ -266,7 +375,7 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
                       child: Center(child: Text('Aucun produit trouvé dans ce fichier.')),
                     )
                   else
-                    ...a.lignes.map(_tuile),
+                    ...[...douteux, ...autres].map(_tuile),
                 ],
               ),
             ),
@@ -284,7 +393,7 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    onPressed: (_enCours || aEcrire == 0) ? null : _importer,
+                    onPressed: (_enCours || aEcrire == 0 || a.nbAChoisir > 0) ? null : _importer,
                     icon: _enCours
                         ? const SizedBox(
                             width: 18,
@@ -293,7 +402,11 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
                           )
                         : const Icon(Icons.file_download_done),
                     label: Text(
-                      _enCours ? _progression : 'Importer $aEcrire produit(s)',
+                      _enCours
+                          ? _progression
+                          : a.nbAChoisir > 0
+                              ? 'Choisissez d\'abord : ${a.nbAChoisir} à vérifier'
+                              : 'Importer $aEcrire produit(s)',
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
