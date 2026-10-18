@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:stockly_saas/features/boutiques/boutiques_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
 
 import '../core/providers/user_role_provider.dart';
 import '../core/services/excel_service.dart';
@@ -46,7 +47,19 @@ class SettingsMaintenanceController extends FamilyAsyncNotifier<void, String> {
           .get();
 
       final produitsList = snapshot.docs.map((doc) => doc.data()).toList();
-      await ExcelService.exporterStockVersExcel(produitsList);
+      // 🏬 Boutique affichée (null = toutes les boutiques)
+      final boutique = ref.read(boutiqueActiveProvider);
+      var nomBoutique = '';
+      if (boutique != null) {
+        nomBoutique = boutique == 'principale' ? 'Principale' : boutique;
+        try {
+          for (final b in ref.read(boutiquesActivesProvider(entrepriseId))) {
+            if (b.id == boutique) nomBoutique = b.nom;
+          }
+        } catch (_) {}
+      }
+      await ExcelService.exporterStockVersExcel(produitsList,
+          boutiqueId: boutique, nomBoutique: nomBoutique);
 
       state = const AsyncValue.data(null);
     } catch (e, stack) {

@@ -171,9 +171,35 @@ class ExcelService {
 
   static String _deux(int n) => n.toString().padLeft(2, '0');
 
+  // 🏬 Quantité d'un produit dans une boutique (null = toutes = stock total)
+  //    principale = stock total − stocks des autres boutiques
+  static int _quantiteDans(Map<String, dynamic> p, String? boutiqueId) {
+    final total = _nombre(p['quantite'] ?? p['stock']).toInt();
+    if (boutiqueId == null) return total;
+    final stocks = p['stocks'] is Map ? p['stocks'] as Map : const {};
+    if (boutiqueId != 'principale') return _nombre(stocks[boutiqueId] ?? 0).toInt();
+    var autres = 0;
+    stocks.forEach((k, v) {
+      if (k != 'principale') autres += _nombre(v).toInt();
+    });
+    final reste = total - autres;
+    return reste < 0 ? 0 : reste;
+  }
+
+  // 🏬 Prix de vente dans une boutique (prix propre, sinon prix normal)
+  static double _prixDans(Map<String, dynamic> p, String? boutiqueId) {
+    final normal = _nombre(p['prixVente'] ?? p['prix']);
+    if (boutiqueId == null) return normal;
+    final propres = p['prixParBoutique'] is Map ? p['prixParBoutique'] as Map : const {};
+    final propre = _nombre(propres[boutiqueId] ?? 0);
+    return propre > 0 ? propre : normal;
+  }
+
   static Future<File> exporterStockVersExcel(
     List<Map<String, dynamic>> produits, {
     bool triggerShare = true,
+    String? boutiqueId, // 🏬 null = toutes les boutiques
+    String nomBoutique = '',
   }) async {
     final excel = Excel.createExcel();
     final String defaultSheet = excel.getDefaultSheet() ?? 'Sheet1';
@@ -198,11 +224,11 @@ class ExcelService {
       return (
         code: (p['codeBarre'] ?? p['code_barre'] ?? '').toString(),
         nom: (p['nom'] ?? 'Inconnu').toString(),
-        quantite: _nombre(p['quantite'] ?? p['stock']).toInt(),
+        quantite: _quantiteDans(p, boutiqueId),
         prixAchat: _nombre(p['prixAchat']),
-        prixVente: _nombre(p['prixVente'] ?? p['prix']),
+        prixVente: _prixDans(p, boutiqueId),
       );
-    }).toList()
+    }).where((l) => boutiqueId == null || l.quantite > 0).toList() // 🏬 sans les produits à 0
       ..sort((a, b) => a.nom.toLowerCase().compareTo(b.nom.toLowerCase()));
 
     int totalQuantite = 0;
@@ -262,7 +288,11 @@ class ExcelService {
     final horodatage =
         '${m.year}-${_deux(m.month)}-${_deux(m.day)}_${_deux(m.hour)}h${_deux(m.minute)}';
     final directory = await getTemporaryDirectory();
-    final filePath = '${directory.path}/Stock_Stockly_$horodatage.xlsx';
+    // 🏬 Nom de la boutique dans le nom du fichier
+    final nomFichier = nomBoutique.trim().isEmpty
+        ? 'Stockly'
+        : nomBoutique.trim().replaceAll(RegExp(r'[^A-Za-z0-9À-ÿ]+'), '_');
+    final filePath = '${directory.path}/Stock_${nomFichier}_$horodatage.xlsx';
 
     final file = File(filePath);
     await file.writeAsBytes(fileBytes);
@@ -270,7 +300,7 @@ class ExcelService {
     if (triggerShare) {
       await Share.shareXFiles(
         [XFile(filePath)],
-        subject: 'État du stock du ${_deux(m.day)}/${_deux(m.month)}/${m.year}',
+        subject: '${nomBoutique.isEmpty ? '' : '$nomBoutique — '}État du stock du ${_deux(m.day)}/${_deux(m.month)}/${m.year}',
         text: 'Veuillez trouver ci-joint l\'état du stock.',
       );
     }
