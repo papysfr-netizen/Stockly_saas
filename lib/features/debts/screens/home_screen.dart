@@ -350,7 +350,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           final produit = filteredDocs[index];
 
                           final produitWidget = ProduitCard(
-                            nom: produit.nom.isNotEmpty ? produit.nom : t.caisseNoName,
+                            nom: '${produit.codeBarre.trim().isEmpty ? '' : '${produit.codeBarre.trim()} · '}' // 🏷️ code devant le nom
+                                '${produit.nom.isNotEmpty ? produit.nom : t.caisseNoName}',
                             quantite: produit.stockBoutique(boutique),
                             prix: produit.prixPour(boutique),
                             currency: currency,

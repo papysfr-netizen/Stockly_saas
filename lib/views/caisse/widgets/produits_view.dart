@@ -483,7 +483,9 @@ class _TuileProduit extends StatelessWidget {
   Widget build(BuildContext context) {
     final enRupture = stock <= 0;
     final couleur = enRupture ? Colors.grey : _couleurPour(produit.nom);
-    final nom = produit.nom.isNotEmpty ? produit.nom : AppLocalizations.of(context).caisseNoName;
+    final nomSeul = produit.nom.isNotEmpty ? produit.nom : AppLocalizations.of(context).caisseNoName;
+    final codeProduit = produit.codeBarre.trim();
+    final nom = codeProduit.isEmpty ? nomSeul : '$codeProduit · $nomSeul'; // 🏷️ code devant le nom
 
     return Material(
       color: Colors.white,
