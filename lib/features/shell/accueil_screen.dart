@@ -660,7 +660,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
         final num stock = p.stockBoutique(boutique);
         final seuil = p.toMap()['seuilAlerte'];
         final num limite = (seuil is num && seuil > 0) ? seuil : 5;
-        if (stock <= limite) stockBas.add(MapEntry(p.nom, stock));
+        if (stock > 0 && stock <= limite) stockBas.add(MapEntry(p.nom, stock));
       }
       texte = await RapportJour.detail(
         l: l,
@@ -671,6 +671,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
         dettesEncaissees: encaissementsDettes,
         stockBas: stockBas,
         prix: devise.formatPrice,
+        boutique: boutique, // 🏬 rapport
       );
     }
 

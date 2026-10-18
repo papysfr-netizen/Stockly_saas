@@ -59,6 +59,7 @@ class RapportJour {
     required List<Map<String, dynamic>> dettesEncaissees,
     required List<MapEntry<String, num>> stockBas,
     required String Function(double) prix,
+    String? boutique, // 🏬 null = toutes les boutiques
   }) async {
     final heure = DateFormat('HH:mm');
     final now = DateTime.now();
@@ -205,6 +206,10 @@ class RapportJour {
           .timeout(const Duration(seconds: 5));
       for (final doc in snap.docs) {
         final c = doc.data();
+        if (boutique != null) { // 🏬 crédit de la boutique affichée
+          final b = (c['boutiqueId'] ?? '').toString();
+          if ((b.isEmpty ? 'principale' : b) != boutique) continue;
+        }
         final initial = _n(c['montantInitial']);
         final reste = _n(c['montantReste']);
         final note = (c['note'] ?? '').toString().trim();
