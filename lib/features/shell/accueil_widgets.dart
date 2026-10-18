@@ -125,13 +125,13 @@ class _AFaireAujourdhuiState extends ConsumerState<AFaireAujourdhui> {
     final t = AppLocalizations.of(context);
     final produits = ref.watch(produitsStreamProvider).value ?? const [];
 
-    // Produits presque épuisés dans la boutique affichée
+    // Produits presque épuisés dans la boutique affichée (les produits à 0 ne sont pas listés)
     final bas = <MapEntry<String, int>>[];
     for (final p in produits) {
       final stock = p.stockBoutique(widget.boutique);
       final seuil = _num(p.toMap()['seuilAlerte']);
       final limite = seuil > 0 ? seuil : 5;
-      if (stock <= limite) bas.add(MapEntry(p.nom, stock));
+      if (stock > 0 && stock <= limite) bas.add(MapEntry(p.nom, stock));
     }
     bas.sort((a, b) => a.value.compareTo(b.value));
 
