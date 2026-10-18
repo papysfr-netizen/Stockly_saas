@@ -12,6 +12,8 @@ class Dette {
   final String numeroFacture;
   /// Identifiant complet de la vente liée ('' si dette ajoutée à la main)
   final String venteId;
+  /// 🏬 Boutique de la dette ('' = ancienne dette pas encore rattachée)
+  final String boutiqueId;
   /// Historique des paiements : {date, montant, methode, parNom, parUid}
   final List<Map<String, dynamic>> paiements;
   final double montantInitial;
@@ -32,6 +34,7 @@ class Dette {
     this.telephone = '',
     required this.numeroFacture,
     this.venteId = '',
+    this.boutiqueId = '',
     this.paiements = const [],
     required this.montantInitial,
     required this.acomptePaye,
@@ -167,6 +170,7 @@ class Dette {
       telephone: (json['telephone'] ?? json['telephoneClient'] ?? json['tel'] ?? '').toString(),
       numeroFacture: numeroFactureResolved,
       venteId: (json['venteId'] ?? '').toString(),
+      boutiqueId: (json['boutiqueId'] ?? '').toString(),
       paiements: _parsePaiements(json['paiements']),
       montantInitial: montantInitialResolved,
       acomptePaye: finalAcompte,
@@ -203,6 +207,7 @@ class Dette {
       'telephone': telephone,
       'numeroFacture': numeroFacture,
       if (venteId.isNotEmpty) 'venteId': venteId,
+      if (boutiqueId.isNotEmpty) 'boutiqueId': boutiqueId,
       'montantInitial': montantInitial,
       'acomptePaye': acomptePaye,
       'montantReste': montantReste,
@@ -225,6 +230,7 @@ class Dette {
       'telephone': telephone,
       'numeroFacture': numeroFacture,
       if (venteId.isNotEmpty) 'venteId': venteId,
+      if (boutiqueId.isNotEmpty) 'boutiqueId': boutiqueId,
       'montantInitial': montantInitial,
       'acomptePaye': acomptePaye,
       'montantReste': montantReste,
@@ -249,6 +255,7 @@ class Dette {
     String? telephone,
     String? numeroFacture,
     String? venteId,
+    String? boutiqueId,
     List<Map<String, dynamic>>? paiements,
     double? montantInitial,
     double? acomptePaye,
@@ -268,6 +275,7 @@ class Dette {
       telephone: telephone ?? this.telephone,
       numeroFacture: numeroFacture ?? this.numeroFacture,
       venteId: venteId ?? this.venteId,
+      boutiqueId: boutiqueId ?? this.boutiqueId,
       paiements: paiements ?? this.paiements,
       montantInitial: montantInitial ?? this.montantInitial,
       acomptePaye: acomptePaye ?? this.acomptePaye,

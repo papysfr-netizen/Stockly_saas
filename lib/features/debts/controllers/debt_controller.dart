@@ -138,6 +138,7 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
     required String note,
     DateTime? dateEcheance,
     PaymentMethod paymentMethod = PaymentMethod.cash,
+    String boutiqueId = 'principale', // 🏬
   }) async {
     final entrepriseId = arg;
 
@@ -181,6 +182,7 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
       // 1. Enregistrement du document Dette/Créance
       final dette = Dette(
         id: targetRef.id,
+        boutiqueId: boutiqueId,
         nomTiers: cleanNom,
         numeroFacture: cleanFacture,
         montantInitial: totalArrondi,

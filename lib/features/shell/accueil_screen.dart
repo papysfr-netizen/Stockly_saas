@@ -183,6 +183,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
           final encaissementsDettes = <Map<String, dynamic>>[];
           for (final doc in snapDettes.data?.docs ?? const []) {
             final c = doc.data();
+            if (!_memeBoutique(boutique, c['boutiqueId'])) continue; // 🏬
             final creation = c['dateCreation'] ?? c['createdAt'];
             final paiements = c['paiements'];
             if (paiements is! List) continue;

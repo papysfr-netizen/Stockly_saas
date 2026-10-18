@@ -1024,6 +1024,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         batch.set(creanceRef, {
           'id': creanceRef.id,
           'venteId': venteRef.id,
+          'boutiqueId': _boutiqueVente, // 🏬 dette
           'numeroFacture': numeroFacture,
           'nomTiers': client,
           'nomClient': client,

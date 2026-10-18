@@ -8,6 +8,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:stockly_saas/core/providers/user_role_provider.dart';
+import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -50,6 +53,43 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
   final NumberFormat _nf = NumberFormat('#,##0.00', 'fr_FR');
 
   bool get _isClient => widget.type == TypeDette.client;
+
+  /// 🏬 Anciennes dettes sans boutique : déjà rattrapées pour ce type pendant cette session ?
+  static final Set<TypeDette> _rattrapes = {};
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _rattraperBoutiques());
+  }
+
+  /// 🏬 Le PATRON ouvre l'écran : chaque ancienne dette sans boutique reçoit
+  /// la boutique de sa vente (sinon « principale »). Une fois par session.
+  Future<void> _rattraperBoutiques() async {
+    if (!mounted || _rattrapes.contains(widget.type)) return;
+    final profil = ref.read(userProfileProvider).value;
+    if (profil == null || !profil.role.isOwner) return;
+    _rattrapes.add(widget.type);
+    final ent = FirebaseFirestore.instance.collection('entreprises').doc(widget.entrepriseId);
+    final collection = widget.type == TypeDette.client ? 'creances' : 'dettes';
+    for (final d in widget.liste) {
+      if (d.boutiqueId.isNotEmpty || d.id.isEmpty) continue;
+      var b = 'principale';
+      try {
+        final vid = venteLiee(d);
+        if (vid.isNotEmpty) {
+          final v = await ent.collection('ventes').doc(vid).get().timeout(const Duration(seconds: 6));
+          final bv = (v.data()?['boutiqueId'] ?? '').toString();
+          if (bv.isNotEmpty) b = bv;
+        }
+        await ent.collection(collection).doc(d.id).update({'boutiqueId': b});
+      } catch (_) {
+        // Pas de réseau : on réessaiera à la prochaine ouverture de l'application
+        _rattrapes.remove(widget.type);
+        return;
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -163,13 +203,20 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
   // ------------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
-    final ouvertes = widget.liste.where((d) => !d.estSolde).toList();
+    // 🏬 Seulement les dettes de la boutique affichée (sans boutique = principale)
+    final boutique = ref.watch(boutiqueActiveProvider);
+    final liste = boutique == null
+        ? widget.liste
+        : widget.liste
+            .where((d) => (d.boutiqueId.isEmpty ? 'principale' : d.boutiqueId) == boutique)
+            .toList();
+    final ouvertes = liste.where((d) => !d.estSolde).toList();
     final total = ouvertes.fold<double>(0, (s, d) => s + d.montantReste);
     final enRetard = ouvertes.where(_enRetard).toList();
     final totalRetard = enRetard.fold<double>(0, (s, d) => s + d.montantReste);
     final nbTiers = ouvertes.map((d) => d.nomTiers.trim().toLowerCase()).toSet().length;
 
-    final visibles = widget.liste.where(_correspond).toList()
+    final visibles = liste.where(_correspond).toList()
       ..sort((a, b) {
         // Les plus anciennes (et non soldées) d'abord
         if (a.estSolde != b.estSolde) return a.estSolde ? 1 : -1;
@@ -185,7 +232,7 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
         const SizedBox(height: 10),
         _filtres(),
         const SizedBox(height: 12),
-        if (widget.liste.isEmpty)
+        if (liste.isEmpty)
           _etatVide(
             _isClient ? Icons.handshake_outlined : Icons.local_shipping_outlined,
             _isClient ? _t.debtEmptyClients : _t.debtEmptySuppliers,

@@ -142,6 +142,10 @@ class _AFaireAujourdhuiState extends ConsumerState<AFaireAujourdhui> {
         for (final d in snap.data?.docs ?? const []) {
           final m = d.data();
           if ((m['type'] ?? 'client').toString() != 'client') continue;
+          if (widget.boutique != null) { // 🏬 dette de la boutique affichée
+            final b = (m['boutiqueId'] ?? '').toString();
+            if ((b.isEmpty ? 'principale' : b) != widget.boutique) continue;
+          }
           final nom = (m['nomTiers'] ?? m['nomClient'] ?? t.accClient).toString().trim();
           clients[nom.isEmpty ? t.accClient : nom] = (clients[nom] ?? 0) + _num(m['montantReste']);
         }

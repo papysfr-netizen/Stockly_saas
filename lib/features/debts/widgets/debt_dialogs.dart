@@ -8,6 +8,7 @@ import 'package:stockly_saas/core/models/payment_method.dart';
 import '../controllers/debt_controller.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:stockly_saas/features/comptes_clients/compte_client_service.dart';
+import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
 
 class DebtDialogs {
   static String _formaterDate(DateTime date) {
@@ -181,6 +182,7 @@ class DebtDialogs {
                           type: type,
                           note: noteController.text.trim(),
                           dateEcheance: dateEcheanceSelectionnee,
+                          boutiqueId: ref.read(boutiqueActiveProvider) ?? 'principale', // 🏬
                         );
                   }
                 },
