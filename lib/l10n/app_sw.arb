@@ -527,5 +527,8 @@
   "retCreditAdded": "Salio la {montant} limeongezwa kwenye akaunti ya mteja (salio jipya : {solde}).",
   "retDepositKept": "Malipo ya awali ya {montant} yamebaki dukani.",
   "retDebtReduced": "Deni la mteja limepunguzwa kwa {montant}.",
-  "retOffline": "(itatumwa intaneti ikirudi)"
+  "retOffline": "(itatumwa intaneti ikirudi)",
+  "caisseNoShopProducts": "Hakuna bidhaa zilizopo katika duka hili.\nOngeza bidhaa (kununua au kuhamisha kutoka duka kuu).",
+  "stockShowOut": "Ona zilizoisha ({count})",
+  "stockShowInStock": "Rudi kwa bidhaa zilizopo"
 }

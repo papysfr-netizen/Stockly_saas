@@ -1583,5 +1583,15 @@
       }
     }
   },
-  "retOffline": "(envoi dès le retour d'internet)"
+  "retOffline": "(envoi dès le retour d'internet)",
+  "caisseNoShopProducts": "Aucun produit en stock dans cette boutique.\nAjoutez du stock (achat ou transfert depuis la boutique principale).",
+  "stockShowOut": "Voir les épuisés ({count})",
+  "@stockShowOut": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stockShowInStock": "Retour aux produits en stock"
 }

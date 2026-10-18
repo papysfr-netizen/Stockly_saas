@@ -1951,4 +1951,16 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get retOffline => '(itatumwa intaneti ikirudi)';
+
+  @override
+  String get caisseNoShopProducts =>
+      'Hakuna bidhaa zilizopo katika duka hili.\nOngeza bidhaa (kununua au kuhamisha kutoka duka kuu).';
+
+  @override
+  String stockShowOut(int count) {
+    return 'Ona zilizoisha ($count)';
+  }
+
+  @override
+  String get stockShowInStock => 'Rudi kwa bidhaa zilizopo';
 }

@@ -1952,4 +1952,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get retOffline => '(will be sent when internet is back)';
+
+  @override
+  String get caisseNoShopProducts =>
+      'No products in stock in this shop.\nAdd stock (purchase or transfer from the main shop).';
+
+  @override
+  String stockShowOut(int count) {
+    return 'Show out of stock ($count)';
+  }
+
+  @override
+  String get stockShowInStock => 'Back to products in stock';
 }

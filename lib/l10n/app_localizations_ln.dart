@@ -1955,4 +1955,16 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get retOffline => '(ekotindama ntango internet ekozonga)';
+
+  @override
+  String get caisseNoShopProducts =>
+      'Biloko ezali te na stock ya magazini oyo.\nBakisa biloko (kosomba to kotinda uta na magazini monene).';
+
+  @override
+  String stockShowOut(int count) {
+    return 'Tala oyo esili ($count)';
+  }
+
+  @override
+  String get stockShowInStock => 'Zonga na biloko ezali na stock';
 }

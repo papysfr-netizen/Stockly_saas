@@ -3270,6 +3270,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'(envoi dès le retour d\'internet)'**
   String get retOffline;
+
+  /// No description provided for @caisseNoShopProducts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun produit en stock dans cette boutique.\nAjoutez du stock (achat ou transfert depuis la boutique principale).'**
+  String get caisseNoShopProducts;
+
+  /// No description provided for @stockShowOut.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir les épuisés ({count})'**
+  String stockShowOut(int count);
+
+  /// No description provided for @stockShowInStock.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour aux produits en stock'**
+  String get stockShowInStock;
 }
 
 class _AppLocalizationsDelegate

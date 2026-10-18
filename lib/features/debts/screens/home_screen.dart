@@ -28,6 +28,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   String _searchQuery = "";
   bool _isImporting = false;
   String _importProgressText = "";
+  bool _voirEpuises = false; // 📦 false = seulement les produits en stock
 
   // ------------------------------------------------------------------
   // 🔐 DROITS SELON LE RÔLE
@@ -291,22 +292,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   return nom.contains(_searchQuery) || code.contains(_searchQuery);
                 }).toList();
 
-                // 🏬 Boutique précise : produits en stock d'abord, ruptures à la fin
-                if (boutique != null) {
-                  final enStock =
-                      filteredDocs.where((p) => p.stockBoutique(boutique) > 0).toList();
-                  final sansStock =
-                      filteredDocs.where((p) => p.stockBoutique(boutique) <= 0).toList();
-                  filteredDocs
-                    ..clear()
-                    ..addAll(enStock)
-                    ..addAll(sansStock);
+                // 📦 Produits à 0 cachés ; le bouton « Voir les épuisés » montre seulement eux
+                final nbEpuises =
+                    filteredDocs.where((p) => p.stockBoutique(boutique) <= 0).length;
+                if (_voirEpuises) {
+                  filteredDocs.retainWhere((p) => p.stockBoutique(boutique) <= 0);
+                } else {
+                  filteredDocs.removeWhere((p) => p.stockBoutique(boutique) <= 0);
                 }
 
                 if (filteredDocs.isEmpty) {
-                  return Center(
-                    child: Text(t.stockNoProduct,
-                        style: const TextStyle(color: Colors.grey)),
+                  return Column(
+                    children: [
+                      _chipEpuises(nbEpuises),
+                      Expanded(
+                        child: Center(
+                          child: Text(t.stockNoProduct,
+                              style: const TextStyle(color: Colors.grey)),
+                        ),
+                      ),
+                    ],
                   );
                 }
 
@@ -335,7 +340,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
+                    _chipEpuises(nbEpuises),
                     Expanded(
                       child: ListView.builder(
                         itemCount: filteredDocs.length,
@@ -449,6 +455,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+
+  /// 📦 Bouton : voir les produits épuisés / revenir aux produits en stock
+  Widget _chipEpuises(int nb) {
+    if (nb == 0 && !_voirEpuises) return const SizedBox(height: 4);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: FilterChip(
+          avatar: Icon(
+            _voirEpuises ? Icons.inventory_2 : Icons.remove_shopping_cart,
+            size: 16,
+            color: _voirEpuises ? Colors.blue : Colors.red,
+          ),
+          label: Text(_voirEpuises ? _t.stockShowInStock : _t.stockShowOut(nb)),
+          selected: _voirEpuises,
+          onSelected: (v) => setState(() => _voirEpuises = v),
+        ),
+      ),
+    );
+  }
 
   Widget _buildStatCard(
       String title, String value, IconData icon, Color color) {

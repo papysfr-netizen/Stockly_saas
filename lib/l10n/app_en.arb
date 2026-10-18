@@ -527,5 +527,8 @@
   "retCreditAdded": "Store credit of {montant} added to the customer account (new balance: {solde}).",
   "retDepositKept": "Deposit of {montant} kept by the shop.",
   "retDebtReduced": "Customer's debt reduced by {montant}.",
-  "retOffline": "(will be sent when internet is back)"
+  "retOffline": "(will be sent when internet is back)",
+  "caisseNoShopProducts": "No products in stock in this shop.\nAdd stock (purchase or transfer from the main shop).",
+  "stockShowOut": "Show out of stock ({count})",
+  "stockShowInStock": "Back to products in stock"
 }

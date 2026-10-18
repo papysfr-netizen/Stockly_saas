@@ -1959,4 +1959,16 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get retOffline => '(envoi dès le retour d\'internet)';
+
+  @override
+  String get caisseNoShopProducts =>
+      'Aucun produit en stock dans cette boutique.\nAjoutez du stock (achat ou transfert depuis la boutique principale).';
+
+  @override
+  String stockShowOut(int count) {
+    return 'Voir les épuisés ($count)';
+  }
+
+  @override
+  String get stockShowInStock => 'Retour aux produits en stock';
 }

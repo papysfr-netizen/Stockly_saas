@@ -527,5 +527,8 @@
   "retCreditAdded": "Avoir ya {montant} ebakisami na compte ya mosombi (solde ya sika : {solde}).",
   "retDepositKept": "Avance ya {montant} ebombami na magazini.",
   "retDebtReduced": "Niongo ya mosombi ekiti na {montant}.",
-  "retOffline": "(ekotindama ntango internet ekozonga)"
+  "retOffline": "(ekotindama ntango internet ekozonga)",
+  "caisseNoShopProducts": "Biloko ezali te na stock ya magazini oyo.\nBakisa biloko (kosomba to kotinda uta na magazini monene).",
+  "stockShowOut": "Tala oyo esili ({count})",
+  "stockShowInStock": "Zonga na biloko ezali na stock"
 }

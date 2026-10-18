@@ -68,6 +68,19 @@ class Produit {
     return stocks[boutiqueId] ?? 0;
   }
 
+  /// 🏬 Ce produit fait-il partie de cette boutique ?
+  ///  - null (toutes les boutiques) : oui
+  ///  - boutique secondaire : elle l'a déjà reçu (présent dans « stocks », même à 0)
+  ///  - boutique principale : il y a du stock chez elle, ou il n'a été envoyé nulle part
+  bool estDansBoutique(String? boutiqueId) {
+    if (boutiqueId == null) return true;
+    if (boutiqueId == idPrincipale) {
+      return stockBoutique(idPrincipale) > 0 ||
+          stocks.keys.where((k) => k != idPrincipale).isEmpty;
+    }
+    return stocks.containsKey(boutiqueId);
+  }
+
   /// Prix de vente dans une boutique (prix propre, sinon prix normal)
   double prixPour(String? boutiqueId) {
     final p = boutiqueId == null ? null : prixParBoutique[boutiqueId];

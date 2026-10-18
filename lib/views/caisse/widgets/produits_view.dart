@@ -276,7 +276,23 @@ class _ProduitsViewState extends ConsumerState<ProduitsView> {
                     child: Text(t.errorPrefix('$err'), style: const TextStyle(color: Colors.red)),
                   ),
                 ),
-                data: (produits) {
+                data: (tousProduits) {
+                  // 🏬 Seulement les produits EN STOCK dans la boutique de vente
+                  final produits = tousProduits
+                      .where((p) => p.stockBoutique(boutique) > 0)
+                      .toList();
+                  if (tousProduits.isNotEmpty && produits.isEmpty) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Text(
+                          t.caisseNoShopProducts,
+                          style: const TextStyle(color: Colors.grey, fontSize: 14),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    );
+                  }
                   if (produits.isEmpty) {
                     return Center(
                       child: Text(
