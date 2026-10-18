@@ -85,6 +85,7 @@ const _motsEntete = {
   'code', 'ref', 'reference', 'nom du produit', 'nom produit',
   'noms', 'designations', 'articles', 'produits', 'descriptions', 'libelles',
   'codes', 'refs', 'references', 'noms des produits',
+  'item', 'items',
 };
 
 // ------------------------------------------------------------------
@@ -191,6 +192,11 @@ Map<String, dynamic> _analyserLignes(List<List<dynamic>> rows) {
     final prixVente = (idxPV >= 0 && idxPV < row.length) ? _cellToDouble(row[idxPV]) : 0.0;
 
     final nomNorm = normaliserTexte(nom);
+    // 🛑 Ligne « TOTAL » : fin du tableau des produits (la suite = autres tableaux)
+    if (produits.isNotEmpty &&
+        (nomNorm.startsWith('total') || normaliserTexte(codeBarre).startsWith('total'))) {
+      break;
+    }
     if (nom.isEmpty || _motsEntete.contains(nomNorm) || nomNorm.startsWith('total')) continue;
 
     produits.add({
@@ -523,6 +529,14 @@ class PackingListService {
 
       dejaVu[cle] = ligne;
       lignes.add(ligne);
+    }
+
+    // Nouveau produit sans quantité : rien à créer
+    for (final l in lignes) {
+      if (l.statut == StatutLigne.nouveau && l.quantite <= 0) {
+        l.statut = StatutLigne.ignore;
+        l.raison = 'Nouveau produit avec quantité 0';
+      }
     }
 
     return AnalyseImport(
