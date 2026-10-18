@@ -9,6 +9,8 @@ import 'xlsx_lecteur_simple.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
 
 import '../../features/import/import_apercu_screen.dart';
 
@@ -279,6 +281,20 @@ class LigneImport {
   }
 }
 
+// 🏬 Stock d'un produit dans une boutique
+//  (principale = stock total − stocks des autres boutiques)
+int _stockDans(Map<String, dynamic> data, String boutiqueId) {
+  final total = (data['quantite'] as num?)?.toInt() ?? 0;
+  final stocks = data['stocks'] is Map ? data['stocks'] as Map : const {};
+  if (boutiqueId != 'principale') return (stocks[boutiqueId] as num?)?.toInt() ?? 0;
+  var autres = 0;
+  stocks.forEach((k, v) {
+    if (k != 'principale' && v is num) autres += v.toInt();
+  });
+  final reste = total - autres;
+  return reste < 0 ? 0 : reste;
+}
+
 class AnalyseImport {
   final String entrepriseId;
   final String nomFichier;
@@ -292,7 +308,13 @@ class AnalyseImport {
     required this.colonnes,
     required this.avecEntete,
     required this.lignes,
+    this.boutiqueId = 'principale',
+    this.nomBoutique = '',
   });
+
+  /// 🏬 Boutique qui reçoit la marchandise
+  final String boutiqueId;
+  final String nomBoutique;
 
   int get nbNouveaux => lignes.where((l) => l.statut == StatutLigne.nouveau).length;
   int get nbExistants => lignes.where((l) => l.statut == StatutLigne.existant).length;
@@ -322,7 +344,35 @@ class PackingListService {
     required String entrepriseId,
     void Function(int traites, int total)? onProgress,
   }) async {
-    final analyse = await choisirEtAnalyser(entrepriseId: entrepriseId);
+    if (!context.mounted) return 0;
+    // 🏬 Boutique qui reçoit la marchandise (boutique affichée ; « Toutes » = principale)
+    var boutiqueId = 'principale';
+    var nomBoutique = 'Boutique principale';
+    try {
+      final conteneur = ProviderScope.containerOf(context, listen: false);
+      boutiqueId = conteneur.read(boutiqueActiveProvider) ?? 'principale';
+      for (final b in conteneur.read(boutiquesActivesProvider(entrepriseId))) {
+        if (b.id == boutiqueId) nomBoutique = b.nom;
+      }
+    } catch (_) {}
+    if (boutiqueId != 'principale' && nomBoutique == 'Boutique principale') nomBoutique = boutiqueId;
+
+    final continuer = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Importer un fichier'),
+        content: Text('La marchandise sera ajoutée à la boutique :\n\n🏬 $nomBoutique\n\n'
+            "Pour une autre boutique, changez d'abord de boutique dans l'application."),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Continuer')),
+        ],
+      ),
+    );
+    if (continuer != true || !context.mounted) return 0;
+
+    final analyse = await choisirEtAnalyser(
+        entrepriseId: entrepriseId, boutiqueId: boutiqueId, nomBoutique: nomBoutique);
     if (analyse == null || !context.mounted) return 0;
 
     final resultat = await Navigator.of(context).push<ResultatImport>(
@@ -357,7 +407,11 @@ class PackingListService {
   }
 
   /// 1) Choisit le fichier, le lit, et compare avec les produits existants.
-  Future<AnalyseImport?> choisirEtAnalyser({required String entrepriseId}) async {
+  Future<AnalyseImport?> choisirEtAnalyser({
+    required String entrepriseId,
+    String boutiqueId = 'principale',
+    String nomBoutique = '',
+  }) async {
     if (entrepriseId.isEmpty) throw Exception("Identifiant d'entreprise manquant.");
 
     final result = await FilePicker.platform.pickFiles(
@@ -460,7 +514,7 @@ class PackingListService {
         ligne.statut = StatutLigne.existant;
         ligne.idExistant = existant.id;
         ligne.nomExistant = (data['nom'] ?? '').toString();
-        ligne.stockActuel = (data['quantite'] as num?)?.toInt() ?? 0;
+        ligne.stockActuel = _stockDans(data, boutiqueId); // 🏬 stock de la boutique
         ligne.codeExistantVide =
             (data['codeBarre'] ?? data['code_barre'] ?? '').toString().trim().isEmpty;
       } else {
@@ -477,6 +531,8 @@ class PackingListService {
       colonnes: colonnes,
       avecEntete: brut['avecEntete'] == true,
       lignes: lignes,
+      boutiqueId: boutiqueId,
+      nomBoutique: nomBoutique,
     );
   }
 
@@ -500,15 +556,24 @@ class PackingListService {
 
       for (final l in paquet) {
         if (l.statut == StatutLigne.existant && l.idExistant != null) {
+          // 🏬 Le stock total change de l'écart ; celui de la boutique aussi
+          final b = analyse.boutiqueId;
+          final ecart = mode == ModeImport.arrivage ? l.quantite : l.quantite - l.stockActuel;
           final maj = <String, dynamic>{
-            'quantite': mode == ModeImport.arrivage ? FieldValue.increment(l.quantite) : l.quantite,
+            'quantite': FieldValue.increment(ecart),
+            if (b != 'principale')
+              'stocks.$b': mode == ModeImport.arrivage ? FieldValue.increment(l.quantite) : l.quantite,
             'updatedAt': FieldValue.serverTimestamp(),
           };
           // Un prix vide ou à 0 dans le fichier ne remplace pas le prix actuel
           if (l.prixAchat > 0) maj['prixAchat'] = l.prixAchat;
           if (l.prixVente > 0) {
-            maj['prixVente'] = l.prixVente;
-            maj['prix'] = l.prixVente;
+            if (b == 'principale') {
+              maj['prixVente'] = l.prixVente;
+              maj['prix'] = l.prixVente;
+            } else {
+              maj['prixParBoutique.$b'] = l.prixVente; // 🏬 prix propre à la boutique
+            }
           }
           if (l.codeBarre.isNotEmpty && l.codeExistantVide) {
             maj['codeBarre'] = l.codeBarre;
@@ -527,6 +592,8 @@ class PackingListService {
             'prix': l.prixVente,
             'categorie': 'Général',
             'seuilAlerte': 5,
+            // 🏬 Nouveau produit : tout son stock est dans la boutique choisie
+            if (analyse.boutiqueId != 'principale') 'stocks': {analyse.boutiqueId: l.quantite},
             'entrepriseId': analyse.entrepriseId,
             'isPublicEcommerce': false,
             'createdAt': FieldValue.serverTimestamp(),
