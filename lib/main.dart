@@ -22,6 +22,27 @@ import 'core/widgets/app_initializer.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // 🩺 APK : au lieu d'un écran gris, afficher l'erreur (à photographier)
+  if (!kDebugMode) {
+    ErrorWidget.builder = (details) => Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            color: Colors.white,
+            child: SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  "⚠️ Erreur d'affichage — prenez une photo et envoyez-la\n\n"
+                  '${details.exceptionAsString()}\n\n'
+                  '${details.stack?.toString().split('\n').take(10).join('\n') ?? ''}',
+                  style: TextStyle(color: Colors.red.shade900, fontSize: 13),
+                ),
+              ),
+            ),
+          ),
+        );
+  }
+
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -36,17 +57,33 @@ void main() async {
     }
 
     // 🐞 Crashlytics : rapports d'erreurs (APK seulement, pas au câble)
+    //    Les erreurs sont TOUJOURS aussi écrites dans le terminal,
+    //    et une panne de Crashlytics ne bloque plus rien.
     if (!kIsWeb) {
-      await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(!kDebugMode);
+      try {
+        await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(!kDebugMode);
+      } catch (e) {
+        debugPrint('Crashlytics indisponible : $e');
+      }
       if (!kDebugMode) {
-        FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+        FlutterError.onError = (details) {
+          FlutterError.presentError(details);
+          try {
+            FirebaseCrashlytics.instance.recordFlutterFatalError(details).catchError((_) {});
+          } catch (_) {}
+        };
         WidgetsBinding.instance.platformDispatcher.onError = (error, stack) {
-          FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+          debugPrint('Erreur : $error\n$stack');
+          try {
+            FirebaseCrashlytics.instance.recordError(error, stack, fatal: true).catchError((_) {});
+          } catch (_) {}
           return true;
         };
         // Chaque rapport porte l'identifiant de l'utilisateur connecté
         FirebaseAuth.instance.authStateChanges().listen((u) {
-          FirebaseCrashlytics.instance.setUserIdentifier(u?.uid ?? '');
+          try {
+            FirebaseCrashlytics.instance.setUserIdentifier(u?.uid ?? '').catchError((_) {});
+          } catch (_) {}
         });
       }
     }
