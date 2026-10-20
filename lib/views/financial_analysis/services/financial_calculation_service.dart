@@ -31,6 +31,15 @@ class FinancialCalculationResult {
   // --- Indicateurs ---
   final int nombreVentes;
 
+  // --- 📊 Rapport du patron ---
+  /// Argent payé au moment des ventes de la période
+  final double encaisse;
+  /// Reste à payer sur les ventes de la période (crédits accordés)
+  final double creditsAccordes;
+  /// Vendeur -> montant vendu (net des retours) / nombre de ventes
+  final Map<String, double> ventesParVendeur;
+  final Map<String, int> nbVentesParVendeur;
+
   /// Marge brute en % du CA net (0 si pas de CA)
   double get tauxMargeBrute =>
       chiffreAffaires.abs() < 0.005 ? 0 : margeBrute / chiffreAffaires * 100;
@@ -70,6 +79,10 @@ class FinancialCalculationResult {
     required this.detailsRetoursList,
     required this.detailsAutresProduitsList,
     required this.detailsPertesList,
+    this.encaisse = 0,
+    this.creditsAccordes = 0,
+    this.ventesParVendeur = const {},
+    this.nbVentesParVendeur = const {},
   });
 }
 
@@ -158,6 +171,10 @@ class FinancialCalculationService {
     double autresProduits = 0.0;
     double pertes = 0.0;
     int nombreVentes = 0;
+    double encaisse = 0.0;
+    double creditsAccordes = 0.0;
+    final Map<String, double> ventesParVendeur = {};
+    final Map<String, int> nbVentesParVendeur = {};
 
     final List<Map<String, dynamic>> detailsVentesList = [];
     final List<Map<String, dynamic>> detailsCoutAchatList = [];
@@ -208,6 +225,17 @@ class FinancialCalculationService {
       ventesBrutes += totalVente;
       final double montantRetourne = _num(data['montantRetourne']);
       final double montantAnnule = _num(data['montantAnnule']);
+      // 📊 Encaissé, crédits, vendeur
+      encaisse += _num(data['montantPaye']);
+      creditsAccordes += _num(data['resteAPayer']);
+      final vendeurBrut = (data['vendeurNom'] ?? '').toString().trim();
+      final vendeur = (vendeurBrut.isEmpty ||
+              (vendeurBrut.length >= 20 && !vendeurBrut.contains(' ')))
+          ? 'Non précisé'
+          : vendeurBrut;
+      ventesParVendeur[vendeur] = (ventesParVendeur[vendeur] ?? 0) +
+          totalVente - montantRetourne - montantAnnule;
+      nbVentesParVendeur[vendeur] = (nbVentesParVendeur[vendeur] ?? 0) + 1;
       if (montantRetourne > 0.005) {
         retoursAnnulations += montantRetourne;
         detailsRetoursList.add({
@@ -344,6 +372,10 @@ class FinancialCalculationService {
       detailsRetoursList: detailsRetoursList,
       detailsAutresProduitsList: detailsAutresProduitsList,
       detailsPertesList: detailsPertesList,
+      encaisse: encaisse,
+      creditsAccordes: creditsAccordes,
+      ventesParVendeur: ventesParVendeur,
+      nbVentesParVendeur: nbVentesParVendeur,
     );
   }
 }

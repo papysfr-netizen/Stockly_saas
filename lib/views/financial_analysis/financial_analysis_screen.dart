@@ -20,6 +20,7 @@ import '../../features/boutiques/boutique_provider.dart';
 
 import 'services/financial_calculation_service.dart';
 import 'widgets/details_bottom_sheet.dart';
+import 'widgets/recherche_client_sheet.dart';
 
 class FinancialAnalysisScreen extends ConsumerStatefulWidget {
   const FinancialAnalysisScreen({super.key});
@@ -359,19 +360,120 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                             entrepriseId: entrepriseId,
                           );
 
+                          // 🏬 Comparatif des boutiques (quand « Toutes » est choisi)
+                          final comparatif =
+                              <({String id, String nom, FinancialCalculationResult r})>[];
+                          if (boutique == null && boutiques.length >= 2) {
+                            String bDe(Object? v) {
+                              final s = (v ?? '').toString();
+                              return s.isEmpty ? 'principale' : s;
+                            }
+
+                            final ids = <String>{'principale', ...boutiques.map((b) => b.id)};
+                            for (final id in ids) {
+                              final vB = (snapVentes.data?.docs ?? []).where((d) {
+                                final m = (d.data() as Map<String, dynamic>?) ?? const {};
+                                return bDe(m['boutiqueId']) == id;
+                              }).toList();
+                              final dB = toutesLesDepenses
+                                  .where((dep) => bDe((dep as dynamic).boutiqueId) == id)
+                                  .toList();
+                              final rb = FinancialCalculationService.computePL(
+                                toutesLesDepenses: dB,
+                                produitsDocs: produits,
+                                ventesDocs: vB,
+                                dateRange: dateRange,
+                                entrepriseId: entrepriseId,
+                              );
+                              final nom = boutiques
+                                      .where((b) => b.id == id)
+                                      .map((b) => b.nom)
+                                      .firstOrNull ??
+                                  (id == 'principale' ? 'Boutique principale' : id);
+                              comparatif.add((id: id, nom: nom, r: rb));
+                            }
+                          }
+
                           _dernier = r;
                           _dernierePeriode = libelle;
 
                           return ListView(
                             padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
                             children: [
+                              // 🔎 Rechercher un client
+                              OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14)),
+                                ),
+                                icon: const Icon(Icons.person_search_rounded),
+                                label: const Text('Rechercher un client'),
+                                onPressed: () => RechercheClientSheet.ouvrir(
+                                  context,
+                                  entrepriseId: entrepriseId,
+                                  ventes: ventes,
+                                  periode: dateRange,
+                                  libellePeriode: libelle,
+                                  fmt: fmt,
+                                  currency: currency,
+                                ),
+                              ),
+                              const SizedBox(height: 14),
                               _carteResultat(r, prec, fmt, currency, libelle),
                               const SizedBox(height: 14),
                               _indicateurs(r, prec, fmt, currency),
+                              const SizedBox(height: 10),
+                              // 📊 Encaissé / crédits
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _tuile(
+                                      icone: Icons.payments_rounded,
+                                      couleur: _vert,
+                                      titre: 'Encaissé',
+                                      valeur: fmt(r.encaisse),
+                                      sousTitre: '$currency • payé à la vente',
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: _tuile(
+                                      icone: Icons.schedule_rounded,
+                                      couleur: _rouge,
+                                      titre: 'Crédits accordés',
+                                      valeur: fmt(r.creditsAccordes),
+                                      sousTitre: '$currency • reste à payer',
+                                    ),
+                                  ),
+                                ],
+                              ),
                               const SizedBox(height: 20),
                               _titreSection('Compte de résultat', 'Touchez une ligne pour le détail'),
                               const SizedBox(height: 10),
                               _tableau(context, r, fmt, currency),
+                              // 🏬 Par boutique
+                              if (comparatif.isNotEmpty) ...[
+                                const SizedBox(height: 20),
+                                _titreSection('Par boutique', 'Toutes les boutiques'),
+                                const SizedBox(height: 10),
+                                _comparatif(comparatif, r, produits, fmt, currency),
+                              ],
+                              // 👤 Par vendeur
+                              const SizedBox(height: 20),
+                              _titreSection('Par vendeur', '${r.nombreVentes} vente(s)'),
+                              const SizedBox(height: 10),
+                              _vendeurs(r, fmt, currency),
+                              // 📦 Produits
+                              const SizedBox(height: 20),
+                              _titreSection('Produits les plus vendus', 'Top 15'),
+                              const SizedBox(height: 10),
+                              _produitsVendus(r, fmt, currency),
+                              const SizedBox(height: 20),
+                              _titreSection('Ne bougent pas', 'En stock, aucune vente'),
+                              const SizedBox(height: 10),
+                              _dormants(produits, r, boutique, fmt, currency),
                               const SizedBox(height: 14),
                               Text(
                                 'Montants en $currency • Comparaison avec la période précédente de même durée.',
@@ -786,6 +888,261 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
         ],
       ),
     );
+  }
+
+  // ------------------------------------------------------------------
+  // 📊 RAPPORT DU PATRON : boutiques, vendeurs, produits
+  // ------------------------------------------------------------------
+  static double _n(Object? v) {
+    if (v is num) return v.toDouble();
+    return double.tryParse((v ?? '').toString().replaceAll(',', '.')) ?? 0;
+  }
+
+  /// Stock d'un produit dans une boutique (null = toutes les boutiques)
+  static double _stockDans(Map<String, dynamic> p, String? b) {
+    final total = _n(p['quantite'] ?? p['stock']);
+    if (b == null) return total;
+    final stocks = p['stocks'] is Map ? p['stocks'] as Map : const {};
+    if (b != 'principale') return _n(stocks[b]);
+    var autres = 0.0;
+    stocks.forEach((k, v) {
+      if (k != 'principale') autres += _n(v);
+    });
+    final reste = total - autres;
+    return reste < 0 ? 0 : reste;
+  }
+
+  /// Valeur du stock au prix d'achat
+  static double _valeurStock(List<QueryDocumentSnapshot> produits, String? b) {
+    var s = 0.0;
+    for (final d in produits) {
+      final p = (d.data() as Map<String, dynamic>?) ?? const <String, dynamic>{};
+      final q = _stockDans(p, b);
+      if (q > 0) s += q * _n(p['prixAchat'] ?? p['prix_achat']);
+    }
+    return s;
+  }
+
+  Widget _carteBlanche(List<Widget> enfants) => Container(
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
+        ),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: enfants),
+      );
+
+  Widget _aucun() => Padding(
+        padding: const EdgeInsets.all(16),
+        child: Text('Aucune donnée sur cette période',
+            style: TextStyle(color: Colors.grey.shade600)),
+      );
+
+  Widget _petit(String t, String v) => Text.rich(TextSpan(children: [
+        TextSpan(text: '$t : ', style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+        TextSpan(
+            text: v,
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: _bleuNuit)),
+      ]));
+
+  Widget _blocBoutique(String nom, FinancialCalculationResult x, double stock,
+      String Function(double) fmt, String currency,
+      {bool total = false}) {
+    final couleur = x.beneficeNet >= 0 ? _vert : _rouge;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: total ? const Color(0xFFF1F5F9) : Colors.white,
+        border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(total ? Icons.functions_rounded : Icons.storefront_rounded,
+                  size: 16, color: _bleuNuit),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(nom,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        fontWeight: total ? FontWeight.w900 : FontWeight.bold,
+                        color: _bleuNuit)),
+              ),
+              Text(
+                '${x.beneficeNet < -0.005 ? '− ${fmt(-x.beneficeNet)}' : fmt(x.beneficeNet)} $currency',
+                style: TextStyle(fontWeight: FontWeight.w800, color: couleur),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 12,
+            runSpacing: 4,
+            children: [
+              _petit('CA', fmt(x.chiffreAffaires)),
+              _petit('Ventes', '${x.nombreVentes}'),
+              _petit('Encaissé', fmt(x.encaisse)),
+              _petit('Crédits', fmt(x.creditsAccordes)),
+              _petit('Dépenses', fmt(x.totalDepenses)),
+              _petit('Stock (achat)', fmt(stock)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _comparatif(
+      List<({String id, String nom, FinancialCalculationResult r})> liste,
+      FinancialCalculationResult total,
+      List<QueryDocumentSnapshot> produits,
+      String Function(double) fmt,
+      String currency) {
+    final tri = [...liste]..sort((a, b) => b.r.chiffreAffaires.compareTo(a.r.chiffreAffaires));
+    return _carteBlanche([
+      for (final e in tri)
+        _blocBoutique(e.nom, e.r, _valeurStock(produits, e.id), fmt, currency),
+      _blocBoutique('TOTAL', total, _valeurStock(produits, null), fmt, currency, total: true),
+    ]);
+  }
+
+  Widget _vendeurs(FinancialCalculationResult r, String Function(double) fmt, String currency) {
+    final tri = r.ventesParVendeur.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+    if (tri.isEmpty) return _carteBlanche([_aucun()]);
+    final max = tri.first.value <= 0 ? 1.0 : tri.first.value;
+    return _carteBlanche([
+      for (final e in tri)
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.person_rounded, size: 16, color: Colors.indigo),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(e.key,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontWeight: FontWeight.w600)),
+                  ),
+                  Text('${r.nbVentesParVendeur[e.key] ?? 0} vente(s) • ',
+                      style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                  Text('${fmt(e.value)} $currency',
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: _bleuNuit)),
+                ],
+              ),
+              const SizedBox(height: 6),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: (e.value / max).clamp(0.0, 1.0),
+                  minHeight: 6,
+                  backgroundColor: Colors.grey.shade200,
+                  color: Colors.indigo,
+                ),
+              ),
+            ],
+          ),
+        ),
+    ]);
+  }
+
+  Widget _produitsVendus(
+      FinancialCalculationResult r, String Function(double) fmt, String currency) {
+    final parNom = <String, List<double>>{};
+    for (final it in r.detailsVentesList) {
+      final p = parNom.putIfAbsent((it['nom'] ?? '').toString(), () => [0, 0]);
+      p[0] += _n(it['qte']);
+      p[1] += _n(it['total']);
+    }
+    final tri = parNom.entries.toList()..sort((a, b) => b.value[1].compareTo(a.value[1]));
+    if (tri.isEmpty) return _carteBlanche([_aucun()]);
+    return _carteBlanche([
+      for (var i = 0; i < tri.length && i < 15; i++)
+        ListTile(
+          dense: true,
+          leading: CircleAvatar(
+            radius: 13,
+            backgroundColor: Colors.teal.withValues(alpha: 0.12),
+            child: Text('${i + 1}',
+                style: const TextStyle(
+                    fontSize: 11, color: Colors.teal, fontWeight: FontWeight.bold)),
+          ),
+          title: Text(tri[i].key, overflow: TextOverflow.ellipsis),
+          subtitle: Text(
+              '${tri[i].value[0].toStringAsFixed(tri[i].value[0] % 1 == 0 ? 0 : 1)} pièce(s)'),
+          trailing: Text('${fmt(tri[i].value[1])} $currency',
+              style: const TextStyle(fontWeight: FontWeight.bold, color: _bleuNuit)),
+        ),
+      if (tri.length > 15)
+        Padding(
+          padding: const EdgeInsets.all(10),
+          child: Text('… et ${tri.length - 15} autre(s)',
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+        ),
+    ]);
+  }
+
+  Widget _dormants(List<QueryDocumentSnapshot> produits, FinancialCalculationResult r,
+      String? boutique, String Function(double) fmt, String currency) {
+    final vendus = r.detailsVentesList
+        .map((it) => (it['nom'] ?? '').toString().trim().toLowerCase())
+        .toSet();
+    final liste = <({String nom, String code, double qte, double valeur})>[];
+    for (final d in produits) {
+      final p = (d.data() as Map<String, dynamic>?) ?? const <String, dynamic>{};
+      final q = _stockDans(p, boutique);
+      if (q <= 0) continue;
+      final nom = (p['nom'] ?? '').toString();
+      if (vendus.contains(nom.trim().toLowerCase())) continue;
+      liste.add((
+        nom: nom,
+        code: (p['codeBarre'] ?? '').toString().trim(),
+        qte: q,
+        valeur: q * _n(p['prixAchat'] ?? p['prix_achat']),
+      ));
+    }
+    liste.sort((a, b) => b.valeur.compareTo(a.valeur));
+    if (liste.isEmpty) {
+      return _carteBlanche([
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text('Tous les produits en stock se sont vendus 👍',
+              style: TextStyle(color: Colors.grey.shade700)),
+        ),
+      ]);
+    }
+    final valeurTotale = liste.fold<double>(0, (s, e) => s + e.valeur);
+    return _carteBlanche([
+      Padding(
+        padding: const EdgeInsets.fromLTRB(14, 12, 14, 4),
+        child: Text(
+          "${liste.length} produit(s) • ${fmt(valeurTotale)} $currency immobilisés (prix d'achat)",
+          style: TextStyle(
+              fontSize: 12, color: Colors.orange.shade900, fontWeight: FontWeight.w600),
+        ),
+      ),
+      for (final e in liste.take(20))
+        ListTile(
+          dense: true,
+          leading: Icon(Icons.hourglass_bottom_rounded, color: Colors.orange.shade700),
+          title: Text('${e.code.isEmpty ? '' : '${e.code} · '}${e.nom}',
+              overflow: TextOverflow.ellipsis),
+          subtitle: Text('Stock : ${e.qte.toStringAsFixed(e.qte % 1 == 0 ? 0 : 1)}'),
+          trailing: Text('${fmt(e.valeur)} $currency',
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange.shade900)),
+        ),
+      if (liste.length > 20)
+        Padding(
+          padding: const EdgeInsets.all(10),
+          child: Text('… et ${liste.length - 20} autre(s)',
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+        ),
+    ]);
   }
 
   // ------------------------------------------------------------------

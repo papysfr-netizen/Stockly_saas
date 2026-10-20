@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:stockly_saas/features/boutiques/boutiques_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:stockly_saas/core/widgets/sauvegarde_card.dart';
 import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
 
 import '../core/providers/user_role_provider.dart';
@@ -192,6 +193,11 @@ class SettingsScreen extends ConsumerWidget {
               // 📤 Export : seulement avec l'autorisation « voir les finances »
               if (userProfile?.peutVoirFinances == true) ...[
                 ExportCard(entrepriseId: entrepriseId),
+                const SizedBox(height: 16),
+              ],
+              // 💾 Sauvegarde complète : propriétaire seulement
+              if (userProfile?.role.isOwner == true) ...[
+                SauvegardeCard(entrepriseId: entrepriseId),
                 const SizedBox(height: 16),
               ],
               if (userProfile?.peutMaintenance == true) ...[
