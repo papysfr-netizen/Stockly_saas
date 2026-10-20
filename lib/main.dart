@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
 import 'package:flutter/material.dart';
@@ -43,10 +42,31 @@ void main() async {
         );
   }
 
+  // 🩺 Démarrage de Firebase séparé : on garde la vraie raison d'un échec
+  Object? erreurFirebase;
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+  } catch (e, pile) {
+    erreurFirebase = e;
+    debugPrint('Firebase.initializeApp a échoué : $e\n$pile');
+    // 🔧 Firebase déjà démarré par Android (« already exists ») :
+    //    on récupère celui-là au lieu d'en créer un deuxième
+    try {
+      await Firebase.initializeApp();
+      erreurFirebase = null;
+    } catch (e2) {
+      debugPrint('Deuxième essai Firebase : $e2');
+    }
+  }
+  if (Firebase.apps.isEmpty) {
+    runApp(_ErreurDemarrage(erreur: '${erreurFirebase ?? 'Firebase absent'}'));
+    return;
+  }
+
+  try {
+    // (Firebase est déjà démarré juste au-dessus)
 
     // Configuration avancée de la persistance Firestore Hors-Ligne
     if (!kIsWeb) {
@@ -56,42 +76,71 @@ void main() async {
       );
     }
 
-    // 🐞 Crashlytics : rapports d'erreurs (APK seulement, pas au câble)
-    //    Les erreurs sont TOUJOURS aussi écrites dans le terminal,
-    //    et une panne de Crashlytics ne bloque plus rien.
-    if (!kIsWeb) {
-      try {
-        await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(!kDebugMode);
-      } catch (e) {
-        debugPrint('Crashlytics indisponible : $e');
-      }
-      if (!kDebugMode) {
-        FlutterError.onError = (details) {
-          FlutterError.presentError(details);
-          try {
-            FirebaseCrashlytics.instance.recordFlutterFatalError(details).catchError((_) {});
-          } catch (_) {}
-        };
-        WidgetsBinding.instance.platformDispatcher.onError = (error, stack) {
-          debugPrint('Erreur : $error\n$stack');
-          try {
-            FirebaseCrashlytics.instance.recordError(error, stack, fatal: true).catchError((_) {});
-          } catch (_) {}
-          return true;
-        };
-        // Chaque rapport porte l'identifiant de l'utilisateur connecté
-        FirebaseAuth.instance.authStateChanges().listen((u) {
-          try {
-            FirebaseCrashlytics.instance.setUserIdentifier(u?.uid ?? '').catchError((_) {});
-          } catch (_) {}
-        });
-      }
+    // 🩺 Erreurs de l'APK : toujours écrites dans le terminal
+    //    (Crashlytics retiré : il bloquait le démarrage sur certains téléphones)
+    if (!kDebugMode) {
+      FlutterError.onError = (details) => FlutterError.presentError(details);
+      WidgetsBinding.instance.platformDispatcher.onError = (error, stack) {
+        debugPrint('Erreur : $error\n$stack');
+        return true;
+      };
     }
   } catch (e) {
     debugPrint("Erreur d'initialisation Firebase : $e");
   }
 
   runApp(const RacineApp());
+}
+
+// ============================================================================
+// 🩺 ÉCRAN « DÉMARRAGE IMPOSSIBLE » (Firebase n'a pas pu se lancer)
+// ============================================================================
+class _ErreurDemarrage extends StatelessWidget {
+  final String erreur;
+  const _ErreurDemarrage({required this.erreur});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.cloud_off, size: 56, color: Colors.orange.shade700),
+                const SizedBox(height: 12),
+                const Text('Démarrage impossible',
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                const Text(
+                  "Stockly n'a pas pu se connecter à ses services sur ce téléphone.\n"
+                  'Vérifiez internet et les « Services Google Play », puis réessayez.\n'
+                  "Si le problème continue, prenez une photo de cet écran et envoyez-la.",
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  color: Colors.grey.shade200,
+                  child: Text(erreur,
+                      style: TextStyle(fontSize: 12, color: Colors.red.shade900)),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton.icon(
+                  onPressed: () => main(),
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Réessayer'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 // ============================================================================
