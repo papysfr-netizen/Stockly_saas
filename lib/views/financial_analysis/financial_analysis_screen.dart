@@ -47,6 +47,10 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
   // Dernier résultat (pour l'export)
   FinancialCalculationResult? _dernier;
   String _dernierePeriode = '';
+  // 📊 Pour le rapport complet (export PDF / Excel)
+  List<({String id, String nom, FinancialCalculationResult r})> _dernierComparatif = const [];
+  List<QueryDocumentSnapshot> _derniersProduits = const [];
+  String? _derniereBoutique;
 
   // ------------------------------------------------------------------
   // PÉRIODES
@@ -134,17 +138,49 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
       ['RÉSULTAT NET (${r.tauxMargeNette.toStringAsFixed(1)} %)', fmt(r.beneficeNet)],
       ['Nombre de ventes', '${r.nombreVentes}'],
       ['Panier moyen', fmt(r.panierMoyen)],
+      ['Encaissé (payé à la vente)', fmt(r.encaisse)],
+      ['Crédits accordés (reste à payer)', fmt(r.creditsAccordes)],
+      // 🏬 Par boutique
+      if (_dernierComparatif.isNotEmpty) ...[
+        ['', ''],
+        ['PAR BOUTIQUE', 'Résultat net'],
+        for (final e in _dernierComparatif) ...[
+          [e.nom.toUpperCase(), fmt(e.r.beneficeNet)],
+          ['   CA net / nombre de ventes', '${fmt(e.r.chiffreAffaires)} / ${e.r.nombreVentes}'],
+          ['   Encaissé / crédits', '${fmt(e.r.encaisse)} / ${fmt(e.r.creditsAccordes)}'],
+          ['   Dépenses', '-${fmt(e.r.totalDepenses)}'],
+          ["   Stock (prix d'achat)", fmt(_valeurStock(_derniersProduits, e.id))],
+        ],
+      ],
+      // 👤 Par vendeur
+      ['', ''],
+      ['PAR VENDEUR', 'Vendu'],
+      for (final e in (r.ventesParVendeur.entries.toList()
+        ..sort((a, b) => b.value.compareTo(a.value))))
+        ['${e.key} (${r.nbVentesParVendeur[e.key] ?? 0} vente(s))', fmt(e.value)],
+      // 📦 Produits
+      ['', ''],
+      ['PRODUITS LES PLUS VENDUS', 'Montant'],
+      for (final e in _topProduits(r).take(15))
+        ['${e.key} (x${e.value[0].toStringAsFixed(e.value[0] % 1 == 0 ? 0 : 1)})', fmt(e.value[1])],
+      ['', ''],
+      ['NE BOUGENT PAS (en stock, aucune vente)', 'Stock / valeur achat'],
+      for (final e in _listeDormants(_derniersProduits, r, _derniereBoutique).take(30))
+        [
+          '${e.code.isEmpty ? '' : '${e.code} · '}${e.nom}',
+          '${e.qte.toStringAsFixed(e.qte % 1 == 0 ? 0 : 1)} / ${fmt(e.valeur)}',
+        ],
     ];
 
     if (type == 'excel') {
       await ReportExportService.exporterExcel(
-        titreRapport: 'Compte de resultat $_dernierePeriode',
+        titreRapport: 'Rapport complet $_dernierePeriode',
         enTetes: enTetes,
         lignes: lignes,
       );
     } else {
       await ReportExportService.exporterPDF(
-        titreRapport: 'Compte de Résultat – $_dernierePeriode',
+        titreRapport: 'Rapport complet – $_dernierePeriode',
         nomBoutique: 'Stockly Pro',
         enTetes: enTetes,
         lignes: lignes,
@@ -395,6 +431,9 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                           }
 
                           _dernier = r;
+                          _dernierComparatif = comparatif;
+                          _derniersProduits = produits;
+                          _derniereBoutique = boutique;
                           _dernierePeriode = libelle;
 
                           return ListView(
@@ -910,6 +949,40 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
     });
     final reste = total - autres;
     return reste < 0 ? 0 : reste;
+  }
+
+  /// Produits vendus : nom -> [quantité, montant], du plus vendu au moins vendu
+  static List<MapEntry<String, List<double>>> _topProduits(FinancialCalculationResult r) {
+    final parNom = <String, List<double>>{};
+    for (final it in r.detailsVentesList) {
+      final p = parNom.putIfAbsent((it['nom'] ?? '').toString(), () => [0, 0]);
+      p[0] += _n(it['qte']);
+      p[1] += _n(it['total']);
+    }
+    return parNom.entries.toList()..sort((a, b) => b.value[1].compareTo(a.value[1]));
+  }
+
+  /// Produits en stock sans vente sur la période (le plus d'argent immobilisé d'abord)
+  static List<({String nom, String code, double qte, double valeur})> _listeDormants(
+      List<QueryDocumentSnapshot> produits, FinancialCalculationResult r, String? boutique) {
+    final vendus = r.detailsVentesList
+        .map((it) => (it['nom'] ?? '').toString().trim().toLowerCase())
+        .toSet();
+    final liste = <({String nom, String code, double qte, double valeur})>[];
+    for (final d in produits) {
+      final p = (d.data() as Map<String, dynamic>?) ?? const <String, dynamic>{};
+      final q = _stockDans(p, boutique);
+      if (q <= 0) continue;
+      final nom = (p['nom'] ?? '').toString();
+      if (vendus.contains(nom.trim().toLowerCase())) continue;
+      liste.add((
+        nom: nom,
+        code: (p['codeBarre'] ?? '').toString().trim(),
+        qte: q,
+        valeur: q * _n(p['prixAchat'] ?? p['prix_achat']),
+      ));
+    }
+    return liste..sort((a, b) => b.valeur.compareTo(a.valeur));
   }
 
   /// Valeur du stock au prix d'achat
