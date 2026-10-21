@@ -308,7 +308,16 @@ class _AddProductModalState extends State<AddProductModal> {
 
     // Anti-doublon : ce code-barres appartient-il déjà à un autre produit ?
     final codeBarreVal = _codeBarresController.text.trim();
-    if (codeBarreVal.isNotEmpty) {
+    // 🔧 Code non modifié en « Modifier » : pas de vérification
+    //    (sinon un code déjà partagé bloquait tout enregistrement)
+    final codeAvant = (widget.product?['codeBarre'] ??
+            widget.product?['code_barre'] ??
+            widget.product?['codeBarres'] ??
+            '')
+        .toString()
+        .trim();
+    final codeInchange = isEditing && codeBarreVal == codeAvant;
+    if (codeBarreVal.isNotEmpty && !codeInchange) {
       final existant = await _chercherProduitParCode(codeBarreVal);
       if (!mounted) return;
       if (existant != null) {
