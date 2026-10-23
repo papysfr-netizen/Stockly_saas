@@ -297,6 +297,150 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
     });
   }
 
+  /// 📶 Le serveur répond-il ? (lecture rapide, 5 secondes maximum)
+  Future<bool> _serveurJoignable(String entrepriseId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('entreprises')
+          .doc(entrepriseId)
+          .get(const GetOptions(source: Source.server))
+          .timeout(const Duration(seconds: 5));
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// 📴 Paiement SANS internet : calculé avec la copie du téléphone,
+  /// écrit avec des « increments » et envoyé au retour du réseau.
+  Future<({String info, double montant, String boutique})> _paiementHorsLigne({
+    required String entrepriseId,
+    required String detteId,
+    required TypeDette? type,
+    required double montantPaye,
+    required PaymentMethod paymentMethod,
+    required String parNom,
+  }) async {
+    const cache = GetOptions(source: Source.cache);
+    DocumentReference docRef;
+    DocumentSnapshot? snapshot;
+
+    Future<DocumentSnapshot?> lireCache(DocumentReference r) async {
+      try {
+        return await r.get(cache);
+      } catch (_) {
+        return null;
+      }
+    }
+
+    if (type != null) {
+      docRef = _getTargetRef(entrepriseId, type).doc(detteId);
+      snapshot = await lireCache(docRef);
+    } else {
+      final creanceRef = _getTargetRef(entrepriseId, TypeDette.client).doc(detteId);
+      final s = await lireCache(creanceRef);
+      if (s != null && s.exists) {
+        docRef = creanceRef;
+        snapshot = s;
+      } else {
+        docRef = _getTargetRef(entrepriseId, TypeDette.fournisseur).doc(detteId);
+        snapshot = await lireCache(docRef);
+      }
+    }
+
+    if (snapshot == null || !snapshot.exists) {
+      throw StateError(
+          "Pas d'internet, et cette dette n'est pas encore dans le téléphone. Réessayez avec internet.");
+    }
+
+    final dette = Dette.fromDocument(snapshot);
+    if (dette.montantReste <= 0) {
+      throw StateError('Cette créance/dette est déjà entièrement soldée.');
+    }
+
+    final double montantEffectif = _roundMoney(
+      montantPaye > dette.montantReste ? dette.montantReste : montantPaye,
+    );
+    final double nouveauReste = _roundMoney(dette.montantReste - montantEffectif);
+    final String nouveauStatut = nouveauReste <= 0 ? 'paye' : 'partiel';
+    final now = DateTime.now();
+    final bool isClient = dette.type == TypeDette.client;
+    final data = snapshot.data();
+    final aMontantRestant = data is Map && data.containsKey('montantRestant');
+
+    final db = FirebaseFirestore.instance;
+    final batch = db.batch();
+
+    batch.update(docRef, {
+      // « increment » : juste, même si un autre paiement arrive en même temps
+      'montantReste': FieldValue.increment(-montantEffectif),
+      'montantRestant':
+          aMontantRestant ? FieldValue.increment(-montantEffectif) : nouveauReste,
+      'acomptePaye': FieldValue.increment(montantEffectif),
+      'statut': nouveauStatut,
+      'dernierPaiement': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+      // 🧾 Historique des paiements
+      'paiements': FieldValue.arrayUnion([
+        _lignePaiement(now, montantEffectif, paymentMethod, parNom),
+      ]),
+    });
+
+    final ecritureRef = _ecrituresRef(entrepriseId).doc();
+    final String codeTresorerie =
+        AccountingJournalService.getAccountCodeForPayment(paymentMethod);
+    final String debitCode = isClient ? codeTresorerie : '401000';
+    final String creditCode = isClient ? '411000' : codeTresorerie;
+
+    final journalEntry = JournalEntry(
+      id: ecritureRef.id,
+      entrepriseId: entrepriseId,
+      date: now,
+      reference: detteId,
+      journalCode: _getJournalCodeForPayment(paymentMethod),
+      description: isClient
+          ? 'Règlement créance client : ${dette.nomTiers}'
+          : 'Règlement dette fournisseur : ${dette.nomTiers}',
+      lines: [
+        JournalEntryLine(
+          accountCode: debitCode,
+          accountLabel: isClient
+              ? JournalEntry.getAccountLabel(codeTresorerie)
+              : 'Fournisseurs - ${dette.nomTiers}',
+          debit: montantEffectif,
+          credit: 0.0,
+        ),
+        JournalEntryLine(
+          accountCode: creditCode,
+          accountLabel: isClient
+              ? 'Clients - ${dette.nomTiers}'
+              : JournalEntry.getAccountLabel(codeTresorerie),
+          debit: 0.0,
+          credit: montantEffectif,
+        ),
+      ],
+      montantEncaisse: isClient ? montantEffectif : 0.0,
+    );
+
+    final boutique = dette.boutiqueId.isEmpty ? 'principale' : dette.boutiqueId;
+    batch.set(ecritureRef, {
+      ...journalEntry.toFirestore(),
+      'boutiqueId': boutique, // 🏬 compta
+    });
+
+    try {
+      await batch.commit().timeout(const Duration(seconds: 5));
+    } on TimeoutException {
+      // Hors ligne : gardé sur le téléphone, envoyé au retour d'internet
+    }
+
+    final info = '${isClient ? 'Client' : 'Fournisseur'} ${dette.nomTiers} · '
+        'payé ${montantEffectif.toStringAsFixed(2)} \$ · '
+        '${nouveauReste <= 0 ? 'soldé' : 'reste ${nouveauReste.toStringAsFixed(2)} \$'} · '
+        '${JournalEntry.getAccountLabel(codeTresorerie)} · hors ligne';
+    return (info: info, montant: montantEffectif, boutique: boutique);
+  }
+
   /// Enregistre un règlement partiel ou total de manière atomique (Transaction)
   Future<void> enregistrerPaiement({
     required String detteId,
@@ -322,6 +466,27 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
       String? infoJournal;
       double montantJournal = 0;
       String boutiqueJournal = 'principale';
+
+      // 📴 Pas d'internet : paiement gardé sur le téléphone, envoyé plus tard
+      if (!await _serveurJoignable(entrepriseId)) {
+        final r = await _paiementHorsLigne(
+          entrepriseId: entrepriseId,
+          detteId: detteId,
+          type: type,
+          montantPaye: montantPaye,
+          paymentMethod: paymentMethod,
+          parNom: parNom,
+        );
+        unawaited(noterJournal(
+          entrepriseId: entrepriseId,
+          action: ActionsJournal.paiementDette,
+          details: r.info,
+          boutiqueId: r.boutique,
+          montant: r.montant,
+          reference: detteId,
+        ));
+        return;
+      }
 
       await db.runTransaction((transaction) async {
         DocumentReference docRef;
