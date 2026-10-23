@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:stockly_saas/core/services/journal_service.dart';
 import 'package:csv/csv.dart';
 import 'package:excel/excel.dart';
 import 'xlsx_lecteur_simple.dart';
@@ -687,6 +688,33 @@ class PackingListService {
 
       faits += paquet.length;
       onProgress?.call(faits, aEcrire.length);
+    }
+
+    // 📒 Journal « qui a fait quoi » (n'empêche jamais l'import)
+    if (aEcrire.isNotEmpty) {
+      final arrivage = mode == ModeImport.arrivage;
+      final pieces = aEcrire.fold<num>(0, (s, l) => s + l.quantite);
+      final nomB =
+          analyse.nomBoutique.isEmpty ? analyse.boutiqueId : analyse.nomBoutique;
+      var detailsImport = '${arrivage ? 'Arrivage' : 'Inventaire'} · $nomB · '
+          '${resultat.nouveaux} nouveau(x), ${resultat.misAJour} mis à jour · '
+          '$pieces pièce(s)';
+      if (!arrivage) {
+        var ecarts = aEcrire
+            .where((l) =>
+                l.statut == StatutLigne.existant && l.quantite != l.stockActuel)
+            .map((l) => '${l.codeBarre.isEmpty ? l.nom : l.codeBarre} '
+                '${l.stockActuel} → ${l.quantite}')
+            .join(', ');
+        if (ecarts.length > 300) ecarts = '${ecarts.substring(0, 300)}…';
+        if (ecarts.isNotEmpty) detailsImport += ' · écarts : $ecarts';
+      }
+      unawaited(noterJournal(
+        entrepriseId: analyse.entrepriseId,
+        action: ActionsJournal.import,
+        details: detailsImport,
+        boutiqueId: analyse.boutiqueId,
+      ));
     }
 
     return resultat;
