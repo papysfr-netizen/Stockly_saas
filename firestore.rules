@@ -78,6 +78,13 @@ service cloud.firestore {
         && monProfil().get('permissions', {}).get('toutesBoutiques', false) == true;
     }
 
+    // Employé autorisé « Paramètres sensibles » par le patron (éteint par défaut) :
+    // taux de change, boutiques, sauvegarde, journal
+    function aParametres(entId) {
+      return estMembre(entId)
+        && monProfil().get('permissions', {}).get('parametresSensibles', false) == true;
+    }
+
     // Le proprietaire travaille partout ; les autres seulement dans leur boutique
     // (sauf avec l'autorisation « Toutes les boutiques »)
     function boutiqueAutorisee(entId, b) {
@@ -215,7 +222,8 @@ service cloud.firestore {
       // ----- Boutiques (multi-boutiques) : tout le monde voit ; le patron gère -----
       match /boutiques/{boutiqueId} {
         allow read: if estMembre(entId);
-        allow create, update: if estProprietaireDe(entId);
+        // Créer / modifier (nom, taux de change) : le patron ou « Paramètres sensibles »
+        allow create, update: if estProprietaireDe(entId) || aParametres(entId);
         allow delete: if false;
       }
 
@@ -287,7 +295,7 @@ service cloud.firestore {
       // Chacun ajoute SA ligne ; personne ne modifie ni n'efface ;
       // seuls le Propriétaire et le Gérant lisent.
       match /journal/{docId} {
-        allow read: if estGerantOuPlus(entId);
+        allow read: if estGerantOuPlus(entId) || aParametres(entId);
         allow create: if estMembre(entId) && request.resource.data.userId == request.auth.uid;
         allow update, delete: if false;
       }
