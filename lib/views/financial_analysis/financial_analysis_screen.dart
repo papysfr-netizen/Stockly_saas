@@ -21,6 +21,7 @@ import '../../features/boutiques/boutique_provider.dart';
 import 'services/financial_calculation_service.dart';
 import 'widgets/details_bottom_sheet.dart';
 import 'widgets/recherche_client_sheet.dart';
+import 'widgets/details_rapport_sheet.dart';
 
 class FinancialAnalysisScreen extends ConsumerStatefulWidget {
   const FinancialAnalysisScreen({super.key});
@@ -51,6 +52,13 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
   List<({String id, String nom, FinancialCalculationResult r})> _dernierComparatif = const [];
   List<QueryDocumentSnapshot> _derniersProduits = const [];
   String? _derniereBoutique;
+  // 📋 Pour les détails touchables
+  List<QueryDocumentSnapshot> _ventesToutes = const [];
+  List<QueryDocumentSnapshot> _ventesAffichees = const [];
+  List<dynamic> _depensesToutes = const [];
+  List<dynamic> _depensesAffichees = const [];
+  DateTimeRange? _periodeAffichee;
+  Map<String, String> _nomsBoutiques = const {};
 
   // ------------------------------------------------------------------
   // PÉRIODES
@@ -435,6 +443,12 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                           _derniersProduits = produits;
                           _derniereBoutique = boutique;
                           _dernierePeriode = libelle;
+                          _ventesToutes = snapVentes.data?.docs ?? const [];
+                          _ventesAffichees = ventes;
+                          _depensesToutes = toutesLesDepenses;
+                          _depensesAffichees = depensesBoutique;
+                          _periodeAffichee = dateRange;
+                          _nomsBoutiques = {for (final b in boutiques) b.id: b.nom};
 
                           return ListView(
                             padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
@@ -468,22 +482,30 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                               Row(
                                 children: [
                                   Expanded(
-                                    child: _tuile(
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(14),
+                                      onTap: () => _ouvrirEncaisse(context, fmt, currency),
+                                      child: _tuile(
                                       icone: Icons.payments_rounded,
                                       couleur: _vert,
                                       titre: 'Encaissé',
                                       valeur: fmt(r.encaisse),
                                       sousTitre: '$currency • payé à la vente',
                                     ),
+                                    ),
                                   ),
                                   const SizedBox(width: 10),
                                   Expanded(
-                                    child: _tuile(
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(14),
+                                      onTap: () => _ouvrirCredits(context, fmt, currency),
+                                      child: _tuile(
                                       icone: Icons.schedule_rounded,
                                       couleur: _rouge,
                                       titre: 'Crédits accordés',
                                       valeur: fmt(r.creditsAccordes),
                                       sousTitre: '$currency • reste à payer',
+                                    ),
                                     ),
                                   ),
                                 ],
@@ -1021,9 +1043,11 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
 
   Widget _blocBoutique(String nom, FinancialCalculationResult x, double stock,
       String Function(double) fmt, String currency,
-      {bool total = false}) {
+      {bool total = false, VoidCallback? onTap}) {
     final couleur = x.beneficeNet >= 0 ? _vert : _rouge;
-    return Container(
+    return InkWell(
+      onTap: onTap,
+      child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: total ? const Color(0xFFF1F5F9) : Colors.white,
@@ -1065,6 +1089,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
           ),
         ],
       ),
+    ),
     );
   }
 
@@ -1077,8 +1102,11 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
     final tri = [...liste]..sort((a, b) => b.r.chiffreAffaires.compareTo(a.r.chiffreAffaires));
     return _carteBlanche([
       for (final e in tri)
-        _blocBoutique(e.nom, e.r, _valeurStock(produits, e.id), fmt, currency),
-      _blocBoutique('TOTAL', total, _valeurStock(produits, null), fmt, currency, total: true),
+        _blocBoutique(e.nom, e.r, _valeurStock(produits, e.id), fmt, currency,
+            onTap: () => _ouvrirBoutique(context, e.id, e.nom, fmt, currency)),
+      _blocBoutique('TOTAL', total, _valeurStock(produits, null), fmt, currency,
+          total: true,
+          onTap: () => _ouvrirBoutique(context, null, 'Toutes les boutiques', fmt, currency)),
     ]);
   }
 
@@ -1088,7 +1116,9 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
     final max = tri.first.value <= 0 ? 1.0 : tri.first.value;
     return _carteBlanche([
       for (final e in tri)
-        Padding(
+        InkWell(
+          onTap: () => _ouvrirVendeur(context, e.key, fmt, currency),
+          child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1120,6 +1150,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
               ),
             ],
           ),
+        ),
         ),
     ]);
   }
@@ -1216,6 +1247,70 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
               style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
         ),
     ]);
+  }
+
+  // ------------------------------------------------------------------
+  // 📋 DÉTAILS TOUCHABLES : boutique, vendeur, encaissé, crédits
+  // ------------------------------------------------------------------
+  void _ouvrirEncaisse(BuildContext context, String Function(double) fmt, String currency) {
+    final p = _periodeAffichee;
+    if (p == null) return;
+    DetailsRapport.ventes(
+      context,
+      titre: 'Encaissé',
+      ventes: DetailsRapport.ventesPeriode(_ventesAffichees, p,
+          garder: (m) => DetailsRapport.encaisseDe(m) > 0.005),
+      fmt: fmt,
+      currency: currency,
+      noms: _nomsBoutiques,
+      mode: 'encaisse',
+    );
+  }
+
+  void _ouvrirCredits(BuildContext context, String Function(double) fmt, String currency) {
+    final p = _periodeAffichee;
+    if (p == null) return;
+    DetailsRapport.ventes(
+      context,
+      titre: 'Qui doit encore',
+      ventes: DetailsRapport.ventesPeriode(_ventesAffichees, p,
+          garder: (m) => _n(m['resteAPayer']) > 0.005),
+      fmt: fmt,
+      currency: currency,
+      noms: _nomsBoutiques,
+      mode: 'credit',
+    );
+  }
+
+  void _ouvrirBoutique(BuildContext context, String? id, String nom,
+      String Function(double) fmt, String currency) {
+    final p = _periodeAffichee;
+    if (p == null) return;
+    DetailsRapport.boutique(
+      context,
+      titre: nom,
+      ventes: DetailsRapport.ventesPeriode(_ventesToutes, p,
+          garder: id == null ? null : (m) => DetailsRapport.boutiqueDe(m['boutiqueId']) == id),
+      depenses: DetailsRapport.depensesPeriode(_depensesToutes, p, boutique: id),
+      fmt: fmt,
+      currency: currency,
+      noms: _nomsBoutiques,
+    );
+  }
+
+  void _ouvrirVendeur(BuildContext context, String vendeur,
+      String Function(double) fmt, String currency) {
+    final p = _periodeAffichee;
+    if (p == null) return;
+    DetailsRapport.ventes(
+      context,
+      titre: vendeur,
+      ventes: DetailsRapport.ventesPeriode(_ventesAffichees, p,
+          garder: (m) => DetailsRapport.vendeurDe(m) == vendeur),
+      fmt: fmt,
+      currency: currency,
+      noms: _nomsBoutiques,
+    );
   }
 
   // ------------------------------------------------------------------
@@ -1319,7 +1414,13 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                 trailing: Text('− ${fmt(e.value)} $currency',
                     style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.redAccent)),
               );
-            }).toList(),
+            }).toList()
+        ..addAll(_periodeAffichee == null
+            ? const <Widget>[]
+            : DetailsRapport.lignesDepenses(
+                DetailsRapport.depensesPeriode(_depensesAffichees, _periodeAffichee!),
+                fmt,
+                currency)),
     );
   }
 
