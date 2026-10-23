@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:stockly_saas/core/models/produit.dart';
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:stockly_saas/core/services/journal_service.dart';
 import 'package:flutter/material.dart';
 import '../services/packing_list_service.dart';
 import 'quick_scanner_widget.dart';
@@ -387,6 +388,60 @@ class _AddProductModalState extends State<AddProductModal> {
           '[Stockly] Produit ${docRef.id} enregistré sur le téléphone, '
           'envoi au serveur en attente du réseau',
         );
+      }
+
+      // 📒 Journal « qui a fait quoi » (n'empêche jamais l'enregistrement)
+      String nombre(num v) =>
+          v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(2);
+      num lireNombre(Object? v) =>
+          v is num ? v : (num.tryParse('${v ?? ''}'.replaceAll(',', '.')) ?? 0);
+      final nomProduit = _nomController.text.trim();
+      final libelle =
+          codeBarreVal.isEmpty ? nomProduit : '$codeBarreVal · $nomProduit';
+      final boutiqueJournal = b ?? 'Toutes';
+      if (isEditing) {
+        final ancien = widget.product ?? const <String, dynamic>{};
+        final avantP = _produitAvant;
+        final changements = <String>[];
+        final num stockAvant = (b != null && avantP != null)
+            ? avantP.stockBoutique(b)
+            : lireNombre(ancien['quantite']);
+        if (stockAvant != quantiteVal) {
+          changements.add('stock ${nombre(stockAvant)} → $quantiteVal');
+        }
+        final pvAvant = lireNombre(ancien['prixVente'] ?? ancien['prix']);
+        if ((pvAvant - prixVenteVal).abs() > 0.001) {
+          changements.add('prix de vente ${nombre(pvAvant)} → ${nombre(prixVenteVal)}');
+        }
+        final paAvant = lireNombre(ancien['prixAchat']);
+        final paApres = _lireDecimal(_prixAchatController.text) ?? 0.0;
+        if ((paAvant - paApres).abs() > 0.001) {
+          changements.add("prix d'achat ${nombre(paAvant)} → ${nombre(paApres)}");
+        }
+        final nomAvant = (ancien['nom'] ?? '').toString().trim();
+        if (nomAvant.isNotEmpty && nomAvant != nomProduit) {
+          changements.add('nom « $nomAvant » → « $nomProduit »');
+        }
+        if (!codeInchange) {
+          changements.add('code « $codeAvant » → « $codeBarreVal »');
+        }
+        if (changements.isNotEmpty) {
+          unawaited(noterJournal(
+            entrepriseId: entrepriseId,
+            action: ActionsJournal.produitModifie,
+            details: '$libelle · ${changements.join(' · ')}',
+            boutiqueId: boutiqueJournal,
+            reference: docRef.id,
+          ));
+        }
+      } else {
+        unawaited(noterJournal(
+          entrepriseId: entrepriseId,
+          action: ActionsJournal.produitAjoute,
+          details: '$libelle · stock $quantiteVal · prix ${nombre(prixVenteVal)}',
+          boutiqueId: boutiqueJournal,
+          reference: docRef.id,
+        ));
       }
 
       if (totalApres != null) productData['quantite'] = totalApres;
