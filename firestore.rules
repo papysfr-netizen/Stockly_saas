@@ -97,6 +97,19 @@ service cloud.firestore {
         && baisse <= paye + rendu + 0.02;
     }
 
+    // Une vente déjà faite (employé non gérant) : on peut livrer, faire un retour,
+    // encaisser une dette… mais JAMAIS changer le montant, les articles, le vendeur,
+    // la boutique, la date, le client ni la façon dont elle a été payée.
+    function venteIntacte() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+        'id', 'entrepriseId', 'montantTotal', 'articles', 'remiseTotale',
+        'vendeurId', 'vendeurNom', 'boutiqueId', 'date', 'createdAt',
+        'nomClient', 'telephoneClient', 'methodePaiement', 'tauxEchange',
+        'montantPayeUSD', 'montantPayeLocal', 'montantCompteClient',
+        'monnaieRendueUSD', 'monnaieRendueLocal', 'comptabilise', 'coutMarchandises'
+      ]);
+    }
+
     // ---------- Profils utilisateurs ----------
     match /users/{userId} {
 
@@ -168,7 +181,13 @@ service cloud.firestore {
       }
 
       match /ventes/{docId} {
-        allow read, update: if estMembre(entId);
+        allow read: if estMembre(entId);
+        // 🔒 Modifier : Gérant+ = tout ; les autres = livraison, retour, paiement seulement ;
+        //    « Maintenance » = rattrapage du coût des marchandises
+        allow update: if estGerantOuPlus(entId)
+          || (estMembre(entId) && venteIntacte())
+          || (aPermission(entId, 'maintenance')
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['coutMarchandises']));
         allow create: if estMembre(entId)
           && boutiqueAutorisee(entId, request.resource.data.get('boutiqueId', ''));
         allow delete: if estGerantOuPlus(entId);
