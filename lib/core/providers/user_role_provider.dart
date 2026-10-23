@@ -92,6 +92,7 @@ class Permissions {
   static const String remisesRetraits = 'remisesRetraits';
   static const String maintenance = 'maintenance';
   static const String gererEquipe = 'gererEquipe';
+  static const String toutesBoutiques = 'toutesBoutiques';
 
   /// Ancienne clé (Caisse : bouton « Nouveau produit ») : suit « Gérer le stock ».
   static const String ancienneAjoutProduit = 'canAddProduct';
@@ -104,6 +105,7 @@ class Permissions {
     remisesRetraits,
     maintenance,
     gererEquipe,
+    toutesBoutiques,
   ];
 
   static const Map<String, String> titres = {
@@ -113,6 +115,7 @@ class Permissions {
     remisesRetraits: 'Remises et retraits',
     maintenance: 'Maintenance des données',
     gererEquipe: "Gérer l'équipe",
+    toutesBoutiques: 'Toutes les boutiques',
   };
 
   static const Map<String, String> descriptions = {
@@ -123,6 +126,8 @@ class Permissions {
     maintenance: 'Paramètres : rattraper les coûts, fusionner les doublons.',
     gererEquipe: 'Ajouter, bloquer ou débloquer des employés (jamais le patron). '
         'Les autorisations restent réservées au patron.',
+    toutesBoutiques: "Choisir n'importe quelle boutique (ou « Toutes ») "
+        'pour vendre, voir le stock et les rapports.',
   };
 }
 
@@ -194,7 +199,9 @@ class UserProfile {
   /// (gérant : oui ; caissier : non).
   /// (« Maintenance » : non par défaut, même pour le gérant.)
   static bool valeurParDefaut(UserRole role, [String? cle]) =>
-      (cle == Permissions.maintenance || cle == Permissions.gererEquipe)
+      (cle == Permissions.maintenance ||
+              cle == Permissions.gererEquipe ||
+              cle == Permissions.toutesBoutiques)
           ? role.isOwner
           : (role.isOwner || role.isGerant);
 
@@ -217,6 +224,7 @@ class UserProfile {
   bool get peutRemisesRetraits => can(Permissions.remisesRetraits);
   bool get peutMaintenance => can(Permissions.maintenance);
   bool get peutGererEquipe => can(Permissions.gererEquipe);
+  bool get peutToutesBoutiques => can(Permissions.toutesBoutiques);
 
   UserProfile copyWith({
     String? uid,

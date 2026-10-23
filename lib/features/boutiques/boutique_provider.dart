@@ -61,7 +61,8 @@ final boutiqueChoisieProvider = StateProvider<String?>((ref) => null);
 final boutiqueActiveProvider = Provider<String?>((ref) {
   final p = ref.watch(userProfileProvider).value;
   if (p == null || p.uid.isEmpty) return BoutiquesService.idPrincipale;
-  if (p.role.isOwner) return ref.watch(boutiqueChoisieProvider);
+  // Le patron, ou un employé autorisé « Toutes les boutiques », choisit librement
+  if (p.role.isOwner || p.peutToutesBoutiques) return ref.watch(boutiqueChoisieProvider);
   return p.boutiqueId.isEmpty ? BoutiquesService.idPrincipale : p.boutiqueId;
 });
 
@@ -154,7 +155,9 @@ class SelecteurBoutique extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profil = ref.watch(userProfileProvider).value;
     final actives = ref.watch(boutiquesActivesProvider(entrepriseId));
-    if (profil == null || !profil.role.isOwner || actives.length < 2) {
+    if (profil == null ||
+        !(profil.role.isOwner || profil.peutToutesBoutiques) ||
+        actives.length < 2) {
       return const SizedBox.shrink();
     }
 
