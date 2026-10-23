@@ -5,6 +5,7 @@ import 'package:stockly_saas/features/boutiques/boutiques_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stockly_saas/core/widgets/sauvegarde_card.dart';
+import 'package:stockly_saas/features/journal/journal_screen.dart';
 import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
 
 import '../core/providers/user_role_provider.dart';
@@ -198,6 +199,11 @@ class SettingsScreen extends ConsumerWidget {
               // 💾 Sauvegarde complète : propriétaire seulement
               if (userProfile?.role.isOwner == true) ...[
                 SauvegardeCard(entrepriseId: entrepriseId),
+                const SizedBox(height: 16),
+              ],
+              // 📒 Journal « qui a fait quoi » : propriétaire seulement
+              if (userProfile?.role.isOwner == true) ...[
+                JournalCard(entrepriseId: entrepriseId),
                 const SizedBox(height: 16),
               ],
               if (userProfile?.peutMaintenance == true) ...[
