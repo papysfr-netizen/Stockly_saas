@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:stockly_saas/core/services/journal_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
@@ -65,6 +66,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final entrepriseId = widget.currentUser.entrepriseId;
     if (entrepriseId.isEmpty || id.isEmpty) return;
 
+    // 📒 Ce que contenait le produit avant suppression (pour le journal)
+    var infoProduit = nom;
+    try {
+      final avant = await FirebaseFirestore.instance
+          .collection('entreprises')
+          .doc(entrepriseId)
+          .collection('produits')
+          .doc(id)
+          .get(const GetOptions(source: Source.cache));
+      final d = avant.data();
+      if (d != null) {
+        final code = (d['codeBarre'] ?? d['codeBarres'] ?? '').toString().trim();
+        infoProduit = '${code.isEmpty ? '' : '$code · '}$nom · '
+            'stock total ${d['quantite'] ?? '?'}';
+      }
+    } catch (_) {
+      // Pas dans le téléphone : on garde seulement le nom.
+    }
+    void noterSuppression() => unawaited(noterJournal(
+          entrepriseId: entrepriseId,
+          action: ActionsJournal.produitSupprime,
+          details: infoProduit,
+          boutiqueId: 'Toutes',
+          reference: id,
+        ));
+
     try {
       await FirebaseFirestore.instance
           .collection('entreprises')
@@ -73,6 +100,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           .doc(id)
           .delete()
           .timeout(const Duration(seconds: 5));
+      noterSuppression();
       messenger.showSnackBar(
         SnackBar(
           content: Text(t.stockDeleted(nom)),
@@ -80,6 +108,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       );
     } on TimeoutException {
+      noterSuppression();
       messenger.showSnackBar(
         SnackBar(
           content: Text(t.stockDeletedOffline(nom)),
