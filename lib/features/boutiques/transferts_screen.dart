@@ -11,6 +11,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:stockly_saas/core/services/journal_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -167,6 +168,20 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
           horsLigne = true;
         });
       }
+
+      // 📒 Journal « qui a fait quoi » (n'empêche jamais le transfert)
+      var resumeTransfert =
+          lignes.map((l) => '${l['quantite']} × ${l['nom']}').join(', ');
+      if (resumeTransfert.length > 200) {
+        resumeTransfert = '${resumeTransfert.substring(0, 200)}…';
+      }
+      unawaited(noterJournal(
+        entrepriseId: widget.entrepriseId,
+        action: ActionsJournal.transfert,
+        details: '$deNom → $versNom · $_totalArticles article(s) · $resumeTransfert',
+        boutiqueId: _de,
+        reference: transfertRef.id,
+      ));
 
       if (!mounted) return;
       setState(() => _qte.clear());
