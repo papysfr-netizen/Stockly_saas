@@ -229,9 +229,11 @@ service cloud.firestore {
         allow delete: if estGerantOuPlus(entId);
       }
 
-      // ----- Écritures comptables : tout le monde crée ; modifier / effacer = Gérant+ -----
+      // ----- Écritures comptables : tout le monde crée (chaque vente en fait une) ;
+      //       lire = autorisation « Voir les finances » ; modifier / effacer = Gérant+ -----
       match /ecritures_comptables/{docId} {
-        allow read, create: if estMembre(entId);
+        allow read: if aPermission(entId, 'voirFinances');
+        allow create: if estMembre(entId);
         allow update, delete: if estGerantOuPlus(entId);
       }
 
@@ -246,7 +248,7 @@ service cloud.firestore {
 
       // ----- Toutes les autres sous-collections (comme avant) -----
       match /{collection}/{reste=**} {
-        allow read: if estMembre(entId) && collection != 'journal';
+        allow read: if estMembre(entId) && !(collection in ['journal', 'ecritures_comptables']);
         allow write: if !(collection in ['produits', 'ventes', 'retours', 'comptes_clients', 'boutiques', 'transferts', 'creances', 'dettes', 'ecritures_comptables', 'journal'])
           && (estMembre(entId) || creeParMoi(entId));
       }
