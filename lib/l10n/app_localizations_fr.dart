@@ -2240,4 +2240,162 @@ class AppLocalizationsFr extends AppLocalizations {
   String ccBalanceAfter(String montant) {
     return 'Solde : $montant';
   }
+
+  @override
+  String get depSearchHint => 'Rechercher une dépense...';
+
+  @override
+  String get depTitle => 'Charges & Dépenses';
+
+  @override
+  String get depTabAll => 'Toutes les Charges';
+
+  @override
+  String get depTabByCat => 'Par Catégorie';
+
+  @override
+  String get depExport => 'Exporter';
+
+  @override
+  String get depColDate => 'Date';
+
+  @override
+  String get depColTitle => 'Titre / Motif';
+
+  @override
+  String get depColCategory => 'Catégorie';
+
+  @override
+  String get depColAmount => 'Montant';
+
+  @override
+  String get depColAuthor => 'Auteur';
+
+  @override
+  String get depColNote => 'Note';
+
+  @override
+  String get depReportTitle => 'Rapport des Charges et Dépenses';
+
+  @override
+  String get depToExcel => 'Exporter vers Excel';
+
+  @override
+  String get depPrintPdf => 'Imprimer / PDF';
+
+  @override
+  String get depTotalAll => 'Total Général des Dépenses';
+
+  @override
+  String depTotalFor(String categorie) {
+    return 'Total pour : $categorie';
+  }
+
+  @override
+  String depNoResult(String recherche) {
+    return 'Aucun résultat pour « $recherche »';
+  }
+
+  @override
+  String get depNone => 'Aucune dépense enregistrée.';
+
+  @override
+  String depNote(String note) {
+    return 'Note : $note';
+  }
+
+  @override
+  String get depEdit => 'Modifier';
+
+  @override
+  String get depDelete => 'Supprimer';
+
+  @override
+  String get depAdd => 'Ajouter une dépense';
+
+  @override
+  String get depDeleteTitle => 'Supprimer la dépense';
+
+  @override
+  String get depDeleteConfirm =>
+      'Êtes-vous sûr de vouloir supprimer cette ligne de charge ?';
+
+  @override
+  String get depInvalidAmount => 'Veuillez saisir un montant valide (> 0)';
+
+  @override
+  String get depEdited => 'Dépense modifiée !';
+
+  @override
+  String get depSaved => 'Dépense enregistrée !';
+
+  @override
+  String depSaveError(String erreur) {
+    return 'Erreur lors de l\'enregistrement : $erreur';
+  }
+
+  @override
+  String get depFormEdit => 'Modifier la dépense';
+
+  @override
+  String get depFormNew => 'Enregistrer une Dépense';
+
+  @override
+  String get depReasonRequired => 'Le motif est requis';
+
+  @override
+  String get depReasonLabel => 'Motif / Titre';
+
+  @override
+  String get depReasonHint => 'ex: Loyer, Électricité...';
+
+  @override
+  String get depAmountRequired => 'Le montant est requis';
+
+  @override
+  String get depAmountInvalid => 'Montant invalide';
+
+  @override
+  String get depCategoryLabel => 'Catégorie de Charge';
+
+  @override
+  String depDate(String date) {
+    return 'Date : $date';
+  }
+
+  @override
+  String get depNoteLabel => 'Note / Commentaire (Optionnel)';
+
+  @override
+  String get depSaveChanges => 'Enregistrer les modifications';
+
+  @override
+  String get depSaveExpense => 'Enregistrer la dépense';
+
+  @override
+  String get depCatAll => 'Toutes';
+
+  @override
+  String get depCatRent => 'Loyer';
+
+  @override
+  String get depCatSalaries => 'Salaires';
+
+  @override
+  String get depCatUtilities => 'Électricité & Eau';
+
+  @override
+  String get depCatTransport => 'Transport / Carburant';
+
+  @override
+  String get depCatTaxes => 'Taxes & Impôts';
+
+  @override
+  String get depCatMaintenance => 'Maintenance / Réparation';
+
+  @override
+  String get depCatMarketing => 'Marketing / Pub';
+
+  @override
+  String get depCatOther => 'Autre';
 }

@@ -1890,5 +1890,89 @@
         "type": "String"
       }
     }
-  }
+  },
+  "depSearchHint": "Rechercher une dépense...",
+  "depTitle": "Charges & Dépenses",
+  "depTabAll": "Toutes les Charges",
+  "depTabByCat": "Par Catégorie",
+  "depExport": "Exporter",
+  "depColDate": "Date",
+  "depColTitle": "Titre / Motif",
+  "depColCategory": "Catégorie",
+  "depColAmount": "Montant",
+  "depColAuthor": "Auteur",
+  "depColNote": "Note",
+  "depReportTitle": "Rapport des Charges et Dépenses",
+  "depToExcel": "Exporter vers Excel",
+  "depPrintPdf": "Imprimer / PDF",
+  "depTotalAll": "Total Général des Dépenses",
+  "depTotalFor": "Total pour : {categorie}",
+  "@depTotalFor": {
+    "placeholders": {
+      "categorie": {
+        "type": "String"
+      }
+    }
+  },
+  "depNoResult": "Aucun résultat pour « {recherche} »",
+  "@depNoResult": {
+    "placeholders": {
+      "recherche": {
+        "type": "String"
+      }
+    }
+  },
+  "depNone": "Aucune dépense enregistrée.",
+  "depNote": "Note : {note}",
+  "@depNote": {
+    "placeholders": {
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "depEdit": "Modifier",
+  "depDelete": "Supprimer",
+  "depAdd": "Ajouter une dépense",
+  "depDeleteTitle": "Supprimer la dépense",
+  "depDeleteConfirm": "Êtes-vous sûr de vouloir supprimer cette ligne de charge ?",
+  "depInvalidAmount": "Veuillez saisir un montant valide (> 0)",
+  "depEdited": "Dépense modifiée !",
+  "depSaved": "Dépense enregistrée !",
+  "depSaveError": "Erreur lors de l'enregistrement : {erreur}",
+  "@depSaveError": {
+    "placeholders": {
+      "erreur": {
+        "type": "String"
+      }
+    }
+  },
+  "depFormEdit": "Modifier la dépense",
+  "depFormNew": "Enregistrer une Dépense",
+  "depReasonRequired": "Le motif est requis",
+  "depReasonLabel": "Motif / Titre",
+  "depReasonHint": "ex: Loyer, Électricité...",
+  "depAmountRequired": "Le montant est requis",
+  "depAmountInvalid": "Montant invalide",
+  "depCategoryLabel": "Catégorie de Charge",
+  "depDate": "Date : {date}",
+  "@depDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "depNoteLabel": "Note / Commentaire (Optionnel)",
+  "depSaveChanges": "Enregistrer les modifications",
+  "depSaveExpense": "Enregistrer la dépense",
+  "depCatAll": "Toutes",
+  "depCatRent": "Loyer",
+  "depCatSalaries": "Salaires",
+  "depCatUtilities": "Électricité & Eau",
+  "depCatTransport": "Transport / Carburant",
+  "depCatTaxes": "Taxes & Impôts",
+  "depCatMaintenance": "Maintenance / Réparation",
+  "depCatMarketing": "Marketing / Pub",
+  "depCatOther": "Autre"
 }

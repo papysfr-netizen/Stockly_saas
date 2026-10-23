@@ -2232,4 +2232,161 @@ class AppLocalizationsSw extends AppLocalizations {
   String ccBalanceAfter(String montant) {
     return 'Salio : $montant';
   }
+
+  @override
+  String get depSearchHint => 'Tafuta gharama...';
+
+  @override
+  String get depTitle => 'Gharama na Matumizi';
+
+  @override
+  String get depTabAll => 'Gharama zote';
+
+  @override
+  String get depTabByCat => 'Kwa aina';
+
+  @override
+  String get depExport => 'Hamisha';
+
+  @override
+  String get depColDate => 'Tarehe';
+
+  @override
+  String get depColTitle => 'Kichwa / Sababu';
+
+  @override
+  String get depColCategory => 'Aina';
+
+  @override
+  String get depColAmount => 'Kiasi';
+
+  @override
+  String get depColAuthor => 'Mwandishi';
+
+  @override
+  String get depColNote => 'Maelezo';
+
+  @override
+  String get depReportTitle => 'Ripoti ya Gharama na Matumizi';
+
+  @override
+  String get depToExcel => 'Hamisha kwa Excel';
+
+  @override
+  String get depPrintPdf => 'Chapisha / PDF';
+
+  @override
+  String get depTotalAll => 'Jumla kuu ya matumizi';
+
+  @override
+  String depTotalFor(String categorie) {
+    return 'Jumla ya : $categorie';
+  }
+
+  @override
+  String depNoResult(String recherche) {
+    return 'Hakuna matokeo ya « $recherche »';
+  }
+
+  @override
+  String get depNone => 'Hakuna gharama iliyoandikwa.';
+
+  @override
+  String depNote(String note) {
+    return 'Maelezo : $note';
+  }
+
+  @override
+  String get depEdit => 'Hariri';
+
+  @override
+  String get depDelete => 'Futa';
+
+  @override
+  String get depAdd => 'Ongeza gharama';
+
+  @override
+  String get depDeleteTitle => 'Futa gharama';
+
+  @override
+  String get depDeleteConfirm => 'Una uhakika unataka kufuta gharama hii?';
+
+  @override
+  String get depInvalidAmount => 'Tafadhali weka kiasi sahihi (> 0)';
+
+  @override
+  String get depEdited => 'Gharama imehaririwa!';
+
+  @override
+  String get depSaved => 'Gharama imehifadhiwa!';
+
+  @override
+  String depSaveError(String erreur) {
+    return 'Hitilafu wakati wa kuhifadhi : $erreur';
+  }
+
+  @override
+  String get depFormEdit => 'Hariri gharama';
+
+  @override
+  String get depFormNew => 'Andika gharama';
+
+  @override
+  String get depReasonRequired => 'Sababu inahitajika';
+
+  @override
+  String get depReasonLabel => 'Sababu / Kichwa';
+
+  @override
+  String get depReasonHint => 'mf: Kodi ya nyumba, Umeme...';
+
+  @override
+  String get depAmountRequired => 'Kiasi kinahitajika';
+
+  @override
+  String get depAmountInvalid => 'Kiasi si sahihi';
+
+  @override
+  String get depCategoryLabel => 'Aina ya gharama';
+
+  @override
+  String depDate(String date) {
+    return 'Tarehe : $date';
+  }
+
+  @override
+  String get depNoteLabel => 'Maelezo (si lazima)';
+
+  @override
+  String get depSaveChanges => 'Hifadhi mabadiliko';
+
+  @override
+  String get depSaveExpense => 'Hifadhi gharama';
+
+  @override
+  String get depCatAll => 'Zote';
+
+  @override
+  String get depCatRent => 'Kodi ya nyumba';
+
+  @override
+  String get depCatSalaries => 'Mishahara';
+
+  @override
+  String get depCatUtilities => 'Umeme na Maji';
+
+  @override
+  String get depCatTransport => 'Usafiri / Mafuta';
+
+  @override
+  String get depCatTaxes => 'Ushuru na Kodi';
+
+  @override
+  String get depCatMaintenance => 'Matengenezo';
+
+  @override
+  String get depCatMarketing => 'Matangazo';
+
+  @override
+  String get depCatOther => 'Nyingine';
 }

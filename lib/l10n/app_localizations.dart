@@ -3702,6 +3702,300 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Solde : {montant}'**
   String ccBalanceAfter(String montant);
+
+  /// No description provided for @depSearchHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher une dépense...'**
+  String get depSearchHint;
+
+  /// No description provided for @depTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Charges & Dépenses'**
+  String get depTitle;
+
+  /// No description provided for @depTabAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes les Charges'**
+  String get depTabAll;
+
+  /// No description provided for @depTabByCat.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par Catégorie'**
+  String get depTabByCat;
+
+  /// No description provided for @depExport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter'**
+  String get depExport;
+
+  /// No description provided for @depColDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date'**
+  String get depColDate;
+
+  /// No description provided for @depColTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Titre / Motif'**
+  String get depColTitle;
+
+  /// No description provided for @depColCategory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie'**
+  String get depColCategory;
+
+  /// No description provided for @depColAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get depColAmount;
+
+  /// No description provided for @depColAuthor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Auteur'**
+  String get depColAuthor;
+
+  /// No description provided for @depColNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Note'**
+  String get depColNote;
+
+  /// No description provided for @depReportTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rapport des Charges et Dépenses'**
+  String get depReportTitle;
+
+  /// No description provided for @depToExcel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter vers Excel'**
+  String get depToExcel;
+
+  /// No description provided for @depPrintPdf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Imprimer / PDF'**
+  String get depPrintPdf;
+
+  /// No description provided for @depTotalAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total Général des Dépenses'**
+  String get depTotalAll;
+
+  /// No description provided for @depTotalFor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total pour : {categorie}'**
+  String depTotalFor(String categorie);
+
+  /// No description provided for @depNoResult.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun résultat pour « {recherche} »'**
+  String depNoResult(String recherche);
+
+  /// No description provided for @depNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune dépense enregistrée.'**
+  String get depNone;
+
+  /// No description provided for @depNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Note : {note}'**
+  String depNote(String note);
+
+  /// No description provided for @depEdit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get depEdit;
+
+  /// No description provided for @depDelete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get depDelete;
+
+  /// No description provided for @depAdd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter une dépense'**
+  String get depAdd;
+
+  /// No description provided for @depDeleteTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer la dépense'**
+  String get depDeleteTitle;
+
+  /// No description provided for @depDeleteConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Êtes-vous sûr de vouloir supprimer cette ligne de charge ?'**
+  String get depDeleteConfirm;
+
+  /// No description provided for @depInvalidAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Veuillez saisir un montant valide (> 0)'**
+  String get depInvalidAmount;
+
+  /// No description provided for @depEdited.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépense modifiée !'**
+  String get depEdited;
+
+  /// No description provided for @depSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépense enregistrée !'**
+  String get depSaved;
+
+  /// No description provided for @depSaveError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de l\'enregistrement : {erreur}'**
+  String depSaveError(String erreur);
+
+  /// No description provided for @depFormEdit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier la dépense'**
+  String get depFormEdit;
+
+  /// No description provided for @depFormNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer une Dépense'**
+  String get depFormNew;
+
+  /// No description provided for @depReasonRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le motif est requis'**
+  String get depReasonRequired;
+
+  /// No description provided for @depReasonLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif / Titre'**
+  String get depReasonLabel;
+
+  /// No description provided for @depReasonHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'ex: Loyer, Électricité...'**
+  String get depReasonHint;
+
+  /// No description provided for @depAmountRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le montant est requis'**
+  String get depAmountRequired;
+
+  /// No description provided for @depAmountInvalid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant invalide'**
+  String get depAmountInvalid;
+
+  /// No description provided for @depCategoryLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie de Charge'**
+  String get depCategoryLabel;
+
+  /// No description provided for @depDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date : {date}'**
+  String depDate(String date);
+
+  /// No description provided for @depNoteLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Note / Commentaire (Optionnel)'**
+  String get depNoteLabel;
+
+  /// No description provided for @depSaveChanges.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer les modifications'**
+  String get depSaveChanges;
+
+  /// No description provided for @depSaveExpense.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer la dépense'**
+  String get depSaveExpense;
+
+  /// No description provided for @depCatAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes'**
+  String get depCatAll;
+
+  /// No description provided for @depCatRent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Loyer'**
+  String get depCatRent;
+
+  /// No description provided for @depCatSalaries.
+  ///
+  /// In fr, this message translates to:
+  /// **'Salaires'**
+  String get depCatSalaries;
+
+  /// No description provided for @depCatUtilities.
+  ///
+  /// In fr, this message translates to:
+  /// **'Électricité & Eau'**
+  String get depCatUtilities;
+
+  /// No description provided for @depCatTransport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transport / Carburant'**
+  String get depCatTransport;
+
+  /// No description provided for @depCatTaxes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taxes & Impôts'**
+  String get depCatTaxes;
+
+  /// No description provided for @depCatMaintenance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Maintenance / Réparation'**
+  String get depCatMaintenance;
+
+  /// No description provided for @depCatMarketing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marketing / Pub'**
+  String get depCatMarketing;
+
+  /// No description provided for @depCatOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get depCatOther;
 }
 
 class _AppLocalizationsDelegate

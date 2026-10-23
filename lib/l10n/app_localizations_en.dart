@@ -2232,4 +2232,162 @@ class AppLocalizationsEn extends AppLocalizations {
   String ccBalanceAfter(String montant) {
     return 'Balance: $montant';
   }
+
+  @override
+  String get depSearchHint => 'Search an expense...';
+
+  @override
+  String get depTitle => 'Charges & Expenses';
+
+  @override
+  String get depTabAll => 'All charges';
+
+  @override
+  String get depTabByCat => 'By category';
+
+  @override
+  String get depExport => 'Export';
+
+  @override
+  String get depColDate => 'Date';
+
+  @override
+  String get depColTitle => 'Title / Reason';
+
+  @override
+  String get depColCategory => 'Category';
+
+  @override
+  String get depColAmount => 'Amount';
+
+  @override
+  String get depColAuthor => 'Author';
+
+  @override
+  String get depColNote => 'Note';
+
+  @override
+  String get depReportTitle => 'Charges and Expenses Report';
+
+  @override
+  String get depToExcel => 'Export to Excel';
+
+  @override
+  String get depPrintPdf => 'Print / PDF';
+
+  @override
+  String get depTotalAll => 'Grand total of expenses';
+
+  @override
+  String depTotalFor(String categorie) {
+    return 'Total for: $categorie';
+  }
+
+  @override
+  String depNoResult(String recherche) {
+    return 'No result for “$recherche”';
+  }
+
+  @override
+  String get depNone => 'No expense recorded.';
+
+  @override
+  String depNote(String note) {
+    return 'Note: $note';
+  }
+
+  @override
+  String get depEdit => 'Edit';
+
+  @override
+  String get depDelete => 'Delete';
+
+  @override
+  String get depAdd => 'Add an expense';
+
+  @override
+  String get depDeleteTitle => 'Delete the expense';
+
+  @override
+  String get depDeleteConfirm =>
+      'Are you sure you want to delete this expense line?';
+
+  @override
+  String get depInvalidAmount => 'Please enter a valid amount (> 0)';
+
+  @override
+  String get depEdited => 'Expense updated!';
+
+  @override
+  String get depSaved => 'Expense saved!';
+
+  @override
+  String depSaveError(String erreur) {
+    return 'Error while saving: $erreur';
+  }
+
+  @override
+  String get depFormEdit => 'Edit the expense';
+
+  @override
+  String get depFormNew => 'Record an expense';
+
+  @override
+  String get depReasonRequired => 'The reason is required';
+
+  @override
+  String get depReasonLabel => 'Reason / Title';
+
+  @override
+  String get depReasonHint => 'e.g. Rent, Electricity...';
+
+  @override
+  String get depAmountRequired => 'The amount is required';
+
+  @override
+  String get depAmountInvalid => 'Invalid amount';
+
+  @override
+  String get depCategoryLabel => 'Expense category';
+
+  @override
+  String depDate(String date) {
+    return 'Date: $date';
+  }
+
+  @override
+  String get depNoteLabel => 'Note / Comment (optional)';
+
+  @override
+  String get depSaveChanges => 'Save changes';
+
+  @override
+  String get depSaveExpense => 'Save the expense';
+
+  @override
+  String get depCatAll => 'All';
+
+  @override
+  String get depCatRent => 'Rent';
+
+  @override
+  String get depCatSalaries => 'Salaries';
+
+  @override
+  String get depCatUtilities => 'Electricity & Water';
+
+  @override
+  String get depCatTransport => 'Transport / Fuel';
+
+  @override
+  String get depCatTaxes => 'Taxes';
+
+  @override
+  String get depCatMaintenance => 'Maintenance / Repair';
+
+  @override
+  String get depCatMarketing => 'Marketing / Ads';
+
+  @override
+  String get depCatOther => 'Other';
 }

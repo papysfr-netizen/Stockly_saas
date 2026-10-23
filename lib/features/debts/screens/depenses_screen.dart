@@ -10,6 +10,33 @@ import '../../../core/providers/currency_provider.dart';
 import '../../../core/providers/depense_provider.dart';
 import '../../../core/providers/user_role_provider.dart';
 import '../../../core/services/report_export_service.dart';
+import 'package:stockly_saas/l10n/app_localizations.dart';
+
+/// Nom affiché d'une catégorie (la valeur enregistrée reste en français)
+String _nomCategorie(AppLocalizations t, String cat) {
+  switch (cat) {
+    case 'Toutes':
+      return t.depCatAll;
+    case 'Loyer':
+      return t.depCatRent;
+    case 'Salaires':
+      return t.depCatSalaries;
+    case 'Électricité & Eau':
+      return t.depCatUtilities;
+    case 'Transport / Carburant':
+      return t.depCatTransport;
+    case 'Taxes & Impôts':
+      return t.depCatTaxes;
+    case 'Maintenance / Réparation':
+      return t.depCatMaintenance;
+    case 'Marketing / Pub':
+      return t.depCatMarketing;
+    case 'Autre':
+      return t.depCatOther;
+    default:
+      return cat;
+  }
+}
 
 class DepensesScreen extends ConsumerStatefulWidget {
   const DepensesScreen({super.key});
@@ -125,6 +152,7 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
     final profile = ref.watch(userProfileProvider).value;
     final entrepriseId = profile?.entrepriseId ?? '';
     final userNom = profile?.nom ?? '';
+    final t = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
@@ -135,9 +163,9 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
                 autofocus: true,
                 style: const TextStyle(color: Colors.white),
                 cursorColor: Colors.white,
-                decoration: const InputDecoration(
-                  hintText: 'Rechercher une dépense...',
-                  hintStyle: TextStyle(color: Colors.white70),
+                decoration: InputDecoration(
+                  hintText: t.depSearchHint,
+                  hintStyle: const TextStyle(color: Colors.white70),
                   border: InputBorder.none,
                 ),
                 onChanged: (val) {
@@ -146,9 +174,9 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
                   });
                 },
               )
-            : const Text(
-                'Charges & Dépenses',
-                style: TextStyle(fontWeight: FontWeight.bold),
+            : Text(
+                t.depTitle,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
         backgroundColor: const Color(0xFF1E293B),
         foregroundColor: Colors.white,
@@ -159,9 +187,9 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
           indicatorWeight: 3,
           labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
           unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14),
-          tabs: const [
-            Tab(text: 'Toutes les Charges'),
-            Tab(text: 'Par Catégorie'),
+          tabs: [
+            Tab(text: t.depTabAll),
+            Tab(text: t.depTabByCat),
           ],
         ),
         actions: [
@@ -179,17 +207,24 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
           ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
-            tooltip: 'Exporter',
+            tooltip: t.depExport,
             onSelected: (value) async {
               final depenses = depensesAsync.value ?? [];
               final depensesFiltrees = _filtrerDepenses(depenses);
 
-              final enTetes = ['Date', 'Titre / Motif', 'Catégorie', 'Montant', 'Auteur', 'Note'];
+              final enTetes = [
+                t.depColDate,
+                t.depColTitle,
+                t.depColCategory,
+                t.depColAmount,
+                t.depColAuthor,
+                t.depColNote,
+              ];
               final lignes = depensesFiltrees.map((d) {
                 return [
                   DateFormat('dd/MM/yyyy HH:mm').format(d.date),
                   d.titre,
-                  d.categorie,
+                  _nomCategorie(t, d.categorie),
                   '${d.montant.toStringAsFixed(2)} ${currency.activeCurrency}',
                   d.enregistrePar ?? '',
                   d.note ?? '',
@@ -204,21 +239,21 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
                 );
               } else if (value == 'pdf') {
                 await ReportExportService.exporterPDF(
-                  titreRapport: 'Rapport des Charges et Dépenses',
+                  titreRapport: t.depReportTitle,
                   nomBoutique: 'Stockly Pro',
                   enTetes: enTetes,
                   lignes: lignes,
                 );
               }
             },
-            itemBuilder: (context) => const [
+            itemBuilder: (context) => [
               PopupMenuItem(
                 value: 'excel',
                 child: Row(
                   children: [
-                    Icon(Icons.table_chart_rounded, color: Colors.green),
-                    SizedBox(width: 8),
-                    Text('Exporter vers Excel'),
+                    const Icon(Icons.table_chart_rounded, color: Colors.green),
+                    const SizedBox(width: 8),
+                    Text(t.depToExcel),
                   ],
                 ),
               ),
@@ -226,9 +261,9 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
                 value: 'pdf',
                 child: Row(
                   children: [
-                    Icon(Icons.picture_as_pdf_rounded, color: Colors.red),
-                    SizedBox(width: 8),
-                    Text('Imprimer / PDF'),
+                    const Icon(Icons.picture_as_pdf_rounded, color: Colors.red),
+                    const SizedBox(width: 8),
+                    Text(t.depPrintPdf),
                   ],
                 ),
               ),
@@ -238,7 +273,7 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
       ),
       body: depensesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Erreur : $err')),
+        error: (err, stack) => Center(child: Text(t.errorPrefix('$err'))),
         data: (depenses) {
           final depensesFiltrees = _filtrerDepenses(depenses);
           final totalDepenses = depensesFiltrees.fold<double>(
@@ -272,8 +307,8 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
                         children: [
                           Text(
                             _tabController.index == 0
-                                ? 'Total Général des Dépenses'
-                                : 'Total pour : $_categorieFiltre',
+                                ? t.depTotalAll
+                                : t.depTotalFor(_nomCategorie(t, _categorieFiltre)),
                             style: TextStyle(
                               color: Colors.grey.shade600,
                               fontSize: 13,
@@ -330,7 +365,7 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
                             final cat = _categories[index];
                             final isSelected = _categorieFiltre == cat;
                             return ChoiceChip(
-                              label: Text(cat),
+                              label: Text(_nomCategorie(t, cat)),
                               selected: isSelected,
                               selectedColor: Colors.orange.shade800,
                               labelStyle: TextStyle(
@@ -358,8 +393,8 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
                             const SizedBox(height: 12),
                             Text(
                               _searchQuery.isNotEmpty
-                                  ? 'Aucun résultat pour "$_searchQuery"'
-                                  : 'Aucune dépense enregistrée.',
+                                  ? t.depNoResult(_searchQuery)
+                                  : t.depNone,
                               style: TextStyle(color: Colors.grey.shade600, fontSize: 15),
                             ),
                           ],
@@ -415,7 +450,7 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
                                           borderRadius: BorderRadius.circular(6),
                                         ),
                                         child: Text(
-                                          depense.categorie,
+                                          _nomCategorie(t, depense.categorie),
                                           style: TextStyle(
                                             color: Colors.indigo.shade900,
                                             fontSize: 11,
@@ -433,7 +468,7 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
                                   if (depense.note != null && depense.note!.isNotEmpty) ...[
                                     const SizedBox(height: 8),
                                     Text(
-                                      'Note : ${depense.note}',
+                                      t.depNote(depense.note ?? ''),
                                       style: TextStyle(
                                         fontSize: 13,
                                         fontStyle: FontStyle.italic,
@@ -453,7 +488,7 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
                                             padding: const EdgeInsets.symmetric(horizontal: 8),
                                           ),
                                           icon: const Icon(Icons.edit_outlined, size: 18),
-                                          label: const Text('Modifier', style: TextStyle(fontSize: 12)),
+                                          label: Text(t.depEdit, style: const TextStyle(fontSize: 12)),
                                           onPressed: () => _ouvrirFormulaire(
                                             entrepriseId: entrepriseId,
                                             userNom: userNom,
@@ -467,7 +502,7 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
                                             padding: const EdgeInsets.symmetric(horizontal: 8),
                                           ),
                                           icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                                          label: const Text('Supprimer', style: TextStyle(fontSize: 12)),
+                                          label: Text(t.depDelete, style: const TextStyle(fontSize: 12)),
                                           onPressed: () => _confirmerSuppression(context, depense.id),
                                         ),
                                       ],
@@ -488,9 +523,9 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
         backgroundColor: const Color(0xFF1E293B),
         elevation: 4,
         icon: const Icon(Icons.add_rounded, color: Colors.white),
-        label: const Text(
-          'Ajouter une dépense',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        label: Text(
+          t.depAdd,
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         onPressed: () => _ouvrirFormulaire(
           entrepriseId: entrepriseId,
@@ -501,14 +536,15 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
   }
 
   void _confirmerSuppression(BuildContext context, String depenseId) {
+    final t = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Supprimer la dépense'),
-        content: const Text('Êtes-vous sûr de vouloir supprimer cette ligne de charge ?'),
+        title: Text(t.depDeleteTitle),
+        content: Text(t.depDeleteConfirm),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuler')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t.cancel)),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
@@ -518,7 +554,7 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
               await ref.read(depenseRepositoryProvider).supprimerDepense(depenseId);
               if (ctx.mounted) Navigator.pop(ctx);
             },
-            child: const Text('Supprimer', style: TextStyle(color: Colors.white)),
+            child: Text(t.depDelete, style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -561,6 +597,8 @@ class _AjoutDepenseBottomSheetState extends ConsumerState<_AjoutDepenseBottomShe
 
   bool get _estModification => widget.depenseExistante != null;
 
+  AppLocalizations get _t => AppLocalizations.of(context);
+
   @override
   void initState() {
     super.initState();
@@ -600,10 +638,11 @@ class _AjoutDepenseBottomSheetState extends ConsumerState<_AjoutDepenseBottomShe
 
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
+    final t = _t;
 
     if (montant == null || montant <= 0) {
       messenger.showSnackBar(
-        const SnackBar(content: Text('Veuillez saisir un montant valide (> 0)')),
+        SnackBar(content: Text(t.depInvalidAmount)),
       );
       return;
     }
@@ -650,14 +689,14 @@ class _AjoutDepenseBottomSheetState extends ConsumerState<_AjoutDepenseBottomShe
       messenger.showSnackBar(
         SnackBar(
           backgroundColor: Colors.green,
-          content: Text(_estModification ? 'Dépense modifiée !' : 'Dépense enregistrée !'),
+          content: Text(_estModification ? t.depEdited : t.depSaved),
         ),
       );
     } catch (e) {
       messenger.showSnackBar(
         SnackBar(
           backgroundColor: Colors.red,
-          content: Text('Erreur lors de l\'enregistrement : $e'),
+          content: Text(t.depSaveError('$e')),
         ),
       );
     } finally {
@@ -706,6 +745,7 @@ class _AjoutDepenseBottomSheetState extends ConsumerState<_AjoutDepenseBottomShe
 
   @override
   Widget build(BuildContext context) {
+    final t = _t;
     return Padding(
       padding: EdgeInsets.only(
         top: 20,
@@ -732,16 +772,16 @@ class _AjoutDepenseBottomSheetState extends ConsumerState<_AjoutDepenseBottomShe
               ),
               const SizedBox(height: 16),
               Text(
-                _estModification ? 'Modifier la dépense' : 'Enregistrer une Dépense',
+                _estModification ? t.depFormEdit : t.depFormNew,
                 style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _titreController,
-                validator: (val) => (val == null || val.trim().isEmpty) ? 'Le motif est requis' : null,
+                validator: (val) => (val == null || val.trim().isEmpty) ? t.depReasonRequired : null,
                 decoration: InputDecoration(
-                  labelText: 'Motif / Titre',
-                  hintText: 'ex: Loyer, Électricité...',
+                  labelText: t.depReasonLabel,
+                  hintText: t.depReasonHint,
                   prefixIcon: const Icon(Icons.edit_note_rounded),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
@@ -751,21 +791,21 @@ class _AjoutDepenseBottomSheetState extends ConsumerState<_AjoutDepenseBottomShe
                 controller: _montantController,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 validator: (val) {
-                  if (val == null || val.trim().isEmpty) return 'Le montant est requis';
+                  if (val == null || val.trim().isEmpty) return t.depAmountRequired;
                   final parsed = double.tryParse(val.trim().replaceAll(',', '.'));
-                  if (parsed == null || parsed <= 0) return 'Montant invalide';
+                  if (parsed == null || parsed <= 0) return t.depAmountInvalid;
                   return null;
                 },
                 decoration: InputDecoration(
-                  labelText: 'Montant',
+                  labelText: t.depColAmount,
                   prefixIcon: const Icon(Icons.attach_money_rounded),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Catégorie de Charge',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey),
+              Text(
+                t.depCategoryLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey),
               ),
               const SizedBox(height: 8),
               Wrap(
@@ -779,7 +819,7 @@ class _AjoutDepenseBottomSheetState extends ConsumerState<_AjoutDepenseBottomShe
                       size: 16,
                       color: isSelected ? Colors.white : Colors.orange.shade800,
                     ),
-                    label: Text(cat),
+                    label: Text(_nomCategorie(t, cat)),
                     selected: isSelected,
                     selectedColor: Colors.orange.shade800,
                     labelStyle: TextStyle(
@@ -808,7 +848,7 @@ class _AjoutDepenseBottomSheetState extends ConsumerState<_AjoutDepenseBottomShe
                       Icon(Icons.calendar_today_rounded, color: Colors.orange.shade800, size: 20),
                       const SizedBox(width: 10),
                       Text(
-                        'Date : ${DateFormat('dd/MM/yyyy').format(_dateSelectionnee)}',
+                        t.depDate(DateFormat('dd/MM/yyyy').format(_dateSelectionnee)),
                         style: const TextStyle(fontWeight: FontWeight.w500),
                       ),
                     ],
@@ -820,7 +860,7 @@ class _AjoutDepenseBottomSheetState extends ConsumerState<_AjoutDepenseBottomShe
                 controller: _noteController,
                 maxLines: 2,
                 decoration: InputDecoration(
-                  labelText: 'Note / Commentaire (Optionnel)',
+                  labelText: t.depNoteLabel,
                   prefixIcon: const Icon(Icons.note_rounded),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
@@ -841,8 +881,8 @@ class _AjoutDepenseBottomSheetState extends ConsumerState<_AjoutDepenseBottomShe
                       ? const CircularProgressIndicator(color: Colors.white)
                       : Text(
                           _estModification
-                              ? 'Enregistrer les modifications'
-                              : 'Enregistrer la dépense',
+                              ? t.depSaveChanges
+                              : t.depSaveExpense,
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 16,

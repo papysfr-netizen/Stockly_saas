@@ -2236,4 +2236,162 @@ class AppLocalizationsLn extends AppLocalizations {
   String ccBalanceAfter(String montant) {
     return 'Mbongo etikali : $montant';
   }
+
+  @override
+  String get depSearchHint => 'Luka mbongo ebimi...';
+
+  @override
+  String get depTitle => 'Bafuti mpe Mbongo ebimi';
+
+  @override
+  String get depTabAll => 'Bafuti nyonso';
+
+  @override
+  String get depTabByCat => 'Na lolenge';
+
+  @override
+  String get depExport => 'Kobimisa';
+
+  @override
+  String get depColDate => 'Mokolo';
+
+  @override
+  String get depColTitle => 'Motó / Ntina';
+
+  @override
+  String get depColCategory => 'Lolenge';
+
+  @override
+  String get depColAmount => 'Motuya';
+
+  @override
+  String get depColAuthor => 'Mokomi';
+
+  @override
+  String get depColNote => 'Likebisi';
+
+  @override
+  String get depReportTitle => 'Rapport ya Bafuti mpe Mbongo ebimi';
+
+  @override
+  String get depToExcel => 'Kobimisa na Excel';
+
+  @override
+  String get depPrintPdf => 'Kobimisa / PDF';
+
+  @override
+  String get depTotalAll => 'Motango mobimba ya mbongo ebimi';
+
+  @override
+  String depTotalFor(String categorie) {
+    return 'Motango mpo na : $categorie';
+  }
+
+  @override
+  String depNoResult(String recherche) {
+    return 'Eloko te mpo na « $recherche »';
+  }
+
+  @override
+  String get depNone => 'Mbongo ebimi moko te ekomami.';
+
+  @override
+  String depNote(String note) {
+    return 'Likebisi : $note';
+  }
+
+  @override
+  String get depEdit => 'Kobongola';
+
+  @override
+  String get depDelete => 'Kolongola';
+
+  @override
+  String get depAdd => 'Bakisa mbongo ebimi';
+
+  @override
+  String get depDeleteTitle => 'Kolongola mbongo ebimi';
+
+  @override
+  String get depDeleteConfirm =>
+      'Ozali na ntembe te ya kolongola mbongo ebimi oyo?';
+
+  @override
+  String get depInvalidAmount => 'Svp tia motuya ya malamu (> 0)';
+
+  @override
+  String get depEdited => 'Mbongo ebimi ebongolami!';
+
+  @override
+  String get depSaved => 'Mbongo ebimi ekomami!';
+
+  @override
+  String depSaveError(String erreur) {
+    return 'Libunga na ntango ya kokoma : $erreur';
+  }
+
+  @override
+  String get depFormEdit => 'Bongola mbongo ebimi';
+
+  @override
+  String get depFormNew => 'Koma mbongo ebimi';
+
+  @override
+  String get depReasonRequired => 'Ntina esengeli';
+
+  @override
+  String get depReasonLabel => 'Ntina / Motó';
+
+  @override
+  String get depReasonHint => 'ndakisa: Lifuti ya ndako, Courant...';
+
+  @override
+  String get depAmountRequired => 'Motuya esengeli';
+
+  @override
+  String get depAmountInvalid => 'Motuya ezali malamu te';
+
+  @override
+  String get depCategoryLabel => 'Lolenge ya mbongo ebimi';
+
+  @override
+  String depDate(String date) {
+    return 'Mokolo : $date';
+  }
+
+  @override
+  String get depNoteLabel => 'Likebisi (ezali na bosenga te)';
+
+  @override
+  String get depSaveChanges => 'Koma mbongwana';
+
+  @override
+  String get depSaveExpense => 'Koma mbongo ebimi';
+
+  @override
+  String get depCatAll => 'Nyonso';
+
+  @override
+  String get depCatRent => 'Lifuti ya ndako';
+
+  @override
+  String get depCatSalaries => 'Lifuti ya basali';
+
+  @override
+  String get depCatUtilities => 'Courant mpe Mai';
+
+  @override
+  String get depCatTransport => 'Transport / Esanzi';
+
+  @override
+  String get depCatTaxes => 'Mpako';
+
+  @override
+  String get depCatMaintenance => 'Kobongisa';
+
+  @override
+  String get depCatMarketing => 'Publicité';
+
+  @override
+  String get depCatOther => 'Mosusu';
 }
