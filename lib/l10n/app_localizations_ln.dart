@@ -2394,4 +2394,77 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get depCatOther => 'Mosusu';
+
+  @override
+  String get blTraceTitle => 'Bolandeli esengeli';
+
+  @override
+  String blTraceMsg(String montant, String seuil) {
+    return 'Mokanda oyo ya kopesa biloko ezali $montant USD (eleki ndelo ya $seuil USD).\n\nMpo na bokengi ya mbongo mpe bolandeli, nkombo ya mosombi mpe nimero ya telefone esengeli.';
+  }
+
+  @override
+  String get blTitle => 'Mokanda ya kopesa biloko';
+
+  @override
+  String get blPrint => 'Imprimer';
+
+  @override
+  String get blShare => 'Kokabola (WhatsApp, e-mail…)';
+
+  @override
+  String blPdfError(String erreur) {
+    return 'Ekoki te kosala PDF : $erreur';
+  }
+
+  @override
+  String get blPrintShare => 'Imprimer / Kokabola';
+
+  @override
+  String get blMyShop => 'Magazini na ngai';
+
+  @override
+  String blPhoneShort(String tel) {
+    return 'Tel : $tel';
+  }
+
+  @override
+  String get blDeliveredTo => 'MOSOMBI APESAMI :';
+
+  @override
+  String get blCounterClient => 'Mosombi ya comptoir';
+
+  @override
+  String blAddress(String adresse) {
+    return 'Adresi : $adresse';
+  }
+
+  @override
+  String get blNotSpecified => 'Elobami te';
+
+  @override
+  String blPhone(String tel) {
+    return 'Telefone : $tel';
+  }
+
+  @override
+  String get blColItem => 'Eloko';
+
+  @override
+  String get blColQty => 'Motango';
+
+  @override
+  String get blColUnit => 'Ntalo';
+
+  @override
+  String get blColTotal => 'Nyonso';
+
+  @override
+  String get blGrandTotal => 'MOTANGO MOBIMBA : ';
+
+  @override
+  String get blDeliverer => 'Mopesi / Motindi';
+
+  @override
+  String get blCustomerSign => 'Mosombi (andimi)';
 }

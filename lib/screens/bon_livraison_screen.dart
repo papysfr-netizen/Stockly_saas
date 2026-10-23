@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../core/providers/currency_provider.dart';
 import '../core/providers/settings_provider.dart' show settingsProvider;
 import '../core/services/facture_pdf_service.dart';
+import '../l10n/app_localizations.dart';
 
 class BonLivraisonScreen extends ConsumerStatefulWidget {
   final String entrepriseId;
@@ -51,6 +52,7 @@ class _BonLivraisonScreenState extends ConsumerState<BonLivraisonScreen> {
 
   Future<void> _imprimerOuPartager() async {
     // --- RÈGLE DE SÉCURITÉ / TRAÇABILITÉ ---
+    final t = AppLocalizations.of(context);
     final double totalGlobal = _totalGlobal;
 
     const double seuilMinimumTracabilite = 1000.0; // Seuil fixé à 1000 USD
@@ -65,22 +67,21 @@ class _BonLivraisonScreenState extends ConsumerState<BonLivraisonScreen> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.warning_amber_rounded, color: Colors.orange),
-              SizedBox(width: 8),
-              Text('Traçabilité requise', style: TextStyle(fontSize: 16)),
+              const Icon(Icons.warning_amber_rounded, color: Colors.orange),
+              const SizedBox(width: 8),
+              Text(t.blTraceTitle, style: const TextStyle(fontSize: 16)),
             ],
           ),
           content: Text(
-            'Ce bon de livraison s\'élève à ${totalGlobal.toStringAsFixed(2)} \$ (ce qui dépasse le seuil de $seuilMinimumTracabilite \$).\n\n'
-            'Pour des raisons de sécurité financière et de suivi, un nom de client valide et un numéro de téléphone sont obligatoires.',
+            t.blTraceMsg(totalGlobal.toStringAsFixed(2), seuilMinimumTracabilite.toStringAsFixed(0)),
             style: const TextStyle(fontSize: 13),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Compris'),
+              child: Text(t.payUnderstood),
             ),
           ],
         ),
@@ -99,16 +100,16 @@ class _BonLivraisonScreenState extends ConsumerState<BonLivraisonScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 8),
-            const Text('Bon de livraison',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            Text(t.blTitle,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             ListTile(
               leading: const Icon(Icons.print, color: Colors.teal),
-              title: const Text('Imprimer'),
+              title: Text(t.blPrint),
               onTap: () => Navigator.pop(ctx, 'imprimer'),
             ),
             ListTile(
               leading: const Icon(Icons.share, color: Colors.green),
-              title: const Text('Partager (WhatsApp, e-mail…)'),
+              title: Text(t.blShare),
               onTap: () => Navigator.pop(ctx, 'partager'),
             ),
             const SizedBox(height: 8),
@@ -153,7 +154,7 @@ class _BonLivraisonScreenState extends ConsumerState<BonLivraisonScreen> {
     } catch (e) {
       messenger.showSnackBar(
         SnackBar(
-          content: Text('Impossible de créer le PDF : $e'),
+          content: Text(t.blPdfError('$e')),
           backgroundColor: Colors.red,
         ),
       );
@@ -166,11 +167,12 @@ class _BonLivraisonScreenState extends ConsumerState<BonLivraisonScreen> {
   Widget build(BuildContext context) {
     final currencyState = ref.watch(currencyProvider);
     final boutique = ref.watch(settingsProvider);
-    final dateDuJour = DateFormat('dd/MM/yyyy à HH:mm').format(_date);
+    final dateDuJour = DateFormat('dd/MM/yyyy HH:mm').format(_date);
+    final t = AppLocalizations.of(context);
 
     // Infos du magasin (Paramètres) : les champs vides ne s'affichent pas
     final String nomMagasin = boutique.nomBoutique.trim().isEmpty
-        ? 'Ma Boutique'
+        ? t.blMyShop
         : boutique.nomBoutique.trim();
     final String adresseMagasin = boutique.adresse.trim();
     final String phoneMagasin = boutique.telephone.trim();
@@ -181,14 +183,14 @@ class _BonLivraisonScreenState extends ConsumerState<BonLivraisonScreen> {
     ];
     final List<String> coordonnees = [
       if (adresseMagasin.isNotEmpty) adresseMagasin,
-      if (phoneMagasin.isNotEmpty) 'Tél : $phoneMagasin',
+      if (phoneMagasin.isNotEmpty) t.blPhoneShort(phoneMagasin),
     ];
 
     final double totalGlobal = _totalGlobal;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bon de Livraison ($_numeroBL)',
+        title: Text('${t.blTitle} ($_numeroBL)',
             overflow: TextOverflow.ellipsis),
         backgroundColor: Colors.teal.shade800,
         foregroundColor: Colors.white,
@@ -204,7 +206,7 @@ class _BonLivraisonScreenState extends ConsumerState<BonLivraisonScreen> {
                 )
               : IconButton(
                   icon: const Icon(Icons.print_rounded),
-                  tooltip: 'Imprimer / Partager',
+                  tooltip: t.blPrintShare,
                   onPressed: _imprimerOuPartager,
                 ),
         ],
@@ -272,7 +274,7 @@ class _BonLivraisonScreenState extends ConsumerState<BonLivraisonScreen> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            'BON DE LIVRAISON',
+                            t.blTitle.toUpperCase(),
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
@@ -287,7 +289,7 @@ class _BonLivraisonScreenState extends ConsumerState<BonLivraisonScreen> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Date : $dateDuJour',
+                            t.depDate(dateDuJour),
                             style: const TextStyle(
                                 fontSize: 10, color: Colors.black54),
                           ),
@@ -310,9 +312,9 @@ class _BonLivraisonScreenState extends ConsumerState<BonLivraisonScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'CLIENT LIVRÉ :',
-                        style: TextStyle(
+                      Text(
+                        t.blDeliveredTo,
+                        style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
                             color: Colors.teal),
@@ -320,20 +322,20 @@ class _BonLivraisonScreenState extends ConsumerState<BonLivraisonScreen> {
                       const SizedBox(height: 6),
                       Text(
                         widget.nomClient.isEmpty
-                            ? 'Client Comptoir'
+                            ? t.blCounterClient
                             : widget.nomClient,
                         style: const TextStyle(
                             fontSize: 14, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Adresse : ${widget.adresseClient.isEmpty ? 'Non spécifiée' : widget.adresseClient}',
+                        t.blAddress(widget.adresseClient.isEmpty ? t.blNotSpecified : widget.adresseClient),
                         style: const TextStyle(
                             fontSize: 11, color: Colors.black87),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Téléphone : ${widget.telephoneClient.isEmpty ? 'N/A' : widget.telephoneClient}',
+                        t.blPhone(widget.telephoneClient.isEmpty ? 'N/A' : widget.telephoneClient),
                         style: const TextStyle(
                             fontSize: 11, color: Colors.black87),
                       ),
@@ -355,32 +357,32 @@ class _BonLivraisonScreenState extends ConsumerState<BonLivraisonScreen> {
                   children: [
                     TableRow(
                       decoration: BoxDecoration(color: Colors.teal.shade100),
-                      children: const [
+                      children: [
                         Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text('Désignation',
-                              style: TextStyle(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(t.blColItem,
+                              style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 11)),
                         ),
                         Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text('Qté',
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(t.blColQty,
                               textAlign: TextAlign.center,
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 11)),
                         ),
                         Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text('P.U.',
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(t.blColUnit,
                               textAlign: TextAlign.right,
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 11)),
                         ),
                         Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text('Total',
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(t.blColTotal,
                               textAlign: TextAlign.right,
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 11)),
                         ),
                       ],
@@ -435,8 +437,8 @@ class _BonLivraisonScreenState extends ConsumerState<BonLivraisonScreen> {
                       ),
                       child: Row(
                         children: [
-                          const Text('TOTAL GÉNÉRAL : ',
-                              style: TextStyle(
+                          Text(t.blGrandTotal,
+                              style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 12)),
                           Text(
                             currencyState.formatPrice(totalGlobal),
@@ -453,33 +455,33 @@ class _BonLivraisonScreenState extends ConsumerState<BonLivraisonScreen> {
                 const SizedBox(height: 30),
 
                 // --- SIGNATURES ---
-                const Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Le Livreur / Expéditeur',
-                              style: TextStyle(
+                          Text(t.blDeliverer,
+                              style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 11)),
-                          SizedBox(height: 35),
-                          Text('--------------------------------',
+                          const SizedBox(height: 35),
+                          const Text('--------------------------------',
                               style: TextStyle(color: Colors.grey),
                               overflow: TextOverflow.ellipsis),
                         ],
                       ),
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Le Client (Bon accord)',
-                              style: TextStyle(
+                          Text(t.blCustomerSign,
+                              style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 11)),
-                          SizedBox(height: 35),
-                          Text('--------------------------------',
+                          const SizedBox(height: 35),
+                          const Text('--------------------------------',
                               style: TextStyle(color: Colors.grey),
                               overflow: TextOverflow.ellipsis),
                         ],

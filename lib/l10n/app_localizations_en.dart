@@ -2390,4 +2390,77 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get depCatOther => 'Other';
+
+  @override
+  String get blTraceTitle => 'Traceability required';
+
+  @override
+  String blTraceMsg(String montant, String seuil) {
+    return 'This delivery note amounts to $montant USD (above the $seuil USD threshold).\n\nFor financial security and tracking, a valid customer name and phone number are required.';
+  }
+
+  @override
+  String get blTitle => 'Delivery note';
+
+  @override
+  String get blPrint => 'Print';
+
+  @override
+  String get blShare => 'Share (WhatsApp, e-mail…)';
+
+  @override
+  String blPdfError(String erreur) {
+    return 'Cannot create the PDF: $erreur';
+  }
+
+  @override
+  String get blPrintShare => 'Print / Share';
+
+  @override
+  String get blMyShop => 'My Shop';
+
+  @override
+  String blPhoneShort(String tel) {
+    return 'Tel: $tel';
+  }
+
+  @override
+  String get blDeliveredTo => 'DELIVERED TO:';
+
+  @override
+  String get blCounterClient => 'Walk-in customer';
+
+  @override
+  String blAddress(String adresse) {
+    return 'Address: $adresse';
+  }
+
+  @override
+  String get blNotSpecified => 'Not specified';
+
+  @override
+  String blPhone(String tel) {
+    return 'Phone: $tel';
+  }
+
+  @override
+  String get blColItem => 'Item';
+
+  @override
+  String get blColQty => 'Qty';
+
+  @override
+  String get blColUnit => 'Unit price';
+
+  @override
+  String get blColTotal => 'Total';
+
+  @override
+  String get blGrandTotal => 'GRAND TOTAL: ';
+
+  @override
+  String get blDeliverer => 'Deliverer / Sender';
+
+  @override
+  String get blCustomerSign => 'Customer (agreed)';
 }

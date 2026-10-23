@@ -3996,6 +3996,132 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Autre'**
   String get depCatOther;
+
+  /// No description provided for @blTraceTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Traçabilité requise'**
+  String get blTraceTitle;
+
+  /// No description provided for @blTraceMsg.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce bon de livraison s\'élève à {montant} USD (au-dessus du seuil de {seuil} USD).\n\nPour des raisons de sécurité financière et de suivi, un nom de client valide et un numéro de téléphone sont obligatoires.'**
+  String blTraceMsg(String montant, String seuil);
+
+  /// No description provided for @blTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bon de livraison'**
+  String get blTitle;
+
+  /// No description provided for @blPrint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Imprimer'**
+  String get blPrint;
+
+  /// No description provided for @blShare.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager (WhatsApp, e-mail…)'**
+  String get blShare;
+
+  /// No description provided for @blPdfError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de créer le PDF : {erreur}'**
+  String blPdfError(String erreur);
+
+  /// No description provided for @blPrintShare.
+  ///
+  /// In fr, this message translates to:
+  /// **'Imprimer / Partager'**
+  String get blPrintShare;
+
+  /// No description provided for @blMyShop.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ma Boutique'**
+  String get blMyShop;
+
+  /// No description provided for @blPhoneShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tél : {tel}'**
+  String blPhoneShort(String tel);
+
+  /// No description provided for @blDeliveredTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'CLIENT LIVRÉ :'**
+  String get blDeliveredTo;
+
+  /// No description provided for @blCounterClient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Client Comptoir'**
+  String get blCounterClient;
+
+  /// No description provided for @blAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse : {adresse}'**
+  String blAddress(String adresse);
+
+  /// No description provided for @blNotSpecified.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non spécifiée'**
+  String get blNotSpecified;
+
+  /// No description provided for @blPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléphone : {tel}'**
+  String blPhone(String tel);
+
+  /// No description provided for @blColItem.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désignation'**
+  String get blColItem;
+
+  /// No description provided for @blColQty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Qté'**
+  String get blColQty;
+
+  /// No description provided for @blColUnit.
+  ///
+  /// In fr, this message translates to:
+  /// **'P.U.'**
+  String get blColUnit;
+
+  /// No description provided for @blColTotal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total'**
+  String get blColTotal;
+
+  /// No description provided for @blGrandTotal.
+  ///
+  /// In fr, this message translates to:
+  /// **'TOTAL GÉNÉRAL : '**
+  String get blGrandTotal;
+
+  /// No description provided for @blDeliverer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le Livreur / Expéditeur'**
+  String get blDeliverer;
+
+  /// No description provided for @blCustomerSign.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le Client (Bon accord)'**
+  String get blCustomerSign;
 }
 
 class _AppLocalizationsDelegate

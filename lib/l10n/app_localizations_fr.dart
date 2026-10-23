@@ -2398,4 +2398,77 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get depCatOther => 'Autre';
+
+  @override
+  String get blTraceTitle => 'Traçabilité requise';
+
+  @override
+  String blTraceMsg(String montant, String seuil) {
+    return 'Ce bon de livraison s\'élève à $montant USD (au-dessus du seuil de $seuil USD).\n\nPour des raisons de sécurité financière et de suivi, un nom de client valide et un numéro de téléphone sont obligatoires.';
+  }
+
+  @override
+  String get blTitle => 'Bon de livraison';
+
+  @override
+  String get blPrint => 'Imprimer';
+
+  @override
+  String get blShare => 'Partager (WhatsApp, e-mail…)';
+
+  @override
+  String blPdfError(String erreur) {
+    return 'Impossible de créer le PDF : $erreur';
+  }
+
+  @override
+  String get blPrintShare => 'Imprimer / Partager';
+
+  @override
+  String get blMyShop => 'Ma Boutique';
+
+  @override
+  String blPhoneShort(String tel) {
+    return 'Tél : $tel';
+  }
+
+  @override
+  String get blDeliveredTo => 'CLIENT LIVRÉ :';
+
+  @override
+  String get blCounterClient => 'Client Comptoir';
+
+  @override
+  String blAddress(String adresse) {
+    return 'Adresse : $adresse';
+  }
+
+  @override
+  String get blNotSpecified => 'Non spécifiée';
+
+  @override
+  String blPhone(String tel) {
+    return 'Téléphone : $tel';
+  }
+
+  @override
+  String get blColItem => 'Désignation';
+
+  @override
+  String get blColQty => 'Qté';
+
+  @override
+  String get blColUnit => 'P.U.';
+
+  @override
+  String get blColTotal => 'Total';
+
+  @override
+  String get blGrandTotal => 'TOTAL GÉNÉRAL : ';
+
+  @override
+  String get blDeliverer => 'Le Livreur / Expéditeur';
+
+  @override
+  String get blCustomerSign => 'Le Client (Bon accord)';
 }

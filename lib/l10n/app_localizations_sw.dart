@@ -2389,4 +2389,77 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get depCatOther => 'Nyingine';
+
+  @override
+  String get blTraceTitle => 'Ufuatiliaji unahitajika';
+
+  @override
+  String blTraceMsg(String montant, String seuil) {
+    return 'Hati hii ya ukabidhi ni $montant USD (zaidi ya kikomo cha $seuil USD).\n\nKwa usalama wa fedha na ufuatiliaji, jina halali la mteja na namba ya simu vinahitajika.';
+  }
+
+  @override
+  String get blTitle => 'Hati ya ukabidhi';
+
+  @override
+  String get blPrint => 'Chapisha';
+
+  @override
+  String get blShare => 'Shiriki (WhatsApp, barua pepe…)';
+
+  @override
+  String blPdfError(String erreur) {
+    return 'Imeshindikana kuunda PDF : $erreur';
+  }
+
+  @override
+  String get blPrintShare => 'Chapisha / Shiriki';
+
+  @override
+  String get blMyShop => 'Duka langu';
+
+  @override
+  String blPhoneShort(String tel) {
+    return 'Simu : $tel';
+  }
+
+  @override
+  String get blDeliveredTo => 'AMEKABIDHIWA :';
+
+  @override
+  String get blCounterClient => 'Mteja wa kaunta';
+
+  @override
+  String blAddress(String adresse) {
+    return 'Anwani : $adresse';
+  }
+
+  @override
+  String get blNotSpecified => 'Haijatajwa';
+
+  @override
+  String blPhone(String tel) {
+    return 'Simu : $tel';
+  }
+
+  @override
+  String get blColItem => 'Bidhaa';
+
+  @override
+  String get blColQty => 'Idadi';
+
+  @override
+  String get blColUnit => 'Bei';
+
+  @override
+  String get blColTotal => 'Jumla';
+
+  @override
+  String get blGrandTotal => 'JUMLA KUU : ';
+
+  @override
+  String get blDeliverer => 'Mkabidhi / Mtumaji';
+
+  @override
+  String get blCustomerSign => 'Mteja (amekubali)';
 }

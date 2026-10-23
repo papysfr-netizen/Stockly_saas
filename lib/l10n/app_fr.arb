@@ -1974,5 +1974,64 @@
   "depCatTaxes": "Taxes & Impôts",
   "depCatMaintenance": "Maintenance / Réparation",
   "depCatMarketing": "Marketing / Pub",
-  "depCatOther": "Autre"
+  "depCatOther": "Autre",
+  "blTraceTitle": "Traçabilité requise",
+  "blTraceMsg": "Ce bon de livraison s'élève à {montant} USD (au-dessus du seuil de {seuil} USD).\n\nPour des raisons de sécurité financière et de suivi, un nom de client valide et un numéro de téléphone sont obligatoires.",
+  "@blTraceMsg": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      },
+      "seuil": {
+        "type": "String"
+      }
+    }
+  },
+  "blTitle": "Bon de livraison",
+  "blPrint": "Imprimer",
+  "blShare": "Partager (WhatsApp, e-mail…)",
+  "blPdfError": "Impossible de créer le PDF : {erreur}",
+  "@blPdfError": {
+    "placeholders": {
+      "erreur": {
+        "type": "String"
+      }
+    }
+  },
+  "blPrintShare": "Imprimer / Partager",
+  "blMyShop": "Ma Boutique",
+  "blPhoneShort": "Tél : {tel}",
+  "@blPhoneShort": {
+    "placeholders": {
+      "tel": {
+        "type": "String"
+      }
+    }
+  },
+  "blDeliveredTo": "CLIENT LIVRÉ :",
+  "blCounterClient": "Client Comptoir",
+  "blAddress": "Adresse : {adresse}",
+  "@blAddress": {
+    "placeholders": {
+      "adresse": {
+        "type": "String"
+      }
+    }
+  },
+  "blNotSpecified": "Non spécifiée",
+  "blPhone": "Téléphone : {tel}",
+  "@blPhone": {
+    "placeholders": {
+      "tel": {
+        "type": "String"
+      }
+    }
+  },
+  "blColItem": "Désignation",
+  "blColQty": "Qté",
+  "blColUnit": "P.U.",
+  "blColTotal": "Total",
+  "blGrandTotal": "TOTAL GÉNÉRAL : ",
+  "blDeliverer": "Le Livreur / Expéditeur",
+  "blCustomerSign": "Le Client (Bon accord)"
 }
