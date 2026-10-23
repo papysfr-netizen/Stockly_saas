@@ -2136,4 +2136,100 @@ class AppLocalizationsSw extends AppLocalizations {
   String livBy(String nom) {
     return '(na $nom)';
   }
+
+  @override
+  String get ccDepositTitle => 'Amana ya mteja';
+
+  @override
+  String get ccWithdrawTitle => 'Mteja kutoa pesa';
+
+  @override
+  String get ccPhoneLabel => 'Simu ya mteja *';
+
+  @override
+  String get ccPhoneShort => 'Namba fupi mno';
+
+  @override
+  String get ccNameLabel => 'Jina la mteja';
+
+  @override
+  String get ccAmountLabel => 'Kiasi (USD) *';
+
+  @override
+  String get ccMoreThanBalance => 'Zaidi ya salio lililopo';
+
+  @override
+  String ccAvailable(String montant) {
+    return 'Salio lililopo : $montant';
+  }
+
+  @override
+  String get ccCash => 'Pesa taslimu';
+
+  @override
+  String get ccSaveDeposit => 'Hifadhi amana';
+
+  @override
+  String get ccSaveWithdraw => 'Hifadhi utoaji';
+
+  @override
+  String ccDepositSaved(String montant) {
+    return 'Amana ya $montant imehifadhiwa.';
+  }
+
+  @override
+  String ccWithdrawSaved(String montant) {
+    return 'Utoaji wa $montant umehifadhiwa.';
+  }
+
+  @override
+  String get ccNewDeposit => 'Amana mpya';
+
+  @override
+  String get ccSearchHint => 'Jina au simu…';
+
+  @override
+  String ccCount(int count) {
+    return 'Wateja $count wenye akaunti';
+  }
+
+  @override
+  String ccTotalKept(String montant) {
+    return 'Pesa za wateja zilizohifadhiwa : $montant';
+  }
+
+  @override
+  String get ccNone =>
+      'Hakuna akaunti ya mteja.\nBonyeza « Amana mpya » kuunda moja.';
+
+  @override
+  String get ccAccountTitle => 'Akaunti ya mteja';
+
+  @override
+  String get ccAvailableLabel => 'Salio lililopo';
+
+  @override
+  String get ccDeposit => 'Amana';
+
+  @override
+  String get ccWithdraw => 'Kutoa';
+
+  @override
+  String get ccSendStatement => 'Tuma taarifa kwa WhatsApp';
+
+  @override
+  String get ccHistory => 'Historia';
+
+  @override
+  String get ccNoMovement => 'Hakuna miamala.';
+
+  @override
+  String ccDateBy(String date, String nom) {
+    return '$date • na $nom';
+  }
+
+  @override
+  String ccBalanceAfter(String montant) {
+    return 'Salio : $montant';
+  }
 }

@@ -3540,6 +3540,168 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'(par {nom})'**
   String livBy(String nom);
+
+  /// No description provided for @ccDepositTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépôt du client'**
+  String get ccDepositTitle;
+
+  /// No description provided for @ccWithdrawTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrait du client'**
+  String get ccWithdrawTitle;
+
+  /// No description provided for @ccPhoneLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléphone du client *'**
+  String get ccPhoneLabel;
+
+  /// No description provided for @ccPhoneShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro trop court'**
+  String get ccPhoneShort;
+
+  /// No description provided for @ccNameLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom du client'**
+  String get ccNameLabel;
+
+  /// No description provided for @ccAmountLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant (USD) *'**
+  String get ccAmountLabel;
+
+  /// No description provided for @ccMoreThanBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus que le solde disponible'**
+  String get ccMoreThanBalance;
+
+  /// No description provided for @ccAvailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde disponible : {montant}'**
+  String ccAvailable(String montant);
+
+  /// No description provided for @ccCash.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espèces'**
+  String get ccCash;
+
+  /// No description provided for @ccSaveDeposit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer le dépôt'**
+  String get ccSaveDeposit;
+
+  /// No description provided for @ccSaveWithdraw.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer le retrait'**
+  String get ccSaveWithdraw;
+
+  /// No description provided for @ccDepositSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépôt de {montant} enregistré.'**
+  String ccDepositSaved(String montant);
+
+  /// No description provided for @ccWithdrawSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrait de {montant} enregistré.'**
+  String ccWithdrawSaved(String montant);
+
+  /// No description provided for @ccNewDeposit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau dépôt'**
+  String get ccNewDeposit;
+
+  /// No description provided for @ccSearchHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom ou téléphone…'**
+  String get ccSearchHint;
+
+  /// No description provided for @ccCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} client(s) avec un compte'**
+  String ccCount(int count);
+
+  /// No description provided for @ccTotalKept.
+  ///
+  /// In fr, this message translates to:
+  /// **'Argent des clients gardé : {montant}'**
+  String ccTotalKept(String montant);
+
+  /// No description provided for @ccNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun compte client.\nAppuyez sur « Nouveau dépôt » pour en créer un.'**
+  String get ccNone;
+
+  /// No description provided for @ccAccountTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte client'**
+  String get ccAccountTitle;
+
+  /// No description provided for @ccAvailableLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde disponible'**
+  String get ccAvailableLabel;
+
+  /// No description provided for @ccDeposit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépôt'**
+  String get ccDeposit;
+
+  /// No description provided for @ccWithdraw.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrait'**
+  String get ccWithdraw;
+
+  /// No description provided for @ccSendStatement.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer le relevé par WhatsApp'**
+  String get ccSendStatement;
+
+  /// No description provided for @ccHistory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Historique'**
+  String get ccHistory;
+
+  /// No description provided for @ccNoMovement.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun mouvement.'**
+  String get ccNoMovement;
+
+  /// No description provided for @ccDateBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'{date} • par {nom}'**
+  String ccDateBy(String date, String nom);
+
+  /// No description provided for @ccBalanceAfter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde : {montant}'**
+  String ccBalanceAfter(String montant);
 }
 
 class _AppLocalizationsDelegate

@@ -1811,5 +1811,84 @@
         "type": "String"
       }
     }
+  },
+  "ccDepositTitle": "Dépôt du client",
+  "ccWithdrawTitle": "Retrait du client",
+  "ccPhoneLabel": "Téléphone du client *",
+  "ccPhoneShort": "Numéro trop court",
+  "ccNameLabel": "Nom du client",
+  "ccAmountLabel": "Montant (USD) *",
+  "ccMoreThanBalance": "Plus que le solde disponible",
+  "ccAvailable": "Solde disponible : {montant}",
+  "@ccAvailable": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "ccCash": "Espèces",
+  "ccSaveDeposit": "Enregistrer le dépôt",
+  "ccSaveWithdraw": "Enregistrer le retrait",
+  "ccDepositSaved": "Dépôt de {montant} enregistré.",
+  "@ccDepositSaved": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "ccWithdrawSaved": "Retrait de {montant} enregistré.",
+  "@ccWithdrawSaved": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "ccNewDeposit": "Nouveau dépôt",
+  "ccSearchHint": "Nom ou téléphone…",
+  "ccCount": "{count} client(s) avec un compte",
+  "@ccCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ccTotalKept": "Argent des clients gardé : {montant}",
+  "@ccTotalKept": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "ccNone": "Aucun compte client.\nAppuyez sur « Nouveau dépôt » pour en créer un.",
+  "ccAccountTitle": "Compte client",
+  "ccAvailableLabel": "Solde disponible",
+  "ccDeposit": "Dépôt",
+  "ccWithdraw": "Retrait",
+  "ccSendStatement": "Envoyer le relevé par WhatsApp",
+  "ccHistory": "Historique",
+  "ccNoMovement": "Aucun mouvement.",
+  "ccDateBy": "{date} • par {nom}",
+  "@ccDateBy": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
+  "ccBalanceAfter": "Solde : {montant}",
+  "@ccBalanceAfter": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
   }
 }

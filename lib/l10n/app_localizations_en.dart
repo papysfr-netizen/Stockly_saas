@@ -2137,4 +2137,99 @@ class AppLocalizationsEn extends AppLocalizations {
   String livBy(String nom) {
     return '(by $nom)';
   }
+
+  @override
+  String get ccDepositTitle => 'Customer deposit';
+
+  @override
+  String get ccWithdrawTitle => 'Customer withdrawal';
+
+  @override
+  String get ccPhoneLabel => 'Customer phone *';
+
+  @override
+  String get ccPhoneShort => 'Number too short';
+
+  @override
+  String get ccNameLabel => 'Customer name';
+
+  @override
+  String get ccAmountLabel => 'Amount (USD) *';
+
+  @override
+  String get ccMoreThanBalance => 'More than the available balance';
+
+  @override
+  String ccAvailable(String montant) {
+    return 'Available balance: $montant';
+  }
+
+  @override
+  String get ccCash => 'Cash';
+
+  @override
+  String get ccSaveDeposit => 'Save the deposit';
+
+  @override
+  String get ccSaveWithdraw => 'Save the withdrawal';
+
+  @override
+  String ccDepositSaved(String montant) {
+    return 'Deposit of $montant saved.';
+  }
+
+  @override
+  String ccWithdrawSaved(String montant) {
+    return 'Withdrawal of $montant saved.';
+  }
+
+  @override
+  String get ccNewDeposit => 'New deposit';
+
+  @override
+  String get ccSearchHint => 'Name or phone…';
+
+  @override
+  String ccCount(int count) {
+    return '$count customer(s) with an account';
+  }
+
+  @override
+  String ccTotalKept(String montant) {
+    return 'Customers\' money held: $montant';
+  }
+
+  @override
+  String get ccNone => 'No customer account.\nTap “New deposit” to create one.';
+
+  @override
+  String get ccAccountTitle => 'Customer account';
+
+  @override
+  String get ccAvailableLabel => 'Available balance';
+
+  @override
+  String get ccDeposit => 'Deposit';
+
+  @override
+  String get ccWithdraw => 'Withdrawal';
+
+  @override
+  String get ccSendStatement => 'Send the statement via WhatsApp';
+
+  @override
+  String get ccHistory => 'History';
+
+  @override
+  String get ccNoMovement => 'No transactions.';
+
+  @override
+  String ccDateBy(String date, String nom) {
+    return '$date • by $nom';
+  }
+
+  @override
+  String ccBalanceAfter(String montant) {
+    return 'Balance: $montant';
+  }
 }

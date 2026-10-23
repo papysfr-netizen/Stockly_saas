@@ -2140,4 +2140,100 @@ class AppLocalizationsLn extends AppLocalizations {
   String livBy(String nom) {
     return '(na $nom)';
   }
+
+  @override
+  String get ccDepositTitle => 'Kotia mbongo ya mosombi';
+
+  @override
+  String get ccWithdrawTitle => 'Kobimisa mbongo ya mosombi';
+
+  @override
+  String get ccPhoneLabel => 'Telefone ya mosombi *';
+
+  @override
+  String get ccPhoneShort => 'Nimero ezali mokuse mingi';
+
+  @override
+  String get ccNameLabel => 'Nkombo ya mosombi';
+
+  @override
+  String get ccAmountLabel => 'Motuya (USD) *';
+
+  @override
+  String get ccMoreThanBalance => 'Eleki mbongo oyo ezali';
+
+  @override
+  String ccAvailable(String montant) {
+    return 'Mbongo ezali : $montant';
+  }
+
+  @override
+  String get ccCash => 'Mbongo ya maboko';
+
+  @override
+  String get ccSaveDeposit => 'Koma kotia mbongo';
+
+  @override
+  String get ccSaveWithdraw => 'Koma kobimisa mbongo';
+
+  @override
+  String ccDepositSaved(String montant) {
+    return 'Kotia $montant ekomami.';
+  }
+
+  @override
+  String ccWithdrawSaved(String montant) {
+    return 'Kobimisa $montant ekomami.';
+  }
+
+  @override
+  String get ccNewDeposit => 'Kotia mbongo ya sika';
+
+  @override
+  String get ccSearchHint => 'Nkombo to telefone…';
+
+  @override
+  String ccCount(int count) {
+    return 'Basombi $count bazali na compte';
+  }
+
+  @override
+  String ccTotalKept(String montant) {
+    return 'Mbongo ya basombi ebombami : $montant';
+  }
+
+  @override
+  String get ccNone =>
+      'Compte ya mosombi ezali te.\nFina « Kotia mbongo ya sika » mpo na kosala yango.';
+
+  @override
+  String get ccAccountTitle => 'Compte ya mosombi';
+
+  @override
+  String get ccAvailableLabel => 'Mbongo ezali';
+
+  @override
+  String get ccDeposit => 'Kotia';
+
+  @override
+  String get ccWithdraw => 'Kobimisa';
+
+  @override
+  String get ccSendStatement => 'Tinda relevé na WhatsApp';
+
+  @override
+  String get ccHistory => 'Lisolo';
+
+  @override
+  String get ccNoMovement => 'Mouvement moko te.';
+
+  @override
+  String ccDateBy(String date, String nom) {
+    return '$date • na $nom';
+  }
+
+  @override
+  String ccBalanceAfter(String montant) {
+    return 'Mbongo etikali : $montant';
+  }
 }

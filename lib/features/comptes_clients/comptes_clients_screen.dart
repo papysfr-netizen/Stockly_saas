@@ -7,6 +7,7 @@ import '../../core/providers/entreprise_provider.dart';
 import '../../core/providers/user_role_provider.dart';
 import '../../core/utils/currency_extension.dart';
 import 'compte_client_service.dart';
+import 'package:stockly_saas/l10n/app_localizations.dart';
 
 // ============================================================================
 // 💰 COMPTES CLIENTS : liste, dépôts, retraits, historique, relevé WhatsApp
@@ -51,6 +52,7 @@ Future<void> ouvrirOperationCompte(
   double solde = 0,
 }) async {
   final messenger = ScaffoldMessenger.of(context);
+  final t = AppLocalizations.of(context);
   final estDepot = type == 'depot';
   final telCtrl = TextEditingController(text: telephone);
   final nomCtrl = TextEditingController(text: nom);
@@ -69,7 +71,7 @@ Future<void> ouvrirOperationCompte(
         final valide = telOk && montant > 0 && !depasse;
 
         return AlertDialog(
-          title: Text(estDepot ? 'Dépôt du client' : 'Retrait du client'),
+          title: Text(estDepot ? t.ccDepositTitle : t.ccWithdrawTitle),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -80,18 +82,18 @@ Future<void> ouvrirOperationCompte(
                   keyboardType: TextInputType.phone,
                   onChanged: (_) => setD(() {}),
                   decoration: InputDecoration(
-                    labelText: 'Téléphone du client *',
+                    labelText: t.ccPhoneLabel,
                     prefixIcon: const Icon(Icons.phone),
-                    errorText: telCtrl.text.isNotEmpty && !telOk ? 'Numéro trop court' : null,
+                    errorText: telCtrl.text.isNotEmpty && !telOk ? t.ccPhoneShort : null,
                   ),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: nomCtrl,
                   textCapitalization: TextCapitalization.words,
-                  decoration: const InputDecoration(
-                    labelText: 'Nom du client',
-                    prefixIcon: Icon(Icons.person),
+                  decoration: InputDecoration(
+                    labelText: t.ccNameLabel,
+                    prefixIcon: const Icon(Icons.person),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -100,28 +102,28 @@ Future<void> ouvrirOperationCompte(
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   onChanged: (_) => setD(() {}),
                   decoration: InputDecoration(
-                    labelText: 'Montant (\$) *',
+                    labelText: t.ccAmountLabel,
                     prefixIcon: const Icon(Icons.attach_money),
-                    errorText: depasse ? 'Plus que le solde disponible' : null,
+                    errorText: depasse ? t.ccMoreThanBalance : null,
                   ),
                 ),
                 if (!estDepot)
                   Padding(
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
-                      'Solde disponible : ${ref.formatPrice(solde)}',
+                      t.ccAvailable(ref.formatPrice(solde)),
                       style: TextStyle(color: Colors.grey.shade700),
                     ),
                   ),
                 const SizedBox(height: 12),
                 SegmentedButton<String>(
-                  segments: const [
+                  segments: [
                     ButtonSegment(
                       value: 'Espèces',
-                      label: Text('Espèces'),
-                      icon: Icon(Icons.payments_outlined),
+                      label: Text(t.ccCash),
+                      icon: const Icon(Icons.payments_outlined),
                     ),
-                    ButtonSegment(
+                    const ButtonSegment(
                       value: 'Mobile Money',
                       label: Text('Mobile Money'),
                       icon: Icon(Icons.phone_android),
@@ -136,7 +138,7 @@ Future<void> ouvrirOperationCompte(
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Annuler'),
+              child: Text(t.cancel),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -144,7 +146,7 @@ Future<void> ouvrirOperationCompte(
                 foregroundColor: Colors.white,
               ),
               onPressed: valide ? () => Navigator.pop(ctx, true) : null,
-              child: Text(estDepot ? 'Enregistrer le dépôt' : 'Enregistrer le retrait'),
+              child: Text(estDepot ? t.ccSaveDeposit : t.ccSaveWithdraw),
             ),
           ],
         );
@@ -178,11 +180,11 @@ Future<void> ouvrirOperationCompte(
             methode: methode,
           );
     final texte = estDepot
-        ? 'Dépôt de ${ref.formatPrice(montant)} enregistré.'
-        : 'Retrait de ${ref.formatPrice(montant)} enregistré.';
+        ? t.ccDepositSaved(ref.formatPrice(montant))
+        : t.ccWithdrawSaved(ref.formatPrice(montant));
     messenger.showSnackBar(
       SnackBar(
-        content: Text(enLigne ? texte : "$texte (envoi dès le retour d'internet)"),
+        content: Text(enLigne ? texte : '$texte ${t.retOffline}'),
         backgroundColor: enLigne ? Colors.green.shade700 : Colors.orange.shade800,
       ),
     );
@@ -220,10 +222,11 @@ class _ComptesClientsScreenState extends ConsumerState<ComptesClientsScreen> {
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(comptesClientsProvider(widget.entrepriseId));
+    final t = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Comptes clients'),
+        title: Text(t.accClientAccounts),
         backgroundColor: Colors.teal.shade700,
         foregroundColor: Colors.white,
       ),
@@ -231,7 +234,7 @@ class _ComptesClientsScreenState extends ConsumerState<ComptesClientsScreen> {
         backgroundColor: Colors.teal.shade700,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add),
-        label: const Text('Nouveau dépôt'),
+        label: Text(t.ccNewDeposit),
         onPressed: () => ouvrirOperationCompte(
           context,
           ref,
@@ -246,16 +249,16 @@ class _ComptesClientsScreenState extends ConsumerState<ComptesClientsScreen> {
             child: TextField(
               controller: _rechercheCtrl,
               onChanged: (v) => setState(() => _recherche = v.trim().toLowerCase()),
-              decoration: const InputDecoration(
-                hintText: 'Nom ou téléphone…',
-                prefixIcon: Icon(Icons.search),
+              decoration: InputDecoration(
+                hintText: t.ccSearchHint,
+                prefixIcon: const Icon(Icons.search),
               ),
             ),
           ),
           Expanded(
             child: async.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Erreur de chargement : $e')),
+              error: (e, _) => Center(child: Text(t.errorPrefix('$e'))),
               data: (docs) {
                 final filtres = docs.where((d) {
                   if (_recherche.isEmpty) return true;
@@ -282,11 +285,11 @@ class _ComptesClientsScreenState extends ConsumerState<ComptesClientsScreen> {
                       ),
                       child: Column(
                         children: [
-                          Text('${docs.length} client(s) avec un compte',
+                          Text(t.ccCount(docs.length),
                               style: TextStyle(color: Colors.grey.shade700)),
                           const SizedBox(height: 4),
                           Text(
-                            'Argent des clients gardé : ${ref.formatPrice(totalDu)}',
+                            t.ccTotalKept(ref.formatPrice(totalDu)),
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -298,13 +301,13 @@ class _ComptesClientsScreenState extends ConsumerState<ComptesClientsScreen> {
                     ),
                     Expanded(
                       child: filtres.isEmpty
-                          ? const Center(
+                          ? Center(
                               child: Padding(
-                                padding: EdgeInsets.all(24),
+                                padding: const EdgeInsets.all(24),
                                 child: Text(
-                                  'Aucun compte client.\nAppuyez sur « Nouveau dépôt » pour en créer un.',
+                                  t.ccNone,
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(color: Colors.grey),
+                                  style: const TextStyle(color: Colors.grey),
                                 ),
                               ),
                             )
@@ -399,6 +402,7 @@ class CompteClientDetailScreen extends ConsumerWidget {
     required List<Map<String, dynamic>> mouvements,
   }) async {
     final messenger = ScaffoldMessenger.of(context);
+    final t = AppLocalizations.of(context);
     final boutique = ref.read(entrepriseProvider).nom;
     final buffer = StringBuffer(
         'Bonjour ${nom.isEmpty ? '' : nom}, votre solde chez $boutique est de ${ref.formatPrice(solde)}.');
@@ -420,7 +424,7 @@ class CompteClientDetailScreen extends ConsumerWidget {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {
       messenger.showSnackBar(
-        const SnackBar(content: Text("Impossible d'ouvrir WhatsApp.")),
+        SnackBar(content: Text(t.livNoWhatsapp)),
       );
     }
   }
@@ -431,10 +435,11 @@ class CompteClientDetailScreen extends ConsumerWidget {
             .watch(userProfileProvider)
             .whenOrNull(data: (p) => p.peutRemisesRetraits) ??
         false;
+    final t = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Compte client'),
+        title: Text(t.ccAccountTitle),
         backgroundColor: Colors.teal.shade700,
         foregroundColor: Colors.white,
       ),
@@ -473,7 +478,7 @@ class CompteClientDetailScreen extends ConsumerWidget {
                           if (nom.isNotEmpty)
                             Text(tel, style: TextStyle(color: Colors.grey.shade700)),
                           const SizedBox(height: 10),
-                          const Text('Solde disponible'),
+                          Text(t.ccAvailableLabel),
                           Text(
                             ref.formatPrice(solde),
                             style: TextStyle(
@@ -499,7 +504,7 @@ class CompteClientDetailScreen extends ConsumerWidget {
                             padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
                           icon: const Icon(Icons.add),
-                          label: const Text('Dépôt'),
+                          label: Text(t.ccDeposit),
                           onPressed: () => ouvrirOperationCompte(
                             context,
                             ref,
@@ -521,7 +526,7 @@ class CompteClientDetailScreen extends ConsumerWidget {
                               padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
                             icon: const Icon(Icons.remove),
-                            label: const Text('Retrait'),
+                            label: Text(t.ccWithdraw),
                             onPressed: solde > 0.005
                                 ? () => ouvrirOperationCompte(
                                       context,
@@ -545,7 +550,7 @@ class CompteClientDetailScreen extends ConsumerWidget {
                       side: BorderSide(color: Colors.green.shade600),
                     ),
                     icon: const Icon(Icons.chat),
-                    label: const Text('Envoyer le relevé par WhatsApp'),
+                    label: Text(t.ccSendStatement),
                     onPressed: () => _envoyerReleve(
                       context,
                       ref,
@@ -555,13 +560,13 @@ class CompteClientDetailScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text('Historique',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text(t.ccHistory,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 6),
                   if (mouvements.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Text('Aucun mouvement.', style: TextStyle(color: Colors.grey)),
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(t.ccNoMovement, style: const TextStyle(color: Colors.grey)),
                     ),
                   for (final m in mouvements) _LigneMouvement(m: m),
                 ],
@@ -585,6 +590,7 @@ class _LigneMouvement extends ConsumerWidget {
     final d = m['date'];
     final quand = d is Timestamp ? _formatDate(d.toDate()) : '';
     final par = (m['parNom'] ?? '').toString();
+    final t = AppLocalizations.of(context);
 
     final IconData icone;
     final Color couleur;
@@ -612,7 +618,7 @@ class _LigneMouvement extends ConsumerWidget {
         dense: true,
         leading: Icon(icone, color: couleur),
         title: Text((m['description'] ?? '').toString()),
-        subtitle: Text(par.isEmpty ? quand : '$quand • par $par'),
+        subtitle: Text(par.isEmpty ? quand : t.ccDateBy(quand, par)),
         trailing: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -622,7 +628,7 @@ class _LigneMouvement extends ConsumerWidget {
               style: TextStyle(fontWeight: FontWeight.bold, color: couleur),
             ),
             Text(
-              'Solde : ${ref.formatPrice(_num(m['soldeApres']))}',
+              t.ccBalanceAfter(ref.formatPrice(_num(m['soldeApres']))),
               style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
             ),
           ],
