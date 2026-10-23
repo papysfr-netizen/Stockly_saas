@@ -91,6 +91,7 @@ class Permissions {
   static const String gererStock = 'gererStock';
   static const String remisesRetraits = 'remisesRetraits';
   static const String maintenance = 'maintenance';
+  static const String gererEquipe = 'gererEquipe';
 
   /// Ancienne clé (Caisse : bouton « Nouveau produit ») : suit « Gérer le stock ».
   static const String ancienneAjoutProduit = 'canAddProduct';
@@ -102,6 +103,7 @@ class Permissions {
     gererStock,
     remisesRetraits,
     maintenance,
+    gererEquipe,
   ];
 
   static const Map<String, String> titres = {
@@ -110,6 +112,7 @@ class Permissions {
     gererStock: 'Gérer le stock',
     remisesRetraits: 'Remises et retraits',
     maintenance: 'Maintenance des données',
+    gererEquipe: "Gérer l'équipe",
   };
 
   static const Map<String, String> descriptions = {
@@ -118,6 +121,8 @@ class Permissions {
     gererStock: 'Ajouter, modifier, supprimer des produits, importer un fichier.',
     remisesRetraits: 'Retirer de l\'argent d\'un compte client (et les remises, plus tard).',
     maintenance: 'Paramètres : rattraper les coûts, fusionner les doublons.',
+    gererEquipe: 'Ajouter, bloquer ou débloquer des employés (jamais le patron). '
+        'Les autorisations restent réservées au patron.',
   };
 }
 
@@ -189,7 +194,9 @@ class UserProfile {
   /// (gérant : oui ; caissier : non).
   /// (« Maintenance » : non par défaut, même pour le gérant.)
   static bool valeurParDefaut(UserRole role, [String? cle]) =>
-      cle == Permissions.maintenance ? role.isOwner : (role.isOwner || role.isGerant);
+      (cle == Permissions.maintenance || cle == Permissions.gererEquipe)
+          ? role.isOwner
+          : (role.isOwner || role.isGerant);
 
   /// L'utilisateur a-t-il cette autorisation ?
   ///  - Propriétaire : toujours oui.
@@ -209,6 +216,7 @@ class UserProfile {
   bool get peutGererStock => can(Permissions.gererStock);
   bool get peutRemisesRetraits => can(Permissions.remisesRetraits);
   bool get peutMaintenance => can(Permissions.maintenance);
+  bool get peutGererEquipe => can(Permissions.gererEquipe);
 
   UserProfile copyWith({
     String? uid,
