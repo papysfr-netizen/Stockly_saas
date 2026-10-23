@@ -226,7 +226,18 @@ class FinancialCalculationService {
       final double montantRetourne = _num(data['montantRetourne']);
       final double montantAnnule = _num(data['montantAnnule']);
       // 📊 Encaissé, crédits, vendeur
-      encaisse += _num(data['montantPaye']);
+      // Ce que la boutique garde vraiment pour cette vente :
+      //  - jamais plus que la vente nette (les remboursements des retours
+      //    et annulations sont ainsi retirés, la monnaie rendue aussi),
+      //  - sans l'argent pris sur le compte client (encaissé lors du dépôt),
+      //  - plus l'acompte gardé lors d'une annulation.
+      final double venteNette = totalVente - montantRetourne - montantAnnule;
+      final double payeBrut = _num(data['montantPaye']);
+      final double payeGarde = venteNette <= 0
+          ? 0.0
+          : (payeBrut < venteNette ? payeBrut : venteNette);
+      final double payeCash = payeGarde - _num(data['montantCompteClient']);
+      encaisse += (payeCash > 0 ? payeCash : 0.0) + _num(data['montantConserve']);
       creditsAccordes += _num(data['resteAPayer']);
       final vendeurBrut = (data['vendeurNom'] ?? '').toString().trim();
       final vendeur = (vendeurBrut.isEmpty ||
