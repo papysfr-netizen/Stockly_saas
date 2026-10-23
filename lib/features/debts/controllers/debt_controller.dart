@@ -1,6 +1,9 @@
 // lib/features/debts/controllers/debt_controller.dart
 
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:stockly_saas/core/services/journal_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rxdart/rxdart.dart';
@@ -315,6 +318,11 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
       final parNom = await _nomConnecte();
       final db = FirebaseFirestore.instance;
 
+      // 📒 Remplis dans la transaction, utilisés pour le journal ensuite
+      String? infoJournal;
+      double montantJournal = 0;
+      String boutiqueJournal = 'principale';
+
       await db.runTransaction((transaction) async {
         DocumentReference docRef;
         DocumentSnapshot snapshot;
@@ -353,6 +361,13 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
         final String nouveauStatut = nouveauReste <= 0 ? 'paye' : 'partiel';
         final now = DateTime.now();
         final bool isClient = dette.type == TypeDette.client;
+
+        infoJournal = '${isClient ? 'Client' : 'Fournisseur'} ${dette.nomTiers} · '
+            'payé ${montantEffectif.toStringAsFixed(2)} \$ · '
+            '${nouveauReste <= 0 ? 'soldé' : 'reste ${nouveauReste.toStringAsFixed(2)} \$'} · '
+            '${JournalEntry.getAccountLabel(AccountingJournalService.getAccountCodeForPayment(paymentMethod))}';
+        montantJournal = montantEffectif;
+        boutiqueJournal = dette.boutiqueId.isEmpty ? 'principale' : dette.boutiqueId;
 
         transaction.update(docRef, {
           'montantReste': nouveauReste,
@@ -409,6 +424,19 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
           'boutiqueId': dette.boutiqueId.isEmpty ? 'principale' : dette.boutiqueId, // 🏬 compta
         });
       });
+
+      // 📒 Journal « qui a fait quoi » (n'empêche jamais le paiement)
+      final info = infoJournal;
+      if (info != null) {
+        unawaited(noterJournal(
+          entrepriseId: entrepriseId,
+          action: ActionsJournal.paiementDette,
+          details: info,
+          boutiqueId: boutiqueJournal,
+          montant: montantJournal,
+          reference: detteId,
+        ));
+      }
     });
   }
 }
