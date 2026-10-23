@@ -39,7 +39,7 @@ class GestionEquipeScreen extends ConsumerWidget {
       data: (profile) {
         final entrepriseId = profile.entrepriseId;
 
-        if (!profile.role.peutGererEquipe) {
+        if (!profile.peutGererEquipe) {
           return Scaffold(
             appBar: AppBar(title: Text(t.teamTitle)),
             body: Center(
@@ -92,6 +92,7 @@ class GestionEquipeScreen extends ConsumerWidget {
                   ...membres.map((doc) => _CarteMembre(
                         doc: doc,
                         estMoi: doc.id == profile.uid,
+                        moiPatron: profile.role.isOwner,
                       )),
                 ],
               );
@@ -335,7 +336,9 @@ class _DialogueCreationState extends State<_DialogueCreation> {
 class _CarteMembre extends StatelessWidget {
   final QueryDocumentSnapshot<Map<String, dynamic>> doc;
   final bool estMoi;
-  const _CarteMembre({required this.doc, required this.estMoi});
+  /// Celui qui regarde est le patron (sinon : un administrateur)
+  final bool moiPatron;
+  const _CarteMembre({required this.doc, required this.estMoi, required this.moiPatron});
 
   static const Map<String, IconData> _icones = {
     Permissions.voirFinances: Icons.bar_chart,
@@ -343,6 +346,7 @@ class _CarteMembre extends StatelessWidget {
     Permissions.gererStock: Icons.inventory_2_outlined,
     Permissions.remisesRetraits: Icons.price_change_outlined,
     Permissions.maintenance: Icons.cleaning_services_outlined,
+    Permissions.gererEquipe: Icons.manage_accounts_outlined,
   };
 
   Future<void> _action(BuildContext context, Future<void> Function() action, String succes) async {
@@ -405,6 +409,11 @@ class _CarteMembre extends StatelessWidget {
     final actif = data['estActif'] as bool? ?? true;
     final permissions = (data['permissions'] as Map<String, dynamic>?) ?? {};
 
+    // 👥 Un administrateur (employé autorisé « Gérer l'équipe ») ne touche
+    //    ni à lui-même, ni à un autre administrateur.
+    final estAdmin = !role.isOwner && permissions[Permissions.gererEquipe] == true;
+    final peutModifier = moiPatron || (!estMoi && !estAdmin);
+
     final couleur = role.isOwner
         ? Colors.amber.shade700
         : (role.isGerant ? Colors.indigo : Colors.teal);
@@ -443,7 +452,7 @@ class _CarteMembre extends StatelessWidget {
                   ),
                 ),
                 Chip(
-                  label: Text(_nomRole(t, role), style: const TextStyle(color: Colors.white, fontSize: 12)),
+                  label: Text(estAdmin ? 'Administrateur' : _nomRole(t, role), style: const TextStyle(color: Colors.white, fontSize: 12)),
                   backgroundColor: actif ? couleur : Colors.grey,
                   visualDensity: VisualDensity.compact,
                 ),
@@ -459,6 +468,17 @@ class _CarteMembre extends StatelessWidget {
               )
             else ...[
               const Divider(height: 20),
+              if (!peutModifier)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    estMoi
+                        ? 'Seul le patron peut modifier votre compte.'
+                        : 'Administrateur : seul le patron peut le modifier.',
+                    style: TextStyle(
+                        fontSize: 12, color: Colors.grey.shade700, fontStyle: FontStyle.italic),
+                  ),
+                ),
               Row(
                 children: [
                   Text(t.teamRoleLabel),
@@ -469,7 +489,7 @@ class _CarteMembre extends StatelessWidget {
                       DropdownMenuItem(value: 'caissier', child: Text(t.roleCashier)),
                       DropdownMenuItem(value: 'gerant', child: Text(t.roleManager)),
                     ],
-                    onChanged: (v) {
+                    onChanged: !peutModifier ? null : (v) {
                       if (v == null) return;
                       _action(context, () => EquipeService.changerRole(doc.id, v), t.teamRoleChanged);
                     },
@@ -477,6 +497,7 @@ class _CarteMembre extends StatelessWidget {
                 ],
               ),
               // 🏬 Boutique de travail (visible dès 2 boutiques)
+              if (moiPatron)
               ChoixBoutiqueMembre(
                 entrepriseId: (data['entrepriseId'] ?? '').toString(),
                 uid: doc.id,
@@ -488,7 +509,7 @@ class _CarteMembre extends StatelessWidget {
                 title: Text(t.teamActive),
                 subtitle: Text(actif ? t.teamCanLogin : t.teamDisabledInfo),
                 value: actif,
-                onChanged: (v) => _action(
+                onChanged: !peutModifier ? null : (v) => _action(
                   context,
                   () => EquipeService.changerActif(doc.id, v),
                   v ? t.teamReactivated : t.teamDeactivated,
@@ -524,7 +545,7 @@ class _CarteMembre extends StatelessWidget {
                           style: const TextStyle(fontSize: 12),
                         ),
                         value: _valeur(permissions, cle, role),
-                        onChanged: (v) => _action(
+                        onChanged: !moiPatron ? null : (v) => _action(
                           context,
                           () => EquipeService.changerPermission(doc.id, cle, v),
                           v
