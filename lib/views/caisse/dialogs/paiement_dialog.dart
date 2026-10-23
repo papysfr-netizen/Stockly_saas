@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:stockly_saas/core/services/journal_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -1125,6 +1126,22 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         );
         return;
       }
+
+      // 📒 Journal « qui a fait quoi » (n'empêche jamais la vente)
+      var resumeArticles =
+          widget.cart.map((i) => '${i.quantite} × ${i.nom}').join(', ');
+      if (resumeArticles.length > 200) {
+        resumeArticles = '${resumeArticles.substring(0, 200)}…';
+      }
+      unawaited(noterJournal(
+        entrepriseId: widget.entrepriseId,
+        action: ActionsJournal.vente,
+        details: 'Facture $numeroFacture · $client · $resumeArticles'
+            '${resteEffective > 0.005 ? ' · crédit ${resteEffective.toStringAsFixed(2)} \$' : ''}',
+        boutiqueId: _boutiqueVente,
+        montant: totalVente,
+        reference: venteRef.id,
+      ));
 
       if (!mounted) return;
 
