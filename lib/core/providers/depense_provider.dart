@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:stockly_saas/core/services/journal_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/depense.dart';
@@ -118,6 +119,22 @@ class DepenseRepository {
     };
   }
 
+  /// 📒 Texte du journal pour une dépense (description, catégorie…)
+  static String _texteJournal(Map<String, dynamic>? j) {
+    if (j == null) return '';
+    final morceaux = <String>[];
+    for (final cle in const ['description', 'libelle', 'motif', 'titre', 'categorie', 'beneficiaire']) {
+      final v = (j[cle] ?? '').toString().trim();
+      if (v.isNotEmpty && !morceaux.contains(v)) morceaux.add(v);
+    }
+    return morceaux.join(' · ');
+  }
+
+  static String _boutiqueJournal(Map<String, dynamic>? j) {
+    final b = (j?['boutiqueId'] ?? '').toString();
+    return b.isEmpty ? 'principale' : b;
+  }
+
   /// Une dépense peut être comptabilisée si elle a une entreprise et un montant.
   static bool _peutComptabiliser(Depense d) =>
       d.entrepriseId.isNotEmpty && d.montant > 0;
@@ -153,6 +170,17 @@ class DepenseRepository {
       );
     }
     await _valider(batch);
+
+    // 📒 Journal « qui a fait quoi »
+    final json = nouvelleDepense.toJson();
+    unawaited(noterJournal(
+      entrepriseId: nouvelleDepense.entrepriseId,
+      action: ActionsJournal.depense,
+      details: 'Ajoutée · ${_texteJournal(json)}',
+      boutiqueId: _boutiqueJournal(json),
+      montant: nouvelleDepense.montant,
+      reference: nouvelleDepense.id,
+    ));
   }
 
   /// Met à jour une dépense existante + son écriture comptable.
@@ -171,6 +199,17 @@ class DepenseRepository {
       batch.delete(_refEcriture(maj.entrepriseId, maj.id));
     }
     await _valider(batch);
+
+    // 📒 Journal « qui a fait quoi »
+    final json = maj.toJson();
+    unawaited(noterJournal(
+      entrepriseId: maj.entrepriseId,
+      action: ActionsJournal.depense,
+      details: 'Modifiée · ${_texteJournal(json)}',
+      boutiqueId: _boutiqueJournal(json),
+      montant: maj.montant,
+      reference: maj.id,
+    ));
   }
 
   /// Supprime une dépense + son écriture comptable.
@@ -180,13 +219,16 @@ class DepenseRepository {
 
     // On lit la dépense pour connaître son entreprise (serveur, sinon cache).
     String entrepriseId = '';
+    Map<String, dynamic>? donnees; // 📒 pour le journal
     try {
       final snap = await depenseRef.get().timeout(_delai);
+      donnees = snap.data();
       entrepriseId = snap.data()?['entrepriseId']?.toString() ?? '';
     } catch (_) {
       try {
         final snap =
             await depenseRef.get(const GetOptions(source: Source.cache));
+        donnees = snap.data();
         entrepriseId = snap.data()?['entrepriseId']?.toString() ?? '';
       } catch (_) {
         // Introuvable : on supprime au moins la dépense.
@@ -199,6 +241,17 @@ class DepenseRepository {
       batch.delete(_refEcriture(entrepriseId, id));
     }
     await _valider(batch);
+
+    // 📒 Journal « qui a fait quoi »
+    final m = donnees?['montant'];
+    unawaited(noterJournal(
+      entrepriseId: entrepriseId,
+      action: ActionsJournal.depense,
+      details: 'Supprimée · ${_texteJournal(donnees)}',
+      boutiqueId: _boutiqueJournal(donnees),
+      montant: m is num ? m : null,
+      reference: id,
+    ));
   }
 }
 
