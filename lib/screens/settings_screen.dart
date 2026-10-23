@@ -177,9 +177,12 @@ class SettingsScreen extends ConsumerWidget {
               if (userProfile?.role.isOwner == true) ...[
                 const InfoCard(),
                 const SizedBox(height: 16),
-                const _TeamCard(),
-                const SizedBox(height: 16),
                 MesBoutiquesCard(entrepriseId: entrepriseId),
+                const SizedBox(height: 16),
+              ],
+              // 👥 Équipe : le patron, ou un employé autorisé « Gérer l'équipe »
+              if (userProfile?.peutGererEquipe == true) ...[
+                const _TeamCard(),
                 const SizedBox(height: 16),
               ],
               const CurrencyCard(),
