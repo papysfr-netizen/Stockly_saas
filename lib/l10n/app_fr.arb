@@ -2033,5 +2033,13 @@
   "blColTotal": "Total",
   "blGrandTotal": "TOTAL GÉNÉRAL : ",
   "blDeliverer": "Le Livreur / Expéditeur",
-  "blCustomerSign": "Le Client (Bon accord)"
+  "blCustomerSign": "Le Client (Bon accord)",
+  "panRateTitle": "Taux du jour (USD -> FC)",
+  "panRateFor1": "Taux pour 1 USD",
+  "panUpdate": "Mettre à jour",
+  "panClear": "Vider le panier",
+  "panEmpty": "Votre panier est vide",
+  "panTotal": "Total à payer :",
+  "panCheckout": "ENCAISSER",
+  "panRateLocked": "Seul le patron (ou une personne autorisée) peut changer le taux."
 }

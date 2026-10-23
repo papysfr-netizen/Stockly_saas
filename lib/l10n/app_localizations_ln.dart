@@ -2467,4 +2467,29 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get blCustomerSign => 'Mosombi (andimi)';
+
+  @override
+  String get panRateTitle => 'Taux ya lelo (USD -> FC)';
+
+  @override
+  String get panRateFor1 => 'Taux mpo na USD 1';
+
+  @override
+  String get panUpdate => 'Kobongisa';
+
+  @override
+  String get panClear => 'Kolongola biloko nyonso';
+
+  @override
+  String get panEmpty => 'Panier na yo ezali pamba';
+
+  @override
+  String get panTotal => 'Motango ya kofuta :';
+
+  @override
+  String get panCheckout => 'KOFUTISA';
+
+  @override
+  String get panRateLocked =>
+      'Kaka nkolo (to moto apesami ndingisa) nde akoki kobongola taux.';
 }

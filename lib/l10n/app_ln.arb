@@ -669,5 +669,13 @@
   "blColTotal": "Nyonso",
   "blGrandTotal": "MOTANGO MOBIMBA : ",
   "blDeliverer": "Mopesi / Motindi",
-  "blCustomerSign": "Mosombi (andimi)"
+  "blCustomerSign": "Mosombi (andimi)",
+  "panRateTitle": "Taux ya lelo (USD -> FC)",
+  "panRateFor1": "Taux mpo na USD 1",
+  "panUpdate": "Kobongisa",
+  "panClear": "Kolongola biloko nyonso",
+  "panEmpty": "Panier na yo ezali pamba",
+  "panTotal": "Motango ya kofuta :",
+  "panCheckout": "KOFUTISA",
+  "panRateLocked": "Kaka nkolo (to moto apesami ndingisa) nde akoki kobongola taux."
 }

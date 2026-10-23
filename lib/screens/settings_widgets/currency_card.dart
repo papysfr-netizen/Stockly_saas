@@ -45,7 +45,7 @@ class CurrencyCard extends ConsumerWidget {
                 labelText: t.bccRate,
                 helperText: peutModifierTaux
                     ? null
-                    : 'Seul le patron (ou une personne autorisée) peut changer le taux.',
+                    : t.panRateLocked,
                 prefixIcon: const Icon(Icons.currency_exchange),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),

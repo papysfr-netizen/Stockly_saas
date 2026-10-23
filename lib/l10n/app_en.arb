@@ -669,5 +669,13 @@
   "blColTotal": "Total",
   "blGrandTotal": "GRAND TOTAL: ",
   "blDeliverer": "Deliverer / Sender",
-  "blCustomerSign": "Customer (agreed)"
+  "blCustomerSign": "Customer (agreed)",
+  "panRateTitle": "Today's rate (USD -> FC)",
+  "panRateFor1": "Rate for 1 USD",
+  "panUpdate": "Update",
+  "panClear": "Empty the cart",
+  "panEmpty": "Your cart is empty",
+  "panTotal": "Total to pay:",
+  "panCheckout": "CHECKOUT",
+  "panRateLocked": "Only the owner (or an authorised person) can change the rate."
 }

@@ -2463,4 +2463,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get blCustomerSign => 'Customer (agreed)';
+
+  @override
+  String get panRateTitle => 'Today\'s rate (USD -> FC)';
+
+  @override
+  String get panRateFor1 => 'Rate for 1 USD';
+
+  @override
+  String get panUpdate => 'Update';
+
+  @override
+  String get panClear => 'Empty the cart';
+
+  @override
+  String get panEmpty => 'Your cart is empty';
+
+  @override
+  String get panTotal => 'Total to pay:';
+
+  @override
+  String get panCheckout => 'CHECKOUT';
+
+  @override
+  String get panRateLocked =>
+      'Only the owner (or an authorised person) can change the rate.';
 }

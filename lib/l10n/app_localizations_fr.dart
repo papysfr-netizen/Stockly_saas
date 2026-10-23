@@ -2471,4 +2471,29 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get blCustomerSign => 'Le Client (Bon accord)';
+
+  @override
+  String get panRateTitle => 'Taux du jour (USD -> FC)';
+
+  @override
+  String get panRateFor1 => 'Taux pour 1 USD';
+
+  @override
+  String get panUpdate => 'Mettre à jour';
+
+  @override
+  String get panClear => 'Vider le panier';
+
+  @override
+  String get panEmpty => 'Votre panier est vide';
+
+  @override
+  String get panTotal => 'Total à payer :';
+
+  @override
+  String get panCheckout => 'ENCAISSER';
+
+  @override
+  String get panRateLocked =>
+      'Seul le patron (ou une personne autorisée) peut changer le taux.';
 }

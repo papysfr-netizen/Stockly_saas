@@ -2462,4 +2462,29 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get blCustomerSign => 'Mteja (amekubali)';
+
+  @override
+  String get panRateTitle => 'Kiwango cha leo (USD -> FC)';
+
+  @override
+  String get panRateFor1 => 'Kiwango kwa USD 1';
+
+  @override
+  String get panUpdate => 'Sasisha';
+
+  @override
+  String get panClear => 'Futa kikapu';
+
+  @override
+  String get panEmpty => 'Kikapu chako ni tupu';
+
+  @override
+  String get panTotal => 'Jumla ya kulipa :';
+
+  @override
+  String get panCheckout => 'LIPA';
+
+  @override
+  String get panRateLocked =>
+      'Mmiliki pekee (au mtu aliyeruhusiwa) ndiye anaweza kubadilisha kiwango.';
 }

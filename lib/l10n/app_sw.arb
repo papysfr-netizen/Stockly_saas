@@ -669,5 +669,13 @@
   "blColTotal": "Jumla",
   "blGrandTotal": "JUMLA KUU : ",
   "blDeliverer": "Mkabidhi / Mtumaji",
-  "blCustomerSign": "Mteja (amekubali)"
+  "blCustomerSign": "Mteja (amekubali)",
+  "panRateTitle": "Kiwango cha leo (USD -> FC)",
+  "panRateFor1": "Kiwango kwa USD 1",
+  "panUpdate": "Sasisha",
+  "panClear": "Futa kikapu",
+  "panEmpty": "Kikapu chako ni tupu",
+  "panTotal": "Jumla ya kulipa :",
+  "panCheckout": "LIPA",
+  "panRateLocked": "Mmiliki pekee (au mtu aliyeruhusiwa) ndiye anaweza kubadilisha kiwango."
 }

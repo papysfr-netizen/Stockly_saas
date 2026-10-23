@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/cart_provider.dart';
 import '../../../core/providers/currency_provider.dart';
+import '../../../core/providers/user_role_provider.dart';
+import '../../../l10n/app_localizations.dart';
 import '../dialogs/paiement_dialog.dart';
 
 class PanierView extends ConsumerWidget {
@@ -19,6 +21,15 @@ class PanierView extends ConsumerWidget {
 
   /// Dialogue pour la mise à jour rapide du taux de change du jour (USD -> FC)
   void _afficherDialogTauxChange(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context);
+    // 🔒 Taux : le patron, ou « Paramètres sensibles » seulement
+    final autorise = ref.read(userProfileProvider).value?.peutParametres ?? false;
+    if (!autorise) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(t.panRateLocked)),
+      );
+      return;
+    }
     final currencyState = ref.read(currencyProvider);
     // Utilisation directe du taux CDF au lieu du taux de la devise active (qui vaut 1.0 en USD)
     final cdfRate = currencyState.bccCdfRate;
@@ -29,27 +40,27 @@ class PanierView extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.currency_exchange, color: Colors.indigo),
-            SizedBox(width: 8),
-            Text('Taux du jour (USD -> FC)', style: TextStyle(fontSize: 16)),
+            const Icon(Icons.currency_exchange, color: Colors.indigo),
+            const SizedBox(width: 8),
+            Text(t.panRateTitle, style: const TextStyle(fontSize: 16)),
           ],
         ),
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
           autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Taux pour 1 USD',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: t.panRateFor1,
+            border: const OutlineInputBorder(),
             suffixText: 'FC',
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Annuler'),
+            child: Text(t.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -59,7 +70,7 @@ class PanierView extends ConsumerWidget {
                 Navigator.pop(dialogContext);
               }
             },
-            child: const Text('Mettre à jour'),
+            child: Text(t.panUpdate),
           ),
         ],
       ),
@@ -72,6 +83,8 @@ class PanierView extends ConsumerWidget {
     final totalAmount = ref.watch(cartTotalProvider);
     final currencyState = ref.watch(currencyProvider);
     final activeInfo = currencyState.activeCurrencyInfo;
+    final t = AppLocalizations.of(context);
+    final peutChangerTaux = ref.watch(userProfileProvider).value?.peutParametres ?? false;
 
     return Container(
       color: Colors.grey.shade50,
@@ -129,8 +142,10 @@ class PanierView extends ConsumerWidget {
                               ),
                             ),
                           ),
-                          const SizedBox(width: 2),
-                          const Icon(Icons.edit, size: 12, color: Colors.indigo),
+                          if (peutChangerTaux) ...[
+                            const SizedBox(width: 2),
+                            const Icon(Icons.edit, size: 12, color: Colors.indigo),
+                          ],
                         ],
                       ),
                     ),
@@ -140,7 +155,7 @@ class PanierView extends ConsumerWidget {
                 if (cart.isNotEmpty)
                   IconButton(
                     icon: const Icon(Icons.delete_sweep, color: Colors.redAccent, size: 20),
-                    tooltip: 'Vider le panier',
+                    tooltip: t.panClear,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                     onPressed: () => ref.read(cartProvider.notifier).clearCart(),
@@ -153,15 +168,15 @@ class PanierView extends ConsumerWidget {
           // 2. Liste des articles du panier
           Expanded(
             child: cart.isEmpty
-                ? const Center(
+                ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.shopping_cart_outlined, size: 48, color: Colors.grey),
-                        SizedBox(height: 8),
+                        const Icon(Icons.shopping_cart_outlined, size: 48, color: Colors.grey),
+                        const SizedBox(height: 8),
                         Text(
-                          'Votre panier est vide',
-                          style: TextStyle(color: Colors.grey, fontSize: 15),
+                          t.panEmpty,
+                          style: const TextStyle(color: Colors.grey, fontSize: 15),
                         ),
                       ],
                     ),
@@ -222,9 +237,9 @@ class PanierView extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Total à payer :',
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                    Text(
+                      t.panTotal,
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                     ),
                     Text(
                       currencyState.formatPrice(totalAmount),
@@ -262,9 +277,9 @@ class PanierView extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text(
-                      'ENCAISSER',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    child: Text(
+                      t.panCheckout,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),

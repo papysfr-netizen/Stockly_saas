@@ -4122,6 +4122,54 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Le Client (Bon accord)'**
   String get blCustomerSign;
+
+  /// No description provided for @panRateTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taux du jour (USD -> FC)'**
+  String get panRateTitle;
+
+  /// No description provided for @panRateFor1.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taux pour 1 USD'**
+  String get panRateFor1;
+
+  /// No description provided for @panUpdate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mettre à jour'**
+  String get panUpdate;
+
+  /// No description provided for @panClear.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vider le panier'**
+  String get panClear;
+
+  /// No description provided for @panEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre panier est vide'**
+  String get panEmpty;
+
+  /// No description provided for @panTotal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total à payer :'**
+  String get panTotal;
+
+  /// No description provided for @panCheckout.
+  ///
+  /// In fr, this message translates to:
+  /// **'ENCAISSER'**
+  String get panCheckout;
+
+  /// No description provided for @panRateLocked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seul le patron (ou une personne autorisée) peut changer le taux.'**
+  String get panRateLocked;
 }
 
 class _AppLocalizationsDelegate
