@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers/user_role_provider.dart';
 import '../../core/services/utilisateur_service.dart';
+import '../../core/services/journal_service.dart';
 import '../../core/utils/currency_extension.dart';
 import '../comptes_clients/compte_client_service.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
@@ -876,6 +877,31 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
       );
       return;
     }
+
+    // 📒 Journal « qui a fait quoi » (n'empêche jamais le retour)
+    const modesTexte = {
+      'especes': 'remboursé en espèces',
+      'avoir': 'mis sur le compte client',
+      'garder': 'acompte gardé',
+      'aucun': 'dette réduite',
+    };
+    var resumeRetour = lignes
+        .map((l) => '${l['quantite']} × ${l['nom']}'
+            '${l['etat'] == 'abime' ? ' (abîmé)' : ''}')
+        .join(', ');
+    if (resumeRetour.length > 200) {
+      resumeRetour = '${resumeRetour.substring(0, 200)}…';
+    }
+    unawaited(noterJournal(
+      entrepriseId: widget.entrepriseId,
+      action: _annulation ? ActionsJournal.annulation : ActionsJournal.retour,
+      details: 'Facture $numeroFacture · $client · $resumeRetour · '
+          '${modesTexte[mode] ?? mode}'
+          '${motif.isEmpty ? '' : ' · motif : $motif'}',
+      boutiqueId: (widget.data['boutiqueId'] ?? 'principale').toString(),
+      montant: montant,
+      reference: widget.venteId,
+    ));
 
     final debut = _annulation ? t.retCancelSaved : t.retReturnSaved;
     final String texte;
