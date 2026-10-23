@@ -1593,5 +1593,223 @@
       }
     }
   },
-  "stockShowInStock": "Retour aux produits en stock"
+  "stockShowInStock": "Retour aux produits en stock",
+  "livTitle": "À livrer",
+  "livButtonLate": "À livrer ({count} en retard)",
+  "@livButtonLate": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "livNoneTitle": "Aucune livraison en attente",
+  "livNoneSub": "Tous les clients ont reçu leur marchandise.",
+  "livWaitingLate": "{count} client(s) en attente — dont {late} en retard",
+  "@livWaitingLate": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "late": {
+        "type": "int"
+      }
+    }
+  },
+  "livWaiting": "{count} client(s) attendent leur marchandise",
+  "@livWaiting": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "livNoWhatsapp": "Impossible d'ouvrir WhatsApp.",
+  "livHandOverTitle": "Remettre la marchandise",
+  "livClient": "Client : {nom}",
+  "@livClient": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      }
+    }
+  },
+  "livWhatNow": "Indiquez ce que le client emporte maintenant :",
+  "livAllGiven": "Tout a déjà été remis.",
+  "livRemainDone": "Reste {reste} (déjà remis : {deja})",
+  "@livRemainDone": {
+    "placeholders": {
+      "reste": {
+        "type": "int"
+      },
+      "deja": {
+        "type": "int"
+      }
+    }
+  },
+  "livToHand": "À remettre : {count}",
+  "@livToHand": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "livChooseOne": "Choisissez au moins une pièce à remettre.",
+  "livPartialAfter": "Sortie partielle : il restera {count} pièce(s) à retirer.",
+  "@livPartialAfter": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "livComplete": "Livraison complète : tout est remis.",
+  "livWarnUnpaid": "Attention : il reste {montant} à payer.",
+  "@livWarnUnpaid": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "livValidateExit": "Valider la sortie",
+  "livAllDelivered": "Oui, tout livré",
+  "livSavedOffline": "Sortie notée sur le téléphone. Envoi dès le retour d'internet.",
+  "livCompleteSaved": "Livraison complète enregistrée pour {client}.",
+  "@livCompleteSaved": {
+    "placeholders": {
+      "client": {
+        "type": "String"
+      }
+    }
+  },
+  "livPartialSaved": "Sortie partielle enregistrée : il reste {count} pièce(s) à retirer.",
+  "@livPartialSaved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "livLatePassed": "Délai dépassé (limite : {date})",
+  "@livLatePassed": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "livLateDays": "Délai dépassé de {jours} jour(s) (limite : {date})",
+  "@livLateDays": {
+    "placeholders": {
+      "jours": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "livPickToday": "À retirer aujourd'hui (limite : {date})",
+  "@livPickToday": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "livPickTomorrow": "À retirer avant demain soir ({date})",
+  "@livPickTomorrow": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "livPickBefore": "À retirer avant le {date} ({jours} jours restants)",
+  "@livPickBefore": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "jours": {
+        "type": "int"
+      }
+    }
+  },
+  "livCall": "Appeler {tel}",
+  "@livCall": {
+    "placeholders": {
+      "tel": {
+        "type": "String"
+      }
+    }
+  },
+  "livPartial": "Partiellement livré",
+  "livSoldOn": "Vendu le {date}",
+  "@livSoldOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "livSoldOnBy": "Vendu le {date} par {vendeur}",
+  "@livSoldOnBy": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "vendeur": {
+        "type": "String"
+      }
+    }
+  },
+  "livStillToHand": "Reste à remettre :",
+  "livToHandColon": "À remettre :",
+  "livNothingToHand": "rien à remettre",
+  "livOutOf": "(sur {count})",
+  "@livOutOf": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "livHanded": "remis : {count}",
+  "@livHanded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "livCancelled": "{count} annulé(s)",
+  "@livCancelled": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "livAlreadyOut": "Déjà sorti :",
+  "livUnpaid": "Reste à payer : {montant} — à encaisser avant de livrer",
+  "@livUnpaid": {
+    "placeholders": {
+      "montant": {
+        "type": "String"
+      }
+    }
+  },
+  "livRemind": "Relancer",
+  "livMarkDelivered": "Marquer comme livré",
+  "livBy": "(par {nom})",
+  "@livBy": {
+    "placeholders": {
+      "nom": {
+        "type": "String"
+      }
+    }
+  }
 }

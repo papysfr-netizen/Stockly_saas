@@ -1963,4 +1963,177 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get stockShowInStock => 'Rudi kwa bidhaa zilizopo';
+
+  @override
+  String get livTitle => 'Ya kukabidhi';
+
+  @override
+  String livButtonLate(int count) {
+    return 'Ya kukabidhi ($count zimechelewa)';
+  }
+
+  @override
+  String get livNoneTitle => 'Hakuna bidhaa zinazosubiri kukabidhiwa';
+
+  @override
+  String get livNoneSub => 'Wateja wote wamepokea bidhaa zao.';
+
+  @override
+  String livWaitingLate(int count, int late) {
+    return 'Wateja $count wanasubiri — $late wamechelewa';
+  }
+
+  @override
+  String livWaiting(int count) {
+    return 'Wateja $count wanasubiri bidhaa zao';
+  }
+
+  @override
+  String get livNoWhatsapp => 'Imeshindikana kufungua WhatsApp.';
+
+  @override
+  String get livHandOverTitle => 'Kabidhi bidhaa';
+
+  @override
+  String livClient(String nom) {
+    return 'Mteja : $nom';
+  }
+
+  @override
+  String get livWhatNow => 'Onyesha mteja anachukua nini sasa :';
+
+  @override
+  String get livAllGiven => 'Kila kitu kimeshakabidhiwa.';
+
+  @override
+  String livRemainDone(int reste, int deja) {
+    return 'Imebaki $reste (imeshakabidhiwa : $deja)';
+  }
+
+  @override
+  String livToHand(int count) {
+    return 'Ya kukabidhi : $count';
+  }
+
+  @override
+  String get livChooseOne => 'Chagua angalau kipande kimoja cha kukabidhi.';
+
+  @override
+  String livPartialAfter(int count) {
+    return 'Utoaji wa sehemu : vipande $count vitabaki kuchukuliwa.';
+  }
+
+  @override
+  String get livComplete => 'Ukabidhi kamili : kila kitu kimekabidhiwa.';
+
+  @override
+  String livWarnUnpaid(String montant) {
+    return 'Tahadhari : imebaki $montant kulipa.';
+  }
+
+  @override
+  String get livValidateExit => 'Thibitisha utoaji';
+
+  @override
+  String get livAllDelivered => 'Ndiyo, vyote vimekabidhiwa';
+
+  @override
+  String get livSavedOffline =>
+      'Utoaji umeandikwa kwenye simu. Utatumwa intaneti ikirudi.';
+
+  @override
+  String livCompleteSaved(String client) {
+    return 'Ukabidhi kamili umeandikwa kwa $client.';
+  }
+
+  @override
+  String livPartialSaved(int count) {
+    return 'Utoaji wa sehemu umeandikwa : vimebaki vipande $count kuchukuliwa.';
+  }
+
+  @override
+  String livLatePassed(String date) {
+    return 'Muda umepita (kikomo : $date)';
+  }
+
+  @override
+  String livLateDays(int jours, String date) {
+    return 'Muda umepita kwa siku $jours (kikomo : $date)';
+  }
+
+  @override
+  String livPickToday(String date) {
+    return 'Ya kuchukua leo (kikomo : $date)';
+  }
+
+  @override
+  String livPickTomorrow(String date) {
+    return 'Ya kuchukua kabla ya kesho jioni ($date)';
+  }
+
+  @override
+  String livPickBefore(String date, int jours) {
+    return 'Ya kuchukua kabla ya $date (siku $jours zimebaki)';
+  }
+
+  @override
+  String livCall(String tel) {
+    return 'Piga simu $tel';
+  }
+
+  @override
+  String get livPartial => 'Imekabidhiwa sehemu';
+
+  @override
+  String livSoldOn(String date) {
+    return 'Imeuzwa tarehe $date';
+  }
+
+  @override
+  String livSoldOnBy(String date, String vendeur) {
+    return 'Imeuzwa tarehe $date na $vendeur';
+  }
+
+  @override
+  String get livStillToHand => 'Bado kukabidhi :';
+
+  @override
+  String get livToHandColon => 'Ya kukabidhi :';
+
+  @override
+  String get livNothingToHand => 'hakuna cha kukabidhi';
+
+  @override
+  String livOutOf(String count) {
+    return '(kati ya $count)';
+  }
+
+  @override
+  String livHanded(int count) {
+    return 'imekabidhiwa : $count';
+  }
+
+  @override
+  String livCancelled(int count) {
+    return '$count imefutwa';
+  }
+
+  @override
+  String get livAlreadyOut => 'Tayari imetoka :';
+
+  @override
+  String livUnpaid(String montant) {
+    return 'Kiasi kilichobaki : $montant — kilipwe kabla ya kukabidhi';
+  }
+
+  @override
+  String get livRemind => 'Kumbusha';
+
+  @override
+  String get livMarkDelivered => 'Weka kama imekabidhiwa';
+
+  @override
+  String livBy(String nom) {
+    return '(na $nom)';
+  }
 }

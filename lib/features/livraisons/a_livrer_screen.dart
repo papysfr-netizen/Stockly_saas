@@ -11,6 +11,7 @@ import '../../core/providers/entreprise_provider.dart';
 import '../../core/utils/currency_extension.dart';
 import '../../screens/bon_livraison_screen.dart';
 import '../ventes/retour_vente_screen.dart';
+import 'package:stockly_saas/l10n/app_localizations.dart';
 
 // ============================================================================
 // 🚚 VENTES À LIVRER (statutLivraison == 'Non livré')
@@ -56,7 +57,7 @@ bool _estEnRetard(Map<String, dynamic> data) =>
 String _deuxChiffres(int n) => n.toString().padLeft(2, '0');
 
 String _formatDate(DateTime d) =>
-    '${_deuxChiffres(d.day)}/${_deuxChiffres(d.month)}/${d.year} à ${_deuxChiffres(d.hour)}:${_deuxChiffres(d.minute)}';
+    '${_deuxChiffres(d.day)}/${_deuxChiffres(d.month)}/${d.year} ${_deuxChiffres(d.hour)}:${_deuxChiffres(d.minute)}';
 
 String _formatJour(DateTime d) =>
     '${_deuxChiffres(d.day)}/${_deuxChiffres(d.month)}/${d.year}';
@@ -111,6 +112,7 @@ class ALivrerNavButton extends ConsumerWidget {
         const <QueryDocumentSnapshot<Map<String, dynamic>>>[];
     final nb = docs.length;
     final nbRetard = docs.where((d) => _estEnRetard(d.data())).length;
+    final t = AppLocalizations.of(context);
 
     final Color fond = nbRetard > 0
         ? Colors.red.shade300
@@ -130,7 +132,7 @@ class ALivrerNavButton extends ConsumerWidget {
         child: const Icon(Icons.local_shipping, size: 18),
       ),
       label: Text(
-        nbRetard > 0 ? 'À livrer ($nbRetard en retard)' : 'À livrer',
+        nbRetard > 0 ? t.livButtonLate(nbRetard) : t.livTitle,
         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
       ),
       onPressed: () => Navigator.push(
@@ -153,10 +155,11 @@ class ALivrerScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(ventesALivrerProvider(entrepriseId));
+    final t = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('À livrer'),
+        title: Text(t.livTitle),
         backgroundColor: Colors.amber.shade700,
         foregroundColor: Colors.white,
       ),
@@ -165,7 +168,7 @@ class ALivrerScreen extends ConsumerWidget {
         error: (e, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: Text('Erreur de chargement : $e', textAlign: TextAlign.center),
+            child: Text(t.errorPrefix('$e'), textAlign: TextAlign.center),
           ),
         ),
         data: (docs) {
@@ -176,12 +179,12 @@ class ALivrerScreen extends ConsumerWidget {
                 children: [
                   Icon(Icons.task_alt, size: 72, color: Colors.green.shade400),
                   const SizedBox(height: 12),
-                  const Text(
-                    'Aucune livraison en attente',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Text(
+                    t.livNoneTitle,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 6),
-                  const Text('Tous les clients ont reçu leur marchandise.'),
+                  Text(t.livNoneSub),
                 ],
               ),
             );
@@ -196,8 +199,8 @@ class ALivrerScreen extends ConsumerWidget {
                 padding: const EdgeInsets.only(bottom: 8, left: 4),
                 child: Text(
                   nbRetard > 0
-                      ? '${docs.length} client(s) en attente — dont $nbRetard en retard'
-                      : '${docs.length} client(s) attendent leur marchandise',
+                      ? t.livWaitingLate(docs.length, nbRetard)
+                      : t.livWaiting(docs.length),
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: nbRetard > 0 ? Colors.red : Colors.brown.shade800,
@@ -239,6 +242,8 @@ class _CarteLivraison extends ConsumerStatefulWidget {
 
 class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
   bool _enCours = false;
+
+  AppLocalizations get _t => AppLocalizations.of(context);
 
   List<Map<String, dynamic>> get _articles {
     final brut = widget.data['articles'];
@@ -326,7 +331,7 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Impossible d'ouvrir WhatsApp.")),
+        SnackBar(content: Text(_t.livNoWhatsapp)),
       );
     }
   }
@@ -372,20 +377,20 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
           final resteApres = totalReste - totalMaintenant;
 
           return AlertDialog(
-            title: const Text('Remettre la marchandise'),
+            title: Text(_t.livHandOverTitle),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Client : $client', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(_t.livClient(client), style: const TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
                   Text(
-                    'Indiquez ce que le client emporte maintenant :',
+                    _t.livWhatNow,
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
                   ),
                   const SizedBox(height: 8),
-                  if (totalReste == 0) const Text('Tout a déjà été remis.'),
+                  if (totalReste == 0) Text(_t.livAllGiven),
                   for (var i = 0; i < articles.length; i++)
                     if (restes[i] > 0)
                       Padding(
@@ -402,8 +407,8 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
                                   ),
                                   Text(
                                     dejaLivrees[i] > 0
-                                        ? 'Reste ${restes[i]} (déjà remis : ${dejaLivrees[i]})'
-                                        : 'À remettre : ${restes[i]}',
+                                        ? _t.livRemainDone(restes[i], dejaLivrees[i])
+                                        : _t.livToHand(restes[i]),
                                     style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
                                   ),
                                 ],
@@ -445,10 +450,10 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
                       ),
                       child: Text(
                         totalMaintenant == 0
-                            ? 'Choisissez au moins une pièce à remettre.'
+                            ? _t.livChooseOne
                             : resteApres > 0
-                                ? 'Sortie partielle : il restera $resteApres pièce(s) à retirer.'
-                                : 'Livraison complète : tout est remis.',
+                                ? _t.livPartialAfter(resteApres)
+                                : _t.livComplete,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: resteApres > 0 ? Colors.orange.shade900 : Colors.green.shade800,
@@ -459,7 +464,7 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
                   if (resteAPayer > 0.005) ...[
                     const SizedBox(height: 12),
                     Text(
-                      'Attention : il reste ${ref.formatPrice(resteAPayer)} à payer.',
+                      _t.livWarnUnpaid(ref.formatPrice(resteAPayer)),
                       style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
                     ),
                   ],
@@ -469,7 +474,7 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Annuler'),
+                child: Text(_t.cancel),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -479,7 +484,7 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
                 onPressed: (totalMaintenant > 0 || totalReste == 0)
                     ? () => Navigator.pop(ctx, true)
                     : null,
-                child: Text(resteApres > 0 ? 'Valider la sortie' : 'Oui, tout livré'),
+                child: Text(resteApres > 0 ? _t.livValidateExit : _t.livAllDelivered),
               ),
             ],
           );
@@ -488,6 +493,7 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
     );
 
     if (confirme != true || !mounted) return;
+    final t = _t;
 
     setState(() => _enCours = true);
     final messenger = ScaffoldMessenger.of(context);
@@ -552,7 +558,7 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
     } catch (e) {
       if (mounted) setState(() => _enCours = false);
       messenger.showSnackBar(
-        SnackBar(content: Text('Erreur : $e'), backgroundColor: Colors.red),
+        SnackBar(content: Text(t.errorPrefix('$e')), backgroundColor: Colors.red),
       );
       return;
     }
@@ -561,11 +567,11 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
 
     final String texte;
     if (horsLigne) {
-      texte = "Sortie notée sur le téléphone. Envoi dès le retour d'internet.";
+      texte = t.livSavedOffline;
     } else if (toutLivre) {
-      texte = 'Livraison complète enregistrée pour $client.';
+      texte = t.livCompleteSaved(client);
     } else {
-      texte = 'Sortie partielle enregistrée : il reste $restantApres pièce(s) à retirer.';
+      texte = t.livPartialSaved(restantApres);
     }
     messenger.showSnackBar(
       SnackBar(
@@ -621,6 +627,7 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
     final restes = _restes;
     final sorties = _sorties;
     final partielle = livrees.any((q) => q > 0);
+    final t = _t;
 
     // Jours de retard, ou jours restants
     final debutAujourdhui = DateTime(maintenant.year, maintenant.month, maintenant.day);
@@ -633,16 +640,16 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
       final retard = -ecartJours;
       couleur = Colors.red;
       texteDelai = retard <= 0
-          ? 'Délai dépassé (limite : ${_formatJour(limite)})'
-          : 'Délai dépassé de $retard jour${retard > 1 ? 's' : ''} (limite : ${_formatJour(limite)})';
+          ? t.livLatePassed(_formatJour(limite))
+          : t.livLateDays(retard, _formatJour(limite));
     } else if (ecartJours <= 1) {
       couleur = Colors.orange.shade800;
       texteDelai = ecartJours == 0
-          ? "À retirer aujourd'hui (limite : ${_formatJour(limite)})"
-          : 'À retirer avant demain soir (${_formatJour(limite)})';
+          ? t.livPickToday(_formatJour(limite))
+          : t.livPickTomorrow(_formatJour(limite));
     } else {
       couleur = Colors.blueGrey;
-      texteDelai = 'À retirer avant le ${_formatJour(limite)} ($ecartJours jours restants)';
+      texteDelai = t.livPickBefore(_formatJour(limite), ecartJours);
     }
 
     return Card(
@@ -673,7 +680,7 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
                 ),
                 if (telephone.isNotEmpty)
                   IconButton(
-                    tooltip: 'Appeler $telephone',
+                    tooltip: t.livCall(telephone),
                     icon: const Icon(Icons.call, color: Colors.green),
                     onPressed: () => _appeler(telephone),
                   ),
@@ -696,7 +703,7 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
                   border: Border.all(color: Colors.blue.shade300),
                 ),
                 child: Text(
-                  'Partiellement livré',
+                  t.livPartial,
                   style: TextStyle(
                     color: Colors.blue.shade800,
                     fontWeight: FontWeight.bold,
@@ -732,15 +739,15 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
               padding: const EdgeInsets.only(bottom: 8, left: 2),
               child: Text(
                 vendeurNom.isEmpty
-                    ? 'Vendu le ${_formatDate(date)}'
-                    : 'Vendu le ${_formatDate(date)} par $vendeurNom',
+                    ? t.livSoldOn(_formatDate(date))
+                    : t.livSoldOnBy(_formatDate(date), vendeurNom),
                 style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
               ),
             ),
 
             // Articles
             Text(
-              partielle ? 'Reste à remettre :' : 'À remettre :',
+              partielle ? t.livStillToHand : t.livToHandColon,
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 4),
@@ -752,19 +759,19 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
                   children: [
                     restes[i] == 0
                         ? Text(
-                            '✓ ${articles[i]['quantite']} × ${articles[i]['nom']} — rien à remettre',
+                            '✓ ${articles[i]['quantite']} × ${articles[i]['nom']} — ${t.livNothingToHand}',
                             style: TextStyle(color: Colors.grey.shade500),
                           )
                         : Text(
                             (livrees[i] > 0 || annulees[i] > 0)
-                                ? '• ${restes[i]} × ${articles[i]['nom']}  (sur ${articles[i]['quantite']})'
+                                ? '• ${restes[i]} × ${articles[i]['nom']}  ${t.livOutOf('${articles[i]['quantite']}')}'
                                 : '• ${articles[i]['quantite']} × ${articles[i]['nom']}',
                           ),
                     if (livrees[i] > 0)
-                      Text('   remis : ${livrees[i]}',
+                      Text('   ${t.livHanded(livrees[i])}',
                           style: TextStyle(fontSize: 11, color: Colors.blue.shade700)),
                     if (annulees[i] > 0)
-                      Text('   ✕ ${annulees[i]} annulé(s)',
+                      Text('   ✕ ${t.livCancelled(annulees[i])}',
                           style: TextStyle(fontSize: 11, color: Colors.red.shade700)),
                   ],
                 ),
@@ -774,7 +781,7 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
             if (sorties.isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(
-                'Déjà sorti :',
+                t.livAlreadyOut,
                 style: TextStyle(fontWeight: FontWeight.w600, color: Colors.blue.shade800),
               ),
               for (final s in sorties)
@@ -789,7 +796,7 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
             const SizedBox(height: 8),
 
             // Montants
-            Text('Facture : ${ref.formatPrice(total)}',
+            Text(t.retInvoiceAmount(ref.formatPrice(total)),
                 style: TextStyle(color: Colors.grey.shade800)),
             if (reste > 0.005)
               Container(
@@ -802,7 +809,7 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
                   border: Border.all(color: Colors.red.shade200),
                 ),
                 child: Text(
-                  'Reste à payer : ${ref.formatPrice(reste)} — à encaisser avant de livrer',
+                  t.livUnpaid(ref.formatPrice(reste)),
                   style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -824,9 +831,9 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
                         ),
                         onPressed: () => _relancerWhatsApp(telephone),
                         icon: const Icon(Icons.chat, size: 18),
-                        label: const FittedBox(
+                        label: FittedBox(
                           fit: BoxFit.scaleDown,
-                          child: Text('Relancer', maxLines: 1, softWrap: false),
+                          child: Text(t.livRemind, maxLines: 1, softWrap: false),
                         ),
                       ),
                     ),
@@ -852,13 +859,13 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
                               child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                             )
                           : const Icon(Icons.check_circle),
-                      label: const FittedBox(
+                      label: FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Text(
-                          'Marquer comme livré',
+                          t.livMarkDelivered,
                           maxLines: 1,
                           softWrap: false,
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
@@ -874,7 +881,7 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
                 style: TextButton.styleFrom(foregroundColor: Colors.red.shade700),
                 onPressed: _enCours ? null : _annuler,
                 icon: const Icon(Icons.cancel_outlined, size: 18),
-                label: const Text('Annuler la vente'),
+                label: Text(t.retCancelTitle),
               ),
             ),
           ],
@@ -894,6 +901,6 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
             .join(', ')
         : '';
     final par = (s['parNom'] ?? '').toString();
-    return par.isEmpty ? '$quand : $liste' : '$quand : $liste (par $par)';
+    return par.isEmpty ? '$quand : $liste' : '$quand : $liste ${_t.livBy(par)}';
   }
 }

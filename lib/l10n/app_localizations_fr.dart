@@ -1971,4 +1971,177 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get stockShowInStock => 'Retour aux produits en stock';
+
+  @override
+  String get livTitle => 'À livrer';
+
+  @override
+  String livButtonLate(int count) {
+    return 'À livrer ($count en retard)';
+  }
+
+  @override
+  String get livNoneTitle => 'Aucune livraison en attente';
+
+  @override
+  String get livNoneSub => 'Tous les clients ont reçu leur marchandise.';
+
+  @override
+  String livWaitingLate(int count, int late) {
+    return '$count client(s) en attente — dont $late en retard';
+  }
+
+  @override
+  String livWaiting(int count) {
+    return '$count client(s) attendent leur marchandise';
+  }
+
+  @override
+  String get livNoWhatsapp => 'Impossible d\'ouvrir WhatsApp.';
+
+  @override
+  String get livHandOverTitle => 'Remettre la marchandise';
+
+  @override
+  String livClient(String nom) {
+    return 'Client : $nom';
+  }
+
+  @override
+  String get livWhatNow => 'Indiquez ce que le client emporte maintenant :';
+
+  @override
+  String get livAllGiven => 'Tout a déjà été remis.';
+
+  @override
+  String livRemainDone(int reste, int deja) {
+    return 'Reste $reste (déjà remis : $deja)';
+  }
+
+  @override
+  String livToHand(int count) {
+    return 'À remettre : $count';
+  }
+
+  @override
+  String get livChooseOne => 'Choisissez au moins une pièce à remettre.';
+
+  @override
+  String livPartialAfter(int count) {
+    return 'Sortie partielle : il restera $count pièce(s) à retirer.';
+  }
+
+  @override
+  String get livComplete => 'Livraison complète : tout est remis.';
+
+  @override
+  String livWarnUnpaid(String montant) {
+    return 'Attention : il reste $montant à payer.';
+  }
+
+  @override
+  String get livValidateExit => 'Valider la sortie';
+
+  @override
+  String get livAllDelivered => 'Oui, tout livré';
+
+  @override
+  String get livSavedOffline =>
+      'Sortie notée sur le téléphone. Envoi dès le retour d\'internet.';
+
+  @override
+  String livCompleteSaved(String client) {
+    return 'Livraison complète enregistrée pour $client.';
+  }
+
+  @override
+  String livPartialSaved(int count) {
+    return 'Sortie partielle enregistrée : il reste $count pièce(s) à retirer.';
+  }
+
+  @override
+  String livLatePassed(String date) {
+    return 'Délai dépassé (limite : $date)';
+  }
+
+  @override
+  String livLateDays(int jours, String date) {
+    return 'Délai dépassé de $jours jour(s) (limite : $date)';
+  }
+
+  @override
+  String livPickToday(String date) {
+    return 'À retirer aujourd\'hui (limite : $date)';
+  }
+
+  @override
+  String livPickTomorrow(String date) {
+    return 'À retirer avant demain soir ($date)';
+  }
+
+  @override
+  String livPickBefore(String date, int jours) {
+    return 'À retirer avant le $date ($jours jours restants)';
+  }
+
+  @override
+  String livCall(String tel) {
+    return 'Appeler $tel';
+  }
+
+  @override
+  String get livPartial => 'Partiellement livré';
+
+  @override
+  String livSoldOn(String date) {
+    return 'Vendu le $date';
+  }
+
+  @override
+  String livSoldOnBy(String date, String vendeur) {
+    return 'Vendu le $date par $vendeur';
+  }
+
+  @override
+  String get livStillToHand => 'Reste à remettre :';
+
+  @override
+  String get livToHandColon => 'À remettre :';
+
+  @override
+  String get livNothingToHand => 'rien à remettre';
+
+  @override
+  String livOutOf(String count) {
+    return '(sur $count)';
+  }
+
+  @override
+  String livHanded(int count) {
+    return 'remis : $count';
+  }
+
+  @override
+  String livCancelled(int count) {
+    return '$count annulé(s)';
+  }
+
+  @override
+  String get livAlreadyOut => 'Déjà sorti :';
+
+  @override
+  String livUnpaid(String montant) {
+    return 'Reste à payer : $montant — à encaisser avant de livrer';
+  }
+
+  @override
+  String get livRemind => 'Relancer';
+
+  @override
+  String get livMarkDelivered => 'Marquer comme livré';
+
+  @override
+  String livBy(String nom) {
+    return '(par $nom)';
+  }
 }

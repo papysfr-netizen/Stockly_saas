@@ -1967,4 +1967,177 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get stockShowInStock => 'Zonga na biloko ezali na stock';
+
+  @override
+  String get livTitle => 'Ya kopesa';
+
+  @override
+  String livButtonLate(int count) {
+    return 'Ya kopesa ($count eleki ntango)';
+  }
+
+  @override
+  String get livNoneTitle => 'Biloko moko te ezali kozela kopesama';
+
+  @override
+  String get livNoneSub => 'Basombi nyonso bazwi biloko na bango.';
+
+  @override
+  String livWaitingLate(int count, int late) {
+    return 'Basombi $count bazali kozela — $late eleki ntango';
+  }
+
+  @override
+  String livWaiting(int count) {
+    return 'Basombi $count bazali kozela biloko na bango';
+  }
+
+  @override
+  String get livNoWhatsapp => 'Ekoki te kofungola WhatsApp.';
+
+  @override
+  String get livHandOverTitle => 'Kopesa biloko';
+
+  @override
+  String livClient(String nom) {
+    return 'Mosombi : $nom';
+  }
+
+  @override
+  String get livWhatNow => 'Lakisa nini mosombi azali kozwa sikoyo :';
+
+  @override
+  String get livAllGiven => 'Nyonso esilaki kopesama.';
+
+  @override
+  String livRemainDone(int reste, int deja) {
+    return 'Etikali $reste (esilaki kopesama : $deja)';
+  }
+
+  @override
+  String livToHand(int count) {
+    return 'Ya kopesa : $count';
+  }
+
+  @override
+  String get livChooseOne => 'Pona ata eloko moko ya kopesa.';
+
+  @override
+  String livPartialAfter(int count) {
+    return 'Kobima ndambo : biloko $count ekotikala kozwa.';
+  }
+
+  @override
+  String get livComplete => 'Kopesa mobimba : nyonso epesami.';
+
+  @override
+  String livWarnUnpaid(String montant) {
+    return 'Keba : etikali $montant ya kofuta.';
+  }
+
+  @override
+  String get livValidateExit => 'Ndima kobima';
+
+  @override
+  String get livAllDelivered => 'Iyo, nyonso epesami';
+
+  @override
+  String get livSavedOffline =>
+      'Kobima ekomami na telefone. Ekotindama ntango internet ekozonga.';
+
+  @override
+  String livCompleteSaved(String client) {
+    return 'Kopesa mobimba ekomami mpo na $client.';
+  }
+
+  @override
+  String livPartialSaved(int count) {
+    return 'Kobima ndambo ekomami : etikali biloko $count ya kozwa.';
+  }
+
+  @override
+  String livLatePassed(String date) {
+    return 'Ntango eleki (ndelo : $date)';
+  }
+
+  @override
+  String livLateDays(int jours, String date) {
+    return 'Ntango eleki na mikolo $jours (ndelo : $date)';
+  }
+
+  @override
+  String livPickToday(String date) {
+    return 'Ya kozwa lelo (ndelo : $date)';
+  }
+
+  @override
+  String livPickTomorrow(String date) {
+    return 'Ya kozwa liboso ya lobi mpokwa ($date)';
+  }
+
+  @override
+  String livPickBefore(String date, int jours) {
+    return 'Ya kozwa liboso ya $date (mikolo $jours etikali)';
+  }
+
+  @override
+  String livCall(String tel) {
+    return 'Benga $tel';
+  }
+
+  @override
+  String get livPartial => 'Epesami ndambo';
+
+  @override
+  String livSoldOn(String date) {
+    return 'Etekisami na $date';
+  }
+
+  @override
+  String livSoldOnBy(String date, String vendeur) {
+    return 'Etekisami na $date na $vendeur';
+  }
+
+  @override
+  String get livStillToHand => 'Etikali kopesa :';
+
+  @override
+  String get livToHandColon => 'Ya kopesa :';
+
+  @override
+  String get livNothingToHand => 'eloko te ya kopesa';
+
+  @override
+  String livOutOf(String count) {
+    return '(na $count)';
+  }
+
+  @override
+  String livHanded(int count) {
+    return 'epesami : $count';
+  }
+
+  @override
+  String livCancelled(int count) {
+    return '$count elongolami';
+  }
+
+  @override
+  String get livAlreadyOut => 'Esilaki kobima :';
+
+  @override
+  String livUnpaid(String montant) {
+    return 'Etikali kofuta : $montant — kozwa yango liboso ya kopesa';
+  }
+
+  @override
+  String get livRemind => 'Kundolisa';
+
+  @override
+  String get livMarkDelivered => 'Tia lokola epesami';
+
+  @override
+  String livBy(String nom) {
+    return '(na $nom)';
+  }
 }

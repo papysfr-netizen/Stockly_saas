@@ -3288,6 +3288,258 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Retour aux produits en stock'**
   String get stockShowInStock;
+
+  /// No description provided for @livTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'À livrer'**
+  String get livTitle;
+
+  /// No description provided for @livButtonLate.
+  ///
+  /// In fr, this message translates to:
+  /// **'À livrer ({count} en retard)'**
+  String livButtonLate(int count);
+
+  /// No description provided for @livNoneTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune livraison en attente'**
+  String get livNoneTitle;
+
+  /// No description provided for @livNoneSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous les clients ont reçu leur marchandise.'**
+  String get livNoneSub;
+
+  /// No description provided for @livWaitingLate.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} client(s) en attente — dont {late} en retard'**
+  String livWaitingLate(int count, int late);
+
+  /// No description provided for @livWaiting.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} client(s) attendent leur marchandise'**
+  String livWaiting(int count);
+
+  /// No description provided for @livNoWhatsapp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible d\'ouvrir WhatsApp.'**
+  String get livNoWhatsapp;
+
+  /// No description provided for @livHandOverTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remettre la marchandise'**
+  String get livHandOverTitle;
+
+  /// No description provided for @livClient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Client : {nom}'**
+  String livClient(String nom);
+
+  /// No description provided for @livWhatNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez ce que le client emporte maintenant :'**
+  String get livWhatNow;
+
+  /// No description provided for @livAllGiven.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout a déjà été remis.'**
+  String get livAllGiven;
+
+  /// No description provided for @livRemainDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reste {reste} (déjà remis : {deja})'**
+  String livRemainDone(int reste, int deja);
+
+  /// No description provided for @livToHand.
+  ///
+  /// In fr, this message translates to:
+  /// **'À remettre : {count}'**
+  String livToHand(int count);
+
+  /// No description provided for @livChooseOne.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez au moins une pièce à remettre.'**
+  String get livChooseOne;
+
+  /// No description provided for @livPartialAfter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sortie partielle : il restera {count} pièce(s) à retirer.'**
+  String livPartialAfter(int count);
+
+  /// No description provided for @livComplete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison complète : tout est remis.'**
+  String get livComplete;
+
+  /// No description provided for @livWarnUnpaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Attention : il reste {montant} à payer.'**
+  String livWarnUnpaid(String montant);
+
+  /// No description provided for @livValidateExit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider la sortie'**
+  String get livValidateExit;
+
+  /// No description provided for @livAllDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Oui, tout livré'**
+  String get livAllDelivered;
+
+  /// No description provided for @livSavedOffline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sortie notée sur le téléphone. Envoi dès le retour d\'internet.'**
+  String get livSavedOffline;
+
+  /// No description provided for @livCompleteSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison complète enregistrée pour {client}.'**
+  String livCompleteSaved(String client);
+
+  /// No description provided for @livPartialSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sortie partielle enregistrée : il reste {count} pièce(s) à retirer.'**
+  String livPartialSaved(int count);
+
+  /// No description provided for @livLatePassed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Délai dépassé (limite : {date})'**
+  String livLatePassed(String date);
+
+  /// No description provided for @livLateDays.
+  ///
+  /// In fr, this message translates to:
+  /// **'Délai dépassé de {jours} jour(s) (limite : {date})'**
+  String livLateDays(int jours, String date);
+
+  /// No description provided for @livPickToday.
+  ///
+  /// In fr, this message translates to:
+  /// **'À retirer aujourd\'hui (limite : {date})'**
+  String livPickToday(String date);
+
+  /// No description provided for @livPickTomorrow.
+  ///
+  /// In fr, this message translates to:
+  /// **'À retirer avant demain soir ({date})'**
+  String livPickTomorrow(String date);
+
+  /// No description provided for @livPickBefore.
+  ///
+  /// In fr, this message translates to:
+  /// **'À retirer avant le {date} ({jours} jours restants)'**
+  String livPickBefore(String date, int jours);
+
+  /// No description provided for @livCall.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appeler {tel}'**
+  String livCall(String tel);
+
+  /// No description provided for @livPartial.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partiellement livré'**
+  String get livPartial;
+
+  /// No description provided for @livSoldOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vendu le {date}'**
+  String livSoldOn(String date);
+
+  /// No description provided for @livSoldOnBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vendu le {date} par {vendeur}'**
+  String livSoldOnBy(String date, String vendeur);
+
+  /// No description provided for @livStillToHand.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reste à remettre :'**
+  String get livStillToHand;
+
+  /// No description provided for @livToHandColon.
+  ///
+  /// In fr, this message translates to:
+  /// **'À remettre :'**
+  String get livToHandColon;
+
+  /// No description provided for @livNothingToHand.
+  ///
+  /// In fr, this message translates to:
+  /// **'rien à remettre'**
+  String get livNothingToHand;
+
+  /// No description provided for @livOutOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'(sur {count})'**
+  String livOutOf(String count);
+
+  /// No description provided for @livHanded.
+  ///
+  /// In fr, this message translates to:
+  /// **'remis : {count}'**
+  String livHanded(int count);
+
+  /// No description provided for @livCancelled.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} annulé(s)'**
+  String livCancelled(int count);
+
+  /// No description provided for @livAlreadyOut.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déjà sorti :'**
+  String get livAlreadyOut;
+
+  /// No description provided for @livUnpaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reste à payer : {montant} — à encaisser avant de livrer'**
+  String livUnpaid(String montant);
+
+  /// No description provided for @livRemind.
+  ///
+  /// In fr, this message translates to:
+  /// **'Relancer'**
+  String get livRemind;
+
+  /// No description provided for @livMarkDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marquer comme livré'**
+  String get livMarkDelivered;
+
+  /// No description provided for @livBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'(par {nom})'**
+  String livBy(String nom);
 }
 
 class _AppLocalizationsDelegate
