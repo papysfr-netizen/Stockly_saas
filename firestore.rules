@@ -110,12 +110,25 @@ service cloud.firestore {
       ]);
     }
 
+    // Employé autorisé « Gérer l'équipe » par le patron
+    // (éteint par défaut, même pour un gérant)
+    function estAdminEquipe(entId) {
+      return estMembre(entId)
+        && monProfil().get('permissions', {}).get('gererEquipe', false) == true;
+    }
+
+    // Ce profil est-il un administrateur ?
+    function profilEstAdmin(data) {
+      return data.get('permissions', {}).get('gererEquipe', false) == true;
+    }
+
     // ---------- Profils utilisateurs ----------
     match /users/{userId} {
 
       allow read: if estConnecte() && (
         request.auth.uid == userId
         || estProprietaireDe(resource.data.entrepriseId)
+        || estAdminEquipe(resource.data.entrepriseId)
       );
 
       allow create: if estConnecte() && (
@@ -123,6 +136,17 @@ service cloud.firestore {
         || (
           estProprietaireDe(request.resource.data.entrepriseId)
           && request.resource.data.role in ['gerant', 'caissier']
+        )
+        // 👥 Administrateur : crée un gérant ou un caissier SANS aucune autorisation
+        //    spéciale et sans boutique (c'est le patron qui les donne)
+        || (
+          estAdminEquipe(request.resource.data.entrepriseId)
+          && request.resource.data.role in ['gerant', 'caissier']
+          && request.resource.data.get('uid', '') == userId
+          && request.resource.data.get('estActif', true) == true
+          && request.resource.data.get('permissions', {}).keys().hasOnly(['canGiveDiscount'])
+          && request.resource.data.get('permissions', {}).get('canGiveDiscount', false) == false
+          && !request.resource.data.keys().hasAny(['boutiqueId'])
         )
       );
 
@@ -138,6 +162,18 @@ service cloud.firestore {
           && resource.data.role != 'owner'
           && request.resource.data.entrepriseId == resource.data.entrepriseId
           && request.resource.data.role in ['gerant', 'caissier']
+        )
+        // 👥 Administrateur : change seulement caissier ou gérant et bloque / débloque.
+        //    Jamais lui-même, jamais le patron, jamais un autre administrateur,
+        //    jamais les autorisations ni la boutique.
+        || (
+          estAdminEquipe(resource.data.entrepriseId)
+          && request.auth.uid != userId
+          && resource.data.role in ['gerant', 'caissier']
+          && request.resource.data.role in ['gerant', 'caissier']
+          && !profilEstAdmin(resource.data)
+          && get(/databases/$(database)/documents/entreprises/$(resource.data.entrepriseId)).data.ownerId != userId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role', 'estActif'])
         )
       );
 
