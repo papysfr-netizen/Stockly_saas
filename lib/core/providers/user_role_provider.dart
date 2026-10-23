@@ -93,6 +93,7 @@ class Permissions {
   static const String maintenance = 'maintenance';
   static const String gererEquipe = 'gererEquipe';
   static const String toutesBoutiques = 'toutesBoutiques';
+  static const String parametres = 'parametresSensibles';
 
   /// Ancienne clé (Caisse : bouton « Nouveau produit ») : suit « Gérer le stock ».
   static const String ancienneAjoutProduit = 'canAddProduct';
@@ -106,6 +107,7 @@ class Permissions {
     maintenance,
     gererEquipe,
     toutesBoutiques,
+    parametres,
   ];
 
   static const Map<String, String> titres = {
@@ -116,6 +118,7 @@ class Permissions {
     maintenance: 'Maintenance des données',
     gererEquipe: "Gérer l'équipe",
     toutesBoutiques: 'Toutes les boutiques',
+    parametres: 'Paramètres sensibles',
   };
 
   static const Map<String, String> descriptions = {
@@ -128,6 +131,7 @@ class Permissions {
         'Les autorisations restent réservées au patron.',
     toutesBoutiques: "Choisir n'importe quelle boutique (ou « Toutes ») "
         'pour vendre, voir le stock et les rapports.',
+    parametres: 'Taux de change, boutiques, sauvegarde complète et journal.',
   };
 }
 
@@ -201,7 +205,8 @@ class UserProfile {
   static bool valeurParDefaut(UserRole role, [String? cle]) =>
       (cle == Permissions.maintenance ||
               cle == Permissions.gererEquipe ||
-              cle == Permissions.toutesBoutiques)
+              cle == Permissions.toutesBoutiques ||
+              cle == Permissions.parametres)
           ? role.isOwner
           : (role.isOwner || role.isGerant);
 
@@ -225,6 +230,7 @@ class UserProfile {
   bool get peutMaintenance => can(Permissions.maintenance);
   bool get peutGererEquipe => can(Permissions.gererEquipe);
   bool get peutToutesBoutiques => can(Permissions.toutesBoutiques);
+  bool get peutParametres => can(Permissions.parametres);
 
   UserProfile copyWith({
     String? uid,

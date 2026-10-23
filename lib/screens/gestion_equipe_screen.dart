@@ -348,6 +348,7 @@ class _CarteMembre extends StatelessWidget {
     Permissions.maintenance: Icons.cleaning_services_outlined,
     Permissions.gererEquipe: Icons.manage_accounts_outlined,
     Permissions.toutesBoutiques: Icons.storefront_outlined,
+    Permissions.parametres: Icons.tune,
   };
 
   Future<void> _action(BuildContext context, Future<void> Function() action, String succes) async {

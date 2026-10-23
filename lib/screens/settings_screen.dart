@@ -177,6 +177,9 @@ class SettingsScreen extends ConsumerWidget {
               if (userProfile?.role.isOwner == true) ...[
                 const InfoCard(),
                 const SizedBox(height: 16),
+              ],
+              // 🏬 Boutiques : le patron, ou « Paramètres sensibles »
+              if (userProfile?.peutParametres == true) ...[
                 MesBoutiquesCard(entrepriseId: entrepriseId),
                 const SizedBox(height: 16),
               ],
@@ -200,12 +203,12 @@ class SettingsScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
               ],
               // 💾 Sauvegarde complète : propriétaire seulement
-              if (userProfile?.role.isOwner == true) ...[
+              if (userProfile?.peutParametres == true) ...[
                 SauvegardeCard(entrepriseId: entrepriseId),
                 const SizedBox(height: 16),
               ],
               // 📒 Journal « qui a fait quoi » : propriétaire seulement
-              if (userProfile?.role.isOwner == true) ...[
+              if (userProfile?.peutParametres == true) ...[
                 JournalCard(entrepriseId: entrepriseId),
                 const SizedBox(height: 16),
               ],

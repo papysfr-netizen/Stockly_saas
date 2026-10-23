@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/currency_provider.dart';
+import '../../core/providers/user_role_provider.dart';
 import '../../l10n/app_localizations.dart';
 
 class CurrencyCard extends ConsumerWidget {
@@ -10,6 +11,9 @@ class CurrencyCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currencyState = ref.watch(currencyProvider);
     final t = AppLocalizations.of(context);
+    // 🔒 Taux : le patron, ou « Paramètres sensibles » ; les autres le voient seulement
+    final peutModifierTaux =
+        ref.watch(userProfileProvider).value?.peutParametres ?? false;
 
     return Card(
       elevation: 2,
@@ -36,12 +40,17 @@ class CurrencyCard extends ConsumerWidget {
             TextFormField(
               initialValue: currencyState.bccCdfRate.toStringAsFixed(0),
               keyboardType: TextInputType.number,
+              readOnly: !peutModifierTaux,
               decoration: InputDecoration(
                 labelText: t.bccRate,
+                helperText: peutModifierTaux
+                    ? null
+                    : 'Seul le patron (ou une personne autorisée) peut changer le taux.',
                 prefixIcon: const Icon(Icons.currency_exchange),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
               onChanged: (val) {
+                if (!peutModifierTaux) return;
                 final double? newRate = double.tryParse(val);
                 if (newRate != null && newRate > 0) {
                   ref.read(currencyProvider.notifier).updateBccRate(newRate);
