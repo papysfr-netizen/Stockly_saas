@@ -181,7 +181,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final t = _t;
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF121418) : Colors.grey.shade50,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.blue.shade800,
@@ -300,7 +300,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF22262E) : Colors.white,
               ),
             ),
           ),
@@ -513,9 +513,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: Container(
         padding: const EdgeInsets.all(12.0),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1C1F26) : Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2A2E37) : Colors.grey.shade200),
         ),
         child: Row(
           children: [
@@ -580,7 +580,7 @@ class ProduitCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2A2E37) : Colors.grey.shade200),
       ),
       child: Material(
         color: Colors.transparent,
@@ -592,7 +592,9 @@ class ProduitCard extends StatelessWidget {
               CircleAvatar(
                 radius: 20,
                 backgroundColor:
-                    isLowStock ? Colors.orange.shade50 : Colors.blue.shade50,
+                    Theme.of(context).brightness == Brightness.dark
+                        ? (isLowStock ? const Color(0xFF3A2A14) : const Color(0xFF1E2A4A))
+                        : (isLowStock ? Colors.orange.shade50 : Colors.blue.shade50),
                 backgroundImage: imageUrl != null && imageUrl!.isNotEmpty
                     ? NetworkImage(imageUrl!)
                     : null,
@@ -619,7 +621,7 @@ class ProduitCard extends StatelessWidget {
                         Text(
                           AppLocalizations.of(context).stockQty(quantite),
                           style: TextStyle(
-                              fontSize: 12, color: Colors.grey.shade700),
+                              fontSize: 12, color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade700),
                         ),
                         if (isLowStock) ...[
                           const SizedBox(width: 6),
@@ -627,7 +629,7 @@ class ProduitCard extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.red.shade50,
+                              color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF3A1A1A) : Colors.red.shade50,
                               borderRadius: BorderRadius.circular(4),
                               border: Border.all(
                                   color: Colors.red.shade200, width: 0.5),
