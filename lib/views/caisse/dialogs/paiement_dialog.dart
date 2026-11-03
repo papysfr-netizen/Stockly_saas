@@ -344,7 +344,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                           margin: const EdgeInsets.only(top: 8),
                           padding: const EdgeInsets.fromLTRB(10, 6, 4, 8),
                           decoration: BoxDecoration(
-                            color: Colors.green.shade50,
+                            color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF16302A) : Colors.green.shade50,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(color: Colors.green.shade300),
                           ),
@@ -447,7 +447,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.teal.shade50,
+                          color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF143533) : Colors.teal.shade50,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(color: Colors.teal.shade200),
                         ),
@@ -505,7 +505,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                                   avatar: const Icon(Icons.attach_money, size: 15, color: Colors.teal),
                                   label: Text(t.payAllIn('\$'), style: const TextStyle(fontSize: 11)),
                                   onPressed: _payerToutUSD,
-                                  backgroundColor: Colors.white,
+                                  backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF22262E) : Colors.white,
                                   padding: EdgeInsets.zero,
                                 ),
                                 if (activeInfo.code != 'USD') ...[
@@ -513,7 +513,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                                     avatar: const Icon(Icons.currency_exchange, size: 15, color: Colors.teal),
                                     label: Text(t.payAllIn(activeInfo.code), style: const TextStyle(fontSize: 11)),
                                     onPressed: () => _payerToutLocal(activeInfo.rateToUSD),
-                                    backgroundColor: Colors.white,
+                                    backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF22262E) : Colors.white,
                                     padding: EdgeInsets.zero,
                                   ),
                                   if (calc.remainingUSD > 0 && paidUSD > 0)
@@ -521,7 +521,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                                       avatar: const Icon(Icons.add_card, size: 15, color: Colors.orange),
                                       label: Text(t.payRestIn(activeInfo.code), style: const TextStyle(fontSize: 11)),
                                       onPressed: () => _completerResteLocal(calc, activeInfo.rateToUSD),
-                                      backgroundColor: Colors.orange.shade50,
+                                      backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF3A2A14) : Colors.orange.shade50,
                                       padding: EdgeInsets.zero,
                                     ),
                                 ],
