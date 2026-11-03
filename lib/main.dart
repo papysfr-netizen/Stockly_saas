@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:stockly_saas/core/providers/theme_provider.dart';
 
 import 'firebase_options.dart';
 import 'l10n/app_localizations.dart';
@@ -232,6 +233,9 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentLocale = ref.watch(localeProvider);
 
+    // 🌙 Apparence choisie dans Paramètres
+    final themeMode = ref.watch(themeModeProvider);
+
     return MaterialApp(
       title: 'Stockly Pro',
       debugShowCheckedModeBanner: false,
@@ -268,6 +272,41 @@ class MyApp extends ConsumerWidget {
           ),
         ),
       ),
+      // 🌙 Thème sombre (mêmes formes, couleurs de nuit)
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF0052FF),
+          brightness: Brightness.dark,
+        ),
+        scaffoldBackgroundColor: const Color(0xFF121418),
+        cardTheme: CardThemeData(
+          elevation: 0,
+          color: const Color(0xFF1C1F26),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+            side: const BorderSide(color: Color(0xFF2A2E37), width: 1),
+          ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: const Color(0xFF22262E),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Color(0xFF343944), width: 0.8),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Color(0xFF5B8CFF), width: 1.5),
+          ),
+        ),
+      ),
+      themeMode: themeMode,
       locale: currentLocale,
       supportedLocales: LocaleNotifier.supportedLanguages
           .map((lang) => Locale(lang.code))

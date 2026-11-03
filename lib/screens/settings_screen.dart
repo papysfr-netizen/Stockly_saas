@@ -17,6 +17,7 @@ import 'gestion_equipe_screen.dart';
 import 'settings_widgets/info_card.dart';
 import 'settings_widgets/currency_card.dart';
 import 'settings_widgets/language_card.dart';
+import 'settings_widgets/theme_card.dart';
 import 'settings_widgets/imprimante_card.dart';
 import 'package:stockly_saas/features/aide/aide_screen.dart';
 import 'settings_widgets/export_card.dart';
@@ -191,6 +192,9 @@ class SettingsScreen extends ConsumerWidget {
               const CurrencyCard(),
               const SizedBox(height: 16),
               const LanguageCard(),
+              const SizedBox(height: 16),
+              // 🌙 Apparence : Auto / Clair / Sombre
+              const ThemeCard(),
               const SizedBox(height: 16),
               const ImprimanteCard(),
               const SizedBox(height: 16),
