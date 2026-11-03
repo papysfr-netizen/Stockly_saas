@@ -41,6 +41,9 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
   static const Color _bleuNuit = Color(0xFF1E293B);
   static const Color _vert = Color(0xFF0F9D58);
   static const Color _rouge = Color(0xFFD93025);
+  // 🌙 Couleur des titres et montants : bleu nuit le jour, clair la nuit
+  Color get _encre =>
+      Theme.of(context).brightness == Brightness.dark ? const Color(0xFFE5E7EB) : _bleuNuit;
 
   int _selectedPeriodeIndex = 0;
   DateTimeRange? _customRange;
@@ -734,7 +737,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Text(valeur,
-                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: _bleuNuit)),
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: _encre)),
           ),
           const SizedBox(height: 2),
           FittedBox(
@@ -755,7 +758,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
     return Row(
       children: [
         Text(titre,
-            style: const TextStyle(color: _bleuNuit, fontSize: 16, fontWeight: FontWeight.bold)),
+            style: TextStyle(color: _encre, fontSize: 16, fontWeight: FontWeight.bold)),
         const Spacer(),
         Text(aide, style: TextStyle(fontSize: 11, color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade600))),
       ],
@@ -853,7 +856,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: negatif ? _rouge : _bleuNuit,
+                color: negatif ? _rouge : _encre,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
@@ -888,8 +891,8 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                 children: [
                   Flexible(
                     child: Text(libelle,
-                        style: const TextStyle(
-                            fontSize: 13, fontWeight: FontWeight.w800, color: _bleuNuit, letterSpacing: 0.3)),
+                        style: TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.w800, color: _encre, letterSpacing: 0.3)),
                   ),
                   if (complement != null) ...[
                     const SizedBox(width: 8),
@@ -912,7 +915,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
-                color: montant < -0.005 ? _rouge : _bleuNuit,
+                color: montant < -0.005 ? _rouge : _encre,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
@@ -932,9 +935,9 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
       color: couleur.withValues(alpha: 0.08),
       child: Row(
         children: [
-          const Expanded(
+          Expanded(
             child: Text('RÉSULTAT NET',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: _bleuNuit, letterSpacing: 0.5)),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: _encre, letterSpacing: 0.5)),
           ),
           Text(
             '${r.beneficeNet < -0.005 ? '− ${fmt(-r.beneficeNet)}' : fmt(r.beneficeNet)} $currency',
@@ -1038,7 +1041,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
         TextSpan(text: '$t : ', style: TextStyle(fontSize: 11, color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade600))),
         TextSpan(
             text: v,
-            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: _bleuNuit)),
+            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: _encre)),
       ]));
 
   Widget _blocBoutique(String nom, FinancialCalculationResult x, double stock,
@@ -1061,14 +1064,14 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
           Row(
             children: [
               Icon(total ? Icons.functions_rounded : Icons.storefront_rounded,
-                  size: 16, color: _bleuNuit),
+                  size: 16, color: _encre),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(nom,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                         fontWeight: total ? FontWeight.w900 : FontWeight.bold,
-                        color: _bleuNuit)),
+                        color: _encre)),
               ),
               Text(
                 '${x.beneficeNet < -0.005 ? '− ${fmt(-x.beneficeNet)}' : fmt(x.beneficeNet)} $currency',
@@ -1137,7 +1140,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                   Text('${r.nbVentesParVendeur[e.key] ?? 0} vente(s) • ',
                       style: TextStyle(fontSize: 12, color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade600))),
                   Text('${fmt(e.value)} $currency',
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: _bleuNuit)),
+                      style: TextStyle(fontWeight: FontWeight.bold, color: _encre)),
                 ],
               ),
               const SizedBox(height: 6),
@@ -1182,7 +1185,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
           subtitle: Text(
               '${tri[i].value[0].toStringAsFixed(tri[i].value[0] % 1 == 0 ? 0 : 1)} pièce(s)'),
           trailing: Text('${fmt(tri[i].value[1])} $currency',
-              style: const TextStyle(fontWeight: FontWeight.bold, color: _bleuNuit)),
+              style: TextStyle(fontWeight: FontWeight.bold, color: _encre)),
         ),
       if (tri.length > 15)
         Padding(
