@@ -9,13 +9,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'firebase_options.dart';
 import 'l10n/app_localizations.dart';
-import 'core/models/auth_state.dart';
 import 'core/models/user_model.dart';
 import 'features/debts/screens/providers/auth_controller.dart';
 import 'core/providers/locale_provider.dart';
 import 'features/shell/main_shell.dart';
 import 'features/debts/screens/login_screen.dart';
-import 'features/debts/screens/pin_lock_screen.dart';
 import 'core/widgets/app_initializer.dart';
 
 void main() async {
@@ -299,7 +297,6 @@ class AuthWrapper extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final posAuthState = ref.watch(authControllerProvider);
 
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
@@ -354,28 +351,17 @@ class AuthWrapper extends ConsumerWidget {
                 firebaseUser.uid,
               );
 
-              final String expectedPin = rawData['pinCode']?.toString() ?? '0000';
-
-              return switch (posAuthState) {
-                PosUnauthenticated() => PinLockScreen(
-                    expectedPin: expectedPin,
-                    userRole: currentUser.role.name,
-                  ),
-                PosLocked() => PinLockScreen(
-                    expectedPin: expectedPin,
-                    userRole: currentUser.role.name,
-                  ),
-                PosUnlocked() => Listener(
-                    onPointerDown: (_) {
-                      ref
-                          .read(authControllerProvider.notifier)
-                          .registerUserActivity();
-                    },
-                    child: MainShell(
-                      currentUser: currentUser,
-                    ),
-                  ),
-              };
+              // 🔓 Plus d'écran « Caisse Verrouillée » : on ouvre directement l'application
+              return Listener(
+                onPointerDown: (_) {
+                  ref
+                      .read(authControllerProvider.notifier)
+                      .registerUserActivity();
+                },
+                child: MainShell(
+                  currentUser: currentUser,
+                ),
+              );
             }
 
             if (userSnapshot.hasError) {
