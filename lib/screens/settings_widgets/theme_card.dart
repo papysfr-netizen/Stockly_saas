@@ -47,7 +47,14 @@ class ThemeCard extends ConsumerWidget {
                 showSelectedIcon: false,
                 segments: [
                   for (final o in options)
-                    ButtonSegment(value: o.$1, icon: Icon(o.$2), label: Text(o.$3)),
+                    ButtonSegment(
+                      value: o.$1,
+                      icon: Icon(o.$2, size: 18),
+                      label: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(o.$3, maxLines: 1, softWrap: false),
+                      ),
+                    ),
                 ],
                 selected: {mode},
                 onSelectionChanged: (s) => ref.read(themeModeProvider.notifier).choisir(s.first),

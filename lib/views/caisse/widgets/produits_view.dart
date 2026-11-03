@@ -341,7 +341,7 @@ class _ProduitsViewState extends ConsumerState<ProduitsView> {
                                   selected: isSelected,
                                   selectedColor: _bleuNuit,
                                   labelStyle: TextStyle(
-                                    color: isSelected ? Colors.white : Colors.black87,
+                                    color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
                                     fontSize: 12,
                                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                                   ),
@@ -355,7 +355,7 @@ class _ProduitsViewState extends ConsumerState<ProduitsView> {
                         padding: const EdgeInsets.fromLTRB(4, 6, 4, 6),
                         child: Text(
                           t.caisseHint,
-                          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                          style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
                         ),
                       ),
                       Expanded(
@@ -406,7 +406,7 @@ class _ProduitsViewState extends ConsumerState<ProduitsView> {
               child: Container(
                 padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1C1F26) : Colors.white,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.08),
@@ -488,7 +488,7 @@ class _TuileProduit extends StatelessWidget {
     final nom = codeProduit.isEmpty ? nomSeul : '$codeProduit · $nomSeul'; // 🏷️ code devant le nom
 
     return Material(
-      color: Colors.white,
+      color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1C1F26) : Colors.white,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
@@ -498,7 +498,9 @@ class _TuileProduit extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: quantitePanier > 0 ? _vert : Colors.grey.shade200,
+              color: quantitePanier > 0
+                  ? _vert
+                  : (Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2A2E37) : Colors.grey.shade200),
               width: quantitePanier > 0 ? 2 : 1,
             ),
           ),
