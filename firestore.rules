@@ -319,8 +319,9 @@ service cloud.firestore {
     }
 
     // ---------- Ancien chemin (écran Équipe de démonstration) ----------
+    // 🔒 Fermé : plus utilisé par l'application
     match /organizations/{entId}/{document=**} {
-      allow read, write: if estMembre(entId);
+      allow read, write: if false;
     }
   }
 }
