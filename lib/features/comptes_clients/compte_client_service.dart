@@ -94,6 +94,7 @@ class CompteClientService {
     String? retourId,
   }) {
     final ref = compteRef(entrepriseId, telephone);
+    final mvtRef = ref.collection('mouvements').doc(); // 🔒 ligne d'historique liée
     final montant = _arrondi(delta.abs());
     final credit = delta > 0;
 
@@ -110,11 +111,11 @@ class CompteClientService {
         if (type == 'achat') 'totalUtilise': FieldValue.increment(montant),
         if (type == 'retrait') 'totalRetire': FieldValue.increment(montant),
         'updatedAt': date,
+        'dernierMouvementId': mvtRef.id, // 🔒 le serveur pourra vérifier la trace
       },
       SetOptions(merge: true),
     );
 
-    final mvtRef = ref.collection('mouvements').doc();
     batch.set(mvtRef, {
       'id': mvtRef.id,
       'type': type,
