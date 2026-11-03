@@ -109,13 +109,13 @@ class PanierView extends ConsumerWidget {
     final peutChangerTaux = ref.watch(userProfileProvider).value?.peutParametres ?? false;
 
     return Container(
-      color: Colors.grey.shade50,
+      color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF16191F) : Colors.grey.shade50,
       child: Column(
         children: [
           // 1. En-tête : Changement de devise & Taux du jour (Corrigé avec Flexible)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-            color: Colors.indigo.shade50,
+            color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF232A45) : Colors.indigo.shade50,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -232,7 +232,7 @@ class PanierView extends ConsumerWidget {
                           children: [
                             Text(
                               '${item.quantite} x ${currencyState.formatPrice(item.prix)}',
-                              style: TextStyle(color: Colors.grey.shade700, fontSize: 12),
+                              style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade700, fontSize: 12),
                             ),
                             if (item.prixNegocie)
                               Text(
@@ -269,7 +269,7 @@ class PanierView extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1C1F26) : Colors.white,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withAlpha(12),
@@ -318,7 +318,7 @@ class PanierView extends ConsumerWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green.shade700,
                       foregroundColor: Colors.white,
-                      disabledBackgroundColor: Colors.grey.shade300,
+                      disabledBackgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2A2E37) : Colors.grey.shade300,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
