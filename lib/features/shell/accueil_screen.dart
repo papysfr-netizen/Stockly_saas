@@ -156,7 +156,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
     final t = AppLocalizations.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F5F7),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF121418) : const Color(0xFFF3F5F7),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: _streamDettesPayees,
         builder: (context, snapDettes) => StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -290,20 +290,20 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1C1F26) : Colors.white,
                       borderRadius: BorderRadius.circular(22),
-                      border: Border.all(color: Colors.grey.shade200),
+                      border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2A2E37) : Colors.grey.shade200),
                     ),
                     child: Column(
                       children: [
                         Text(t.accToday,
-                            style: TextStyle(fontSize: 12, letterSpacing: 1.2, color: Colors.grey.shade600)),
+                            style: TextStyle(fontSize: 12, letterSpacing: 1.2, color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade600)),
                         const SizedBox(height: 4),
                         Text(
                           devise.formatPrice(ventes),
                           style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: _vert),
                         ),
-                        Text(t.accOfSales, style: TextStyle(color: Colors.grey.shade600)),
+                        Text(t.accOfSales, style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade600)),
                         const SizedBox(height: 16),
                         Row(
                           children: [
@@ -458,14 +458,14 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(22),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1C1F26) : Colors.white,
                         borderRadius: BorderRadius.circular(18),
-                        border: Border.all(color: Colors.grey.shade200),
+                        border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2A2E37) : Colors.grey.shade200),
                       ),
                       child: Text(
                         t.accNoSales,
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey.shade700, height: 1.4),
+                        style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade700, height: 1.4),
                       ),
                     ),
                   ),
@@ -481,9 +481,9 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1C1F26) : Colors.white,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade200),
+                          border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2A2E37) : Colors.grey.shade200),
                         ),
                         child: ListTile(
                           leading: CircleAvatar(
@@ -529,9 +529,9 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1C1F26) : Colors.white,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade200),
+                          border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2A2E37) : Colors.grey.shade200),
                         ),
                         child: ListTile(
                           onTap: () => _ouvrir(const DebtManagementScreen()),
@@ -718,8 +718,8 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
     return ActionChip(
       avatar: Icon(icone, size: 18, color: couleur),
       label: Text(titre, style: TextStyle(fontWeight: FontWeight.w600, color: couleur)),
-      backgroundColor: Colors.white,
-      side: BorderSide(color: Colors.grey.shade300),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1C1F26) : Colors.white,
+      side: BorderSide(color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF343944) : Colors.grey.shade300),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       onPressed: onTap,
     );
@@ -737,7 +737,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
           children: [
             Icon(icone, color: couleur, size: 20),
             const SizedBox(height: 4),
-            Text(titre, style: TextStyle(fontSize: 12, color: Colors.grey.shade700)),
+            Text(titre, style: TextStyle(fontSize: 12, color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade700)),
             const SizedBox(height: 2),
             FittedBox(
               fit: BoxFit.scaleDown,
@@ -753,7 +753,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
     final actif = onTap != null;
     return Expanded(
       child: Material(
-        color: Colors.white,
+        color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1C1F26) : Colors.white,
         borderRadius: BorderRadius.circular(18),
         child: InkWell(
           borderRadius: BorderRadius.circular(18),
@@ -762,7 +762,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
             padding: const EdgeInsets.symmetric(vertical: 16),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: Colors.grey.shade200),
+              border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2A2E37) : Colors.grey.shade200),
             ),
             child: Opacity(
               opacity: actif ? 1 : 0.35,

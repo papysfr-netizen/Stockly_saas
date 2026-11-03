@@ -45,7 +45,10 @@ class ResumeDuJour extends ConsumerWidget {
     final heure = DateTime.now().hour;
     final salut = heure < 12 ? t.resMorning : (heure < 18 ? t.resAfternoon : t.resEvening);
 
-    const normal = TextStyle(fontSize: 17, height: 1.45, color: Color(0xFF1F2937));
+    final normal = TextStyle(
+        fontSize: 17,
+        height: 1.45,
+        color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFFE5E7EB) : const Color(0xFF1F2937));
     const gras = TextStyle(fontWeight: FontWeight.bold);
 
     final List<InlineSpan> morceaux;
@@ -74,9 +77,9 @@ class ResumeDuJour extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1C1F26) : Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2A2E37) : Colors.grey.shade200),
       ),
       child: Text.rich(TextSpan(style: normal, children: morceaux)),
     );
@@ -194,9 +197,9 @@ class _AFaireAujourdhuiState extends ConsumerState<AFaireAujourdhui> {
         return Container(
           padding: const EdgeInsets.fromLTRB(16, 14, 8, 8),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1C1F26) : Colors.white,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.grey.shade200),
+            border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2A2E37) : Colors.grey.shade200),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -208,7 +211,7 @@ class _AFaireAujourdhuiState extends ConsumerState<AFaireAujourdhui> {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: Text(t.todoNothing,
-                      style: TextStyle(color: Colors.grey.shade700)),
+                      style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade700)),
                 )
               else
                 ...lignes,
