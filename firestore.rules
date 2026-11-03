@@ -242,8 +242,14 @@ service cloud.firestore {
           || (estMembre(entId) && venteIntacte())
           || (aPermission(entId, 'maintenance')
               && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['coutMarchandises']));
+        // 🔒 Créer : dans sa boutique, À SON NOM (sauf Gérant+),
+        //    et remise / prix baissé seulement avec « Remises et retraits »
         allow create: if estMembre(entId)
-          && boutiqueAutorisee(entId, request.resource.data.get('boutiqueId', ''));
+          && boutiqueAutorisee(entId, request.resource.data.get('boutiqueId', ''))
+          && (estGerantOuPlus(entId)
+              || request.resource.data.get('vendeurId', '') == request.auth.uid)
+          && (request.resource.data.get('remiseTotale', 0) <= 0.01
+              || aPermission(entId, 'remisesRetraits'));
         allow delete: if estGerantOuPlus(entId);
       }
       match /retours/{docId} {
