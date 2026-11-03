@@ -246,7 +246,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
         : '$libellePeriode • ${nomBoutique ?? 'Toutes les boutiques'}';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F4F6),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF121418) : const Color(0xFFF3F4F6),
       appBar: AppBar(
         title: const Text(
           'Compte de résultat',
@@ -456,7 +456,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                               // 🔎 Rechercher un client
                               OutlinedButton.icon(
                                 style: OutlinedButton.styleFrom(
-                                  backgroundColor: Colors.white,
+                                  backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1C1F26) : Colors.white,
                                   padding: const EdgeInsets.symmetric(vertical: 12),
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(14)),
@@ -539,7 +539,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                               Text(
                                 'Montants en $currency • Comparaison avec la période précédente de même durée.',
                                 textAlign: TextAlign.center,
-                                style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                                style: TextStyle(fontSize: 11, color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade600)),
                               ),
                             ],
                           );
@@ -567,7 +567,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
     if (v == null) {
       return Text('— vs période préc.',
           style: TextStyle(
-              fontSize: 11, color: surFondCouleur ? Colors.white70 : Colors.grey.shade600));
+              fontSize: 11, color: surFondCouleur ? Colors.white70 : (Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade600)));
     }
     final hausse = v >= 0;
     final couleur = surFondCouleur ? Colors.white : (hausse ? _vert : _rouge);
@@ -711,7 +711,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1C1F26) : Colors.white,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
       ),
@@ -725,7 +725,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
               Expanded(
                 child: Text(titre,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 11, color: Colors.grey.shade700, fontWeight: FontWeight.w600)),
+                    style: TextStyle(fontSize: 11, color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade700, fontWeight: FontWeight.w600)),
               ),
             ],
           ),
@@ -740,7 +740,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
-            child: Text(sousTitre, style: TextStyle(fontSize: 10, color: Colors.grey.shade600)),
+            child: Text(sousTitre, style: TextStyle(fontSize: 10, color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade600))),
           ),
           if (variation != null) ...[
             const SizedBox(height: 4),
@@ -757,7 +757,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
         Text(titre,
             style: const TextStyle(color: _bleuNuit, fontSize: 16, fontWeight: FontWeight.bold)),
         const Spacer(),
-        Text(aide, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+        Text(aide, style: TextStyle(fontSize: 11, color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade600))),
       ],
     );
   }
@@ -821,7 +821,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1C1F26) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
       ),
@@ -841,12 +841,12 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
         decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+          border: Border(bottom: BorderSide(color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2A2E37) : Colors.grey.shade200)),
         ),
         child: Row(
           children: [
             Expanded(
-              child: Text(libelle, style: TextStyle(fontSize: 14, color: Colors.grey.shade800)),
+              child: Text(libelle, style: TextStyle(fontSize: 14, color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade300 : Colors.grey.shade800)),
             ),
             Text(
               negatif ? '− ${fmt(-montant)}' : fmt(montant),
@@ -878,8 +878,8 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
         decoration: BoxDecoration(
-          color: const Color(0xFFF1F5F9),
-          border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
+          color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF232733) : const Color(0xFFF1F5F9),
+          border: Border(bottom: BorderSide(color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF343944) : Colors.grey.shade300)),
         ),
         child: Row(
           children: [
@@ -1021,7 +1021,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
   Widget _carteBlanche(List<Widget> enfants) => Container(
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1C1F26) : Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
         ),
@@ -1031,11 +1031,11 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
   Widget _aucun() => Padding(
         padding: const EdgeInsets.all(16),
         child: Text('Aucune donnée sur cette période',
-            style: TextStyle(color: Colors.grey.shade600)),
+            style: TextStyle(color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade600))),
       );
 
   Widget _petit(String t, String v) => Text.rich(TextSpan(children: [
-        TextSpan(text: '$t : ', style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+        TextSpan(text: '$t : ', style: TextStyle(fontSize: 11, color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade600))),
         TextSpan(
             text: v,
             style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: _bleuNuit)),
@@ -1050,8 +1050,10 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
       child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: total ? const Color(0xFFF1F5F9) : Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+        color: Theme.of(context).brightness == Brightness.dark
+            ? (total ? const Color(0xFF232733) : const Color(0xFF1C1F26))
+            : (total ? const Color(0xFFF1F5F9) : Colors.white),
+        border: Border(bottom: BorderSide(color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2A2E37) : Colors.grey.shade200)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1133,7 +1135,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                         style: const TextStyle(fontWeight: FontWeight.w600)),
                   ),
                   Text('${r.nbVentesParVendeur[e.key] ?? 0} vente(s) • ',
-                      style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                      style: TextStyle(fontSize: 12, color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade600))),
                   Text('${fmt(e.value)} $currency',
                       style: const TextStyle(fontWeight: FontWeight.bold, color: _bleuNuit)),
                 ],
@@ -1144,7 +1146,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                 child: LinearProgressIndicator(
                   value: (e.value / max).clamp(0.0, 1.0),
                   minHeight: 6,
-                  backgroundColor: Colors.grey.shade200,
+                  backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2A2E37) : Colors.grey.shade200,
                   color: Colors.indigo,
                 ),
               ),
@@ -1186,7 +1188,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
         Padding(
           padding: const EdgeInsets.all(10),
           child: Text('… et ${tri.length - 15} autre(s)',
-              style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+              style: TextStyle(fontSize: 12, color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade600))),
         ),
     ]);
   }
@@ -1216,7 +1218,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
         Padding(
           padding: const EdgeInsets.all(16),
           child: Text('Tous les produits en stock se sont vendus 👍',
-              style: TextStyle(color: Colors.grey.shade700)),
+              style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade700)),
         ),
       ]);
     }
@@ -1244,7 +1246,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
         Padding(
           padding: const EdgeInsets.all(10),
           child: Text('… et ${liste.length - 20} autre(s)',
-              style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+              style: TextStyle(fontSize: 12, color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade600))),
         ),
     ]);
   }
