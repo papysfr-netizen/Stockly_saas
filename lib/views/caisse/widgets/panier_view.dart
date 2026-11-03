@@ -8,6 +8,7 @@ import '../../../core/providers/currency_provider.dart';
 import '../../../core/providers/user_role_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../dialogs/paiement_dialog.dart';
+import '../dialogs/prix_negocie_dialog.dart';
 
 class PanierView extends ConsumerWidget {
   final String entrepriseId;
@@ -75,6 +76,27 @@ class PanierView extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// 🏷️ Changer le prix d'une ligne du panier (autorisation « Remises et retraits »)
+  Future<void> _changerPrix(BuildContext context, WidgetRef ref, CartItem item) async {
+    final peut = ref.read(userProfileProvider).value?.peutRemisesRetraits ?? false;
+    if (!peut) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Changer le prix demande l'autorisation « Remises et retraits »."),
+        backgroundColor: Colors.orange,
+      ));
+      return;
+    }
+    final nouveau = await demanderPrixNegocie(
+      context,
+      nom: item.nom,
+      prixActuel: item.prix,
+      prixNormal: item.prixNormal,
+      prixAchat: item.prixAchat,
+    );
+    if (nouveau == null) return;
+    ref.read(cartProvider.notifier).changerPrix(item.id, nouveau);
   }
 
   @override
@@ -192,13 +214,37 @@ class PanierView extends ConsumerWidget {
                       return ListTile(
                         dense: true,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+                        onTap: () => _changerPrix(context, ref, item),
+                        leading: Icon(
+                          Icons.sell_outlined,
+                          size: 20,
+                          color: item.aPerte
+                              ? Colors.red
+                              : (item.prixNegocie ? Colors.orange.shade800 : Colors.grey),
+                        ),
                         title: Text(
                           item.nom,
                           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                         ),
-                        subtitle: Text(
-                          '${item.quantite} x ${currencyState.formatPrice(item.prix)}',
-                          style: TextStyle(color: Colors.grey.shade700, fontSize: 12),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '${item.quantite} x ${currencyState.formatPrice(item.prix)}',
+                              style: TextStyle(color: Colors.grey.shade700, fontSize: 12),
+                            ),
+                            if (item.prixNegocie)
+                              Text(
+                                'Prix normal : ${currencyState.formatPrice(item.prixNormal)}',
+                                style: TextStyle(fontSize: 11, color: Colors.orange.shade800),
+                              ),
+                            if (item.aPerte)
+                              const Text(
+                                'Vente à perte',
+                                style: TextStyle(fontSize: 11, color: Colors.red, fontWeight: FontWeight.bold),
+                              ),
+                          ],
                         ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
