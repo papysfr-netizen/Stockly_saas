@@ -157,9 +157,12 @@ Future<void> ouvrirOperationCompte(
   final tel = telCtrl.text.trim();
   final nomSaisi = nomCtrl.text.trim();
   final montant = double.tryParse(montantCtrl.text.trim().replaceAll(',', '.')) ?? 0.0;
-  telCtrl.dispose();
-  nomCtrl.dispose();
-  montantCtrl.dispose();
+  // 🩹 On attend la fin de l'animation de fermeture avant d'effacer les champs
+  Future.delayed(const Duration(milliseconds: 500), () {
+    telCtrl.dispose();
+    nomCtrl.dispose();
+    montantCtrl.dispose();
+  });
 
   if (resultat != true) return;
 
