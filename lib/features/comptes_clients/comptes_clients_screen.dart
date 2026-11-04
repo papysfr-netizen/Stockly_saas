@@ -112,7 +112,7 @@ Future<void> ouvrirOperationCompte(
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
                       t.ccAvailable(ref.formatPrice(solde)),
-                      style: TextStyle(color: Colors.grey.shade700),
+                      style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade700),
                     ),
                   ),
                 const SizedBox(height: 12),
@@ -283,13 +283,13 @@ class _ComptesClientsScreenState extends ConsumerState<ComptesClientsScreen> {
                       margin: const EdgeInsets.fromLTRB(12, 6, 12, 6),
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.teal.shade50,
+                        color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF15302D) : Colors.teal.shade50,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(
                         children: [
                           Text(t.ccCount(docs.length),
-                              style: TextStyle(color: Colors.grey.shade700)),
+                              style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade700)),
                           const SizedBox(height: 4),
                           Text(
                             t.ccTotalKept(ref.formatPrice(totalDu)),
@@ -327,7 +327,7 @@ class _ComptesClientsScreenState extends ConsumerState<ComptesClientsScreen> {
                                   margin: const EdgeInsets.only(bottom: 8),
                                   child: ListTile(
                                     leading: CircleAvatar(
-                                      backgroundColor: Colors.teal.shade100,
+                                      backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E3F3B) : Colors.teal.shade100,
                                       child: Icon(Icons.account_balance_wallet,
                                           color: Colors.teal.shade800),
                                     ),
@@ -470,7 +470,7 @@ class CompteClientDetailScreen extends ConsumerWidget {
                 children: [
                   // En-tête
                   Card(
-                    color: Colors.teal.shade50,
+                    color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF15302D) : Colors.teal.shade50,
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
@@ -479,7 +479,7 @@ class CompteClientDetailScreen extends ConsumerWidget {
                               style: const TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold)),
                           if (nom.isNotEmpty)
-                            Text(tel, style: TextStyle(color: Colors.grey.shade700)),
+                            Text(tel, style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade700)),
                           const SizedBox(height: 10),
                           Text(t.ccAvailableLabel),
                           Text(
@@ -632,7 +632,7 @@ class _LigneMouvement extends ConsumerWidget {
             ),
             Text(
               t.ccBalanceAfter(ref.formatPrice(_num(m['soldeApres']))),
-              style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+              style: TextStyle(fontSize: 11, color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade600),
             ),
           ],
         ),
