@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/providers/entreprise_provider.dart';
 import '../../core/providers/user_role_provider.dart';
 import '../../core/utils/currency_extension.dart';
+import '../../core/services/journal_service.dart';
 import 'compte_client_service.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
 
@@ -182,6 +185,15 @@ Future<void> ouvrirOperationCompte(
             montant: montant,
             methode: methode,
           );
+    // 📒 Journal : dépôt / retrait sur un compte client
+    unawaited(noterJournal(
+      entrepriseId: entrepriseId,
+      action: ActionsJournal.compteClient,
+      details: '${estDepot ? 'Dépôt' : 'Retrait'} · '
+          '${nomSaisi.trim().isEmpty ? tel : '${nomSaisi.trim()} ($tel)'} · $methode',
+      montant: estDepot ? montant : -montant,
+      reference: tel,
+    ));
     final texte = estDepot
         ? t.ccDepositSaved(ref.formatPrice(montant))
         : t.ccWithdrawSaved(ref.formatPrice(montant));
