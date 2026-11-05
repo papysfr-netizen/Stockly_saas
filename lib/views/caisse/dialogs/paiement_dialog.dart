@@ -201,7 +201,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
       setState(() {
         _rechercheEnCours = false;
         _soldeCompte = solde > 0 ? solde : 0.0;
-        if (_soldeCompte <= 0.005) _utiliserSolde = false;
+        _utiliserSolde = _soldeCompte > 0.005; // 💳 allumé par défaut si le client a un solde
         if (_clientController.text.trim().isEmpty && nom.isNotEmpty) {
           _clientController.text = nom;
         }
