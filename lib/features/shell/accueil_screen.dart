@@ -32,6 +32,7 @@ import 'package:stockly_saas/features/comptes_clients/comptes_clients_screen.dar
 import 'package:stockly_saas/features/debts/screens/comptabilite_screen.dart';
 import 'package:stockly_saas/features/livraisons/a_livrer_screen.dart';
 import 'package:stockly_saas/features/ventes/historique_ventes_screen.dart';
+import 'package:stockly_saas/features/comptes_clients/argent_caisse_comptes.dart';
 
 const _vert = Color(0xFF0B7A5A);
 const _bleu = Color(0xFF0052FF);
@@ -171,7 +172,11 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                 _nombre(v['montantRetourne']) -
                 _nombre(v['montantAnnule']);
             ventes += total;
-            encaisse += _nombre(v['montantPaye']);
+            // 💳 La partie payée avec le compte du client n'entre pas dans le tiroir
+            final paye = _nombre(v['montantPaye']);
+            final payeVente = total > 0 && paye > total ? total : paye;
+            final cashVente = payeVente - _nombre(v['montantCompteClient']);
+            encaisse += cashVente > 0 ? cashVente : 0.0;
             credit += _nombre(v['resteAPayer']);
             cout += _nombre(v['coutMarchandises']);
             remises += _nombre(v['remiseTotale']);
@@ -323,7 +328,13 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                         ],
                         if (voirFinances) ...[
                           const SizedBox(height: 12),
-                          Container(
+                          // 💵 Argent en caisse : + dépôts / − retraits en espèces des comptes clients
+                          LigneArgentCaisse(
+                            entrepriseId: widget.currentUser.entrepriseId,
+                            debut: minuit,
+                            soldeBase: solde,
+                            format: (x) => devise.formatPrice(x),
+                            construire: (solde) => Container(
                             width: double.infinity,
                             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                             decoration: BoxDecoration(
@@ -338,6 +349,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                                 color: solde >= 0 ? _vert : Colors.red,
                               ),
                             ),
+                          ),
                           ),
                         ],
                         if (voirFinances && remises > 0.005) ...[
