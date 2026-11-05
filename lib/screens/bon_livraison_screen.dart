@@ -211,7 +211,17 @@ class _BonLivraisonScreenState extends ConsumerState<BonLivraisonScreen> {
                 ),
         ],
       ),
-      body: SingleChildScrollView(
+      // 📄 La feuille reste claire comme un vrai papier, même en mode sombre
+      body: Theme(
+        data: ThemeData(
+          useMaterial3: true,
+          brightness: Brightness.light,
+          colorSchemeSeed: const Color(0xFF0052FF),
+        ),
+        // ✒️ Texte foncé par défaut sur la feuille
+        child: DefaultTextStyle.merge(
+          style: const TextStyle(color: Color(0xFF1F2937)),
+          child: SingleChildScrollView(
         padding: const EdgeInsets.all(12.0),
         child: Center(
           child: Container(
@@ -529,7 +539,7 @@ class _BonLivraisonScreenState extends ConsumerState<BonLivraisonScreen> {
             ),
           ),
         ),
-      ),
+      ))),
     );
   }
 }
