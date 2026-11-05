@@ -296,7 +296,7 @@ class _ComptesClientsScreenState extends ConsumerState<ComptesClientsScreen> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
-                              color: Colors.teal.shade900,
+                              color: Theme.of(context).brightness == Brightness.dark ? Colors.teal.shade200 : Colors.teal.shade900,
                             ),
                           ),
                         ],
@@ -329,7 +329,7 @@ class _ComptesClientsScreenState extends ConsumerState<ComptesClientsScreen> {
                                     leading: CircleAvatar(
                                       backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E3F3B) : Colors.teal.shade100,
                                       child: Icon(Icons.account_balance_wallet,
-                                          color: Colors.teal.shade800),
+                                          color: Theme.of(context).brightness == Brightness.dark ? Colors.teal.shade200 : Colors.teal.shade800),
                                     ),
                                     title: Text(
                                       nom.isEmpty ? tel : nom,
@@ -487,7 +487,7 @@ class CompteClientDetailScreen extends ConsumerWidget {
                             style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
-                              color: Colors.teal.shade800,
+                              color: Theme.of(context).brightness == Brightness.dark ? Colors.teal.shade200 : Colors.teal.shade800,
                             ),
                           ),
                         ],
