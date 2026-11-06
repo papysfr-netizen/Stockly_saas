@@ -1,3 +1,4 @@
+// 🌙 mode sombre automatique
 // lib/features/debts/widgets/debt_detail_sheet.dart
 //
 // 📋 Fiche de détail d'une dette / créance :
@@ -202,7 +203,7 @@ class _DetteDetailSheetState extends ConsumerState<DetteDetailSheet> {
                             style: const TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold, color: _bleuNuit)),
                         if (d.telephone.isNotEmpty)
-                          Text(d.telephone, style: TextStyle(color: Colors.grey.shade700)),
+                          Text(d.telephone, style: TextStyle(color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey[400]! : Colors.grey[700]!))),
                       ],
                     ),
                   ),
@@ -232,7 +233,7 @@ class _DetteDetailSheetState extends ConsumerState<DetteDetailSheet> {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF3F4F6),
+                  color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1C1F26) : const Color(0xFFF3F4F6),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Column(
@@ -280,7 +281,7 @@ class _DetteDetailSheetState extends ConsumerState<DetteDetailSheet> {
                 else if (snap.hasError)
                   Text(t.ddItemsError, style: TextStyle(color: Colors.red.shade700))
                 else if (vente == null)
-                  Text(t.ddNoItems, style: TextStyle(color: Colors.grey.shade600))
+                  Text(t.ddNoItems, style: TextStyle(color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey[400]! : Colors.grey[600]!)))
                 else
                   ..._articles(t, vente),
               ],
@@ -359,7 +360,7 @@ class _DetteDetailSheetState extends ConsumerState<DetteDetailSheet> {
     final format = DateFormat('dd/MM/yyyy HH:mm');
 
     if (liste.isEmpty && avant <= 0.005) {
-      return [Text(t.ddNoPayments, style: TextStyle(color: Colors.grey.shade600))];
+      return [Text(t.ddNoPayments, style: TextStyle(color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey[400]! : Colors.grey[600]!)))];
     }
     return [
       if (avant > 0.005) _paiementLigne(t.ddPaidBefore, '', avant),
@@ -388,7 +389,7 @@ class _DetteDetailSheetState extends ConsumerState<DetteDetailSheet> {
               children: [
                 Text(titre, style: const TextStyle(fontWeight: FontWeight.w600)),
                 if (detail.isNotEmpty)
-                  Text(detail, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                  Text(detail, style: TextStyle(fontSize: 12, color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey[400]! : Colors.grey[600]!))),
               ],
             ),
           ),
@@ -403,7 +404,7 @@ class _DetteDetailSheetState extends ConsumerState<DetteDetailSheet> {
     final brut = vente['articles'];
     final articles = (brut is List ? brut : const []).whereType<Map>().toList();
     if (articles.isEmpty) {
-      return [Text(t.ddNoItems, style: TextStyle(color: Colors.grey.shade600))];
+      return [Text(t.ddNoItems, style: TextStyle(color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey[400]! : Colors.grey[600]!)))];
     }
     final remise = _num(vente['remiseTotale']);
     return [
@@ -447,7 +448,7 @@ class _DetteDetailSheetState extends ConsumerState<DetteDetailSheet> {
   }
 
   Widget _info(IconData icone, String texte, {Color? couleur}) {
-    final c = couleur ?? Colors.grey.shade700;
+    final c = couleur ?? (Theme.of(context).brightness == Brightness.dark ? Colors.grey[400]! : Colors.grey[700]!);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(

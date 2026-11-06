@@ -1,3 +1,4 @@
+// 🌙 mode sombre automatique
 // lib/features/debts/screens/debt_management_screen.dart
 
 import 'package:flutter/material.dart';
@@ -100,7 +101,7 @@ class DebtManagementScreen extends ConsumerWidget {
       child: Builder(
         builder: (context) {
           return Scaffold(
-            backgroundColor: const Color(0xFFF3F4F6),
+            backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF121418) : const Color(0xFFF3F4F6),
             appBar: AppBar(
               title: Text(
                 AppLocalizations.of(context).debtScreenTitle,

@@ -1,3 +1,4 @@
+// 🌙 mode sombre automatique
 // lib/features/debts/widgets/debt_list_view.dart
 //
 // Liste professionnelle des créances clients / dettes fournisseurs :
@@ -356,16 +357,16 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
                 },
               ),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF22262E) : Colors.white,
         isDense: true,
         contentPadding: const EdgeInsets.symmetric(vertical: 12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderSide: BorderSide(color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2E333D) : Colors.grey[300]!),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderSide: BorderSide(color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2E333D) : Colors.grey[300]!),
         ),
       ),
     );
@@ -397,7 +398,7 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
                 color: _filtre == f ? Colors.white : _bleuNuit,
               ),
               showCheckmark: false,
-              side: BorderSide(color: Colors.grey.shade300),
+              side: BorderSide(color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2E333D) : Colors.grey[300]!),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             ),
             const SizedBox(width: 8),
@@ -414,7 +415,7 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
         children: [
           CircleAvatar(
             radius: 34,
-            backgroundColor: Colors.grey.shade200,
+            backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2A2E37) : Colors.grey[200]!,
             child: Icon(icone, size: 34, color: Colors.grey.shade500),
           ),
           const SizedBox(height: 14),
@@ -423,7 +424,7 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
           const SizedBox(height: 6),
           Text(texte,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: Colors.grey.shade600)),
+              style: TextStyle(fontSize: 13, color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey[400]! : Colors.grey[600]!))),
         ],
       ),
     );
@@ -457,7 +458,7 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
       child: Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1C1F26) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border(left: BorderSide(color: couleurStatut, width: 4)),
         boxShadow: [
@@ -497,7 +498,7 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
                         ].join(' • '),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                        style: TextStyle(fontSize: 12, color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey[400]! : Colors.grey[600]!)),
                       ),
                     ],
                   ),
@@ -537,7 +538,7 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
               child: LinearProgressIndicator(
                 value: pct,
                 minHeight: 7,
-                backgroundColor: Colors.grey.shade200,
+                backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2A2E37) : Colors.grey[200]!,
                 valueColor: AlwaysStoppedAnimation(d.estSolde ? _vert : Colors.teal),
               ),
             ),
@@ -547,7 +548,7 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
                 Expanded(
                   child: Text(
                     _t.paidOf(_nf.format(d.acomptePaye), _m(d.montantInitial)),
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                    style: TextStyle(fontSize: 12, color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey[400]! : Colors.grey[700]!)),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -620,7 +621,7 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
   }
 
   Widget _petiteInfo(IconData icone, String texte, {Color? couleur}) {
-    final c = couleur ?? Colors.grey.shade600;
+    final c = couleur ?? (Theme.of(context).brightness == Brightness.dark ? Colors.grey[400]! : Colors.grey[600]!);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [

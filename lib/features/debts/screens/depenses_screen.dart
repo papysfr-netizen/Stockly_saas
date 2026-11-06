@@ -1,3 +1,4 @@
+// 🌙 mode sombre automatique
 // lib/features/debts/screens/depenses_screen.dart
 
 import 'package:flutter/material.dart';
@@ -155,7 +156,7 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
     final t = AppLocalizations.of(context);
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF121418) : Colors.grey.shade100,
       appBar: AppBar(
         title: _isSearching
             ? TextField(
@@ -292,7 +293,7 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1C1F26) : Colors.white,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
@@ -310,7 +311,7 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
                                 ? t.depTotalAll
                                 : t.depTotalFor(_nomCategorie(t, _categorieFiltre)),
                             style: TextStyle(
-                              color: Colors.grey.shade600,
+                              color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey[400]! : Colors.grey[600]!),
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
                             ),
@@ -369,7 +370,7 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
                               selected: isSelected,
                               selectedColor: Colors.orange.shade800,
                               labelStyle: TextStyle(
-                                color: isSelected ? Colors.white : Colors.black87,
+                                color: isSelected ? Colors.white : (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87),
                                 fontWeight: FontWeight.w500,
                               ),
                               onSelected: (_) => setState(() => _categorieFiltre = cat),
@@ -395,7 +396,7 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
                               _searchQuery.isNotEmpty
                                   ? t.depNoResult(_searchQuery)
                                   : t.depNone,
-                              style: TextStyle(color: Colors.grey.shade600, fontSize: 15),
+                              style: TextStyle(color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey[400]! : Colors.grey[600]!), fontSize: 15),
                             ),
                           ],
                         ),
@@ -446,7 +447,7 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                         decoration: BoxDecoration(
-                                          color: Colors.indigo.shade50,
+                                          color: Theme.of(context).brightness == Brightness.dark ? Colors.indigo.withValues(alpha: 0.16) : Colors.indigo[50]!,
                                           borderRadius: BorderRadius.circular(6),
                                         ),
                                         child: Text(
@@ -461,7 +462,7 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
                                       const Spacer(),
                                       Text(
                                         DateFormat('dd/MM/yyyy • HH:mm').format(depense.date),
-                                        style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                                        style: TextStyle(fontSize: 12, color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey[400]! : Colors.grey[600]!)),
                                       ),
                                     ],
                                   ),
@@ -472,7 +473,7 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
                                       style: TextStyle(
                                         fontSize: 13,
                                         fontStyle: FontStyle.italic,
-                                        color: Colors.grey.shade700,
+                                        color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey[400]! : Colors.grey[700]!),
                                       ),
                                     ),
                                   ],
@@ -823,7 +824,7 @@ class _AjoutDepenseBottomSheetState extends ConsumerState<_AjoutDepenseBottomShe
                     selected: isSelected,
                     selectedColor: Colors.orange.shade800,
                     labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : Colors.black87,
+                      color: isSelected ? Colors.white : (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87),
                       fontSize: 12,
                     ),
                     onSelected: (selected) {

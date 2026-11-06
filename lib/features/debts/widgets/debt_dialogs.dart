@@ -1,3 +1,4 @@
+// 🌙 mode sombre automatique
 // lib/features/debts/presentation/dialogs/debt_dialogs.dart
 
 import 'package:flutter/material.dart';
@@ -119,7 +120,7 @@ class DebtDialogs {
                                   : t.debtDueDate(_formaterDate(dateEcheanceSelectionnee!)),
                               style: TextStyle(
                                 color: dateEcheanceSelectionnee == null
-                                    ? Colors.grey.shade600
+                                    ? (Theme.of(context).brightness == Brightness.dark ? Colors.grey[400]! : Colors.grey[600]!)
                                     : Colors.black,
                                 fontWeight: dateEcheanceSelectionnee != null
                                     ? FontWeight.bold
