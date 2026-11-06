@@ -1137,7 +1137,8 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         entrepriseId: widget.entrepriseId,
         action: ActionsJournal.vente,
         details: 'Facture $numeroFacture · $client · $resumeArticles'
-            '${resteEffective > 0.005 ? ' · crédit ${resteEffective.toStringAsFixed(2)} \$' : ''}',
+            '${resteEffective > 0.005 ? ' · crédit ${resteEffective.toStringAsFixed(2)} \$' : ''}'
+            '${_montantSoldeUtilise > 0.005 ? ' · payé par compte ${_montantSoldeUtilise.toStringAsFixed(2)} \$' : ''}',
         boutiqueId: _boutiqueVente,
         montant: totalVente,
         reference: venteRef.id,
