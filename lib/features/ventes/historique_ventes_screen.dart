@@ -9,6 +9,7 @@ import '../../core/providers/settings_provider.dart' show settingsProvider;
 import '../../core/services/facture_pdf_service.dart';
 import '../../core/utils/currency_extension.dart';
 import '../../screens/bon_livraison_screen.dart';
+import 'restes_creances.dart';
 import 'retour_vente_screen.dart';
 
 // ============================================================================
@@ -129,6 +130,7 @@ class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen>
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(historiqueVentesProvider(widget.entrepriseId));
+    ref.watch(restesCreancesProvider(widget.entrepriseId)); // 💳 reste réel des dettes
     final l = AppLocalizations.of(context);
 
     return Scaffold(
@@ -214,7 +216,7 @@ class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen>
                 for (final v in ventes) {
                   final d = v.data();
                   final t = _totalNet(d);
-                  final r = _num(d['resteAPayer']);
+                  final r = resteReel(d, v.id);
                   total += t;
                   reste += r;
                   encaisse += (t - r);
@@ -371,7 +373,7 @@ Widget _badge(String texte, Color couleur) => Container(
     );
 
 Widget _badgePaiement(AppLocalizations t, Map<String, dynamic> d) {
-  final reste = _num(d['resteAPayer']);
+  final reste = resteReel(d);
   final total = _num(d['montantTotal']);
   if (reste <= 0.005) return _badge(t.histPaid, Colors.green.shade700);
   if (reste < total - 0.005) return _badge(t.histPartial, Colors.orange.shade800);
@@ -471,7 +473,7 @@ class _LigneVente extends ConsumerWidget {
 
     try {
       final total = _num(data['montantTotal']);
-      final reste = _num(data['resteAPayer']);
+      final reste = resteReel(data);
       final numero = _numeroFacture(venteId);
 
       final lignes = _articles
@@ -531,7 +533,7 @@ class _LigneVente extends ConsumerWidget {
     final client = _client(t, data);
     final tel = (data['telephoneClient'] ?? '').toString();
     final total = _num(data['montantTotal']);
-    final reste = _num(data['resteAPayer']);
+    final reste = resteReel(data);
     final montantRetourne = _num(data['montantRetourne']);
     final montantAnnule = _num(data['montantAnnule']);
     final articles = _articles;
