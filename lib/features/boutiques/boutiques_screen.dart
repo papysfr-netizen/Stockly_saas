@@ -88,7 +88,7 @@ class MesBoutiquesCard extends StatelessWidget {
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: CircleAvatar(
-          backgroundColor: Colors.indigo.shade50,
+          backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF232A45) : Colors.indigo.shade50,
           child: Icon(Icons.storefront_rounded, color: Colors.indigo.shade700),
         ),
         title: Text(t.shopTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -116,6 +116,9 @@ class BoutiquesScreen extends StatefulWidget {
 
 class _BoutiquesScreenState extends State<BoutiquesScreen> {
   static const Color _bleuNuit = Color(0xFF1E293B);
+  // 🌙 Titres : bleu nuit le jour, clairs la nuit
+  Color get _encre =>
+      Theme.of(context).brightness == Brightness.dark ? const Color(0xFFE5E7EB) : _bleuNuit;
   AppLocalizations get _t => AppLocalizations.of(context);
 
   @override
@@ -236,7 +239,7 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F4F6),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF121418) : const Color(0xFFF3F4F6),
       appBar: AppBar(
         title: Text(_t.shopTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: _bleuNuit,
@@ -287,9 +290,9 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
+                  color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E2A4A) : Colors.blue.shade50,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.blue.shade100),
+                  border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2E3B66) : Colors.blue.shade100),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -299,7 +302,7 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
                     Expanded(
                       child: Text(
                         _t.shopInfo,
-                        style: TextStyle(fontSize: 13, color: Colors.blue.shade900),
+                        style: TextStyle(fontSize: 13, color: Theme.of(context).brightness == Brightness.dark ? Colors.blue.shade100 : Colors.blue.shade900),
                       ),
                     ),
                   ],
@@ -360,14 +363,14 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1C1F26) : Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: principale ? Colors.indigo.shade200 : Colors.black12),
         ),
         child: ListTile(
           contentPadding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
           leading: CircleAvatar(
-            backgroundColor: principale ? Colors.indigo.shade700 : Colors.teal.shade50,
+            backgroundColor: principale ? Colors.indigo.shade700 : (Theme.of(context).brightness == Brightness.dark ? const Color(0xFF15302D) : Colors.teal.shade50),
             child: Icon(
               principale ? Icons.star_rounded : Icons.storefront_rounded,
               color: principale ? Colors.white : Colors.teal.shade700,
@@ -378,7 +381,7 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
               Flexible(
                 child: Text(nom,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.bold, color: _bleuNuit)),
+                    style: TextStyle(fontWeight: FontWeight.bold, color: _encre)),
               ),
               if (principale) ...[
                 const SizedBox(width: 8),
