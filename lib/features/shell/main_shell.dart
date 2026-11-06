@@ -81,8 +81,12 @@ class _MainShellState extends ConsumerState<MainShell> {
         bottomNavigationBar: NavigationBar(
           selectedIndex: _index,
           height: 68,
-          backgroundColor: Colors.white,
-          indicatorColor: const Color(0xFF0052FF).withValues(alpha: 0.12),
+          // 🌙 Foncée la nuit, blanche le jour
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? const Color(0xFF1C1F26)
+              : Colors.white,
+          indicatorColor: const Color(0xFF0052FF).withValues(
+              alpha: Theme.of(context).brightness == Brightness.dark ? 0.30 : 0.12),
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
           onDestinationSelected: (i) => setState(() {
             _index = i;
