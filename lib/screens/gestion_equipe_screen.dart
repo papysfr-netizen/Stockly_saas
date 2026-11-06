@@ -81,7 +81,7 @@ class GestionEquipeScreen extends ConsumerWidget {
                 children: [
                   if (membres.length <= 1)
                     Card(
-                      color: Colors.blue.shade50,
+                      color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E2A4A) : Colors.blue.shade50,
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Text(
@@ -302,7 +302,7 @@ class _DialogueCreationState extends State<_DialogueCreation> {
                 _role == 'gerant'
                     ? t.teamManagerInfo
                     : t.teamCashierInfo,
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                style: TextStyle(fontSize: 12, color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade700),
               ),
               if (_erreur != null) ...[
                 const SizedBox(height: 12),
@@ -449,7 +449,7 @@ class _CarteMembre extends StatelessWidget {
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                       if (login.isNotEmpty)
-                        Text(login, style: TextStyle(color: Colors.grey.shade700, fontSize: 13)),
+                        Text(login, style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade700, fontSize: 13)),
                     ],
                   ),
                 ),
@@ -478,7 +478,7 @@ class _CarteMembre extends StatelessWidget {
                         ? 'Seul le patron peut modifier votre compte.'
                         : 'Administrateur : seul le patron peut le modifier.',
                     style: TextStyle(
-                        fontSize: 12, color: Colors.grey.shade700, fontStyle: FontStyle.italic),
+                        fontSize: 12, color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade700, fontStyle: FontStyle.italic),
                   ),
                 ),
               Row(
@@ -533,7 +533,7 @@ class _CarteMembre extends StatelessWidget {
                     role.isGerant
                         ? t.teamManagerDefault
                         : t.teamCashierDefault,
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                    style: TextStyle(fontSize: 12, color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade700),
                   ),
                   children: [
                     for (final cle in Permissions.toutes)
