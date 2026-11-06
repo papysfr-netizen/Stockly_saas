@@ -393,6 +393,8 @@ class PackingListService {
     BuildContext context, {
     required String entrepriseId,
     void Function(int traites, int total)? onProgress,
+    // 📷 Lecture par l'IA d'une photo (au lieu d'un fichier Excel)
+    Future<List<Map<String, dynamic>>?> Function()? lirePhoto,
   }) async {
     if (!context.mounted) return 0;
     // 🏬 Boutique qui reçoit la marchandise (boutique affichée ; « Toutes » = principale)
@@ -410,7 +412,7 @@ class PackingListService {
     final continuer = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Importer un fichier'),
+        title: Text(lirePhoto != null ? 'Importer une photo' : 'Importer un fichier'),
         content: Text('La marchandise sera ajoutée à la boutique :\n\n🏬 $nomBoutique\n\n'
             "Pour une autre boutique, changez d'abord de boutique dans l'application."),
         actions: [
@@ -421,8 +423,15 @@ class PackingListService {
     );
     if (continuer != true || !context.mounted) return 0;
 
+    // 📷 Photo : l'IA lit d'abord les produits
+    List<Map<String, dynamic>>? lus;
+    if (lirePhoto != null) {
+      lus = await lirePhoto();
+      if (lus == null || !context.mounted) return 0;
+    }
     final analyse = await choisirEtAnalyser(
-        entrepriseId: entrepriseId, boutiqueId: boutiqueId, nomBoutique: nomBoutique);
+        entrepriseId: entrepriseId, boutiqueId: boutiqueId, nomBoutique: nomBoutique,
+        produitsFournis: lus);
     if (analyse == null || !context.mounted) return 0;
 
     final resultat = await Navigator.of(context).push<ResultatImport>(
@@ -461,34 +470,46 @@ class PackingListService {
     required String entrepriseId,
     String boutiqueId = 'principale',
     String nomBoutique = '',
+    // 📷 Produits déjà lus (photo + IA) : pas de fichier à choisir
+    List<Map<String, dynamic>>? produitsFournis,
+    String? nomSource,
   }) async {
     if (entrepriseId.isEmpty) throw Exception("Identifiant d'entreprise manquant.");
 
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['xlsx', 'xls', 'csv'],
-      withData: true,
-    );
-    if (result == null || result.files.isEmpty) return null;
+    // 📷 Produits déjà lus (photo + IA) : on saute le choix du fichier
+    Map<String, dynamic> brut;
+    String nomFichierLu;
+    if (produitsFournis != null) {
+      brut = {'produits': produitsFournis, 'colonnes': <String, String>{}, 'avecEntete': true};
+      nomFichierLu = nomSource ?? 'Photo (IA)';
+    } else {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['xlsx', 'xls', 'csv'],
+        withData: true,
+      );
+      if (result == null || result.files.isEmpty) return null;
 
-    final pickedFile = result.files.first;
-    final name = pickedFile.name.toLowerCase();
-    final isExcel = name.endsWith('.xlsx') || name.endsWith('.xls');
-    final isCsv = name.endsWith('.csv');
-    if (!isExcel && !isCsv) {
-      throw Exception('Format non supporté. Choisissez un fichier .xlsx ou .csv.');
-    }
+      final pickedFile = result.files.first;
+      final name = pickedFile.name.toLowerCase();
+      final isExcel = name.endsWith('.xlsx') || name.endsWith('.xls');
+      final isCsv = name.endsWith('.csv');
+      if (!isExcel && !isCsv) {
+        throw Exception('Format non supporté. Choisissez un fichier .xlsx ou .csv.');
+      }
 
-    Uint8List? bytes = pickedFile.bytes;
-    if (bytes == null && pickedFile.path != null && pickedFile.path!.isNotEmpty) {
-      bytes = await File(pickedFile.path!).readAsBytes();
-    }
-    if (bytes == null || bytes.isEmpty) {
-      throw Exception('Impossible de lire le contenu du fichier.');
-    }
+      Uint8List? bytes = pickedFile.bytes;
+      if (bytes == null && pickedFile.path != null && pickedFile.path!.isNotEmpty) {
+        bytes = await File(pickedFile.path!).readAsBytes();
+      }
+      if (bytes == null || bytes.isEmpty) {
+        throw Exception('Impossible de lire le contenu du fichier.');
+      }
 
-    final brut = isCsv ? await compute(_parserCsv, bytes) : await compute(_parserExcel, bytes);
-    if (brut['erreur'] != null) throw Exception(brut['erreur']);
+      brut = isCsv ? await compute(_parserCsv, bytes) : await compute(_parserExcel, bytes);
+      if (brut['erreur'] != null) throw Exception(brut['erreur']);
+      nomFichierLu = pickedFile.name;
+    }
 
     final produitsFichier = (brut['produits'] as List).cast<Map<String, dynamic>>();
     final colonnes = Map<String, String>.from(brut['colonnes'] as Map);
@@ -603,7 +624,7 @@ class PackingListService {
 
     return AnalyseImport(
       entrepriseId: entrepriseId,
-      nomFichier: pickedFile.name,
+      nomFichier: nomFichierLu,
       colonnes: colonnes,
       avecEntete: brut['avecEntete'] == true,
       lignes: lignes,
