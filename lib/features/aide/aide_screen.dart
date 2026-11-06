@@ -897,7 +897,7 @@ class _AideScreenState extends State<AideScreen> {
         : rubriques.where((r) => r.contient(_recherche.trim())).toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F5F7),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF121418) : const Color(0xFFF3F5F7),
       appBar: AppBar(
         title: Text(AppLocalizations.of(context).guideTitle),
         backgroundColor: _vert,
@@ -911,10 +911,10 @@ class _AideScreenState extends State<AideScreen> {
               hintText: AppLocalizations.of(context).guideSearch,
               prefixIcon: const Icon(Icons.search_rounded),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF22262E) : Colors.white,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: Colors.grey.shade300),
+                borderSide: BorderSide(color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF343944) : Colors.grey.shade300),
               ),
             ),
             onChanged: (v) => setState(() => _recherche = v),
@@ -926,7 +926,7 @@ class _AideScreenState extends State<AideScreen> {
               child: Text(
                 AppLocalizations.of(context).guideNotFound(_recherche),
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey.shade700),
+                style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade700),
               ),
             ),
           for (final r in liste) _CarteRubrique(rubrique: r, ouverte: _recherche.trim().isNotEmpty),
@@ -948,9 +948,9 @@ class _CarteRubrique extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1C1F26) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2A2E37) : Colors.grey.shade200),
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -963,7 +963,7 @@ class _CarteRubrique extends StatelessWidget {
           ),
           title: Text(r.titre, style: const TextStyle(fontWeight: FontWeight.w600)),
           subtitle: r.patron
-              ? Text(AppLocalizations.of(context).guideOwnerOnly, style: TextStyle(fontSize: 12, color: Colors.grey.shade600))
+              ? Text(AppLocalizations.of(context).guideOwnerOnly, style: TextStyle(fontSize: 12, color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade600))
               : null,
           childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           expandedCrossAxisAlignment: CrossAxisAlignment.start,
@@ -993,7 +993,7 @@ class _CarteRubrique extends StatelessWidget {
                 margin: const EdgeInsets.only(top: 4),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.amber.shade50,
+                  color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF3A3218) : Colors.amber.shade50,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
