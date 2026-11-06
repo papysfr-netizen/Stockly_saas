@@ -12,6 +12,7 @@ import '../../../core/providers/currency_provider.dart';
 import '../../../core/providers/produit_provider.dart';
 import '../../../core/providers/entreprise_provider.dart';
 import '../../../core/services/packing_list_service.dart';
+import '../../../core/services/photo_ia_service.dart';
 import '../../../core/widgets/add_product_modal.dart';
 import '../../../core/widgets/changer_mot_de_passe_dialog.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
@@ -125,7 +126,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  Future<void> _importerExcel() async {
+  Future<void> _importerExcel({bool photo = false}) async {
     if (widget.currentUser.entrepriseId.isEmpty) return;
 
     setState(() {
@@ -136,6 +137,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     try {
       final count = await PackingListService().importerAvecApercu(context,
         entrepriseId: widget.currentUser.entrepriseId,
+        // 📷 Photo de facture lue par l'IA
+        lirePhoto: photo ? () => PhotoIaService.lirePhoto(context) : null,
         onProgress: (traites, total) {
           if (mounted) {
             setState(() {
@@ -242,6 +245,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     tooltip: t.stockImportTooltip,
                     onPressed: _importerExcel,
                   ),
+            // 📷🤖 Import d'une photo de facture, lue par l'IA
+            if (!_isImporting)
+              IconButton(
+                icon: const Icon(Icons.document_scanner_outlined),
+                tooltip: 'Importer une photo (IA)',
+                onPressed: () => _importerExcel(photo: true),
+              ),
           ],
           // 👤 Mon compte : tout le monde (mot de passe + déconnexion)
           PopupMenuButton<String>(
