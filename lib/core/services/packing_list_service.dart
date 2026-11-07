@@ -480,7 +480,14 @@ class PackingListService {
     Map<String, dynamic> brut;
     String nomFichierLu;
     if (produitsFournis != null) {
-      brut = {'produits': produitsFournis, 'colonnes': <String, String>{}, 'avecEntete': true};
+      const ia = "Lu par l'IA";
+      brut = {
+        'produits': produitsFournis,
+        'colonnes': <String, String>{
+          'codeBarre': ia, 'nom': ia, 'quantite': ia, 'prixAchat': ia, 'prixVente': ia,
+        },
+        'avecEntete': true,
+      };
       nomFichierLu = nomSource ?? 'Photo (IA)';
     } else {
       final result = await FilePicker.platform.pickFiles(
