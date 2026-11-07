@@ -226,6 +226,12 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Aperçu de l'import"),
+          // ✖ Toujours un moyen d'annuler (rien n'est importé)
+          leading: IconButton(
+            icon: const Icon(Icons.close),
+            tooltip: 'Annuler',
+            onPressed: _enCours ? null : () => Navigator.of(context).pop(),
+          ),
           backgroundColor: Colors.teal.shade700,
           foregroundColor: Colors.white,
         ),

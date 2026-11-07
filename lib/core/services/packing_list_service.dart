@@ -434,7 +434,8 @@ class PackingListService {
         produitsFournis: lus);
     if (analyse == null || !context.mounted) return 0;
 
-    final resultat = await Navigator.of(context).push<ResultatImport>(
+    // Au premier plan : le geste « retour » du téléphone ferme bien l'aperçu
+    final resultat = await Navigator.of(context, rootNavigator: true).push<ResultatImport>(
       MaterialPageRoute(
         builder: (_) => ImportApercuScreen(analyse: analyse, service: this),
       ),
@@ -484,7 +485,8 @@ class PackingListService {
       brut = {
         'produits': produitsFournis,
         'colonnes': <String, String>{
-          'codeBarre': ia, 'nom': ia, 'quantite': ia, 'prixAchat': ia, 'prixVente': ia,
+          'codeBarre': ia, 'code': ia, 'code_barre': ia,
+          'nom': ia, 'quantite': ia, 'prixAchat': ia, 'prixVente': ia,
         },
         'avecEntete': true,
       };
