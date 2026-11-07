@@ -240,18 +240,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ],
                     ),
                   )
-                : IconButton(
+                // ⬆ Un seul bouton : Excel ou photo lue par l'IA
+                : PopupMenuButton<bool>(
                     icon: const Icon(Icons.file_upload_outlined),
                     tooltip: t.stockImportTooltip,
-                    onPressed: _importerExcel,
+                    onSelected: (photo) => _importerExcel(photo: photo),
+                    itemBuilder: (_) => const [
+                      PopupMenuItem<bool>(
+                        value: false,
+                        child: ListTile(
+                          leading: Icon(Icons.table_chart_outlined),
+                          title: Text('Fichier Excel / CSV'),
+                        ),
+                      ),
+                      PopupMenuItem<bool>(
+                        value: true,
+                        child: ListTile(
+                          leading: Icon(Icons.document_scanner_outlined),
+                          title: Text('Photo de facture (IA)'),
+                        ),
+                      ),
+                    ],
                   ),
-            // 📷🤖 Import d'une photo de facture, lue par l'IA
-            if (!_isImporting)
-              IconButton(
-                icon: const Icon(Icons.document_scanner_outlined),
-                tooltip: 'Importer une photo (IA)',
-                onPressed: () => _importerExcel(photo: true),
-              ),
           ],
           // 👤 Mon compte : tout le monde (mot de passe + déconnexion)
           PopupMenuButton<String>(
