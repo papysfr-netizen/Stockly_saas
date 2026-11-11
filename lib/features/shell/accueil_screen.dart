@@ -237,7 +237,8 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          if (profil?.role.isOwner == true)
+                          // 🏬 Propriétaire OU membre autorisé « Toutes les boutiques »
+                          if (profil?.role.isOwner == true || profil?.peutToutesBoutiques == true)
                             SelecteurBoutique(entrepriseId: _entrepriseId)
                           else
                             _etiquetteBoutique(boutique),

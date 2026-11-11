@@ -11,6 +11,7 @@ import '../../core/providers/entreprise_provider.dart';
 import '../../core/utils/currency_extension.dart';
 import '../../screens/bon_livraison_screen.dart';
 import '../ventes/retour_vente_screen.dart';
+import '../boutiques/boutique_provider.dart';
 import 'package:stockly_saas/core/services/journal_service.dart';
 import '../ventes/restes_creances.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
@@ -51,6 +52,16 @@ DateTime _dateLimite(Map<String, dynamic> data) {
   if (v is Timestamp) return v.toDate();
   final d = _dateDe(data).add(const Duration(days: 7));
   return DateTime(d.year, d.month, d.day, 23, 59, 59);
+}
+
+/// 🏬 Garde seulement les ventes de la boutique affichée (null = toutes).
+List<QueryDocumentSnapshot<Map<String, dynamic>>> _deLaBoutique(
+    String? boutique, List<QueryDocumentSnapshot<Map<String, dynamic>>> docs) {
+  if (boutique == null) return docs;
+  return docs.where((d) {
+    final s = (d.data()['boutiqueId'] ?? '').toString();
+    return (s.isEmpty ? 'principale' : s) == boutique;
+  }).toList();
 }
 
 bool _estEnRetard(Map<String, dynamic> data) =>
@@ -108,10 +119,10 @@ class ALivrerNavButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final docs = ref
-            .watch(ventesALivrerProvider(entrepriseId))
-            .whenOrNull(data: (d) => d) ??
-        const <QueryDocumentSnapshot<Map<String, dynamic>>>[];
+    final docs = _deLaBoutique(
+        ref.watch(boutiqueActiveProvider),
+        ref.watch(ventesALivrerProvider(entrepriseId)).whenOrNull(data: (d) => d) ??
+            const <QueryDocumentSnapshot<Map<String, dynamic>>>[]);
     final nb = docs.length;
     final nbRetard = docs.where((d) => _estEnRetard(d.data())).length;
     final t = AppLocalizations.of(context);
@@ -157,6 +168,7 @@ class ALivrerScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(ventesALivrerProvider(entrepriseId));
+    final boutique = ref.watch(boutiqueActiveProvider); // 🏬
     final t = AppLocalizations.of(context);
 
     return Scaffold(
@@ -173,7 +185,8 @@ class ALivrerScreen extends ConsumerWidget {
             child: Text(t.errorPrefix('$e'), textAlign: TextAlign.center),
           ),
         ),
-        data: (docs) {
+        data: (toutesLesVentes) {
+          final docs = _deLaBoutique(boutique, toutesLesVentes);
           if (docs.isEmpty) {
             return Center(
               child: Column(
