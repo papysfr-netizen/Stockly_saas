@@ -338,20 +338,49 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                             soldeBase: solde,
                             boutique: boutique,
                             format: (x) => devise.formatPrice(x),
+                            // 💵 EN GRAND : l'argent qui doit être dans la caisse
                             construire: (solde) => Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
                             decoration: BoxDecoration(
-                              color: (solde >= 0 ? _vert : Colors.red).withValues(alpha: 0.08),
-                              borderRadius: BorderRadius.circular(12),
+                              color: (solde >= 0 ? _vert : Colors.red).withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: (solde >= 0 ? _vert : Colors.red).withValues(alpha: 0.5)),
                             ),
-                            child: Text(
-                              t.accCashInDrawer(devise.formatPrice(solde)),
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: solde >= 0 ? _vert : Colors.red,
-                              ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.account_balance_wallet_rounded, size: 18,
+                                        color: solde >= 0 ? _vert : Colors.red),
+                                    const SizedBox(width: 6),
+                                    Flexible(
+                                      child: Text(
+                                        t.accCashInDrawer('').replaceAll(':', '').trim(),
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          color: solde >= 0 ? _vert : Colors.red,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    devise.formatPrice(solde),
+                                    style: TextStyle(
+                                      fontSize: 34,
+                                      fontWeight: FontWeight.bold,
+                                      color: solde >= 0 ? _vert : Colors.red,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           ),
