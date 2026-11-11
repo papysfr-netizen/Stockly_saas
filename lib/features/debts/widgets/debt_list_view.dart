@@ -43,6 +43,10 @@ class DebtListView extends ConsumerStatefulWidget {
 
 class _DebtListViewState extends ConsumerState<DebtListView> {
   static const Color _bleuNuit = Color(0xFF1E293B);
+  // 🌙 Mode sombre
+  bool get _sombre => Theme.of(context).brightness == Brightness.dark;
+  Color get _encre => _sombre ? Colors.white : _bleuNuit;
+  Color get _bouton => _sombre ? const Color(0xFF3B5BDB) : _bleuNuit;
   static const Color _vert = Color(0xFF0F9D58);
   static const Color _rouge = Color(0xFFD93025);
   static const int _joursRetard = 30;
@@ -390,12 +394,12 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
               label: Text(libelles[f]!),
               selected: _filtre == f,
               onSelected: (_) => setState(() => _filtre = f),
-              selectedColor: _bleuNuit,
-              backgroundColor: Colors.white,
+              selectedColor: _bouton,
+              backgroundColor: _sombre ? const Color(0xFF22262E) : Colors.white,
               labelStyle: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: _filtre == f ? Colors.white : _bleuNuit,
+                color: _filtre == f ? Colors.white : _encre,
               ),
               showCheckmark: false,
               side: BorderSide(color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2E333D) : Colors.grey[300]!),
@@ -420,7 +424,7 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
           ),
           const SizedBox(height: 14),
           Text(titre,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _bleuNuit)),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _encre)),
           const SizedBox(height: 6),
           Text(texte,
               textAlign: TextAlign.center,
@@ -488,8 +492,8 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
                       Text(d.nomTiers,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.bold, color: _bleuNuit)),
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.bold, color: _encre)),
                       const SizedBox(height: 2),
                       Text(
                         [
@@ -553,7 +557,7 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
                   ),
                 ),
                 Text('${(pct * 100).toStringAsFixed(0)} %',
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: _bleuNuit)),
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: _encre)),
               ],
             ),
 
@@ -589,7 +593,7 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
                     tooltip: _t.ddDetails,
                     visualDensity: VisualDensity.compact,
                     onPressed: () => _ouvrirDetail(d),
-                    icon: const Icon(Icons.receipt_long_rounded, color: _bleuNuit),
+                    icon: Icon(Icons.receipt_long_rounded, color: _encre),
                   ),
                   TextButton.icon(
                     onPressed: () => _relancer(d),
@@ -600,7 +604,8 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
                   const SizedBox(width: 4),
                   FilledButton.icon(
                     style: FilledButton.styleFrom(
-                      backgroundColor: _bleuNuit,
+                      backgroundColor: _bouton,
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(horizontal: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
