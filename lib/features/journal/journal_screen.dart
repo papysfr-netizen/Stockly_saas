@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -42,6 +44,9 @@ class _JournalScreenState extends State<JournalScreen> {
   late Stream<QuerySnapshot<Map<String, dynamic>>> _flux;
   String _personne = ''; // '' = tout le monde
   Map<String, String> _nomsBoutiques = {};
+  // 🚚 Ventes pas encore (entièrement) livrées : id -> livrée en partie ?
+  Map<String, bool> _aLivrer = {};
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _ecouteLivraisons;
 
   @override
   void initState() {
@@ -50,6 +55,35 @@ class _JournalScreenState extends State<JournalScreen> {
     _jour = DateTime(n.year, n.month, n.day);
     _majFlux();
     _chargerBoutiques();
+    _ecouteLivraisons = FirebaseFirestore.instance
+        .collection('entreprises')
+        .doc(widget.entrepriseId)
+        .collection('ventes')
+        .where('statutLivraison', isEqualTo: 'Non livré')
+        .snapshots()
+        .listen((s) {
+      if (!mounted) return;
+      setState(() {
+        _aLivrer = {
+          for (final d in s.docs) d.id: d.data()['livraisonPartielle'] == true,
+        };
+      });
+    }, onError: (Object _) {});
+  }
+
+  @override
+  void dispose() {
+    _ecouteLivraisons?.cancel();
+    super.dispose();
+  }
+
+  /// Ligne « livré / à livrer » sous une vente du journal.
+  String _etatLivraison(Map<String, dynamic> l) {
+    if (l['action'] != ActionsJournal.vente) return '';
+    final id = (l['reference'] ?? '').toString();
+    if (id.isEmpty) return '';
+    if (!_aLivrer.containsKey(id)) return '\n✅ Livré';
+    return _aLivrer[id] == true ? '\n📦 Livré en partie' : '\n📦 À livrer';
   }
 
   void _majFlux() {
@@ -150,6 +184,8 @@ class _JournalScreenState extends State<JournalScreen> {
         return Icons.money_off_rounded;
       case ActionsJournal.compteClient:
         return Icons.account_balance_wallet_rounded;
+      case ActionsJournal.livraison:
+        return Icons.local_shipping_rounded;
       default:
         return Icons.history_rounded;
     }
@@ -169,6 +205,7 @@ class _JournalScreenState extends State<JournalScreen> {
       case ActionsJournal.transfert:
         return Colors.purple.shade600;
       case ActionsJournal.import:
+      case ActionsJournal.livraison:
         return Colors.teal.shade700;
       default:
         return const Color(0xFF0052FF);
@@ -307,7 +344,8 @@ class _JournalScreenState extends State<JournalScreen> {
                             ),
                             subtitle: Text(
                               '${l['details'] ?? ''}\n'
-                              '👤 ${l['userNom'] ?? '?'} · 🏬 ${_boutique((l['boutiqueId'] ?? '').toString())}',
+                              '👤 ${l['userNom'] ?? '?'} · 🏬 ${_boutique((l['boutiqueId'] ?? '').toString())}'
+                              '${_etatLivraison(l)}',
                             ),
                             isThreeLine: true,
                             trailing: Text(heure,

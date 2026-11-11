@@ -22,6 +22,7 @@ class ActionsJournal {
   static const String paiementDette = 'paiement_dette';
   static const String depense = 'depense';
   static const String compteClient = 'compte_client';
+  static const String livraison = 'livraison';
 
   /// Nom affiché à l'écran pour chaque action.
   static const Map<String, String> titres = {
@@ -36,6 +37,7 @@ class ActionsJournal {
     paiementDette: 'Paiement de dette',
     depense: 'Dépense',
     compteClient: 'Compte client',
+    livraison: 'Livraison',
   };
 
   static String titre(String action) => titres[action] ?? action;

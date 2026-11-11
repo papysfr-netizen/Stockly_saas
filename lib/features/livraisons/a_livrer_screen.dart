@@ -11,6 +11,7 @@ import '../../core/providers/entreprise_provider.dart';
 import '../../core/utils/currency_extension.dart';
 import '../../screens/bon_livraison_screen.dart';
 import '../ventes/retour_vente_screen.dart';
+import 'package:stockly_saas/core/services/journal_service.dart';
 import '../ventes/restes_creances.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
 
@@ -565,6 +566,20 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
     }
 
     if (mounted) setState(() => _enCours = false);
+
+    // 📒 Journal : qui a remis quoi (n'empêche jamais la livraison)
+    if (sortieArticles.isNotEmpty) {
+      unawaited(noterJournal(
+        entrepriseId: widget.entrepriseId,
+        action: ActionsJournal.livraison,
+        details: 'Facture ${widget.venteId.length >= 8 ? widget.venteId.substring(0, 8).toUpperCase() : widget.venteId}'
+            ' · $client · '
+            '${sortieArticles.map((a) => '${a['quantite']} × ${a['nom']}').join(', ')}'
+            '${toutLivre ? ' · tout est livré' : ' · livré en partie'}',
+        boutiqueId: (widget.data['boutiqueId'] ?? '').toString(),
+        reference: widget.venteId,
+      ));
+    }
 
     final String texte;
     if (horsLigne) {
