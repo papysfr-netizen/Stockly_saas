@@ -33,6 +33,7 @@ import 'package:stockly_saas/features/debts/screens/comptabilite_screen.dart';
 import 'package:stockly_saas/features/livraisons/a_livrer_screen.dart';
 import 'package:stockly_saas/features/ventes/historique_ventes_screen.dart';
 import 'package:stockly_saas/features/comptes_clients/argent_caisse_comptes.dart';
+import 'package:stockly_saas/core/services/argent_vente.dart';
 import 'package:stockly_saas/core/services/ventes_refusees.dart';
 
 const _vert = Color(0xFF0B7A5A);
@@ -173,11 +174,9 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                 _nombre(v['montantRetourne']) -
                 _nombre(v['montantAnnule']);
             ventes += total;
-            // 💳 La partie payée avec le compte du client n'entre pas dans le tiroir
-            final paye = _nombre(v['montantPaye']);
-            final payeVente = total > 0 && paye > total ? total : paye;
-            final cashVente = payeVente - _nombre(v['montantCompteClient']);
-            encaisse += cashVente > 0 ? cashVente : 0.0;
+            // 💵 Argent reçu À LA VENTE (calcul unique : sans monnaie rendue ni compte client).
+            //    Les remboursements des retours sont retirés à part, le jour du retour.
+            encaisse += ArgentVente.cashALaVente(v);
             credit += _nombre(v['resteAPayer']);
             cout += _nombre(v['coutMarchandises']);
             remises += _nombre(v['remiseTotale']);
@@ -337,6 +336,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                             entrepriseId: widget.currentUser.entrepriseId,
                             debut: minuit,
                             soldeBase: solde,
+                            boutique: boutique,
                             format: (x) => devise.formatPrice(x),
                             construire: (solde) => Container(
                             width: double.infinity,
@@ -644,6 +644,15 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                 .firstOrNull ??
             l.accMainShop;
 
+    // 💵 Même « argent en caisse » que l'Accueil : + dépôts − retraits − remboursements (espèces)
+    final caisseJour =
+        await lireCaisseDuJour(_entrepriseId, DateTime(now.year, now.month, now.day), boutique);
+    if (!mounted) return;
+    final soldeReel = solde +
+        caisseJour.depotsEspeces -
+        caisseJour.retraitsEspeces -
+        caisseJour.remboursementsEspeces;
+
     final t = StringBuffer()
       ..writeln('📊 *$nomBoutique — $date*')
       ..writeln(l.sumSales(nbVentes, devise.formatPrice(ventes)))
@@ -655,7 +664,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
     }
     if (voirFinances) {
       t
-        ..writeln(l.sumCash(devise.formatPrice(solde)))
+        ..writeln(l.sumCash(devise.formatPrice(soldeReel)))
         ..writeln(l.sumProfit(devise.formatPrice(benefice)));
       if (remises > 0.005) {
         t.writeln('🏷️ ${l.accDiscounts(devise.formatPrice(remises))}');

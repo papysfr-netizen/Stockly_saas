@@ -11,6 +11,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
 import 'package:stockly_saas/core/models/depense.dart';
+import 'package:stockly_saas/core/services/argent_vente.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
 
 class RapportJour {
@@ -108,10 +109,16 @@ class RapportJour {
       pv[0] += total;
       pv[1] += 1;
 
-      final paye = _n(v['montantPaye']);
-      if (paye > 0.005) {
-        final moyen = (v['methodePaiement'] ?? 'Cash').toString();
-        parMoyen[moyen] = (parMoyen[moyen] ?? 0) + paye;
+      // 💵 Même calcul que l'Accueil : argent reçu à la vente (sans monnaie rendue ni compte client)
+      final cash = ArgentVente.cashALaVente(v);
+      if (cash > 0.005) {
+        final moyen =
+            (v['methodePaiement'] ?? 'Cash').toString().replaceAll(' + Compte client', '');
+        parMoyen[moyen] = (parMoyen[moyen] ?? 0) + cash;
+      }
+      final parCompte = _n(v['montantCompteClient']);
+      if (parCompte > 0.005) {
+        parMoyen['Compte client'] = (parMoyen['Compte client'] ?? 0) + parCompte;
       }
 
       final d = _d(v['date']);

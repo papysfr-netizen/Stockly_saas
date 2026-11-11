@@ -674,6 +674,7 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
       'type': _annulation ? 'annulation' : 'retour',
       'entrepriseId': widget.entrepriseId,
       'venteId': widget.venteId,
+      'boutiqueId': (widget.data['boutiqueId'] ?? 'principale').toString(), // 🏬
       'nomClient': client,
       'telephoneClient': telephone,
       'articles': lignes,
