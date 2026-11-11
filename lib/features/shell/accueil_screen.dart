@@ -98,6 +98,41 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
     return null;
   }
 
+  /// 📉 Coût d'achat de ce que le client GARDE (comme le Rapport) :
+  ///    coût de la vente − coût des articles retournés/annulés
+  ///    + articles retournés abîmés (perte) − acompte gardé (gain).
+  static double _coutNet(Map<String, dynamic> v) {
+    final brut = _nombre(v['coutMarchandises']);
+    final articles = v['articles'] ?? v['produits'] ?? v['items'];
+    final ret = v['quantitesRetournees'];
+    final ann = v['quantitesAnnulees'];
+    double qteTotale = 0, qteRendue = 0, coutRendu = 0;
+    var prixConnus = true;
+    if (articles is List) {
+      for (var i = 0; i < articles.length; i++) {
+        final a = articles[i];
+        if (a is! Map) continue;
+        final q = _nombre(a['quantite']);
+        var r = (ret is List && i < ret.length ? _nombre(ret[i]) : 0.0) +
+            (ann is List && i < ann.length ? _nombre(ann[i]) : 0.0);
+        if (r > q) r = q;
+        qteTotale += q;
+        qteRendue += r;
+        if (r > 0) {
+          final pa = _nombre(a['prixAchat']);
+          if (pa > 0) {
+            coutRendu += pa * r;
+          } else {
+            prixConnus = false;
+          }
+        }
+      }
+    }
+    // Ancienne vente sans prix d'achat par article : au prorata des quantités
+    if (!prixConnus && qteTotale > 0) coutRendu = brut * qteRendue / qteTotale;
+    return brut - coutRendu + _nombre(v['coutAbimeRetours']) - _nombre(v['montantConserve']);
+  }
+
   static bool _memeBoutique(String? choisie, Object? b) {
     if (choisie == null) return true;
     final s = (b ?? '').toString();
@@ -178,7 +213,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
             //    Les remboursements des retours sont retirés à part, le jour du retour.
             encaisse += ArgentVente.cashALaVente(v);
             credit += _nombre(v['resteAPayer']);
-            cout += _nombre(v['coutMarchandises']);
+            cout += _coutNet(v); // 📉 retours déduits (comme le Rapport)
             remises += _nombre(v['remiseTotale']);
             listeVentes.add(v);
           }
