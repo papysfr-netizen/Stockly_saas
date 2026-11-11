@@ -6,15 +6,11 @@ import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
 import '../../core/providers/currency_provider.dart';
 import '../../core/providers/produit_provider.dart';
 import '../../core/providers/user_role_provider.dart';
-import '../../features/debts/repositories/vente_repository.dart';
 import '../../core/services/report_export_service.dart';
 import 'package:stockly_saas/screens/settings_screen.dart';
 import 'dialogs/nouveau_produit_dialog.dart';
 import 'widgets/panier_view.dart';
 import 'widgets/produits_view.dart' hide PanierView;
-
-final venteRepositoryProvider =
-    Provider<VenteRepository>((ref) => VenteRepository());
 
 class CaisseScreen extends ConsumerWidget {
   const CaisseScreen({super.key});

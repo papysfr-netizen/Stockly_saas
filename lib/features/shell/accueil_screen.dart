@@ -33,6 +33,7 @@ import 'package:stockly_saas/features/debts/screens/comptabilite_screen.dart';
 import 'package:stockly_saas/features/livraisons/a_livrer_screen.dart';
 import 'package:stockly_saas/features/ventes/historique_ventes_screen.dart';
 import 'package:stockly_saas/features/comptes_clients/argent_caisse_comptes.dart';
+import 'package:stockly_saas/core/services/ventes_refusees.dart';
 
 const _vert = Color(0xFF0B7A5A);
 const _bleu = Color(0xFF0052FF);
@@ -273,6 +274,9 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                   ),
                 ),
               ),
+
+              // ---------- 🚨 Ventes refusées par le serveur ----------
+              const SliverToBoxAdapter(child: AlerteVentesRefusees()),
 
               // ---------- La phrase du jour ----------
               SliverToBoxAdapter(

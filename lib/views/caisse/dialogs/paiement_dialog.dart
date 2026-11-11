@@ -19,6 +19,7 @@ import 'package:stockly_saas/core/services/receipt_service.dart';
 import 'package:stockly_saas/core/utils/payment_calculator.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:stockly_saas/core/services/messages_clients.dart';
+import 'package:stockly_saas/core/services/ventes_refusees.dart';
 
 // Import de ton écran de Bon de Livraison professionnel
 import '../../../screens/bon_livraison_screen.dart';
@@ -1097,12 +1098,24 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
       // ⏳ On attend la réponse du serveur (6 s maximum).
       //    Pas de réseau : la vente reste sur le téléphone et partira plus tard.
       //    Refus du serveur : on prévient clairement, rien n'est enregistré.
+      // 🚨 Si le serveur refuse la vente PLUS TARD (vente partie hors ligne),
+      //    on la note pour l'afficher sur l'Accueil (sinon elle disparaîtrait sans prévenir).
+      var refusDejaAffiche = false;
+      final envoi = batch.commit();
+      unawaited(envoi.then((_) {}, onError: (Object e) {
+        Future.delayed(const Duration(seconds: 2), () {
+          if (!refusDejaAffiche) {
+            VentesRefusees.noter(venteRef.id, numeroFacture, totalVente, '$e');
+          }
+        });
+      }));
       try {
-        await batch.commit().timeout(const Duration(seconds: 6));
+        await envoi.timeout(const Duration(seconds: 6));
         debugPrint('[Stockly] Vente ${venteRef.id} envoyée au serveur');
       } on TimeoutException {
         debugPrint('[Stockly] Vente ${venteRef.id} gardée hors ligne');
       } on FirebaseException catch (e) {
+        refusDejaAffiche = true; // le message s'affiche tout de suite ci-dessous
         debugPrint('[Stockly] Vente ${venteRef.id} REFUSÉE : ${e.code} ${e.message}');
         if (!mounted) return;
         setState(() => isLoading = false);

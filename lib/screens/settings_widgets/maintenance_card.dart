@@ -192,9 +192,8 @@ class MaintenanceCard extends ConsumerWidget {
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                onPressed: entrepriseId.isEmpty
-                    ? null
-                    : () => _confirmerEtNettoyerDoublons(context, ref),
+                // ⛔ Désactivé : la fusion par NOM peut mélanger puis effacer des produits différents
+                onPressed: null,
               ),
             ),
           ],
