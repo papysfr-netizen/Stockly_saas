@@ -418,7 +418,7 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.blueGrey.shade50,
+              color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF22262E) : Colors.blueGrey.shade50, // 🌙
               borderRadius: BorderRadius.circular(10),
             ),
             child: Column(
@@ -469,7 +469,7 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(explicationMode,
-                      style: TextStyle(fontSize: 12, color: Colors.grey.shade700)),
+                      style: TextStyle(fontSize: 12, color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade700)),
                   if (_mode == 'avoir') ...[
                     const SizedBox(height: 8),
                     TextField(
