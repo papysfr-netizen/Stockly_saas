@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../core/providers/currency_provider.dart';
 import '../../core/providers/user_role_provider.dart';
@@ -61,6 +62,9 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
   List<dynamic> _depensesToutes = const [];
   List<dynamic> _depensesAffichees = const [];
   DateTimeRange? _periodeAffichee;
+  // ⚡ Flux des ventes gardé tant que la période ne change pas
+  String? _cleVentes;
+  Stream<List<QueryDocumentSnapshot>>? _fluxVentes;
   Map<String, String> _nomsBoutiques = const {};
 
   // ------------------------------------------------------------------
@@ -232,11 +236,33 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
     final rangePrec = _periodePrecedente(dateRange);
 
     Stream<QuerySnapshot>? produitsStream;
-    Stream<QuerySnapshot>? ventesStream;
+    Stream<List<QueryDocumentSnapshot>>? ventesStream;
     if (entrepriseId.isNotEmpty) {
       final racine = FirebaseFirestore.instance.collection('entreprises').doc(entrepriseId);
       produitsStream = racine.collection('produits').snapshots();
-      ventesStream = racine.collection('ventes').snapshots();
+      // ⚡ Seulement les ventes de la période affichée ET de la période précédente
+      //    (pour la comparaison), au lieu de TOUTES les ventes depuis le début.
+      //    Les anciennes ventes dont la date est écrite en texte sont ajoutées.
+      final debutLecture = _jour(rangePrec.start);
+      final finLecture =
+          DateTime(dateRange.end.year, dateRange.end.month, dateRange.end.day + 1);
+      final cle = '$entrepriseId|$debutLecture|$finLecture';
+      if (cle != _cleVentes || _fluxVentes == null) {
+        _cleVentes = cle;
+        final ventes = racine.collection('ventes');
+        final recentes = ventes
+            .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(debutLecture))
+            .where('date', isLessThan: Timestamp.fromDate(finLecture))
+            .snapshots();
+        final anciennes = ventes.where('date', isGreaterThanOrEqualTo: '').snapshots();
+        _fluxVentes = Rx.combineLatest2(
+          recentes,
+          anciennes,
+          (QuerySnapshot<Map<String, dynamic>> a, QuerySnapshot<Map<String, dynamic>> b) =>
+              <QueryDocumentSnapshot>[...a.docs, ...b.docs],
+        ).shareReplay(maxSize: 1);
+      }
+      ventesStream = _fluxVentes;
     }
 
     final dfJour = DateFormat('d MMM yyyy', 'fr_FR');
@@ -356,7 +382,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                     ),
                     data: (toutesLesDepenses) => StreamBuilder<QuerySnapshot>(
                       stream: produitsStream,
-                      builder: (context, snapProduits) => StreamBuilder<QuerySnapshot>(
+                      builder: (context, snapProduits) => StreamBuilder<List<QueryDocumentSnapshot>>(
                         stream: ventesStream,
                         builder: (context, snapVentes) {
                           if (snapVentes.hasError || snapProduits.hasError) {
@@ -380,7 +406,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                           final produits = snapProduits.data?.docs ?? [];
                           // 🏬 Ventes et dépenses de la boutique choisie
                           // (sans boutique = boutique principale)
-                          final ventes = (snapVentes.data?.docs ?? []).where((d) {
+                          final ventes = (snapVentes.data ?? []).where((d) {
                             if (boutique == null) return true;
                             final m = (d.data() as Map<String, dynamic>?) ?? const {};
                             final b = (m['boutiqueId'] ?? '').toString();
@@ -418,7 +444,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
 
                             final ids = <String>{'principale', ...boutiques.map((b) => b.id)};
                             for (final id in ids) {
-                              final vB = (snapVentes.data?.docs ?? []).where((d) {
+                              final vB = (snapVentes.data ?? []).where((d) {
                                 final m = (d.data() as Map<String, dynamic>?) ?? const {};
                                 return bDe(m['boutiqueId']) == id;
                               }).toList();
@@ -446,7 +472,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                           _derniersProduits = produits;
                           _derniereBoutique = boutique;
                           _dernierePeriode = libelle;
-                          _ventesToutes = snapVentes.data?.docs ?? const [];
+                          _ventesToutes = snapVentes.data ?? const [];
                           _ventesAffichees = ventes;
                           _depensesToutes = toutesLesDepenses;
                           _depensesAffichees = depensesBoutique;
