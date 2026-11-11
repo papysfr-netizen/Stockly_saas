@@ -453,7 +453,7 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
                                         child: Text(
                                           _nomCategorie(t, depense.categorie),
                                           style: TextStyle(
-                                            color: Colors.indigo.shade900,
+                                            color: Theme.of(context).brightness == Brightness.dark ? Colors.indigo.shade100 : Colors.indigo.shade900,
                                             fontSize: 11,
                                             fontWeight: FontWeight.bold,
                                           ),

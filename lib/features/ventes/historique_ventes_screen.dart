@@ -788,7 +788,7 @@ class _LigneVente extends ConsumerWidget {
               if (vendeur.isNotEmpty)
                 Text(
                   t.histBy(vendeur),
-                  style: TextStyle(fontSize: 12, color: Colors.indigo.shade700),
+                  style: TextStyle(fontSize: 12, color: Theme.of(context).brightness == Brightness.dark ? Colors.indigo.shade200 : Colors.indigo.shade700),
                 ),
               const SizedBox(height: 4),
               Wrap(spacing: 6, runSpacing: 4, children: _badges(t, data)),
@@ -799,7 +799,7 @@ class _LigneVente extends ConsumerWidget {
           ref.formatPrice(total),
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: annulee ? Colors.grey : Colors.indigo.shade800,
+            color: annulee ? Colors.grey : (Theme.of(context).brightness == Brightness.dark ? Colors.indigo.shade200 : Colors.indigo.shade800),
           ),
         ),
       ),

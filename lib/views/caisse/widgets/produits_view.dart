@@ -237,7 +237,7 @@ class _ProduitsViewState extends ConsumerState<ProduitsView> {
                         },
                       ),
                     IconButton(
-                      icon: const Icon(Icons.qr_code_scanner, color: _bleuNuit),
+                      icon: Icon(Icons.qr_code_scanner, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : _bleuNuit),
                       tooltip: t.caisseScan,
                       onPressed: () async {
                         final codeScanne = await showModalBottomSheet<String>(
@@ -428,7 +428,7 @@ class _ProduitsViewState extends ConsumerState<ProduitsView> {
                       child: Badge(
                         label: Text('$cartItemCount'),
                         backgroundColor: _bleuNuit,
-                        child: const Icon(Icons.shopping_cart_outlined, color: _bleuNuit),
+                        child: Icon(Icons.shopping_cart_outlined, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : _bleuNuit),
                       ),
                     ),
                     const SizedBox(width: 10),

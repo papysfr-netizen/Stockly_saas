@@ -813,7 +813,7 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
               const SizedBox(height: 8),
               Text(
                 t.livAlreadyOut,
-                style: TextStyle(fontWeight: FontWeight.w600, color: Colors.blue.shade800),
+                style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).brightness == Brightness.dark ? Colors.blue.shade200 : Colors.blue.shade800),
               ),
               for (final s in sorties)
                 Padding(
@@ -828,7 +828,7 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
 
             // Montants
             Text(t.retInvoiceAmount(ref.formatPrice(total)),
-                style: TextStyle(color: Colors.grey.shade800)),
+                style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade300 : Colors.grey.shade800)),
             if (reste > 0.005)
               Container(
                 width: double.infinity,

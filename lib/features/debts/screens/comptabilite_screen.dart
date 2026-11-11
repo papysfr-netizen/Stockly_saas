@@ -717,8 +717,8 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: line.debit > 0
-                        ? Colors.green.shade800
-                        : Colors.blue.shade800,
+                        ? (Theme.of(context).brightness == Brightness.dark ? Colors.green.shade300 : Colors.green.shade800)
+                        : (Theme.of(context).brightness == Brightness.dark ? Colors.blue.shade200 : Colors.blue.shade800),
                   ),
                 ),
               ],

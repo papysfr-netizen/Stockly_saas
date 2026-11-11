@@ -160,7 +160,7 @@ class PanierView extends ConsumerWidget {
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.indigo.shade900,
+                                color: Theme.of(context).brightness == Brightness.dark ? Colors.indigo.shade200 : Colors.indigo.shade900,
                               ),
                             ),
                           ),
@@ -292,7 +292,7 @@ class PanierView extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: Colors.indigo.shade800,
+                        color: Theme.of(context).brightness == Brightness.dark ? Colors.indigo.shade200 : Colors.indigo.shade800,
                       ),
                     ),
                   ],

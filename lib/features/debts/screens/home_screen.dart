@@ -677,7 +677,7 @@ class ProduitCard extends StatelessWidget {
                     "$priceText $currency",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue.shade800,
+                      color: Theme.of(context).brightness == Brightness.dark ? Colors.blue.shade200 : Colors.blue.shade800,
                       fontSize: 14,
                     ),
                   ),
