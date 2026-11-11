@@ -32,6 +32,13 @@ class TransfertsScreen extends ConsumerStatefulWidget {
 
 class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
   static const Color _bleuNuit = Color(0xFF1E293B);
+  // 🌙 Mode sombre
+  bool get _sombre => Theme.of(context).brightness == Brightness.dark;
+  Color get _fondPage => _sombre ? const Color(0xFF121418) : const Color(0xFFF3F4F6);
+  Color get _fondCarte => _sombre ? const Color(0xFF1C1F26) : Colors.white;
+  Color get _fondChamp => _sombre ? const Color(0xFF22262E) : Colors.white;
+  Color _pastel(Color clair, Color base) => _sombre ? base.withValues(alpha: 0.22) : clair;
+  Color get _encre => _sombre ? Colors.white : _bleuNuit;
   static const String _principale = BoutiquesService.idPrincipale;
 
   String _de = _principale;
@@ -209,7 +216,7 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF3F4F6),
+        backgroundColor: _fondPage,
         appBar: AppBar(
           title: const Text('Transferts de stock', style: TextStyle(fontWeight: FontWeight.bold)),
           backgroundColor: _bleuNuit,
@@ -287,7 +294,7 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
           children: [
             // De -> Vers
             Container(
-              color: Colors.white,
+              color: _fondCarte,
               padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
               child: Row(
                 children: [
@@ -331,7 +338,7 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
                   hintText: 'Rechercher un produit…',
                   prefixIcon: const Icon(Icons.search_rounded),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: _fondChamp,
                   isDense: true,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
@@ -384,7 +391,7 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
               child: Container(
                 padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: _fondCarte,
                   boxShadow: [
                     BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 8, offset: const Offset(0, -2)),
                   ],
@@ -459,7 +466,7 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.fromLTRB(14, 8, 6, 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _fondCarte,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: q > 0 ? Colors.indigo.shade200 : Colors.black12),
       ),
@@ -472,7 +479,7 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
                 Text(p.nom,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.bold, color: _bleuNuit)),
+                    style: TextStyle(fontWeight: FontWeight.bold, color: _encre)),
                 Text('Disponible : $dispo', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
               ],
             ),
@@ -488,7 +495,7 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
               alignment: Alignment.center,
               padding: const EdgeInsets.symmetric(vertical: 6),
               decoration: BoxDecoration(
-                color: q > 0 ? Colors.indigo.shade50 : Colors.grey.shade100,
+                color: q > 0 ? _pastel(Colors.indigo.shade50, Colors.indigo) : _pastel(Colors.grey.shade100, Colors.grey),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text('$q', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
@@ -557,7 +564,7 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: Colors.indigo.shade50,
+                  backgroundColor: _pastel(Colors.indigo.shade50, Colors.indigo),
                   child: Icon(Icons.local_shipping_rounded, color: Colors.indigo.shade700),
                 ),
                 title: Text('${d['deNom'] ?? '?'}  →  ${d['versNom'] ?? '?'}',

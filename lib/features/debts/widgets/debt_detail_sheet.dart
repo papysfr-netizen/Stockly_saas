@@ -61,7 +61,9 @@ class DetteDetailSheet extends ConsumerStatefulWidget {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? const Color(0xFF1C1F26)
+          : Colors.white, // 🌙
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -81,6 +83,13 @@ class DetteDetailSheet extends ConsumerStatefulWidget {
 
 class _DetteDetailSheetState extends ConsumerState<DetteDetailSheet> {
   static const Color _bleuNuit = Color(0xFF1E293B);
+  // 🌙 Mode sombre
+  bool get _sombre => Theme.of(context).brightness == Brightness.dark;
+  Color get _fondPage => _sombre ? const Color(0xFF121418) : const Color(0xFFF3F4F6);
+  Color get _fondCarte => _sombre ? const Color(0xFF1C1F26) : Colors.white;
+  Color get _fondChamp => _sombre ? const Color(0xFF22262E) : Colors.white;
+  Color _pastel(Color clair, Color base) => _sombre ? base.withValues(alpha: 0.22) : clair;
+  Color get _encre => _sombre ? Colors.white : _bleuNuit;
   static const Color _vert = Color(0xFF0F9D58);
   static const Color _rouge = Color(0xFFD93025);
 
@@ -192,7 +201,7 @@ class _DetteDetailSheetState extends ConsumerState<DetteDetailSheet> {
                     radius: 22,
                     backgroundColor: _bleuNuit.withValues(alpha: 0.08),
                     child: Text(initiale,
-                        style: const TextStyle(color: _bleuNuit, fontWeight: FontWeight.bold)),
+                        style: TextStyle(color: _encre, fontWeight: FontWeight.bold)),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -200,8 +209,8 @@ class _DetteDetailSheetState extends ConsumerState<DetteDetailSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(d.nomTiers,
-                            style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold, color: _bleuNuit)),
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold, color: _encre)),
                         if (d.telephone.isNotEmpty)
                           Text(d.telephone, style: TextStyle(color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey[400]! : Colors.grey[700]!))),
                       ],
@@ -438,7 +447,7 @@ class _DetteDetailSheetState extends ConsumerState<DetteDetailSheet> {
           Text(
             valeur,
             style: TextStyle(
-              color: couleur ?? _bleuNuit,
+              color: couleur ?? _encre,
               fontWeight: gras ? FontWeight.w800 : FontWeight.w600,
             ),
           ),

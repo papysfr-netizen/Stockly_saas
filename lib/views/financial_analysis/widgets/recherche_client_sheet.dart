@@ -57,6 +57,13 @@ class RechercheClientSheet extends StatefulWidget {
 
 class _RechercheClientSheetState extends State<RechercheClientSheet> {
   static const Color _bleuNuit = Color(0xFF1E293B);
+  // 🌙 Mode sombre
+  bool get _sombre => Theme.of(context).brightness == Brightness.dark;
+  Color get _fondPage => _sombre ? const Color(0xFF121418) : const Color(0xFFF3F4F6);
+  Color get _fondCarte => _sombre ? const Color(0xFF1C1F26) : Colors.white;
+  Color get _fondChamp => _sombre ? const Color(0xFF22262E) : Colors.white;
+  Color _pastel(Color clair, Color base) => _sombre ? base.withValues(alpha: 0.22) : clair;
+  Color get _encre => _sombre ? Colors.white : _bleuNuit;
   static const Color _vert = Color(0xFF0F9D58);
   static const Color _rouge = Color(0xFFD93025);
 
@@ -139,8 +146,8 @@ class _RechercheClientSheetState extends State<RechercheClientSheet> {
   Widget build(BuildContext context) {
     return Container(
       height: MediaQuery.of(context).size.height * 0.92,
-      decoration: const BoxDecoration(
-        color: Color(0xFFF3F4F6),
+      decoration: BoxDecoration(
+        color: _fondPage,
         borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
       ),
       child: Column(
@@ -168,8 +175,8 @@ class _RechercheClientSheetState extends State<RechercheClientSheet> {
                     children: [
                       Text(_client ?? '🔎 Rechercher un client',
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold, color: _bleuNuit)),
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold, color: _encre)),
                       Text(widget.libellePeriode,
                           style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
                     ],
@@ -193,7 +200,7 @@ class _RechercheClientSheetState extends State<RechercheClientSheet> {
                   hintText: 'Nom du client…',
                   prefixIcon: const Icon(Icons.search_rounded),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: _fondChamp,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                 ),
@@ -242,7 +249,7 @@ class _RechercheClientSheetState extends State<RechercheClientSheet> {
         child: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-              color: Colors.white, borderRadius: BorderRadius.circular(12)),
+              color: _fondCarte, borderRadius: BorderRadius.circular(12)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -263,8 +270,8 @@ class _RechercheClientSheetState extends State<RechercheClientSheet> {
   Widget _titre(String t) => Padding(
         padding: const EdgeInsets.fromLTRB(4, 18, 4, 8),
         child: Text(t,
-            style: const TextStyle(
-                fontSize: 15, fontWeight: FontWeight.bold, color: _bleuNuit)),
+            style: TextStyle(
+                fontSize: 15, fontWeight: FontWeight.bold, color: _encre)),
       );
 
   Widget _fiche(String nom) {
@@ -341,11 +348,11 @@ class _RechercheClientSheetState extends State<RechercheClientSheet> {
         ),
         const SizedBox(height: 10),
         Row(children: [
-          _stat('Achats (période)', '${achats.length} • ${fmt(total)}', _bleuNuit),
+          _stat('Achats (période)', '${achats.length} • ${fmt(total)}', _encre),
           const SizedBox(width: 8),
           _stat('Payé', fmt(paye), _vert),
           const SizedBox(width: 8),
-          _stat('Reste', fmt(reste), reste > 0.005 ? _rouge : _bleuNuit),
+          _stat('Reste', fmt(reste), reste > 0.005 ? _rouge : _encre),
         ]),
 
         // ----- Achats -----

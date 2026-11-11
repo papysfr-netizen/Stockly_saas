@@ -25,6 +25,13 @@ class PrixBoutiquesScreen extends ConsumerStatefulWidget {
 
 class _PrixBoutiquesScreenState extends ConsumerState<PrixBoutiquesScreen> {
   static const Color _bleuNuit = Color(0xFF1E293B);
+  // 🌙 Mode sombre
+  bool get _sombre => Theme.of(context).brightness == Brightness.dark;
+  Color get _fondPage => _sombre ? const Color(0xFF121418) : const Color(0xFFF3F4F6);
+  Color get _fondCarte => _sombre ? const Color(0xFF1C1F26) : Colors.white;
+  Color get _fondChamp => _sombre ? const Color(0xFF22262E) : Colors.white;
+  Color _pastel(Color clair, Color base) => _sombre ? base.withValues(alpha: 0.22) : clair;
+  Color get _encre => _sombre ? Colors.white : _bleuNuit;
 
   String? _boutique;
   final Map<String, TextEditingController> _ctrls = {};
@@ -136,7 +143,7 @@ class _PrixBoutiquesScreenState extends ConsumerState<PrixBoutiquesScreen> {
       corps = Column(
         children: [
           Container(
-            color: Colors.white,
+            color: _fondCarte,
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
             child: Column(
               children: [
@@ -201,7 +208,7 @@ class _PrixBoutiquesScreenState extends ConsumerState<PrixBoutiquesScreen> {
                             top: false,
                             child: Container(
                               padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-                              color: Colors.white,
+                              color: _fondCarte,
                               child: Row(
                                 children: [
                                   Expanded(
@@ -234,7 +241,7 @@ class _PrixBoutiquesScreenState extends ConsumerState<PrixBoutiquesScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F4F6),
+      backgroundColor: _fondPage,
       appBar: AppBar(
         title: const Text('Prix par boutique', style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: _bleuNuit,
@@ -252,7 +259,7 @@ class _PrixBoutiquesScreenState extends ConsumerState<PrixBoutiquesScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.fromLTRB(14, 8, 10, 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _fondCarte,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: modifie ? Colors.amber.shade400 : Colors.black12),
       ),
@@ -265,7 +272,7 @@ class _PrixBoutiquesScreenState extends ConsumerState<PrixBoutiquesScreen> {
                 Text(p.nom,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.bold, color: _bleuNuit)),
+                    style: TextStyle(fontWeight: FontWeight.bold, color: _encre)),
                 Text('Prix normal : ${_fmt(p.prixVente, taux)} $currency',
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
               ],

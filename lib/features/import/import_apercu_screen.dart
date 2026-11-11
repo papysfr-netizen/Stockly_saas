@@ -14,6 +14,12 @@ class ImportApercuScreen extends StatefulWidget {
 }
 
 class _ImportApercuScreenState extends State<ImportApercuScreen> {
+  // 🌙 Mode sombre
+  bool get _sombre => Theme.of(context).brightness == Brightness.dark;
+  Color get _fondPage => _sombre ? const Color(0xFF121418) : const Color(0xFFF3F4F6);
+  Color get _fondCarte => _sombre ? const Color(0xFF1C1F26) : Colors.white;
+  Color get _fondChamp => _sombre ? const Color(0xFF22262E) : Colors.white;
+  Color _pastel(Color clair, Color base) => _sombre ? base.withValues(alpha: 0.22) : clair;
   ModeImport _mode = ModeImport.arrivage;
   bool _enCours = false;
   String _progression = '';
@@ -103,7 +109,7 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
           Text(
             trouvee != null ? '« $trouvee »' : 'non trouvée',
             style: TextStyle(
-              color: trouvee != null ? Colors.black87 : Colors.orange.shade800,
+              color: trouvee != null ? (_sombre ? Colors.white : Colors.black87) : Colors.orange.shade800,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -116,7 +122,7 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
   Widget _tuileDouteuse(LigneImport l) {
     final choisi = l.memeProduit;
     return Card(
-      color: Colors.orange.shade50,
+      color: _pastel(Colors.orange.shade50, Colors.orange),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
@@ -331,7 +337,7 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
                       ),
                       if (a.nbAChoisir > 0)
                         Chip(
-                          backgroundColor: Colors.orange.shade100,
+                          backgroundColor: _pastel(Colors.orange.shade100, Colors.orange),
                           avatar: Icon(Icons.help_rounded, color: Colors.orange.shade800, size: 18),
                           label: Text('${a.nbAChoisir} à vérifier'),
                         ),
