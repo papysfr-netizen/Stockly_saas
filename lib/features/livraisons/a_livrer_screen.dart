@@ -11,6 +11,7 @@ import '../../core/providers/entreprise_provider.dart';
 import '../../core/utils/currency_extension.dart';
 import '../../screens/bon_livraison_screen.dart';
 import '../ventes/retour_vente_screen.dart';
+import '../ventes/restes_creances.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
 
 // ============================================================================
@@ -300,7 +301,7 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
     final boutique = ref.read(entrepriseProvider).nom;
     final limite = _dateLimite(widget.data);
     final enRetard = _estEnRetard(widget.data);
-    final reste = _nombre(widget.data['resteAPayer']);
+    final reste = resteReel(widget.data, widget.venteId);
     final articles = _articles;
     final restes = _restes;
     final dejaSorti = _quantitesLivrees.any((q) => q > 0);
@@ -359,7 +360,7 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
   Future<void> _marquerLivre() async {
     final client = (widget.data['nomClient'] ?? 'Client').toString();
     final telephone = (widget.data['telephoneClient'] ?? '').toString();
-    final resteAPayer = _nombre(widget.data['resteAPayer']);
+    final resteAPayer = resteReel(widget.data, widget.venteId);
     final articles = _articles;
     final dejaLivrees = _quantitesLivrees;
     final annulees = _quantitesAnnulees;
@@ -612,11 +613,13 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
 
   @override
   Widget build(BuildContext context) {
+    // 💳 Suit les paiements de dette : le reste se met à jour tout seul
+    ref.watch(restesCreancesProvider(widget.entrepriseId));
     final client = (widget.data['nomClient'] ?? 'Client').toString();
     final telephone = (widget.data['telephoneClient'] ?? '').toString();
     final vendeurNom = (widget.data['vendeurNom'] ?? '').toString();
     final total = _nombre(widget.data['montantTotal']);
-    final reste = _nombre(widget.data['resteAPayer']);
+    final reste = resteReel(widget.data, widget.venteId);
     final date = _dateDe(widget.data);
     final limite = _dateLimite(widget.data);
     final maintenant = DateTime.now();
