@@ -215,7 +215,25 @@ service cloud.firestore {
           || (estMembre(entId)
               && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['quantite', 'stocks', 'updatedAt'])
               && (aToutesBoutiques(entId)
-                  || request.resource.data.get('stocks', {}).diff(resource.data.get('stocks', {})).affectedKeys().hasOnly([maBoutique()])));
+                  || (request.resource.data.get('stocks', {}).diff(resource.data.get('stocks', {})).affectedKeys().hasOnly([maBoutique()])
+                      && stockBoutiqueSuitLeTotal()))
+              // 📦 Remettre du stock (retour) : autorisation « Retours et annulations »
+              && (ecartQuantite() <= 0 || aPermission(entId, 'retours')));
+
+        // Écart du stock total (négatif = vente, positif = retour)
+        function ecartQuantite() {
+          return request.resource.data.get('quantite', 0) - resource.data.get('quantite', 0);
+        }
+
+        // Dans une boutique secondaire, le stock de la boutique bouge
+        // exactement comme le total (sinon c'est un transfert caché).
+        // Dans la principale, les autres boutiques ne bougent pas (vérifié au-dessus).
+        function stockBoutiqueSuitLeTotal() {
+          let b = maBoutique();
+          return b == 'principale'
+            || request.resource.data.get('stocks', {}).get(b, 0)
+               - resource.data.get('stocks', {}).get(b, 0) == ecartQuantite();
+        }
       }
 
       // ----- Ventes, créances, dettes : tout le monde crée et met à jour ; effacer = Gérant+ -----

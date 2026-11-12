@@ -1,1 +1,38 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"stockly-saas","appId":"1:68976746757:android:b3d8398e3c2d369f81976c","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"stockly-saas","configurations":{"android":"1:68976746757:android:b3d8398e3c2d369f81976c","ios":"1:68976746757:ios:ad3d32f8c218195a81976c","macos":"1:68976746757:ios:ad3d32f8c218195a81976c","web":"1:68976746757:web:eb8cf46d5936108981976c","windows":"1:68976746757:web:c04ebca52141b8e381976c"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "stockly-saas",
+          "appId": "1:68976746757:android:b3d8398e3c2d369f81976c",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "stockly-saas",
+          "configurations": {
+            "android": "1:68976746757:android:b3d8398e3c2d369f81976c",
+            "ios": "1:68976746757:ios:ad3d32f8c218195a81976c",
+            "macos": "1:68976746757:ios:ad3d32f8c218195a81976c",
+            "web": "1:68976746757:web:eb8cf46d5936108981976c",
+            "windows": "1:68976746757:web:c04ebca52141b8e381976c"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "emulators": {
+    "firestore": {
+      "host": "127.0.0.1",
+      "port": 8080
+    },
+    "ui": {
+      "enabled": false
+    },
+    "singleProjectMode": true
+  }
+}

@@ -1,8 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stockly_saas/core/providers/currency_provider.dart';
 
 void main() {
+  // Simule le stockage du téléphone (SharedPreferences) pendant les tests
+  TestWidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences.setMockInitialValues({});
+
   late ProviderContainer container;
 
   setUp(() {

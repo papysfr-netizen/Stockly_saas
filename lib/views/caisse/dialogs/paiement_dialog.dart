@@ -139,8 +139,8 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
   }
 
   void _onMontantChanged(double rate) {
-    final paidUSD = double.tryParse(_verseUSDController.text.trim()) ?? 0.0;
-    final paidLocal = double.tryParse(_verseLocalController.text.trim()) ?? 0.0;
+    final paidUSD = parseAmount(_verseUSDController.text);
+    final paidLocal = parseAmount(_verseLocalController.text);
     final totalPayeUSD = paidUSD + (rate > 0 ? paidLocal / rate : 0.0) + _montantSoldeUtilise;
 
     setState(() {
@@ -253,8 +253,8 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
     final currencyState = ref.watch(currencyProvider);
     final activeInfo = currencyState.activeCurrencyInfo;
 
-    final paidUSD = double.tryParse(_verseUSDController.text.trim()) ?? 0.0;
-    final paidLocal = double.tryParse(_verseLocalController.text.trim()) ?? 0.0;
+    final paidUSD = parseAmount(_verseUSDController.text);
+    final paidLocal = parseAmount(_verseLocalController.text);
 
     final calc = PaymentResult(
       totalUSD: _totalAPayer,
@@ -822,8 +822,8 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
     final double soldeUtilise = _montantSoldeUtilise;
     final calc = PaymentResult(
       totalUSD: _totalAPayer,
-      paidUSD: double.tryParse(_verseUSDController.text.trim()) ?? 0.0,
-      paidLocal: double.tryParse(_verseLocalController.text.trim()) ?? 0.0,
+      paidUSD: parseAmount(_verseUSDController.text),
+      paidLocal: parseAmount(_verseLocalController.text),
       localRate: activeInfoValidation.rateToUSD,
     );
 
