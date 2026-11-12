@@ -1,0 +1,326 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Fonctions utiles ----------
+
+    function estConnecte() {
+      return request.auth != null;
+    }
+
+    function profilExiste() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function monProfil() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function monEntreprise() {
+      return monProfil().entrepriseId;
+    }
+
+    function monRole() {
+      return monProfil().get('role', 'caissier');
+    }
+
+    // Compte actif (un compte sans le champ estActif est considéré actif)
+    function estActif() {
+      return monProfil().get('estActif', true) != false;
+    }
+
+    function estMembre(entId) {
+      return estConnecte() && profilExiste() && monEntreprise() == entId && estActif();
+    }
+
+    // L'utilisateur est le propriétaire (ownerId) de cette entreprise
+    function estProprietaireDe(entId) {
+      return estConnecte()
+        && get(/databases/$(database)/documents/entreprises/$(entId)).data.ownerId == request.auth.uid;
+    }
+
+    // Le rôle est Propriétaire ou Gérant (anciens noms de rôles acceptés)
+    function aRoleGerantOuPlus() {
+      return monRole() in ['owner', 'proprietaire', 'patron', 'gerant', 'admin',
+                           'administrateur', 'chefboutique', 'chef_boutique', 'chef', 'comptable'];
+    }
+
+    // Propriétaire ou Gérant de cette entreprise
+    function estGerantOuPlus(entId) {
+      return estMembre(entId) && (estProprietaireDe(entId) || aRoleGerantOuPlus());
+    }
+
+    // Autorisation réglée par le patron (Paramètres → Équipe)
+    //  - Propriétaire : toujours oui
+    //  - Sinon : l'interrupteur choisi par le patron,
+    //    ou par défaut : Gérant = oui, Caissier = non
+    function aPermission(entId, cle) {
+      return estMembre(entId) && (
+        estProprietaireDe(entId)
+        || monProfil().get('permissions', {}).get(cle, aRoleGerantOuPlus()) == true
+      );
+    }
+
+    // L'entreprise est en train d'être créée par cet utilisateur (inscription)
+    function creeParMoi(entId) {
+      return estConnecte()
+        && getAfter(/databases/$(database)/documents/entreprises/$(entId)).data.ownerId == request.auth.uid;
+    }
+
+    // Boutique de travail de l'utilisateur (vide = boutique principale)
+    function maBoutique() {
+      return monProfil().get('boutiqueId', '') == '' ? 'principale' : monProfil().get('boutiqueId', '');
+    }
+
+    // Employé autorisé « Toutes les boutiques » par le patron (éteint par défaut)
+    function aToutesBoutiques(entId) {
+      return estMembre(entId)
+        && monProfil().get('permissions', {}).get('toutesBoutiques', false) == true;
+    }
+
+    // Employé autorisé « Paramètres sensibles » par le patron (éteint par défaut) :
+    // taux de change, boutiques, sauvegarde, journal
+    function aParametres(entId) {
+      return estMembre(entId)
+        && monProfil().get('permissions', {}).get('parametresSensibles', false) == true;
+    }
+
+    // Le proprietaire travaille partout ; les autres seulement dans leur boutique
+    // (sauf avec l'autorisation « Toutes les boutiques »)
+    function boutiqueAutorisee(entId, b) {
+      return estProprietaireDe(entId)
+        || aToutesBoutiques(entId)
+        || (b == '' ? 'principale' : b) == maBoutique();
+    }
+
+    // Paiement ou retour sur une dette (employé non gérant) :
+    //  - seuls les champs du paiement changent
+    //  - le reste ne peut que baisser, sans passer sous 0,
+    //    et pas plus que ce qui a été payé (acomptePaye) ou rendu (montantRetour)
+    function paiementValide() {
+      let avant = resource.data;
+      let apres = request.resource.data;
+      let resteAvant = avant.get('montantReste', avant.get('montantRestant', avant.get('montantInitial', 0)));
+      let baisse = resteAvant - apres.get('montantReste', 0);
+      let paye = apres.get('acomptePaye', 0) - avant.get('acomptePaye', 0);
+      let rendu = apres.get('montantRetour', 0) - avant.get('montantRetour', 0);
+      return apres.diff(avant).affectedKeys().hasOnly(['montantReste', 'montantRestant', 'acomptePaye',
+                 'statut', 'dernierPaiement', 'updatedAt', 'paiements', 'montantRetour'])
+        && apres.get('montantReste', 0) >= 0
+        && baisse >= 0
+        && paye >= 0
+        && rendu >= 0
+        && baisse <= paye + rendu + 0.02;
+    }
+
+    // Une vente déjà faite (employé non gérant) : on peut livrer, faire un retour,
+    // encaisser une dette… mais JAMAIS changer le montant, les articles, le vendeur,
+    // la boutique, la date, le client ni la façon dont elle a été payée.
+    function venteIntacte() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+        'id', 'entrepriseId', 'montantTotal', 'articles', 'remiseTotale',
+        'vendeurId', 'vendeurNom', 'boutiqueId', 'date', 'createdAt',
+        'nomClient', 'telephoneClient', 'methodePaiement', 'tauxEchange',
+        'montantPayeUSD', 'montantPayeLocal', 'montantCompteClient',
+        'monnaieRendueUSD', 'monnaieRendueLocal', 'comptabilise', 'coutMarchandises'
+      ]);
+    }
+
+    // Employé autorisé « Gérer l'équipe » par le patron
+    // (éteint par défaut, même pour un gérant)
+    function estAdminEquipe(entId) {
+      return estMembre(entId)
+        && monProfil().get('permissions', {}).get('gererEquipe', false) == true;
+    }
+
+    // Ce profil est-il un administrateur ?
+    function profilEstAdmin(data) {
+      return data.get('permissions', {}).get('gererEquipe', false) == true;
+    }
+
+    // ---------- Profils utilisateurs ----------
+    match /users/{userId} {
+
+      allow read: if estConnecte() && (
+        request.auth.uid == userId
+        || estProprietaireDe(resource.data.entrepriseId)
+        || estAdminEquipe(resource.data.entrepriseId)
+      );
+
+      allow create: if estConnecte() && (
+        (request.auth.uid == userId && creeParMoi(request.resource.data.entrepriseId))
+        || (
+          estProprietaireDe(request.resource.data.entrepriseId)
+          && request.resource.data.role in ['gerant', 'caissier']
+        )
+        // 👥 Administrateur : crée un gérant ou un caissier SANS aucune autorisation
+        //    spéciale et sans boutique (c'est le patron qui les donne)
+        || (
+          estAdminEquipe(request.resource.data.entrepriseId)
+          && request.resource.data.role in ['gerant', 'caissier']
+          && request.resource.data.get('uid', '') == userId
+          && request.resource.data.get('estActif', true) == true
+          && request.resource.data.get('permissions', {}).keys().hasOnly(['canGiveDiscount'])
+          && request.resource.data.get('permissions', {}).get('canGiveDiscount', false) == false
+          && !request.resource.data.keys().hasAny(['boutiqueId'])
+        )
+      );
+
+      allow update: if estConnecte() && (
+        (
+          // Un employé modifie son propre profil : JAMAIS son rôle, son entreprise,
+          // son état actif ni ses autorisations
+          request.auth.uid == userId
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'entrepriseId', 'uid', 'estActif', 'permissions', 'boutiqueId'])
+        )
+        || (
+          estProprietaireDe(resource.data.entrepriseId)
+          && resource.data.role != 'owner'
+          && request.resource.data.entrepriseId == resource.data.entrepriseId
+          && request.resource.data.role in ['gerant', 'caissier']
+        )
+        // 👥 Administrateur : change seulement caissier ou gérant et bloque / débloque.
+        //    Jamais lui-même, jamais le patron, jamais un autre administrateur,
+        //    jamais les autorisations ni la boutique.
+        || (
+          estAdminEquipe(resource.data.entrepriseId)
+          && request.auth.uid != userId
+          && resource.data.role in ['gerant', 'caissier']
+          && request.resource.data.role in ['gerant', 'caissier']
+          && !profilEstAdmin(resource.data)
+          && get(/databases/$(database)/documents/entreprises/$(resource.data.entrepriseId)).data.ownerId != userId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role', 'estActif'])
+        )
+      );
+
+      allow delete: if false;
+    }
+
+    // ---------- Entreprises ----------
+    match /entreprises/{entId} {
+      allow read: if estMembre(entId);
+      allow create: if estConnecte() && request.resource.data.ownerId == request.auth.uid;
+      // Infos de la boutique (Paramètres) : Propriétaire seulement
+      allow update: if estProprietaireDe(entId) && request.resource.data.ownerId == resource.data.ownerId;
+      allow delete: if false;
+
+      // ----- Produits -----
+      match /produits/{produitId} {
+        allow read: if estMembre(entId);
+        // Créer / supprimer : autorisation « Gérer le stock »
+        allow create, delete: if aPermission(entId, 'gererStock');
+        // Modifier : « Gérer le stock » (tout) ;
+        //            les autres : seulement le stock lors d'une vente / d'un retour
+        allow update: if aPermission(entId, 'gererStock')
+          || (estMembre(entId)
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['quantite', 'stocks', 'updatedAt'])
+              && (aToutesBoutiques(entId)
+                  || request.resource.data.get('stocks', {}).diff(resource.data.get('stocks', {})).affectedKeys().hasOnly([maBoutique()])));
+      }
+
+      // ----- Ventes, créances, dettes : tout le monde crée et met à jour ; effacer = Gérant+ -----
+      // ----- Boutiques (multi-boutiques) : tout le monde voit ; le patron gère -----
+      match /boutiques/{boutiqueId} {
+        allow read: if estMembre(entId);
+        // Créer / modifier (nom, taux de change) : le patron ou « Paramètres sensibles »
+        allow create, update: if estProprietaireDe(entId) || aParametres(entId);
+        allow delete: if false;
+      }
+
+      // ----- Transferts de stock entre boutiques : historique jamais modifiable -----
+      match /transferts/{transfertId} {
+        allow read: if estMembre(entId);
+        allow create: if aPermission(entId, 'gererStock');
+        allow update, delete: if false;
+      }
+
+      match /ventes/{docId} {
+        allow read: if estMembre(entId);
+        // 🔒 Modifier : Gérant+ = tout ; les autres = livraison, retour, paiement seulement ;
+        //    « Maintenance » = rattrapage du coût des marchandises
+        allow update: if estGerantOuPlus(entId)
+          || (estMembre(entId) && venteIntacte())
+          || (aPermission(entId, 'maintenance')
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['coutMarchandises']));
+        allow create: if estMembre(entId)
+          && boutiqueAutorisee(entId, request.resource.data.get('boutiqueId', ''));
+        allow delete: if estGerantOuPlus(entId);
+      }
+      match /retours/{docId} {
+        // Retours / annulations : tout le monde voit ;
+        // créer = autorisation « Retours et annulations » ; personne ne modifie
+        allow read: if estMembre(entId);
+        allow create: if aPermission(entId, 'retours');
+        allow update, delete: if false;
+      }
+      match /comptes_clients/{compteId} {
+        // Comptes clients (dépôts / avoirs) : on ne supprime jamais.
+        // Un RETRAIT (totalRetire change) = autorisation « Remises et retraits »
+        allow read, create: if estMembre(entId);
+        allow update: if estMembre(entId) && (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['totalRetire'])
+          || aPermission(entId, 'remisesRetraits')
+        );
+        allow delete: if false;
+        match /mouvements/{mvtId} {
+          allow read: if estMembre(entId);
+          allow create: if estMembre(entId) && (
+            request.resource.data.get('type', '') != 'retrait'
+            || aPermission(entId, 'remisesRetraits')
+          );
+          allow update, delete: if false;
+        }
+      }
+      // 🔒 Créances / dettes : Gérant+ = tout ; les autres = paiement ou retour seulement
+      match /creances/{docId} {
+        allow read, create: if estMembre(entId);
+        allow update: if estGerantOuPlus(entId) || (estMembre(entId) && paiementValide());
+        allow delete: if estGerantOuPlus(entId);
+      }
+      match /dettes/{docId} {
+        allow read, create: if estMembre(entId);
+        allow update: if estGerantOuPlus(entId) || (estMembre(entId) && paiementValide());
+        allow delete: if estGerantOuPlus(entId);
+      }
+
+      // ----- Écritures comptables : tout le monde crée (chaque vente en fait une) ;
+      //       lire = autorisation « Voir les finances » ; modifier / effacer = Gérant+ -----
+      match /ecritures_comptables/{docId} {
+        allow read: if aPermission(entId, 'voirFinances');
+        allow create: if estMembre(entId);
+        allow update, delete: if estGerantOuPlus(entId);
+      }
+
+      // ----- 📒 Journal « qui a fait quoi » -----
+      // Chacun ajoute SA ligne ; personne ne modifie ni n'efface ;
+      // seuls le Propriétaire et le Gérant lisent.
+      match /journal/{docId} {
+        allow read: if estGerantOuPlus(entId) || aParametres(entId);
+        allow create: if estMembre(entId) && request.resource.data.userId == request.auth.uid;
+        allow update, delete: if false;
+      }
+
+      // ----- Toutes les autres sous-collections (comme avant) -----
+      match /{collection}/{reste=**} {
+        allow read: if estMembre(entId) && !(collection in ['journal', 'ecritures_comptables']);
+        allow write: if !(collection in ['produits', 'ventes', 'retours', 'comptes_clients', 'boutiques', 'transferts', 'creances', 'dettes', 'ecritures_comptables', 'journal'])
+          && (estMembre(entId) || creeParMoi(entId));
+      }
+    }
+
+    // ---------- Dépenses : Propriétaire + Gérant ----------
+    match /depenses/{depenseId} {
+      allow read: if estGerantOuPlus(monEntreprise()) && resource.data.entrepriseId == monEntreprise();
+      allow create: if estGerantOuPlus(monEntreprise()) && request.resource.data.entrepriseId == monEntreprise()
+        && boutiqueAutorisee(monEntreprise(), request.resource.data.get('boutiqueId', ''));
+      allow update: if estGerantOuPlus(monEntreprise()) && resource.data.entrepriseId == monEntreprise()
+        && request.resource.data.entrepriseId == resource.data.entrepriseId;
+      allow delete: if estGerantOuPlus(monEntreprise()) && resource.data.entrepriseId == monEntreprise();
+    }
+
+    // ---------- Ancien chemin (écran Équipe de démonstration) ----------
+    match /organizations/{entId}/{document=**} {
+      allow read, write: if estMembre(entId);
+    }
+  }
+}
