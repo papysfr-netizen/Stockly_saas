@@ -16,6 +16,7 @@ import 'core/providers/locale_provider.dart';
 import 'features/shell/main_shell.dart';
 import 'features/debts/screens/login_screen.dart';
 import 'core/widgets/app_initializer.dart';
+import 'core/services/rapport_erreurs.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -75,12 +76,21 @@ void main() async {
       );
     }
 
-    // 🩺 Erreurs de l'APK : toujours écrites dans le terminal
-    //    (Crashlytics retiré : il bloquait le démarrage sur certains téléphones)
+    // 🩺 Erreurs de l'APK : écrites dans le terminal ET envoyées dans
+    //    « rapports_erreurs » (Crashlytics retiré : il bloquait le démarrage
+    //    sur certains téléphones)
     if (!kDebugMode) {
-      FlutterError.onError = (details) => FlutterError.presentError(details);
+      FlutterError.onError = (details) {
+        FlutterError.presentError(details);
+        RapportErreurs.envoyer(
+          details.exception,
+          details.stack,
+          contexte: details.context?.toString() ?? details.library ?? '',
+        );
+      };
       WidgetsBinding.instance.platformDispatcher.onError = (error, stack) {
         debugPrint('Erreur : $error\n$stack');
+        RapportErreurs.envoyer(error, stack, contexte: 'asynchrone', fatale: true);
         return true;
       };
     }

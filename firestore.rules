@@ -342,6 +342,20 @@ service cloud.firestore {
       allow delete: if estGerantOuPlus(monEntreprise()) && resource.data.entrepriseId == monEntreprise();
     }
 
+    // ---------- 🩺 Rapports de plantages (lib/core/services/rapport_erreurs.dart) ----------
+    // Chacun envoie les rapports de SON téléphone ; personne ne les lit dans
+    // l'application (on les consulte dans la console Firebase) ; taille limitée.
+    match /rapports_erreurs/{rapportId} {
+      allow create: if estConnecte()
+        && request.resource.data.keys().hasOnly(['uid', 'message', 'pile', 'contexte', 'fatale', 'plateforme', 'date'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.message is string && request.resource.data.message.size() <= 1000
+        && request.resource.data.pile is string && request.resource.data.pile.size() <= 4000
+        && request.resource.data.contexte is string && request.resource.data.contexte.size() <= 200
+        && request.resource.data.date == request.time;
+      allow read, update, delete: if false;
+    }
+
     // ---------- Ancien chemin (écran Équipe de démonstration) ----------
     // 🔒 Fermé : plus utilisé par l'application
     match /organizations/{entId}/{document=**} {

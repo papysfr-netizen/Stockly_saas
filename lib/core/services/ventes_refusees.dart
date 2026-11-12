@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'rapport_erreurs.dart';
+
 /// 🚨 Ventes envoyées hors ligne puis REFUSÉES par le serveur (règles de sécurité…).
 /// Sans cette liste, elles disparaîtraient du téléphone sans prévenir.
 class VentesRefusees {
@@ -23,6 +25,12 @@ class VentesRefusees {
       await prefs.setStringList(_cle, liste);
       changement.value++;
     } catch (_) {}
+    // 🩺 Prévenir aussi le développeur (rapport de plantages)
+    await RapportErreurs.envoyer(
+      'Vente refusée par le serveur ($facture, $montant \$) : $erreur',
+      null,
+      contexte: 'vente refusée $venteId',
+    );
   }
 
   static Future<List<Map<String, dynamic>>> lire() async {

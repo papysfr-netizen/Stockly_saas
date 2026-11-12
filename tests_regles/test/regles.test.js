@@ -13,6 +13,8 @@ import {
   initializeTestEnvironment,
 } from '@firebase/rules-unit-testing';
 import {
+  addDoc,
+  serverTimestamp,
   deleteDoc,
   doc,
   getDoc,
@@ -232,6 +234,31 @@ describe('Comptabilité et journal', () => {
     await assertFails(updateDoc(doc(db, `entreprises/${E}/journal/j1`), { action: 'rien' }));
     await assertFails(getDocs(collection(db, `entreprises/${E}/journal`)));
     await assertSucceeds(getDocs(collection(dbDe('gerant'), `entreprises/${E}/journal`)));
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+describe('Rapports de plantages', () => {
+  const rapport = (uid, extra = {}) => ({
+    uid, message: 'Null check operator', pile: '#0 main', contexte: '',
+    fatale: false, plateforme: 'android', date: serverTimestamp(), ...extra,
+  });
+
+  it('un utilisateur connecté envoie un rapport à son nom', async () => {
+    await assertSucceeds(addDoc(collection(dbDe('caissier'), 'rapports_erreurs'), rapport('caissier')));
+  });
+
+  it('pas de rapport anonyme, au nom d\'un autre, ou trop gros', async () => {
+    await assertFails(addDoc(collection(dbDe(null), 'rapports_erreurs'), rapport('x')));
+    await assertFails(addDoc(collection(dbDe('caissier'), 'rapports_erreurs'), rapport('gerant')));
+    await assertFails(addDoc(collection(dbDe('caissier'), 'rapports_erreurs'),
+      rapport('caissier', { pile: 'x'.repeat(5000) })));
+    await assertFails(addDoc(collection(dbDe('caissier'), 'rapports_erreurs'),
+      rapport('caissier', { motDePasse: 'secret' })));
+  });
+
+  it('personne ne lit les rapports depuis l\'application', async () => {
+    await assertFails(getDocs(collection(dbDe('patron'), 'rapports_erreurs')));
   });
 });
 
