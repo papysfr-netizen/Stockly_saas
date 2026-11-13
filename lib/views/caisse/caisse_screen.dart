@@ -129,7 +129,7 @@ class CaisseScreen extends ConsumerWidget {
                       } else if (value == 'pdf') {
                         await ReportExportService.exporterPDF(
                           titreRapport: 'Catalogue des Produits (Caisse)',
-                          nomBoutique: 'Stockly Pro',
+                          nomBoutique: 'Nguli',
                           enTetes: enTetes,
                           lignes: lignes,
                         );

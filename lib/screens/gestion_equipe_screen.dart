@@ -155,7 +155,7 @@ class GestionEquipeScreen extends ConsumerWidget {
             label: Text(t.teamCopy),
             onPressed: () {
               Clipboard.setData(ClipboardData(
-                text: 'Stockly\n${t.teamLogin} : ${login.login}\n${t.teamPassword} : ${login.motDePasse}',
+                text: 'Nguli\n${t.teamLogin} : ${login.login}\n${t.teamPassword} : ${login.motDePasse}',
               ));
               ScaffoldMessenger.of(ctx).showSnackBar(
                 SnackBar(content: Text(t.teamCopied)),

@@ -119,7 +119,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   // Titre principal
                   Text(
-                    'Rejoignez Stockly',
+                    'Rejoignez Nguli',
                     textAlign: TextAlign.center,
                     style: theme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,

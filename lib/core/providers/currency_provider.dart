@@ -282,7 +282,7 @@ class CurrencyNotifier extends Notifier<CurrencyState> {
           if (taux != null && taux > 0) _appliquerTauxServeur(taux);
         },
         onError: (e) =>
-            debugPrint('[Stockly] Lecture du taux partagé impossible : $e'),
+            debugPrint('[Nguli] Lecture du taux partagé impossible : $e'),
       );
       ref.onDispose(abonnement.cancel);
     }
@@ -329,7 +329,7 @@ class CurrencyNotifier extends Notifier<CurrencyState> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setDouble(_prefCdfRate, taux);
     } catch (e) {
-      debugPrint('[Stockly] Taux partagé non gardé sur le téléphone : $e');
+      debugPrint('[Nguli] Taux partagé non gardé sur le téléphone : $e');
     }
   }
 
@@ -339,7 +339,7 @@ class CurrencyNotifier extends Notifier<CurrencyState> {
     final boutiqueId = ref.read(boutiqueActiveProvider);
     if (entrepriseId.isEmpty) return;
     if (boutiqueId == null) {
-      debugPrint('[Stockly] Taux gardé sur ce téléphone (aucune boutique choisie)');
+      debugPrint('[Nguli] Taux gardé sur ce téléphone (aucune boutique choisie)');
       return;
     }
     final uid = ref.read(userProfileProvider).value?.uid ?? '';
@@ -357,11 +357,11 @@ class CurrencyNotifier extends Notifier<CurrencyState> {
             'tauxCDFParUid': uid,
           }, SetOptions(merge: true))
           .timeout(const Duration(seconds: 5));
-      debugPrint('[Stockly] Taux $taux envoyé à la boutique $boutiqueId');
+      debugPrint('[Nguli] Taux $taux envoyé à la boutique $boutiqueId');
     } on TimeoutException {
-      debugPrint('[Stockly] Taux gardé sur le téléphone, envoi en attente du réseau');
+      debugPrint('[Nguli] Taux gardé sur le téléphone, envoi en attente du réseau');
     } catch (e) {
-      debugPrint('[Stockly] Taux NON partagé : $e');
+      debugPrint('[Nguli] Taux NON partagé : $e');
     }
   }
 

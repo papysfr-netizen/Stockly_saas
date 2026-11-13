@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
     <application
-        android:label="Stockly Pro"
+        android:label="Nguli"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -43,7 +43,7 @@
             <data android:mimeType="text/plain"/>
         </intent>
 
-        <!-- Stockly : ouvrir WhatsApp, le téléphone, les SMS et les liens web -->
+        <!-- Nguli : ouvrir WhatsApp, le téléphone, les SMS et les liens web -->
         <package android:name="com.whatsapp"/>
         <package android:name="com.whatsapp.w4b"/>
         <intent>

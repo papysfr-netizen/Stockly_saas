@@ -7,7 +7,7 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>$(DEVELOPMENT_LANGUAGE)</string>
     <key>CFBundleDisplayName</key>
-    <string>Stockly Saas</string>
+    <string>Nguli</string>
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key>
@@ -71,6 +71,6 @@
     <!--  PERMISSON CAMÉRA POUR LE SCANNER DE CODES-BARRES      -->
     <!-- ======================================================== -->
     <key>NSCameraUsageDescription</key>
-    <string>Stockly a besoin de la caméra pour scanner les codes-barres de vos produits.</string>
+    <string>Nguli a besoin de la caméra pour scanner les codes-barres de vos produits.</string>
 </dict>
 </plist>

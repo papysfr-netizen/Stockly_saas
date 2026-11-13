@@ -1,6 +1,6 @@
 {
   "@@locale": "sw",
-  "appTitle": "Stockly Pro",
+  "appTitle": "Nguli",
   "settings": "Mipangilio",
   "storeInfo": "Taarifa za duka",
   "storeName": "Jina la duka",
@@ -304,7 +304,7 @@
   "sumCash": "💵 Pesa ya kasha : {montant}",
   "sumProfit": "📈 Faida : {montant}",
   "sumRate": "Bei ya dola : 1 $ = {taux} FC",
-  "sumSentBy": "Imetumwa na {nom} — Stockly Pro",
+  "sumSentBy": "Imetumwa na {nom} — Nguli",
   "logoutQuestion": "Ungependa kutoka?",
   "logoutWarning": "Utahitaji kuingia tena kwa barua pepe na nenosiri lako.",
   "exportDone": "Uhamishaji wa Excel umekamilika!",

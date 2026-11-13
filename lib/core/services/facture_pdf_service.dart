@@ -80,7 +80,7 @@ class FacturePdfService {
               ),
             pw.SizedBox(height: 2),
             pw.Text(
-              'Document généré par Stockly Pro - page ${ctx.pageNumber}/${ctx.pagesCount}',
+              'Document généré par Nguli - page ${ctx.pageNumber}/${ctx.pagesCount}',
               style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey600),
             ),
           ],

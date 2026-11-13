@@ -1,6 +1,6 @@
 {
   "@@locale": "fr",
-  "appTitle": "Stockly Pro",
+  "appTitle": "Nguli",
   "settings": "Paramètres",
   "storeInfo": "Informations du magasin",
   "storeName": "Nom de la boutique",
@@ -921,7 +921,7 @@
       }
     }
   },
-  "sumSentBy": "Envoyé par {nom} — Stockly Pro",
+  "sumSentBy": "Envoyé par {nom} — Nguli",
   "@sumSentBy": {
     "placeholders": {
       "nom": {

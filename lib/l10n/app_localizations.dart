@@ -105,7 +105,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Stockly Pro'**
+  /// **'Nguli'**
   String get appTitle;
 
   /// No description provided for @settings.
@@ -1930,7 +1930,7 @@ abstract class AppLocalizations {
   /// No description provided for @sumSentBy.
   ///
   /// In fr, this message translates to:
-  /// **'Envoyé par {nom} — Stockly Pro'**
+  /// **'Envoyé par {nom} — Nguli'**
   String sumSentBy(String nom);
 
   /// No description provided for @logoutQuestion.

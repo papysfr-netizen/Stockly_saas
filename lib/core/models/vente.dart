@@ -3,7 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
-/// Modèle représentatif d'une transaction de vente dans Stockly
+/// Modèle représentatif d'une transaction de vente dans Nguli
 @immutable
 class Vente {
   final String id;

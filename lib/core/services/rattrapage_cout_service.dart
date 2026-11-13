@@ -153,7 +153,7 @@ class RattrapageCoutService {
       await Future.wait(envois).timeout(const Duration(seconds: 20));
     } on TimeoutException {
       enAttente = true;
-      debugPrint('[Stockly] Rattrapage gardé sur le téléphone, envoi en attente du réseau');
+      debugPrint('[Nguli] Rattrapage gardé sur le téléphone, envoi en attente du réseau');
     }
 
     return ResultatRattrapage(

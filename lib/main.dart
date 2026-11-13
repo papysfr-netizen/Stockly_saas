@@ -125,7 +125,7 @@ class _ErreurDemarrage extends StatelessWidget {
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 const Text(
-                  "Stockly n'a pas pu se connecter à ses services sur ce téléphone.\n"
+                  "Nguli n'a pas pu se connecter à ses services sur ce téléphone.\n"
                   'Vérifiez internet et les « Services Google Play », puis réessayez.\n'
                   "Si le problème continue, prenez une photo de cet écran et envoyez-la.",
                 ),
@@ -247,7 +247,7 @@ class MyApp extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp(
-      title: 'Stockly Pro',
+      title: 'Nguli',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,

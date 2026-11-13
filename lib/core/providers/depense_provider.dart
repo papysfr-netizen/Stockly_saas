@@ -146,7 +146,7 @@ class DepenseRepository {
       await batch.commit().timeout(_delai);
     } on TimeoutException {
       debugPrint(
-          '[Stockly] Hors ligne : dépense gardée sur le téléphone, envoi au retour du réseau.');
+          '[Nguli] Hors ligne : dépense gardée sur le téléphone, envoi au retour du réseau.');
     }
   }
 

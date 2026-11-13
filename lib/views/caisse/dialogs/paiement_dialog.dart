@@ -803,7 +803,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
       final valeur = doc?.data()?['prixAchat'];
       final double prix = valeur is num ? valeur.toDouble() : 0.0;
       if (prix <= 0) {
-        debugPrint('[Stockly] Prix d\'achat inconnu pour le produit $id : coût compté à 0');
+        debugPrint('[Nguli] Prix d\'achat inconnu pour le produit $id : coût compté à 0');
       }
       return MapEntry(id, prix);
     }
@@ -1111,12 +1111,12 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
       }));
       try {
         await envoi.timeout(const Duration(seconds: 6));
-        debugPrint('[Stockly] Vente ${venteRef.id} envoyée au serveur');
+        debugPrint('[Nguli] Vente ${venteRef.id} envoyée au serveur');
       } on TimeoutException {
-        debugPrint('[Stockly] Vente ${venteRef.id} gardée hors ligne');
+        debugPrint('[Nguli] Vente ${venteRef.id} gardée hors ligne');
       } on FirebaseException catch (e) {
         refusDejaAffiche = true; // le message s'affiche tout de suite ci-dessous
-        debugPrint('[Stockly] Vente ${venteRef.id} REFUSÉE : ${e.code} ${e.message}');
+        debugPrint('[Nguli] Vente ${venteRef.id} REFUSÉE : ${e.code} ${e.message}');
         if (!mounted) return;
         setState(() => isLoading = false);
         await showDialog<void>(

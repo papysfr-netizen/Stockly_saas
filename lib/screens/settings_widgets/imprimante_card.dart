@@ -36,7 +36,7 @@ class _ImprimanteCardState extends State<ImprimanteCard> {
     setState(() => _essaiEnCours = true);
     try {
       await ReceiptService.imprimerTicket(
-        nomBoutique: 'Stockly Pro',
+        nomBoutique: 'Nguli',
         nomClient: "Reçu d'essai",
         articles: const [
           {'nom': 'Article essai 1', 'quantite': 2, 'prix': 5.0},

@@ -39,7 +39,7 @@ class BoutiqueInfoService {
 
       return ShopSettings.fromEntreprise(data);
     } catch (e) {
-      debugPrint('[Stockly] Infos boutique indisponibles : $e');
+      debugPrint('[Nguli] Infos boutique indisponibles : $e');
       return null;
     }
   }

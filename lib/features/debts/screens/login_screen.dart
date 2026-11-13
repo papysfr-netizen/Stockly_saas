@@ -239,7 +239,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const Icon(Icons.storefront, size: 80, color: Colors.blue),
               const SizedBox(height: 12),
               const Text(
-                'Stockly Pro',
+                'Nguli',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
@@ -362,7 +362,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Nouveau sur Stockly ?"),
+                  const Text("Nouveau sur Nguli ?"),
                   TextButton(
                     onPressed: () {
                       Navigator.push(

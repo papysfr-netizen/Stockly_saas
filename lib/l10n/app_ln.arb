@@ -1,6 +1,6 @@
 {
   "@@locale": "ln",
-  "appTitle": "Stockly Pro",
+  "appTitle": "Nguli",
   "settings": "Bibongisi",
   "storeInfo": "Sango ya magazini",
   "storeName": "Nkombo ya magazini",
@@ -304,7 +304,7 @@
   "sumCash": "💵 Mbongo na kesi : {montant}",
   "sumProfit": "📈 Litomba : {montant}",
   "sumRate": "Motuya : 1 $ = {taux} FC",
-  "sumSentBy": "Etindami na {nom} — Stockly Pro",
+  "sumSentBy": "Etindami na {nom} — Nguli",
   "logoutQuestion": "Kobima?",
   "logoutWarning": "Okozala na kokota lisusu na e-mail mpe mot de passe na yo.",
   "exportDone": "Kobimisa na Excel esili malamu!",

@@ -9,7 +9,7 @@ class AppLocalizationsLn extends AppLocalizations {
   AppLocalizationsLn([String locale = 'ln']) : super(locale);
 
   @override
-  String get appTitle => 'Stockly Pro';
+  String get appTitle => 'Nguli';
 
   @override
   String get settings => 'Bibongisi';
@@ -1140,7 +1140,7 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String sumSentBy(String nom) {
-    return 'Etindami na $nom — Stockly Pro';
+    return 'Etindami na $nom — Nguli';
   }
 
   @override

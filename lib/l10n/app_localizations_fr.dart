@@ -9,7 +9,7 @@ class AppLocalizationsFr extends AppLocalizations {
   AppLocalizationsFr([String locale = 'fr']) : super(locale);
 
   @override
-  String get appTitle => 'Stockly Pro';
+  String get appTitle => 'Nguli';
 
   @override
   String get settings => 'Paramètres';
@@ -1143,7 +1143,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String sumSentBy(String nom) {
-    return 'Envoyé par $nom — Stockly Pro';
+    return 'Envoyé par $nom — Nguli';
   }
 
   @override

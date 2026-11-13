@@ -206,7 +206,7 @@ class ExcelService {
     excel.rename(defaultSheet, 'Stock Actuel');
     final Sheet feuille = excel['Stock Actuel'];
 
-    // Titres clairs (et toujours reconnus par l'import de Stockly)
+    // Titres clairs (et toujours reconnus par l'import de Nguli)
     const titres = [
       'Code-barres',
       'Nom',
@@ -290,7 +290,7 @@ class ExcelService {
     final directory = await getTemporaryDirectory();
     // 🏬 Nom de la boutique dans le nom du fichier
     final nomFichier = nomBoutique.trim().isEmpty
-        ? 'Stockly'
+        ? 'Nguli'
         : nomBoutique.trim().replaceAll(RegExp(r'[^A-Za-z0-9À-ÿ]+'), '_');
     final filePath = '${directory.path}/Stock_${nomFichier}_$horodatage.xlsx';
 

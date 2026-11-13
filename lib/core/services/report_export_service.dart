@@ -90,7 +90,7 @@ class ReportExportService {
 
     // 0. En-tête du document : boutique, titre, date
     final infos = await BoutiqueInfoService.charger();
-    final nomBoutique = BoutiqueInfoService.choisir(infos?.nomBoutique, 'Stockly Pro');
+    final nomBoutique = BoutiqueInfoService.choisir(infos?.nomBoutique, 'Nguli');
     final maintenant = DateTime.now();
 
     feuille.appendRow([excel_lib.TextCellValue(nomBoutique)]);
@@ -156,7 +156,7 @@ class ReportExportService {
     required String titreRapport,
     required List<String> enTetes,
     required List<List<dynamic>> lignes,
-    String nomBoutique = "Stockly Pro",
+    String nomBoutique = "Nguli",
     bool modePaysage = false,
   }) async {
     final titre = _titreLisible(titreRapport);
@@ -249,7 +249,7 @@ class ReportExportService {
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
               pw.Text(
-                '$nomFinal - Généré avec Stockly Pro',
+                '$nomFinal - Généré avec Nguli',
                 style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500),
               ),
               pw.Text(

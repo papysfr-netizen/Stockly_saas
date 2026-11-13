@@ -1,11 +1,11 @@
 {
-    "name": "Stockly Pro",
-    "short_name": "Stockly Pro",
+    "name": "Nguli",
+    "short_name": "Nguli",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Stockly Pro : stock, caisse, dettes et comptabilité.",
+    "description": "Nguli : stock, caisse, dettes et comptabilité.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

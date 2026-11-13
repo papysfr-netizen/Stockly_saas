@@ -241,7 +241,7 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
               } else if (value == 'pdf') {
                 await ReportExportService.exporterPDF(
                   titreRapport: t.depReportTitle,
-                  nomBoutique: 'Stockly Pro',
+                  nomBoutique: 'Nguli',
                   enTetes: enTetes,
                   lignes: lignes,
                 );

@@ -44,7 +44,7 @@ class LocaleNotifier extends StateNotifier<Locale> {
         state = Locale(code);
       }
     } catch (e) {
-      debugPrint('[Stockly] Lecture de la langue impossible : $e');
+      debugPrint('[Nguli] Lecture de la langue impossible : $e');
     }
   }
 
@@ -56,7 +56,7 @@ class LocaleNotifier extends StateNotifier<Locale> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_cleStockage, languageCode);
     } catch (e) {
-      debugPrint('[Stockly] Sauvegarde de la langue impossible : $e');
+      debugPrint('[Nguli] Sauvegarde de la langue impossible : $e');
     }
   }
 }

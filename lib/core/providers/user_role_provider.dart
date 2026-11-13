@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // ================= 1. RÔLES (SYSTÈME UNIQUE) =================
-/// Les 3 rôles de Stockly :
+/// Les 3 rôles de Nguli :
 ///  - owner    : Propriétaire (tout)
 ///  - gerant   : Gérant (stock, ventes, dépenses, dettes, rapports)
 ///  - caissier : Caissier (caisse + consultation du stock)
@@ -169,7 +169,7 @@ class UserProfile {
   ) {
     if (!snapshot.exists || snapshot.data() == null) {
       debugPrint(
-        '[Stockly] Profil introuvable dans users/${user.uid} '
+        '[Nguli] Profil introuvable dans users/${user.uid} '
         '-> rôle caissier par défaut',
       );
       return UserProfile.empty().copyWith(
@@ -183,7 +183,7 @@ class UserProfile {
     final role = UserRole.fromString(data['role']?.toString());
 
     debugPrint(
-      '[Stockly] Rôle Firestore brut : "${data['role']}" '
+      '[Nguli] Rôle Firestore brut : "${data['role']}" '
       '-> rôle appli : ${role.name}',
     );
 

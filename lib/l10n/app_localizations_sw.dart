@@ -9,7 +9,7 @@ class AppLocalizationsSw extends AppLocalizations {
   AppLocalizationsSw([String locale = 'sw']) : super(locale);
 
   @override
-  String get appTitle => 'Stockly Pro';
+  String get appTitle => 'Nguli';
 
   @override
   String get settings => 'Mipangilio';
@@ -1137,7 +1137,7 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String sumSentBy(String nom) {
-    return 'Imetumwa na $nom — Stockly Pro';
+    return 'Imetumwa na $nom — Nguli';
   }
 
   @override

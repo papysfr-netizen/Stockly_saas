@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "appTitle": "Stockly Pro",
+  "appTitle": "Nguli",
   "settings": "Settings",
   "storeInfo": "Store information",
   "storeName": "Store name",
@@ -304,7 +304,7 @@
   "sumCash": "💵 Cash in the till: {montant}",
   "sumProfit": "📈 Profit: {montant}",
   "sumRate": "Rate: 1 $ = {taux} FC",
-  "sumSentBy": "Sent by {nom} — Stockly Pro",
+  "sumSentBy": "Sent by {nom} — Nguli",
   "logoutQuestion": "Log out?",
   "logoutWarning": "You will have to log in again with your e-mail and password.",
   "exportDone": "Excel export completed!",

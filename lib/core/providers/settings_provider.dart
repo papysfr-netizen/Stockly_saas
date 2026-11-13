@@ -135,7 +135,7 @@ class SettingsNotifier extends Notifier<ShopSettings> {
         }
       },
       onError: (e) =>
-          debugPrint('[Stockly] Lecture des infos boutique impossible : $e'),
+          debugPrint('[Nguli] Lecture des infos boutique impossible : $e'),
     );
     ref.onDispose(abonnement.cancel);
 
@@ -167,7 +167,7 @@ class SettingsNotifier extends Notifier<ShopSettings> {
 
     final entrepriseId = ref.read(entrepriseIdProvider);
     if (entrepriseId.isEmpty) {
-      debugPrint('[Stockly] Infos boutique non enregistrées : entreprise inconnue');
+      debugPrint('[Nguli] Infos boutique non enregistrées : entreprise inconnue');
       return false;
     }
 
@@ -181,9 +181,9 @@ class SettingsNotifier extends Notifier<ShopSettings> {
       // et l'enverra dès que le réseau revient.
       await ecriture.timeout(const Duration(seconds: 5));
     } on TimeoutException {
-      debugPrint('[Stockly] Infos boutique gardées sur le téléphone, envoi en attente du réseau');
+      debugPrint('[Nguli] Infos boutique gardées sur le téléphone, envoi en attente du réseau');
     } catch (e) {
-      debugPrint('[Stockly] Erreur enregistrement infos boutique : $e');
+      debugPrint('[Nguli] Erreur enregistrement infos boutique : $e');
       return false;
     }
     return true;

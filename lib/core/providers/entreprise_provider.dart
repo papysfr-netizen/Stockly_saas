@@ -14,7 +14,7 @@ class Entreprise {
 
   const Entreprise({
     this.id = 'default_entreprise',
-    this.nom = 'Stockly Pro',
+    this.nom = 'Nguli',
     this.adresse = 'Goma, RDC',
     this.telephone = '',
     this.devise = '\$',

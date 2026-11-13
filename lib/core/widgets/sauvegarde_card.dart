@@ -92,7 +92,7 @@ class _SauvegardeCardState extends State<SauvegardeCard> {
 
       final maintenant = DateTime.now();
       final donnees = <String, dynamic>{
-        'application': 'Stockly Pro',
+        'application': 'Nguli',
         'format': 1,
         'creeLe': maintenant.toIso8601String(),
         'entrepriseId': widget.entrepriseId,
@@ -130,7 +130,7 @@ class _SauvegardeCardState extends State<SauvegardeCard> {
       }
 
       _etapeEnCours('Création du fichier…');
-      final nom = 'Sauvegarde_Stockly_${maintenant.year}-${_deux(maintenant.month)}-'
+      final nom = 'Sauvegarde_Nguli_${maintenant.year}-${_deux(maintenant.month)}-'
           '${_deux(maintenant.day)}_${_deux(maintenant.hour)}h${_deux(maintenant.minute)}.json';
       final dossier = await getTemporaryDirectory();
       final fichier = File('${dossier.path}/$nom');
@@ -161,8 +161,8 @@ class _SauvegardeCardState extends State<SauvegardeCard> {
 
       await Share.shareXFiles(
         [XFile(fichier.path)],
-        subject: 'Sauvegarde Stockly',
-        text: 'Sauvegarde complète Stockly du '
+        subject: 'Sauvegarde Nguli',
+        text: 'Sauvegarde complète Nguli du '
             '${_deux(maintenant.day)}/${_deux(maintenant.month)}/${maintenant.year}',
       );
     } catch (e) {

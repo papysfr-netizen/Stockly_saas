@@ -196,7 +196,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
     } else {
       await ReportExportService.exporterPDF(
         titreRapport: 'Rapport complet – $_dernierePeriode',
-        nomBoutique: 'Stockly Pro',
+        nomBoutique: 'Nguli',
         enTetes: enTetes,
         lignes: lignes,
       );

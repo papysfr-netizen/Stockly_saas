@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
-/// Modèle représentatif d'une dépense d'exploitation dans Stockly
+/// Modèle représentatif d'une dépense d'exploitation dans Nguli
 @immutable
 class Depense {
   final String id;

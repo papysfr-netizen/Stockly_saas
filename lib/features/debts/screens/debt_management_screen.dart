@@ -77,7 +77,7 @@ class DebtManagementScreen extends ConsumerWidget {
     } else if (format == 'pdf') {
       await ReportExportService.exporterPDF(
         titreRapport: titreDoc,
-        nomBoutique: 'Stockly Pro',
+        nomBoutique: 'Nguli',
         enTetes: enTetes,
         lignes: lignes
             .map((l) => l.map((v) => v is double ? v.toStringAsFixed(2) : v).toList())

@@ -51,7 +51,7 @@ class RapportErreurs {
         'date': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      debugPrint('[Stockly] Rapport d\'erreur non envoyé : $e');
+      debugPrint('[Nguli] Rapport d\'erreur non envoyé : $e');
     }
   }
 

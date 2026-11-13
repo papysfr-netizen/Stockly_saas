@@ -230,7 +230,7 @@ class _AddProductModalState extends State<AddProductModal> {
       try {
         resultat = await requete.get(const GetOptions(source: Source.cache));
       } catch (e) {
-        debugPrint('[Stockly] Vérification du code-barres impossible : $e');
+        debugPrint('[Nguli] Vérification du code-barres impossible : $e');
         return null;
       }
     }
@@ -385,7 +385,7 @@ class _AddProductModalState extends State<AddProductModal> {
       } on TimeoutException {
         enAttenteReseau = true;
         debugPrint(
-          '[Stockly] Produit ${docRef.id} enregistré sur le téléphone, '
+          '[Nguli] Produit ${docRef.id} enregistré sur le téléphone, '
           'envoi au serveur en attente du réseau',
         );
       }
@@ -471,7 +471,7 @@ class _AddProductModalState extends State<AddProductModal> {
         );
       }
     } catch (e) {
-      debugPrint('[Stockly] Erreur enregistrement produit : $e');
+      debugPrint('[Nguli] Erreur enregistrement produit : $e');
       _afficherMessage(
         messenger,
         t.prodSaveError('$e'),

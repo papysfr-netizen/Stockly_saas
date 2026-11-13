@@ -32,7 +32,7 @@ class ReceiptService {
       _fontItalic = polices[2];
     } catch (e) {
       // 📴 Pas de réseau : police de base du PDF (le reçu sort quand même)
-      debugPrint('[Stockly] Police Roboto indisponible, reçu avec la police de base : $e');
+      debugPrint('[Nguli] Police Roboto indisponible, reçu avec la police de base : $e');
       _fontRegular = null;
       _fontBold = null;
       _fontItalic = null;
@@ -78,7 +78,7 @@ class ReceiptService {
 
       return ShopSettings.fromEntreprise(data);
     } catch (e) {
-      debugPrint('[Stockly] Infos boutique indisponibles pour le reçu : $e');
+      debugPrint('[Nguli] Infos boutique indisponibles pour le reçu : $e');
       return null;
     }
   }
@@ -95,7 +95,7 @@ class ReceiptService {
   static Future<void> imprimerRecu({
     required Vente vente,
     required String monnaie,
-    String nomMagasin = 'Stockly Pro',
+    String nomMagasin = 'Nguli',
     String adresseMagasin = '',
     String phoneMagasin = '',
   }) async {
@@ -146,7 +146,7 @@ class ReceiptService {
     if (cleanPhone.isEmpty) return false;
 
     final infos = await _chargerInfosBoutique();
-    final nomMagasin = _choisir(infos?.nomBoutique, 'Stockly');
+    final nomMagasin = _choisir(infos?.nomBoutique, 'Nguli');
 
     final buffer = StringBuffer();
     buffer.writeln('📄 *REÇU DE VENTE - $nomMagasin*');
@@ -214,7 +214,7 @@ class ReceiptService {
     final reglages = await ReglagesImprimante.charger();
 
     // Les infos enregistrées dans Paramètres priment sur les valeurs
-    // écrites en dur par les écrans (ex : 'Stockly Pro').
+    // écrites en dur par les écrans (ex : 'Nguli').
     final infos = await _chargerInfosBoutique();
     final String nomFinal = _choisir(infos?.nomBoutique, nomMagasin);
     final String adresseFinale = _choisir(infos?.adresse, adresseMagasin);
@@ -435,7 +435,7 @@ class ReceiptService {
                 pw.SizedBox(height: 3),
                 pw.Center(
                   child: pw.Text(
-                    'Stockly Pro | Conçu par PAPY SAFARI (+243 97 34 14 587)',
+                    'Nguli | Conçu par PAPY SAFARI (+243 97 34 14 587)',
                     style: pw.TextStyle(
                         fontWeight: pw.FontWeight.bold, fontSize: 6),
                     textAlign: pw.TextAlign.center,

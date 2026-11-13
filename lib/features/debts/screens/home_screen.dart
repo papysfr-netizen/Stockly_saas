@@ -193,7 +193,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              "Stockly Pro",
+              "Nguli",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             Row(
