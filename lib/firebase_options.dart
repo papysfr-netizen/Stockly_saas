@@ -53,7 +53,7 @@ class DefaultFirebaseOptions {
     ),
     appId: String.fromEnvironment(
       'FIREBASE_APP_ID_ANDROID',
-      defaultValue: '1:68976746757:android:b3d8398e3c2d369f81976c',
+      defaultValue: '1:68976746757:android:066ce0da52c47e8181976c',
     ),
     messagingSenderId: '68976746757',
     projectId: 'stockly-saas',

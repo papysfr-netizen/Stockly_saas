@@ -4,7 +4,7 @@
       "android": {
         "default": {
           "projectId": "stockly-saas",
-          "appId": "1:68976746757:android:b3d8398e3c2d369f81976c",
+          "appId": "1:68976746757:android:066ce0da52c47e8181976c",
           "fileOutput": "android/app/google-services.json"
         }
       },
@@ -12,7 +12,7 @@
         "lib/firebase_options.dart": {
           "projectId": "stockly-saas",
           "configurations": {
-            "android": "1:68976746757:android:b3d8398e3c2d369f81976c",
+            "android": "1:68976746757:android:066ce0da52c47e8181976c",
             "ios": "1:68976746757:ios:ad3d32f8c218195a81976c",
             "macos": "1:68976746757:ios:ad3d32f8c218195a81976c",
             "web": "1:68976746757:web:eb8cf46d5936108981976c",
