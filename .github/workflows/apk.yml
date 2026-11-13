@@ -106,14 +106,28 @@ jobs:
             exit 0
           fi
           echo "$KEYSTORE_BASE64" | base64 --decode > android/app/nguli-upload.jks
-          {
-            echo "storeFile=nguli-upload.jks"
-            echo "storePassword=$KEYSTORE_PASSWORD"
-            echo "keyAlias=$KEY_ALIAS"
-            echo "keyPassword=$KEY_PASSWORD"
-          } > android/key.properties
+          # Les mots de passe ne sont PAS écrits dans le fichier : Gradle les lit
+          # directement dans l'environnement (étape suivante).
+          echo "storeFile=nguli-upload.jks" > android/key.properties
+
+          # Vérification immédiate et claire du mot de passe
+          if ! keytool -list -keystore android/app/nguli-upload.jks \
+                 -storepass:env KEYSTORE_PASSWORD > /dev/null 2>&1; then
+            echo "::error::Le secret NGULI_KEYSTORE_PASSWORD ne correspond pas à la clé. Recréez-le (sans espace avant ou après)."
+            exit 1
+          fi
+          if ! keytool -list -keystore android/app/nguli-upload.jks \
+                 -storepass:env KEYSTORE_PASSWORD -alias "$KEY_ALIAS" > /dev/null 2>&1; then
+            echo "::error::Le secret NGULI_KEY_ALIAS ne correspond pas (il doit valoir : nguli)."
+            exit 1
+          fi
+          echo "Clé officielle et mot de passe vérifiés."
 
       - name: Fabriquer l'APK
+        env:
+          NGULI_KEYSTORE_PASSWORD: ${{ secrets.NGULI_KEYSTORE_PASSWORD }}
+          NGULI_KEY_ALIAS: ${{ secrets.NGULI_KEY_ALIAS }}
+          NGULI_KEY_PASSWORD: ${{ secrets.NGULI_KEY_PASSWORD }}
         run: |
           flutter pub get
           flutter build apk --release --split-per-abi

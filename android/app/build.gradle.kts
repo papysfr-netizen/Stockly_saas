@@ -41,10 +41,15 @@ android {
     signingConfigs {
         create("release") {
             if (aUneCle) {
-                keyAlias = keystoreProperties["keyAlias"] as String
-                keyPassword = keystoreProperties["keyPassword"] as String
+                // Sur GitHub, les mots de passe arrivent tels quels par
+                // l'environnement (aucun caractère spécial n'est déformé).
+                keyAlias = System.getenv("NGULI_KEY_ALIAS")
+                    ?: keystoreProperties["keyAlias"] as String
+                keyPassword = System.getenv("NGULI_KEY_PASSWORD")
+                    ?: keystoreProperties["keyPassword"] as String
                 storeFile = file(keystoreProperties["storeFile"] as String)
-                storePassword = keystoreProperties["storePassword"] as String
+                storePassword = System.getenv("NGULI_KEYSTORE_PASSWORD")
+                    ?: keystoreProperties["storePassword"] as String
             }
         }
     }
