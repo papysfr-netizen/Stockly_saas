@@ -850,6 +850,12 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
       final double verseEffective = verseCash + soldeUtilise;
       final double resteEffective = calc.remainingUSD > 0 ? calc.remainingUSD : 0.0;
 
+      // 📵 Pas de crédit sans numéro de téléphone (sinon impossible de relancer)
+      if (resteEffective > PaymentResult.tolerance &&
+          !CompteClientService.telephoneValide(telephone)) {
+        throw Exception(t.payCreditNeedsPhone);
+      }
+
       final String methodeEnregistree = soldeUtilise > 0.005
           ? (verseCash > 0.005 ? '$methodePaiement + Compte client' : 'Compte client')
           : methodePaiement;

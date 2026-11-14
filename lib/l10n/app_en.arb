@@ -677,5 +677,8 @@
   "panEmpty": "Your cart is empty",
   "panTotal": "Total to pay:",
   "panCheckout": "CHECKOUT",
-  "panRateLocked": "Only the owner (or an authorised person) can change the rate."
+  "panRateLocked": "Only the owner (or an authorised person) can change the rate.",
+  "payCreditNeedsPhone": "For a credit sale, enter the customer's phone number (at least 9 digits).",
+  "debtClientPhone": "Customer phone *",
+  "debtPhoneRequired": "The customer's phone number is required for credit (at least 9 digits)."
 }

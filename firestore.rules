@@ -126,6 +126,11 @@ service cloud.firestore {
       ]);
     }
 
+    // 📵 Un numéro de téléphone a au moins 9 chiffres (espaces, +, tirets ignorés)
+    function telephoneValide(tel) {
+      return tel is string && tel.replace('[^0-9]', '').size() >= 9;
+    }
+
     // Employé autorisé « Gérer l'équipe » par le patron
     // (éteint par défaut, même pour un gérant)
     function estAdminEquipe(entId) {
@@ -267,7 +272,10 @@ service cloud.firestore {
           && (estGerantOuPlus(entId)
               || request.resource.data.get('vendeurId', '') == request.auth.uid)
           && (request.resource.data.get('remiseTotale', 0) <= 0.01
-              || aPermission(entId, 'remisesRetraits'));
+              || aPermission(entId, 'remisesRetraits'))
+          // 📵 Vente à crédit : téléphone du client obligatoire
+          && (request.resource.data.get('resteAPayer', 0) <= 0.01
+              || telephoneValide(request.resource.data.get('telephoneClient', '')));
         allow delete: if estGerantOuPlus(entId);
       }
       match /retours/{docId} {
@@ -297,7 +305,10 @@ service cloud.firestore {
       }
       // 🔒 Créances / dettes : Gérant+ = tout ; les autres = paiement ou retour seulement
       match /creances/{docId} {
-        allow read, create: if estMembre(entId);
+        allow read: if estMembre(entId);
+        // 📵 Pas de crédit client sans téléphone
+        allow create: if estMembre(entId)
+          && telephoneValide(request.resource.data.get('telephone', ''));
         allow update: if estGerantOuPlus(entId) || (estMembre(entId) && paiementValide());
         allow delete: if estGerantOuPlus(entId);
       }

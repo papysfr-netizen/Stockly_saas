@@ -4170,6 +4170,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Seul le patron (ou une personne autorisée) peut changer le taux.'**
   String get panRateLocked;
+
+  /// No description provided for @payCreditNeedsPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour une vente à crédit, saisissez le numéro de téléphone du client (au moins 9 chiffres).'**
+  String get payCreditNeedsPhone;
+
+  /// No description provided for @debtClientPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléphone du client *'**
+  String get debtClientPhone;
+
+  /// No description provided for @debtPhoneRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le numéro de téléphone du client est obligatoire pour un crédit (au moins 9 chiffres).'**
+  String get debtPhoneRequired;
 }
 
 class _AppLocalizationsDelegate

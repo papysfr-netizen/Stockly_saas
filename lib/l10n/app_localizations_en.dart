@@ -2488,4 +2488,15 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get panRateLocked =>
       'Only the owner (or an authorised person) can change the rate.';
+
+  @override
+  String get payCreditNeedsPhone =>
+      'For a credit sale, enter the customer\'s phone number (at least 9 digits).';
+
+  @override
+  String get debtClientPhone => 'Customer phone *';
+
+  @override
+  String get debtPhoneRequired =>
+      'The customer\'s phone number is required for credit (at least 9 digits).';
 }

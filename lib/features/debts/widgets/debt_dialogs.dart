@@ -10,6 +10,7 @@ import '../controllers/debt_controller.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:stockly_saas/features/comptes_clients/compte_client_service.dart';
 import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
+import 'package:stockly_saas/core/utils/payment_calculator.dart';
 
 class DebtDialogs {
   static String _formaterDate(DateTime date) {
@@ -24,6 +25,7 @@ class DebtDialogs {
     TypeDette type,
   ) {
     final nomController = TextEditingController();
+    final telephoneController = TextEditingController();
     final factureController = TextEditingController();
     final montantTotalController = TextEditingController();
     final acompteController = TextEditingController();
@@ -54,6 +56,19 @@ class DebtDialogs {
                       prefixIcon: const Icon(Icons.person),
                     ),
                   ),
+                  // 📵 Client : téléphone obligatoire (pour pouvoir relancer)
+                  if (type == TypeDette.client) ...[
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: telephoneController,
+                      keyboardType: TextInputType.phone,
+                      decoration: InputDecoration(
+                        labelText: t.debtClientPhone,
+                        prefixIcon: const Icon(Icons.phone),
+                        hintText: '+243…',
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 10),
                   TextField(
                     controller: factureController,
@@ -156,10 +171,20 @@ class DebtDialogs {
                 ),
                 onPressed: () async {
                   final nom = nomController.text.trim();
-                  final montantTotal =
-                      double.tryParse(montantTotalController.text.trim()) ?? 0.0;
-                  final acompte =
-                      double.tryParse(acompteController.text.trim()) ?? 0.0;
+                  final telephone = telephoneController.text.trim();
+                  // Virgule ou point, espaces acceptés (« 1 500,5 »)
+                  final montantTotal = parseAmount(montantTotalController.text);
+                  final acompte = parseAmount(acompteController.text);
+
+                  // 📵 Pas de crédit client sans téléphone
+                  if (type == TypeDette.client &&
+                      !CompteClientService.telephoneValide(telephone)) {
+                    ScaffoldMessenger.of(dialogContext).showSnackBar(SnackBar(
+                      content: Text(t.debtPhoneRequired),
+                      backgroundColor: Colors.red,
+                    ));
+                    return;
+                  }
 
                   if (nom.isNotEmpty && montantTotal > 0) {
                     // 🛑 Déjà payé > total : on refuse
@@ -177,6 +202,7 @@ class DebtDialogs {
                     await controleur
                         .ajouterDette(
                           nomTiers: nom,
+                          telephone: type == TypeDette.client ? telephone : '',
                           numeroFacture: factureController.text.trim(),
                           montantTotal: montantTotal,
                           acompte: acompte,

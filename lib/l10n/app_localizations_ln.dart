@@ -2492,4 +2492,15 @@ class AppLocalizationsLn extends AppLocalizations {
   @override
   String get panRateLocked =>
       'Kaka nkolo (to moto apesami ndingisa) nde akoki kobongola taux.';
+
+  @override
+  String get payCreditNeedsPhone =>
+      'Mpo na koteka na niongo, koma nimero ya telefone ya mosombi (ata mituya 9).';
+
+  @override
+  String get debtClientPhone => 'Telefone ya mosombi *';
+
+  @override
+  String get debtPhoneRequired =>
+      'Nimero ya telefone ya mosombi esengeli mpo na niongo (ata mituya 9).';
 }

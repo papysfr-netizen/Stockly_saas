@@ -141,6 +141,18 @@ describe('Ventes', () => {
     await assertFails(updateDoc(ref, { articles: [] }));
   });
 
+  it('vente à crédit : refusée sans téléphone, acceptée avec', async () => {
+    const vente = (extra) => setDoc(doc(collection(dbDe('caissier'), `entreprises/${E}/ventes`)), {
+      entrepriseId: E, vendeurId: 'caissier', boutiqueId: 'principale',
+      montantTotal: 120, remiseTotale: 0, resteAPayer: 120, ...extra,
+    });
+    await assertFails(vente({ telephoneClient: '' }));
+    await assertFails(vente({ telephoneClient: '0812' }));
+    await assertSucceeds(vente({ telephoneClient: '+243 81 234 5678' }));
+    // Payé comptant : pas besoin de téléphone
+    await assertSucceeds(vente({ resteAPayer: 0, telephoneClient: '' }));
+  });
+
   it('seul le gérant peut supprimer une vente', async () => {
     await assertFails(deleteDoc(doc(dbDe('caissier'), `entreprises/${E}/ventes/v1`)));
     await assertSucceeds(deleteDoc(doc(dbDe('gerant'), `entreprises/${E}/ventes/v1`)));
@@ -195,6 +207,15 @@ describe('Stock des produits', () => {
 // ─────────────────────────────────────────────────────────────
 describe('Dettes des clients', () => {
   const c1 = (uid) => doc(dbDe(uid), `entreprises/${E}/creances/c1`);
+
+  it('créer une dette client : téléphone obligatoire', async () => {
+    const creance = (tel) => setDoc(doc(collection(dbDe('caissier'), `entreprises/${E}/creances`)), {
+      nomTiers: 'Jean', montantInitial: 50, acomptePaye: 0, montantReste: 50, telephone: tel,
+    });
+    await assertFails(creance(''));
+    await assertFails(creance('12345'));
+    await assertSucceeds(creance('0991234567'));
+  });
 
   it('un caissier peut encaisser un paiement', async () => {
     await assertSucceeds(updateDoc(c1('caissier'), { acomptePaye: 50, montantReste: 50 }));

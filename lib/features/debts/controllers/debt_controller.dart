@@ -1,6 +1,7 @@
 // lib/features/debts/controllers/debt_controller.dart
 
 import 'dart:async';
+import 'package:stockly_saas/features/comptes_clients/compte_client_service.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:stockly_saas/core/services/journal_service.dart';
@@ -134,6 +135,7 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
   /// Ajoute une nouvelle dette/créance avec écritures comptables d'engagement et d'acompte
   Future<void> ajouterDette({
     required String nomTiers,
+    String telephone = '', // 📵 obligatoire pour une créance client
     required String numeroFacture,
     required double montantTotal,
     required double acompte,
@@ -155,6 +157,11 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
       }
       if (cleanNom.isEmpty) {
         throw ArgumentError('Le nom du tiers est obligatoire.');
+      }
+      if (type == TypeDette.client &&
+          !CompteClientService.telephoneValide(telephone)) {
+        throw ArgumentError(
+            'Le téléphone du client est obligatoire pour un crédit (au moins 9 chiffres).');
       }
       if (cleanFacture.isEmpty) {
         throw ArgumentError('Le numéro de facture est obligatoire.');
@@ -187,6 +194,7 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
         id: targetRef.id,
         boutiqueId: boutiqueId,
         nomTiers: cleanNom,
+        telephone: telephone.trim(),
         numeroFacture: cleanFacture,
         montantInitial: totalArrondi,
         acomptePaye: pureAcompte,

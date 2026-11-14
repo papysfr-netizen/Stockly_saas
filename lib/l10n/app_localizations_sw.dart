@@ -2487,4 +2487,15 @@ class AppLocalizationsSw extends AppLocalizations {
   @override
   String get panRateLocked =>
       'Mmiliki pekee (au mtu aliyeruhusiwa) ndiye anaweza kubadilisha kiwango.';
+
+  @override
+  String get payCreditNeedsPhone =>
+      'Kwa mauzo ya mkopo, andika namba ya simu ya mteja (angalau tarakimu 9).';
+
+  @override
+  String get debtClientPhone => 'Simu ya mteja *';
+
+  @override
+  String get debtPhoneRequired =>
+      'Namba ya simu ya mteja inahitajika kwa mkopo (angalau tarakimu 9).';
 }

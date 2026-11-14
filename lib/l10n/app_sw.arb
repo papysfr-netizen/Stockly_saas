@@ -677,5 +677,8 @@
   "panEmpty": "Kikapu chako ni tupu",
   "panTotal": "Jumla ya kulipa :",
   "panCheckout": "LIPA",
-  "panRateLocked": "Mmiliki pekee (au mtu aliyeruhusiwa) ndiye anaweza kubadilisha kiwango."
+  "panRateLocked": "Mmiliki pekee (au mtu aliyeruhusiwa) ndiye anaweza kubadilisha kiwango.",
+  "payCreditNeedsPhone": "Kwa mauzo ya mkopo, andika namba ya simu ya mteja (angalau tarakimu 9).",
+  "debtClientPhone": "Simu ya mteja *",
+  "debtPhoneRequired": "Namba ya simu ya mteja inahitajika kwa mkopo (angalau tarakimu 9)."
 }

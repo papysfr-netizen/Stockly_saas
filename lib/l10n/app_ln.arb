@@ -677,5 +677,8 @@
   "panEmpty": "Panier na yo ezali pamba",
   "panTotal": "Motango ya kofuta :",
   "panCheckout": "KOFUTISA",
-  "panRateLocked": "Kaka nkolo (to moto apesami ndingisa) nde akoki kobongola taux."
+  "panRateLocked": "Kaka nkolo (to moto apesami ndingisa) nde akoki kobongola taux.",
+  "payCreditNeedsPhone": "Mpo na koteka na niongo, koma nimero ya telefone ya mosombi (ata mituya 9).",
+  "debtClientPhone": "Telefone ya mosombi *",
+  "debtPhoneRequired": "Nimero ya telefone ya mosombi esengeli mpo na niongo (ata mituya 9)."
 }

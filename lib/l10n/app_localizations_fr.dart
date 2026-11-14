@@ -2496,4 +2496,15 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get panRateLocked =>
       'Seul le patron (ou une personne autorisée) peut changer le taux.';
+
+  @override
+  String get payCreditNeedsPhone =>
+      'Pour une vente à crédit, saisissez le numéro de téléphone du client (au moins 9 chiffres).';
+
+  @override
+  String get debtClientPhone => 'Téléphone du client *';
+
+  @override
+  String get debtPhoneRequired =>
+      'Le numéro de téléphone du client est obligatoire pour un crédit (au moins 9 chiffres).';
 }
