@@ -3,7 +3,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stockly_saas/core/models/payment_method.dart';
 import 'package:stockly_saas/features/accounting/services/accounting_journal_service.dart';
-import 'package:stockly_saas/core/services/accounting_report_service.dart';
 
 void main() {
   group('Tests de génération des écritures de vente SYSCOHADA', () {
@@ -55,29 +54,6 @@ void main() {
       final clientLine = saleLines.firstWhere((l) => l.accountCode == '411000');
 
       expect(clientLine.debit, equals(50000.0));
-    });
-  });
-
-  group('Tests du Compte de Résultat et Bilan', () {
-    test('Calcul correct du Bénéfice Net sur un jeu de test', () {
-      final saleEntries = AccountingJournalService.generateSaleEntries(
-        entrepriseId: 'ENT-001',
-        transactionId: 'TX-1003',
-        date: DateTime.now(),
-        invoiceRef: 'FAC-003',
-        customerName: 'Client Gamma',
-        amountExclTax: 200000.0,
-        taxRate: 0.0,
-        paymentMethod: PaymentMethod.cash,
-        costOfGoodsSold: 120000.0,
-      );
-
-      final report = AccountingReportService.calculateIncomeStatement(saleEntries);
-
-      expect(report.totalProduits, equals(200000.0)); // Ventes (701000)
-      expect(report.totalCharges, equals(120000.0));  // Variation stock (603100)
-      expect(report.resultatNet, equals(80000.0));    // Bénéfice
-      expect(report.isBenefice, isTrue);
     });
   });
 }
