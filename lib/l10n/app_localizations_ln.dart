@@ -2725,4 +2725,7 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get caiMainShop => 'Butiki ya liboso';
+
+  @override
+  String get payDeliveryNote => 'Mokanda ya bopesi';
 }

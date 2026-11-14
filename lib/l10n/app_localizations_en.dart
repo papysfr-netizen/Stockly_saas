@@ -2721,4 +2721,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get caiMainShop => 'Main shop';
+
+  @override
+  String get payDeliveryNote => 'Delivery note';
 }

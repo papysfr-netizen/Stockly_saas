@@ -746,5 +746,6 @@
   "caiProfileError": "Could not load your profile: {erreur}",
   "caiPickShop": "Choose the selling shop",
   "caiSellingIn": "Selling in: {nom}",
-  "caiMainShop": "Main shop"
+  "caiMainShop": "Main shop",
+  "payDeliveryNote": "Delivery note"
 }

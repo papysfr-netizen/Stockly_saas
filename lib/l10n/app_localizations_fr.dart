@@ -2731,4 +2731,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get caiMainShop => 'Boutique principale';
+
+  @override
+  String get payDeliveryNote => 'Bon de livraison';
 }

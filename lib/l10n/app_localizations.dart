@@ -4584,6 +4584,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Boutique principale'**
   String get caiMainShop;
+
+  /// No description provided for @payDeliveryNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bon de livraison'**
+  String get payDeliveryNote;
 }
 
 class _AppLocalizationsDelegate

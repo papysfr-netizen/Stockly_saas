@@ -746,5 +746,6 @@
   "caiProfileError": "Ekoki kofungola profil na yo te: {erreur}",
   "caiPickShop": "Pona butiki ya koteka",
   "caiSellingIn": "Koteka: {nom}",
-  "caiMainShop": "Butiki ya liboso"
+  "caiMainShop": "Butiki ya liboso",
+  "payDeliveryNote": "Mokanda ya bopesi"
 }

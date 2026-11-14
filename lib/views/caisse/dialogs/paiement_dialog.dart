@@ -8,15 +8,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:stockly_saas/core/models/payment_method.dart';
 import 'package:stockly_saas/core/providers/cart_provider.dart';
 import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
 import 'package:stockly_saas/core/providers/currency_provider.dart';
 import 'package:stockly_saas/core/providers/entreprise_provider.dart';
-import 'package:stockly_saas/features/accounting/services/accounting_journal_service.dart';
 import 'package:stockly_saas/features/comptes_clients/compte_client_service.dart';
 import 'package:stockly_saas/core/services/receipt_service.dart';
 import 'package:stockly_saas/features/cloture/cloture_service.dart';
+import 'package:stockly_saas/features/ventes/vente_service.dart';
 import 'package:stockly_saas/core/utils/payment_calculator.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:stockly_saas/core/services/messages_clients.dart';
@@ -215,22 +214,6 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         _preremplirMontant();
       });
     });
-  }
-
-  PaymentMethod _parsePaymentMethod(String method) {
-    switch (method.toLowerCase()) {
-      case 'carte bancaire':
-      case 'virement':
-      case 'banque':
-        return PaymentMethod.bank;
-      case 'mobile money':
-        return PaymentMethod.mobileMoney;
-      case 'dette':
-        return PaymentMethod.credit;
-      case 'cash':
-      default:
-        return PaymentMethod.cash;
-    }
   }
 
   Future<void> _envoyerNotificationMessage({
@@ -860,9 +843,6 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
     );
 
     try {
-      final String client = _clientController.text.trim().isEmpty
-          ? 'Client Divers'
-          : _clientController.text.trim();
       final String telephone = _telephoneController.text.trim();
 
       // 💰 Vérifie que le solde du compte client est toujours suffisant
@@ -874,270 +854,61 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         }
       }
 
-      final double totalVente = widget.total;
-      final double aPayer = totalVente - soldeUtilise;
-      final double verseCash = calc.totalPaidInUSD > aPayer
-          ? aPayer
-          : (calc.totalPaidInUSD < 0 ? 0.0 : calc.totalPaidInUSD);
-      final double verseEffective = verseCash + soldeUtilise;
-      final double resteEffective = calc.remainingUSD > 0 ? calc.remainingUSD : 0.0;
+      final firestore = FirebaseFirestore.instance;
+      final vendeurNom = await nomUtilisateurConnecte();
+      final prixAchat = await _chargerPrixAchat(firestore);
+      final nouvelle = NouvelleVente(
+        entrepriseId: widget.entrepriseId,
+        userId: widget.userId,
+        vendeurNom: vendeurNom,
+        boutiqueId: _boutiqueVente,
+        nomSaisi: _clientController.text,
+        telephone: telephone,
+        panier: widget.cart,
+        total: widget.total,
+        paiement: calc,
+        soldeUtilise: soldeUtilise,
+        soldeAvant: soldeAvant,
+        methodePaiement: methodePaiement,
+        statutLivraison: statutLivraison,
+        delaiRetraitJours: delaiRetraitJours,
+        motif: _motifController.text,
+        prixAchat: prixAchat,
+        apresCloture: _apresCloture,
+      );
 
       // 📵 Pas de crédit sans nom ni numéro de téléphone (sinon impossible de relancer)
-      if (resteEffective > PaymentResult.tolerance) {
-        if (_clientController.text.trim().isEmpty ||
-            client.toLowerCase() == 'client divers') {
+      switch (VenteService.verifierCredit(nouvelle)) {
+        case ProblemeCredit.nomManquant:
           throw Exception(t.payCreditNeedsName);
-        }
-        if (!CompteClientService.telephoneValide(telephone)) {
+        case ProblemeCredit.telephoneManquant:
           throw Exception(t.payCreditNeedsPhone);
-        }
+        case null:
+          break;
       }
 
-      final String methodeEnregistree = soldeUtilise > 0.005
-          ? (verseCash > 0.005 ? '$methodePaiement + Compte client' : 'Compte client')
-          : methodePaiement;
-
-      final bool estLivre = statutLivraison == 'Livré';
-
-      final firestore = FirebaseFirestore.instance;
-
-      final prixAchat = await _chargerPrixAchat(firestore);
-      double coutMarchandises = 0.0;
-      for (final item in widget.cart) {
-        coutMarchandises += (prixAchat[item.id] ?? 0.0) * item.quantite;
-      }
-
-      final vendeurNom = await nomUtilisateurConnecte();
-
-      final batch = firestore.batch();
+      // 🧾 Toutes les écritures de la vente, préparées puis mises dans UN lot
+      final ventes = firestore.collection('entreprises').doc(widget.entrepriseId);
       final Timestamp now = Timestamp.now();
+      final plan = VenteService.preparer(
+        nouvelle,
+        venteId: ventes.collection('ventes').doc().id,
+        ecritureId: ventes.collection('ecritures_comptables').doc().id,
+        creanceId: ventes.collection('creances').doc().id,
+        maintenant: now,
+      );
+      final batch = firestore.batch();
+      VenteService.ajouterAuLot(batch, firestore, nouvelle, plan, now);
 
-      // ⏰ Date limite de retrait (fin de journée du dernier jour)
-      final DateTime limite = now.toDate().add(Duration(days: delaiRetraitJours));
-      final DateTime finJourLimite =
-          DateTime(limite.year, limite.month, limite.day, 23, 59, 59);
-
-      // 1. Vente
-      final venteRef = firestore
-          .collection('entreprises')
-          .doc(widget.entrepriseId)
-          .collection('ventes')
-          .doc();
-      final numeroFacture = venteRef.id.substring(0, 8).toUpperCase();
-
-      batch.set(venteRef, {
-        'id': venteRef.id,
-        'nomClient': client,
-        'telephoneClient': telephone,
-        'montantTotal': totalVente,
-        'montantPaye': calc.totalPaidInUSD + soldeUtilise,
-        'montantPayeUSD': calc.paidUSD,
-        'montantPayeLocal': calc.paidLocal,
-        'montantCompteClient': soldeUtilise,
-        'monnaieRendueUSD': calc.changeInUSD,
-        'monnaieRendueLocal': calc.changeInLocal,
-        'tauxEchange': calc.localRate,
-        'resteAPayer': resteEffective,
-        'statutPaiement': verseEffective >= totalVente - 0.001
-            ? 'Payé'
-            : (verseEffective > 0 ? 'Acompte' : 'Dette'),
-        'statutLivraison': statutLivraison,
-        'dateLivraison': estLivre ? now : null,
-        'livrePar': estLivre ? widget.userId : null,
-        'dateLimiteLivraison': estLivre ? null : Timestamp.fromDate(finJourLimite),
-        'methodePaiement': methodeEnregistree,
-        'vendeurId': widget.userId,
-        'boutiqueId': _boutiqueVente, // 🏬
-        if (_apresCloture) 'apresCloture': true, // 🔒 signalée au patron
-        'vendeurNom': vendeurNom,
-        'entrepriseId': widget.entrepriseId,
-        'comptabilise': true,
-        'coutMarchandises': coutMarchandises,
-        // 🏷️ Remises accordées (prix négocié)
-        'remiseTotale': widget.cart.fold<double>(0.0, (s, i) => s + i.remiseTotale),
-        'articles': widget.cart
-            .map((item) => {
-                  'produitId': item.id,
-                  'nom': item.nom,
-                  'prixUnitaire': item.prix,
-                  'prixNormal': item.prixNormal,
-                  'remise': item.remiseTotale,
-                  'prixAchat': prixAchat[item.id] ?? 0.0,
-                  'quantite': item.quantite,
-                  'totalItem': item.prix * item.quantite,
-                })
-            .toList(),
-        'createdAt': now,
-        'date': now,
-      });
-
-      // 2. Écriture comptable de la vente (SYSCOHADA)
-      final ecritureRef = firestore
-          .collection('entreprises')
-          .doc(widget.entrepriseId)
-          .collection('ecritures_comptables')
-          .doc();
-
-      final pMethod = _parsePaymentMethod(methodePaiement);
-      final String codeTresorerie = AccountingJournalService.getAccountCodeForPayment(pMethod);
-
-      final List<Map<String, dynamic>> lines = [];
-
-      if (verseCash > 0) {
-        lines.add({
-          'accountCode': codeTresorerie,
-          'accountLabel': AccountingJournalService.getAccountLabel(codeTresorerie),
-          'debit': verseCash,
-          'credit': 0.0,
-        });
-      }
-
-      if (soldeUtilise > 0.005) {
-        lines.add({
-          'accountCode': CompteClientService.compteAvances,
-          'accountLabel': '${CompteClientService.libelleAvances} - $client',
-          'debit': soldeUtilise,
-          'credit': 0.0,
-        });
-      }
-
-      if (resteEffective > 0) {
-        lines.add({
-          'accountCode': '411000',
-          'accountLabel': 'Client (Créance) - $client',
-          'debit': resteEffective,
-          'credit': 0.0,
-        });
-      }
-
-      lines.add({
-        'accountCode': '701000',
-        'accountLabel': AccountingJournalService.getAccountLabel('701000'),
-        'debit': 0.0,
-        'credit': totalVente,
-      });
-
-      batch.set(ecritureRef, {
-        'id': ecritureRef.id,
-        'entrepriseId': widget.entrepriseId,
-        'reference': venteRef.id,
-        'description': 'Facture de vente - $client',
-        'date': now,
-        'lines': lines,
-        'montantEncaisse': verseCash,
-        'boutiqueId': _boutiqueVente, // 🏬 compta
-      });
-
-      // 2 bis. Coût des marchandises vendues
-      if (coutMarchandises > 0) {
-        final coutRef = firestore
-            .collection('entreprises')
-            .doc(widget.entrepriseId)
-            .collection('ecritures_comptables')
-            .doc('STK-${venteRef.id}');
-
-        batch.set(coutRef, {
-          'id': coutRef.id,
-          'entrepriseId': widget.entrepriseId,
-          'reference': venteRef.id,
-          'description': 'Sortie de stock (coût des marchandises) - $client',
-          'boutiqueId': _boutiqueVente, // 🏬 compta
-          'date': now,
-          'lines': [
-            {
-              'accountCode': '603100',
-              'accountLabel': AccountingJournalService.getAccountLabel('603100'),
-              'debit': coutMarchandises,
-              'credit': 0.0,
-            },
-            {
-              'accountCode': '311000',
-              'accountLabel': AccountingJournalService.getAccountLabel('311000'),
-              'debit': 0.0,
-              'credit': coutMarchandises,
-            },
-          ],
-          'montantEncaisse': 0.0,
-        });
-      }
-
-      // 3. Créance (si reste > 0)
-      if (resteEffective > 0) {
-        final creanceRef = firestore
-            .collection('entreprises')
-            .doc(widget.entrepriseId)
-            .collection('creances')
-            .doc();
-
-        batch.set(creanceRef, {
-          'id': creanceRef.id,
-          'venteId': venteRef.id,
-          'boutiqueId': _boutiqueVente, // 🏬 dette
-          'numeroFacture': numeroFacture,
-          'nomTiers': client,
-          'nomClient': client,
-          'telephone': telephone,
-          'montantInitial': totalVente,
-          'acomptePaye': verseEffective,
-          'montantReste': resteEffective,
-          'type': 'client',
-          'statut': verseEffective > 0 ? 'partiel' : 'non_paye',
-          // 📝 Motif écrit par le vendeur (sinon la phrase automatique)
-          'note': _motifController.text.trim().isNotEmpty
-              ? _motifController.text.trim()
-              : 'Créance issue de la vente #${venteRef.id.substring(0, 6)}',
-          // 🧾 Historique : l'acompte versé à la caisse
-          if (verseEffective > 0.005)
-            'paiements': [
-              {
-                'date': now,
-                'montant': verseEffective,
-                'methode': methodeEnregistree,
-                'parNom': vendeurNom,
-                'parUid': widget.userId,
-              }
-            ],
-          'entrepriseId': widget.entrepriseId,
-          'comptabilise': true,
-          'createdAt': now,
-          'dateCreation': now,
-        });
-      }
-
-      // 3 bis. 💰 Compte client : mouvement « Achat »
-      if (soldeUtilise > 0.005) {
-        CompteClientService.ajouterMouvement(
-          batch,
-          entrepriseId: widget.entrepriseId,
-          telephone: telephone,
-          nom: client == 'Client Divers' ? '' : client,
-          type: 'achat',
-          delta: -soldeUtilise,
-          soldeAvant: soldeAvant,
-          description: 'Achat facture $numeroFacture',
-          date: now,
-          uid: widget.userId,
-          parNom: vendeurNom,
-          venteId: venteRef.id,
-        );
-      }
-
-      // 4. Stock (même si à livrer plus tard : la marchandise est réservée)
-      for (final item in widget.cart) {
-        final prodRef = firestore
-            .collection('entreprises')
-            .doc(widget.entrepriseId)
-            .collection('produits')
-            .doc(item.id);
-
-        final b = _boutiqueVente;
-        batch.update(prodRef, {
-          'quantite': FieldValue.increment(-item.quantite),
-          // 🏬 stock de la boutique (la principale = total − autres boutiques)
-          if (b != 'principale') 'stocks.$b': FieldValue.increment(-item.quantite),
-          'updatedAt': now,
-        });
-      }
+      // Valeurs utiles pour la suite (reçu, message, journal)
+      final venteRef = ventes.collection('ventes').doc(plan.venteId);
+      final numeroFacture = plan.numeroFacture;
+      final double totalVente = widget.total;
+      final double verseEffective = plan.verseTotal;
+      final double resteEffective = plan.reste;
+      final bool estLivre = nouvelle.estLivre;
+      final DateTime finJourLimite = plan.finJourLimite;
+      final String client = nouvelle.client;
 
       // ⏳ On attend la réponse du serveur (6 s maximum).
       //    Pas de réseau : la vente reste sur le téléphone et partira plus tard.
@@ -1279,21 +1050,8 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
       // 7. Fermeture
       navigator.pop();
 
-      // 8. Bon de livraison seulement si la marchandise part maintenant
-      if (estLivre) {
-        navigator.push(
-          MaterialPageRoute(
-            builder: (context) => BonLivraisonScreen(
-              entrepriseId: widget.entrepriseId,
-              nomClient: client,
-              adresseClient: '',
-              telephoneClient: telephone,
-              articles: widget.cart,
-            ),
-          ),
-        );
-      }
-
+      // 8. Bon de livraison : FACULTATIF (bouton dans le message), plus d'écran imposé
+      final articlesVendus = List<CartItem>.from(widget.cart);
       final String texteCompte = soldeUtilise > 0.005
           ? t.payNewBalance(currencyState.formatPrice(soldeAvant - soldeUtilise))
           : '';
@@ -1303,6 +1061,24 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
               ? '${t.paySaved}$texteCompte'
               : '${t.paySavedPickup(_formatJour(finJourLimite))}$texteCompte'),
           backgroundColor: estLivre ? Colors.teal : Colors.orange.shade800,
+          duration: const Duration(seconds: 6),
+          action: estLivre
+              ? SnackBarAction(
+                  label: t.payDeliveryNote,
+                  textColor: Colors.white,
+                  onPressed: () => navigator.push(
+                    MaterialPageRoute(
+                      builder: (context) => BonLivraisonScreen(
+                        entrepriseId: widget.entrepriseId,
+                        nomClient: client,
+                        adresseClient: '',
+                        telephoneClient: telephone,
+                        articles: articlesVendus,
+                      ),
+                    ),
+                  ),
+                )
+              : null,
         ),
       );
 

@@ -746,5 +746,6 @@
   "caiProfileError": "Haiwezekani kupakia wasifu wako: {erreur}",
   "caiPickShop": "Chagua duka la kuuzia",
   "caiSellingIn": "Mauzo: {nom}",
-  "caiMainShop": "Duka kuu"
+  "caiMainShop": "Duka kuu",
+  "payDeliveryNote": "Hati ya uwasilishaji"
 }

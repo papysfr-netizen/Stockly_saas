@@ -79,9 +79,12 @@ séance de relecture.
   et `ouvrirPaiementCaisse`.
 - `dialogs/ajout_panier_dialog.dart` : quantité et prix d'un produit.
 - `dialogs/prix_negocie_dialog.dart` : prix négocié d'une ligne du panier.
-- `dialogs/paiement_dialog.dart` (≈ 1 300 lignes) : fenêtre de paiement ET
-  enregistrement de la vente (vente, écritures comptables, créance, compte
-  client, stock), reçu, WhatsApp/SMS, bon de livraison.
+- `dialogs/paiement_dialog.dart` (≈ 1 100 lignes) : fenêtre de paiement, reçu,
+  WhatsApp/SMS, bouton facultatif « Bon de livraison ».
+- `lib/features/ventes/vente_service.dart` : **enregistrement de la vente**
+  (vente, écriture comptable, coût des marchandises, créance, compte client,
+  stock), préparé sans Firebase puis écrit en un seul lot. Testé par
+  `test/ventes/vente_service_test.dart` (12 cas).
 - Panier : `lib/core/providers/cart_provider.dart`.
 
 Corrigé lors de la relecture : taux du franc modifiable par n'importe quel
@@ -92,10 +95,6 @@ la fiche complète ; prix saisis avec espaces ; textes en dur de l'écran caisse
 export du catalogue avec le stock de la boutique.
 
 Reste à faire :
-- Sortir l'enregistrement de la vente de `paiement_dialog.dart` vers un
-  service testable (`VenteService`), pour pouvoir tester une vente complète.
-- Après chaque vente « livrée », l'écran **Bon de livraison** s'ouvre : à
-  confirmer avec le patron (utile, ou gênant à chaque vente ?).
 - La monnaie rendue n'indique pas sa monnaie ($ ou FC).
 
 ## Déjà corrigé

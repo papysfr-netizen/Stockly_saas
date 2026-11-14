@@ -2719,4 +2719,7 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get caiMainShop => 'Duka kuu';
+
+  @override
+  String get payDeliveryNote => 'Hati ya uwasilishaji';
 }

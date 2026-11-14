@@ -2119,5 +2119,6 @@
   "caiPickShop": "Choisissez la boutique de vente",
   "caiSellingIn": "Vente : {nom}",
   "@caiSellingIn": {"placeholders": {"nom": {"type": "String"}}},
-  "caiMainShop": "Boutique principale"
+  "caiMainShop": "Boutique principale",
+  "payDeliveryNote": "Bon de livraison"
 }
