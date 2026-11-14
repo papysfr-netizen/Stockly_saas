@@ -264,6 +264,43 @@ describe('Comptabilité et journal', () => {
 });
 
 // ─────────────────────────────────────────────────────────────
+describe('Clôture de caisse', () => {
+  const cloture = (uid, extra = {}) => ({
+    boutiqueId: 'principale', jour: '2026-11-14', parUid: uid, parNom: 'X', taux: 2300,
+    fondUSD: 10, fondCDF: 0, compteUSD: 150, compteCDF: 23000, compteMobile: 40,
+    fondDemainUSD: 10, fondDemainCDF: 0, note: '', createdAt: serverTimestamp(), ...extra,
+  });
+  const ref = (uid, id = 'principale_2026-11-14') => doc(dbDe(uid), `entreprises/${E}/clotures/${id}`);
+
+  it('un caissier clôture sa boutique, à son nom', async () => {
+    await assertSucceeds(setDoc(ref('caissier'), cloture('caissier')));
+  });
+
+  it('pas au nom d\'un autre, ni pour une autre boutique, ni avec un mauvais identifiant', async () => {
+    await assertFails(setDoc(ref('caissier'), cloture('gerant')));
+    await assertFails(setDoc(ref('caissierB2'), cloture('caissierB2')));
+    await assertFails(setDoc(ref('caissier', 'principale_2026-11-15'), cloture('caissier')));
+    await assertFails(setDoc(ref('caissier'), cloture('caissier', { compteUSD: -5 })));
+    await assertFails(setDoc(ref('caissier'), cloture('caissier', { attendu: 999 })));
+  });
+
+  it('une clôture ne se modifie jamais ; seul le gérant la supprime (réouverture)', async () => {
+    await assertSucceeds(setDoc(ref('caissier'), cloture('caissier')));
+    await assertFails(updateDoc(ref('caissier'), { compteUSD: 999 }));
+    await assertFails(updateDoc(ref('patron'), { compteUSD: 999 }));
+    await assertFails(setDoc(ref('caissier'), cloture('caissier', { compteUSD: 1 })));
+    await assertFails(deleteDoc(ref('caissier')));
+    await assertSucceeds(deleteDoc(ref('gerant')));
+  });
+
+  it('une autre entreprise ne voit pas les clôtures', async () => {
+    await assertSucceeds(setDoc(ref('caissier'), cloture('caissier')));
+    await assertFails(getDoc(ref('autre')));
+    await assertSucceeds(getDoc(ref('patron')));
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
 describe('Rapports de plantages', () => {
   const rapport = (uid, extra = {}) => ({
     uid, message: 'Null check operator', pile: '#0 main', contexte: '',

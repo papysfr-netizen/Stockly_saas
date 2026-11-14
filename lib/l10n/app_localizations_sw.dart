@@ -2504,4 +2504,165 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get debtNameRequired => 'Jina la mteja linahitajika kwa mkopo.';
+
+  @override
+  String get cloTitle => 'Kufunga sanduku la pesa';
+
+  @override
+  String get cloButton => 'Funga sanduku';
+
+  @override
+  String cloDoneAt(String heure) {
+    return 'Sanduku limefungwa saa $heure';
+  }
+
+  @override
+  String get cloBoutique => 'Duka';
+
+  @override
+  String get cloPickBoutique => 'Chagua duka la kufunga';
+
+  @override
+  String get cloBlindInfo =>
+      'Hesabu pesa iliyo kwenye droo na andika unachokipata. Usinakili kiasi kingine: mwenye duka atalinganisha na mauzo.';
+
+  @override
+  String get cloFloatMorning => 'Pesa ya mwanzo asubuhi';
+
+  @override
+  String get cloCounted => 'Pesa iliyohesabiwa kwenye droo';
+
+  @override
+  String get cloMobileReceived => 'Mobile Money iliyopokelewa leo';
+
+  @override
+  String get cloMobileHint =>
+      'Jumla iliyopokelewa kwenye simu ya duka, kwa dola';
+
+  @override
+  String get cloFloatTomorrow => 'Pesa ya kuacha kwa kesho (si lazima)';
+
+  @override
+  String get cloNote => 'Maelezo (si lazima)';
+
+  @override
+  String get cloInDollars => 'Kwa dola (\$)';
+
+  @override
+  String get cloInFrancs => 'Kwa faranga (FC)';
+
+  @override
+  String get cloSave => 'Hifadhi kufunga';
+
+  @override
+  String get cloConfirmTitle => 'Hifadhi kufunga?';
+
+  @override
+  String get cloConfirmBody => 'Ikishahifadhiwa, haiwezi kubadilishwa tena.';
+
+  @override
+  String get cloSaved => 'Kufunga kumehifadhiwa. Mwenye duka ataona matokeo.';
+
+  @override
+  String get cloAlreadyDone => 'Sanduku hili limeshafungwa leo.';
+
+  @override
+  String get cloResult => 'Matokeo ya kufunga';
+
+  @override
+  String get cloCash => 'Pesa taslimu';
+
+  @override
+  String get cloMobile => 'Mobile Money';
+
+  @override
+  String get cloExpected => 'Inayotarajiwa';
+
+  @override
+  String get cloCountedShort => 'Iliyohesabiwa';
+
+  @override
+  String get cloGap => 'Tofauti';
+
+  @override
+  String get cloOk => 'Sawa ✓';
+
+  @override
+  String cloMissing(String montant) {
+    return 'Inakosekana $montant';
+  }
+
+  @override
+  String cloSurplus(String montant) {
+    return 'Ziada ya $montant';
+  }
+
+  @override
+  String get cloDetail => 'Maelezo ya kiasi kinachotarajiwa';
+
+  @override
+  String get cloLineFloat => 'Pesa ya mwanzo';
+
+  @override
+  String get cloLineSales => 'Mauzo';
+
+  @override
+  String get cloLineDebts => 'Madeni yaliyolipwa';
+
+  @override
+  String get cloLineDeposits => 'Amana za wateja';
+
+  @override
+  String get cloLineWithdrawals => 'Uondoaji wa wateja';
+
+  @override
+  String get cloLineExpenses => 'Matumizi';
+
+  @override
+  String get cloLineSuppliers => 'Wasambazaji waliolipwa';
+
+  @override
+  String get cloLineRefunds => 'Marejesho ya pesa';
+
+  @override
+  String get cloLineOther => 'Malipo mengine (kadi, uhamisho…), hayahesabiwi';
+
+  @override
+  String get cloExpensesHidden =>
+      'Matumizi hayakusomeka: kiasi kinachotarajiwa kinaweza kuwa kikubwa mno.';
+
+  @override
+  String cloAfterSales(String nombre, String montant) {
+    return 'Mauzo $nombre baada ya kufunga: $montant';
+  }
+
+  @override
+  String cloBy(String nom, String heure) {
+    return 'Na $nom saa $heure';
+  }
+
+  @override
+  String get cloHistory => 'Historia ya kufunga';
+
+  @override
+  String get cloHistoryEmpty => 'Bado hakuna kufunga.';
+
+  @override
+  String get cloReopen => 'Fungua tena (futa kufunga)';
+
+  @override
+  String get cloReopenConfirm =>
+      'Futa kufunga huku? Sanduku litaweza kuhesabiwa tena.';
+
+  @override
+  String get cloAfterWarning =>
+      'Sanduku limeshafungwa leo: mauzo haya yataonyeshwa \"baada ya kufunga\".';
+
+  @override
+  String cloRate(String taux) {
+    return 'Kiwango: 1 \$ = $taux FC';
+  }
+
+  @override
+  String get cloLoading => 'Inahesabu kiasi kinachotarajiwa…';
 }

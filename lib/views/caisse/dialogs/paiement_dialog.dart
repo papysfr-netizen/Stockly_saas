@@ -16,6 +16,7 @@ import 'package:stockly_saas/core/providers/entreprise_provider.dart';
 import 'package:stockly_saas/features/accounting/services/accounting_journal_service.dart';
 import 'package:stockly_saas/features/comptes_clients/compte_client_service.dart';
 import 'package:stockly_saas/core/services/receipt_service.dart';
+import 'package:stockly_saas/features/cloture/cloture_service.dart';
 import 'package:stockly_saas/core/utils/payment_calculator.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:stockly_saas/core/services/messages_clients.dart';
@@ -46,6 +47,9 @@ class PaiementDialog extends ConsumerStatefulWidget {
 class _PaiementDialogState extends ConsumerState<PaiementDialog> {
   /// 🏬 Boutique de la vente (patron sur « Toutes les boutiques » = boutique principale)
   String get _boutiqueVente => ref.read(boutiqueActiveProvider) ?? 'principale';
+
+  /// 🔒 Vente faite après la clôture de caisse du jour
+  bool _apresCloture = false;
 
   final _clientController = TextEditingController();
   final _telephoneController = TextEditingController();
@@ -302,6 +306,28 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                 ],
               ),
               const Divider(height: 16),
+
+              // 🔒 Caisse déjà clôturée aujourd'hui : on prévient (la vente reste possible)
+              StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                stream: ClotureService.ecouter(widget.entrepriseId, _boutiqueVente, DateTime.now()),
+                builder: (context, snap) {
+                  _apresCloture = snap.data?.exists == true;
+                  if (!_apresCloture) return const SizedBox.shrink();
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(children: [
+                      Icon(Icons.lock_clock_rounded, color: Colors.orange.shade800),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text(t.cloAfterWarning, style: const TextStyle(fontSize: 12))),
+                    ]),
+                  );
+                },
+              ),
 
               // CONTENU DÉFILABLE
               Expanded(
@@ -916,6 +942,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         'methodePaiement': methodeEnregistree,
         'vendeurId': widget.userId,
         'boutiqueId': _boutiqueVente, // 🏬
+        if (_apresCloture) 'apresCloture': true, // 🔒 signalée au patron
         'vendeurNom': vendeurNom,
         'entrepriseId': widget.entrepriseId,
         'comptabilise': true,

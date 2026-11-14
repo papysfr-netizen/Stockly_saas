@@ -2510,4 +2510,165 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get debtNameRequired => 'Nkombo ya mosombi esengeli mpo na niongo.';
+
+  @override
+  String get cloTitle => 'Kokanga kaisi';
+
+  @override
+  String get cloButton => 'Kanga kaisi';
+
+  @override
+  String cloDoneAt(String heure) {
+    return 'Kaisi ekangami na ngonga $heure';
+  }
+
+  @override
+  String get cloBoutique => 'Butiki';
+
+  @override
+  String get cloPickBoutique => 'Pona butiki oyo okokanga';
+
+  @override
+  String get cloBlindInfo =>
+      'Tanga mbongo ezali na tiroir mpe koma oyo omoni. Kokoma motuya mosusu te: nkolo akokokanisa na biteki.';
+
+  @override
+  String get cloFloatMorning => 'Mbongo ya ebandeli ntongo';
+
+  @override
+  String get cloCounted => 'Mbongo etangami na tiroir';
+
+  @override
+  String get cloMobileReceived => 'Mobile Money ezwami lelo';
+
+  @override
+  String get cloMobileHint => 'Mobimba ezwami na telefone ya butiki, na dolare';
+
+  @override
+  String get cloFloatTomorrow =>
+      'Mbongo etikami mpo na lobi (ezali na makambo te)';
+
+  @override
+  String get cloNote => 'Likebi (ezali na makambo te)';
+
+  @override
+  String get cloInDollars => 'Na dolare (\$)';
+
+  @override
+  String get cloInFrancs => 'Na falanga (FC)';
+
+  @override
+  String get cloSave => 'Bomba kokanga';
+
+  @override
+  String get cloConfirmTitle => 'Bomba kokanga?';
+
+  @override
+  String get cloConfirmBody => 'Soki ebombami, ekoki lisusu kobongwana te.';
+
+  @override
+  String get cloSaved => 'Kokanga ebombami. Nkolo akomona mbano.';
+
+  @override
+  String get cloAlreadyDone => 'Kaisi oyo ekangami lelo.';
+
+  @override
+  String get cloResult => 'Mbano ya kokanga';
+
+  @override
+  String get cloCash => 'Mbongo ya mabóko';
+
+  @override
+  String get cloMobile => 'Mobile Money';
+
+  @override
+  String get cloExpected => 'Ezalaki kozela';
+
+  @override
+  String get cloCountedShort => 'Etangami';
+
+  @override
+  String get cloGap => 'Bokeseni';
+
+  @override
+  String get cloOk => 'Malamu ✓';
+
+  @override
+  String cloMissing(String montant) {
+    return 'Ezangi $montant';
+  }
+
+  @override
+  String cloSurplus(String montant) {
+    return 'Eleki na $montant';
+  }
+
+  @override
+  String get cloDetail => 'Ndimbola ya oyo ezalaki kozela';
+
+  @override
+  String get cloLineFloat => 'Mbongo ya ebandeli';
+
+  @override
+  String get cloLineSales => 'Biteki';
+
+  @override
+  String get cloLineDebts => 'Banyongo efutami';
+
+  @override
+  String get cloLineDeposits => 'Mbongo batiaki na ba compte';
+
+  @override
+  String get cloLineWithdrawals => 'Mbongo babimisi na ba compte';
+
+  @override
+  String get cloLineExpenses => 'Bibimisi';
+
+  @override
+  String get cloLineSuppliers => 'Bapesi biloko bafutami';
+
+  @override
+  String get cloLineRefunds => 'Bozongisi mbongo';
+
+  @override
+  String get cloLineOther => 'Bafuti mosusu (karte, virement…), etangami te';
+
+  @override
+  String get cloExpensesHidden =>
+      'Bibimisi ekoki kotangama te: oyo ezalaki kozela ekoki koleka.';
+
+  @override
+  String cloAfterSales(String nombre, String montant) {
+    return 'Biteki $nombre sima ya kokanga: $montant';
+  }
+
+  @override
+  String cloBy(String nom, String heure) {
+    return 'Na $nom na ngonga $heure';
+  }
+
+  @override
+  String get cloHistory => 'Lisolo ya kokanga';
+
+  @override
+  String get cloHistoryEmpty => 'Kokanga ezali naino te.';
+
+  @override
+  String get cloReopen => 'Fungola lisusu (longola kokanga)';
+
+  @override
+  String get cloReopenConfirm =>
+      'Longola kokanga oyo? Kaisi ekoki kotangama lisusu.';
+
+  @override
+  String get cloAfterWarning =>
+      'Kaisi ekangami lelo: koteka oyo ekolakisama \"sima ya kokanga\".';
+
+  @override
+  String cloRate(String taux) {
+    return 'Motuya: 1 \$ = $taux FC';
+  }
+
+  @override
+  String get cloLoading => 'Ezali kotanga oyo ezalaki kozela…';
 }

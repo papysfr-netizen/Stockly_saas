@@ -2506,4 +2506,165 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get debtNameRequired => 'The customer\'s name is required for credit.';
+
+  @override
+  String get cloTitle => 'Cash register closing';
+
+  @override
+  String get cloButton => 'Close the register';
+
+  @override
+  String cloDoneAt(String heure) {
+    return 'Register closed at $heure';
+  }
+
+  @override
+  String get cloBoutique => 'Shop';
+
+  @override
+  String get cloPickBoutique => 'Choose the shop to close';
+
+  @override
+  String get cloBlindInfo =>
+      'Count the money in the drawer and write what you find. Do not copy another amount: the owner then compares with the sales.';
+
+  @override
+  String get cloFloatMorning => 'Morning cash float';
+
+  @override
+  String get cloCounted => 'Money counted in the drawer';
+
+  @override
+  String get cloMobileReceived => 'Mobile Money received today';
+
+  @override
+  String get cloMobileHint => 'Total received on the shop phone, in dollars';
+
+  @override
+  String get cloFloatTomorrow => 'Float left for tomorrow (optional)';
+
+  @override
+  String get cloNote => 'Note (optional)';
+
+  @override
+  String get cloInDollars => 'In dollars (\$)';
+
+  @override
+  String get cloInFrancs => 'In francs (FC)';
+
+  @override
+  String get cloSave => 'Save the closing';
+
+  @override
+  String get cloConfirmTitle => 'Save the closing?';
+
+  @override
+  String get cloConfirmBody =>
+      'Once saved, the closing can no longer be changed.';
+
+  @override
+  String get cloSaved => 'Closing saved. The owner will see the result.';
+
+  @override
+  String get cloAlreadyDone => 'This register is already closed today.';
+
+  @override
+  String get cloResult => 'Closing result';
+
+  @override
+  String get cloCash => 'Cash';
+
+  @override
+  String get cloMobile => 'Mobile Money';
+
+  @override
+  String get cloExpected => 'Expected';
+
+  @override
+  String get cloCountedShort => 'Counted';
+
+  @override
+  String get cloGap => 'Difference';
+
+  @override
+  String get cloOk => 'Correct ✓';
+
+  @override
+  String cloMissing(String montant) {
+    return '$montant missing';
+  }
+
+  @override
+  String cloSurplus(String montant) {
+    return '$montant extra';
+  }
+
+  @override
+  String get cloDetail => 'Expected amount details';
+
+  @override
+  String get cloLineFloat => 'Cash float';
+
+  @override
+  String get cloLineSales => 'Sales';
+
+  @override
+  String get cloLineDebts => 'Debts collected';
+
+  @override
+  String get cloLineDeposits => 'Customer account deposits';
+
+  @override
+  String get cloLineWithdrawals => 'Customer account withdrawals';
+
+  @override
+  String get cloLineExpenses => 'Expenses';
+
+  @override
+  String get cloLineSuppliers => 'Suppliers paid';
+
+  @override
+  String get cloLineRefunds => 'Return refunds';
+
+  @override
+  String get cloLineOther => 'Other payments (card, transfer…), not counted';
+
+  @override
+  String get cloExpensesHidden =>
+      'Expenses could not be read: the expected amount may be too high.';
+
+  @override
+  String cloAfterSales(String nombre, String montant) {
+    return '$nombre sale(s) after closing: $montant';
+  }
+
+  @override
+  String cloBy(String nom, String heure) {
+    return 'By $nom at $heure';
+  }
+
+  @override
+  String get cloHistory => 'Closing history';
+
+  @override
+  String get cloHistoryEmpty => 'No closing yet.';
+
+  @override
+  String get cloReopen => 'Reopen (delete the closing)';
+
+  @override
+  String get cloReopenConfirm =>
+      'Delete this closing? The register can be counted again.';
+
+  @override
+  String get cloAfterWarning =>
+      'Register already closed today: this sale will be marked \"after closing\".';
+
+  @override
+  String cloRate(String taux) {
+    return 'Rate: 1 \$ = $taux FC';
+  }
+
+  @override
+  String get cloLoading => 'Computing the expected amount…';
 }

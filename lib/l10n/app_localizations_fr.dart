@@ -2515,4 +2515,166 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get debtNameRequired =>
       'Le nom du client est obligatoire pour un crédit.';
+
+  @override
+  String get cloTitle => 'Clôture de caisse';
+
+  @override
+  String get cloButton => 'Clôturer la caisse';
+
+  @override
+  String cloDoneAt(String heure) {
+    return 'Caisse clôturée à $heure';
+  }
+
+  @override
+  String get cloBoutique => 'Boutique';
+
+  @override
+  String get cloPickBoutique => 'Choisissez la boutique à clôturer';
+
+  @override
+  String get cloBlindInfo =>
+      'Comptez l\'argent du tiroir et notez ce que vous trouvez. Ne recopiez pas un autre montant : le patron compare ensuite avec les ventes.';
+
+  @override
+  String get cloFloatMorning => 'Fond de caisse du matin';
+
+  @override
+  String get cloCounted => 'Argent compté dans le tiroir';
+
+  @override
+  String get cloMobileReceived => 'Mobile Money reçu aujourd\'hui';
+
+  @override
+  String get cloMobileHint =>
+      'Total reçu sur le téléphone de la boutique, en dollars';
+
+  @override
+  String get cloFloatTomorrow => 'Fond laissé pour demain (facultatif)';
+
+  @override
+  String get cloNote => 'Remarque (facultatif)';
+
+  @override
+  String get cloInDollars => 'En dollars (\$)';
+
+  @override
+  String get cloInFrancs => 'En francs (FC)';
+
+  @override
+  String get cloSave => 'Enregistrer la clôture';
+
+  @override
+  String get cloConfirmTitle => 'Enregistrer la clôture ?';
+
+  @override
+  String get cloConfirmBody =>
+      'Une fois enregistrée, la clôture ne peut plus être modifiée.';
+
+  @override
+  String get cloSaved => 'Clôture enregistrée. Le patron verra le résultat.';
+
+  @override
+  String get cloAlreadyDone => 'Cette caisse est déjà clôturée aujourd\'hui.';
+
+  @override
+  String get cloResult => 'Résultat de la clôture';
+
+  @override
+  String get cloCash => 'Espèces';
+
+  @override
+  String get cloMobile => 'Mobile Money';
+
+  @override
+  String get cloExpected => 'Attendu';
+
+  @override
+  String get cloCountedShort => 'Compté';
+
+  @override
+  String get cloGap => 'Écart';
+
+  @override
+  String get cloOk => 'Juste ✓';
+
+  @override
+  String cloMissing(String montant) {
+    return 'Il manque $montant';
+  }
+
+  @override
+  String cloSurplus(String montant) {
+    return 'Surplus de $montant';
+  }
+
+  @override
+  String get cloDetail => 'Détail de l\'attendu';
+
+  @override
+  String get cloLineFloat => 'Fond de caisse';
+
+  @override
+  String get cloLineSales => 'Ventes';
+
+  @override
+  String get cloLineDebts => 'Dettes encaissées';
+
+  @override
+  String get cloLineDeposits => 'Dépôts des comptes clients';
+
+  @override
+  String get cloLineWithdrawals => 'Retraits des comptes clients';
+
+  @override
+  String get cloLineExpenses => 'Dépenses';
+
+  @override
+  String get cloLineSuppliers => 'Fournisseurs payés';
+
+  @override
+  String get cloLineRefunds => 'Remboursements des retours';
+
+  @override
+  String get cloLineOther => 'Autres paiements (carte, virement…), non comptés';
+
+  @override
+  String get cloExpensesHidden =>
+      'Les dépenses n\'ont pas pu être lues : l\'attendu peut être trop élevé.';
+
+  @override
+  String cloAfterSales(String nombre, String montant) {
+    return '$nombre vente(s) après la clôture : $montant';
+  }
+
+  @override
+  String cloBy(String nom, String heure) {
+    return 'Par $nom à $heure';
+  }
+
+  @override
+  String get cloHistory => 'Historique des clôtures';
+
+  @override
+  String get cloHistoryEmpty => 'Aucune clôture pour le moment.';
+
+  @override
+  String get cloReopen => 'Rouvrir (supprimer la clôture)';
+
+  @override
+  String get cloReopenConfirm =>
+      'Supprimer cette clôture ? La caisse pourra être recomptée.';
+
+  @override
+  String get cloAfterWarning =>
+      'Caisse déjà clôturée aujourd\'hui : cette vente sera signalée « après clôture ».';
+
+  @override
+  String cloRate(String taux) {
+    return 'Taux : 1 \$ = $taux FC';
+  }
+
+  @override
+  String get cloLoading => 'Calcul de l\'attendu…';
 }

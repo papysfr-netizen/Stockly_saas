@@ -4200,6 +4200,294 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Le nom du client est obligatoire pour un crédit.'**
   String get debtNameRequired;
+
+  /// No description provided for @cloTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clôture de caisse'**
+  String get cloTitle;
+
+  /// No description provided for @cloButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clôturer la caisse'**
+  String get cloButton;
+
+  /// No description provided for @cloDoneAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Caisse clôturée à {heure}'**
+  String cloDoneAt(String heure);
+
+  /// No description provided for @cloBoutique.
+  ///
+  /// In fr, this message translates to:
+  /// **'Boutique'**
+  String get cloBoutique;
+
+  /// No description provided for @cloPickBoutique.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez la boutique à clôturer'**
+  String get cloPickBoutique;
+
+  /// No description provided for @cloBlindInfo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comptez l\'argent du tiroir et notez ce que vous trouvez. Ne recopiez pas un autre montant : le patron compare ensuite avec les ventes.'**
+  String get cloBlindInfo;
+
+  /// No description provided for @cloFloatMorning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fond de caisse du matin'**
+  String get cloFloatMorning;
+
+  /// No description provided for @cloCounted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Argent compté dans le tiroir'**
+  String get cloCounted;
+
+  /// No description provided for @cloMobileReceived.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mobile Money reçu aujourd\'hui'**
+  String get cloMobileReceived;
+
+  /// No description provided for @cloMobileHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total reçu sur le téléphone de la boutique, en dollars'**
+  String get cloMobileHint;
+
+  /// No description provided for @cloFloatTomorrow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fond laissé pour demain (facultatif)'**
+  String get cloFloatTomorrow;
+
+  /// No description provided for @cloNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remarque (facultatif)'**
+  String get cloNote;
+
+  /// No description provided for @cloInDollars.
+  ///
+  /// In fr, this message translates to:
+  /// **'En dollars (\$)'**
+  String get cloInDollars;
+
+  /// No description provided for @cloInFrancs.
+  ///
+  /// In fr, this message translates to:
+  /// **'En francs (FC)'**
+  String get cloInFrancs;
+
+  /// No description provided for @cloSave.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer la clôture'**
+  String get cloSave;
+
+  /// No description provided for @cloConfirmTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer la clôture ?'**
+  String get cloConfirmTitle;
+
+  /// No description provided for @cloConfirmBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une fois enregistrée, la clôture ne peut plus être modifiée.'**
+  String get cloConfirmBody;
+
+  /// No description provided for @cloSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clôture enregistrée. Le patron verra le résultat.'**
+  String get cloSaved;
+
+  /// No description provided for @cloAlreadyDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette caisse est déjà clôturée aujourd\'hui.'**
+  String get cloAlreadyDone;
+
+  /// No description provided for @cloResult.
+  ///
+  /// In fr, this message translates to:
+  /// **'Résultat de la clôture'**
+  String get cloResult;
+
+  /// No description provided for @cloCash.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espèces'**
+  String get cloCash;
+
+  /// No description provided for @cloMobile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mobile Money'**
+  String get cloMobile;
+
+  /// No description provided for @cloExpected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Attendu'**
+  String get cloExpected;
+
+  /// No description provided for @cloCountedShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compté'**
+  String get cloCountedShort;
+
+  /// No description provided for @cloGap.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écart'**
+  String get cloGap;
+
+  /// No description provided for @cloOk.
+  ///
+  /// In fr, this message translates to:
+  /// **'Juste ✓'**
+  String get cloOk;
+
+  /// No description provided for @cloMissing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il manque {montant}'**
+  String cloMissing(String montant);
+
+  /// No description provided for @cloSurplus.
+  ///
+  /// In fr, this message translates to:
+  /// **'Surplus de {montant}'**
+  String cloSurplus(String montant);
+
+  /// No description provided for @cloDetail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détail de l\'attendu'**
+  String get cloDetail;
+
+  /// No description provided for @cloLineFloat.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fond de caisse'**
+  String get cloLineFloat;
+
+  /// No description provided for @cloLineSales.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ventes'**
+  String get cloLineSales;
+
+  /// No description provided for @cloLineDebts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dettes encaissées'**
+  String get cloLineDebts;
+
+  /// No description provided for @cloLineDeposits.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépôts des comptes clients'**
+  String get cloLineDeposits;
+
+  /// No description provided for @cloLineWithdrawals.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retraits des comptes clients'**
+  String get cloLineWithdrawals;
+
+  /// No description provided for @cloLineExpenses.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépenses'**
+  String get cloLineExpenses;
+
+  /// No description provided for @cloLineSuppliers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fournisseurs payés'**
+  String get cloLineSuppliers;
+
+  /// No description provided for @cloLineRefunds.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remboursements des retours'**
+  String get cloLineRefunds;
+
+  /// No description provided for @cloLineOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autres paiements (carte, virement…), non comptés'**
+  String get cloLineOther;
+
+  /// No description provided for @cloExpensesHidden.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les dépenses n\'ont pas pu être lues : l\'attendu peut être trop élevé.'**
+  String get cloExpensesHidden;
+
+  /// No description provided for @cloAfterSales.
+  ///
+  /// In fr, this message translates to:
+  /// **'{nombre} vente(s) après la clôture : {montant}'**
+  String cloAfterSales(String nombre, String montant);
+
+  /// No description provided for @cloBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par {nom} à {heure}'**
+  String cloBy(String nom, String heure);
+
+  /// No description provided for @cloHistory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Historique des clôtures'**
+  String get cloHistory;
+
+  /// No description provided for @cloHistoryEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune clôture pour le moment.'**
+  String get cloHistoryEmpty;
+
+  /// No description provided for @cloReopen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rouvrir (supprimer la clôture)'**
+  String get cloReopen;
+
+  /// No description provided for @cloReopenConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer cette clôture ? La caisse pourra être recomptée.'**
+  String get cloReopenConfirm;
+
+  /// No description provided for @cloAfterWarning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Caisse déjà clôturée aujourd\'hui : cette vente sera signalée « après clôture ».'**
+  String get cloAfterWarning;
+
+  /// No description provided for @cloRate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taux : 1 \$ = {taux} FC'**
+  String cloRate(String taux);
+
+  /// No description provided for @cloLoading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Calcul de l\'attendu…'**
+  String get cloLoading;
 }
 
 class _AppLocalizationsDelegate

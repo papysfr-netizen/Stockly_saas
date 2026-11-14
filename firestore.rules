@@ -334,6 +334,30 @@ service cloud.firestore {
         allow update, delete: if estGerantOuPlus(entId);
       }
 
+      // ----- 🔒 Clôtures de caisse : une par boutique et par jour -----
+      // Chacun clôture SA boutique, à SON nom, une seule fois (jamais modifiée).
+      // Supprimer = « rouvrir » : Gérant+ seulement.
+      match /clotures/{clotureId} {
+        allow read: if estMembre(entId);
+        allow create: if estMembre(entId)
+          && boutiqueAutorisee(entId, request.resource.data.boutiqueId)
+          && clotureId == request.resource.data.boutiqueId + '_' + request.resource.data.jour
+          && request.resource.data.jour.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
+          && request.resource.data.parUid == request.auth.uid
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.keys().hasOnly(['boutiqueId', 'jour', 'parUid', 'parNom', 'taux',
+               'fondUSD', 'fondCDF', 'compteUSD', 'compteCDF', 'compteMobile',
+               'fondDemainUSD', 'fondDemainCDF', 'note', 'createdAt'])
+          && request.resource.data.compteUSD >= 0
+          && request.resource.data.compteCDF >= 0
+          && request.resource.data.compteMobile >= 0
+          && request.resource.data.fondUSD >= 0
+          && request.resource.data.fondCDF >= 0
+          && request.resource.data.note.size() <= 300;
+        allow update: if false;
+        allow delete: if estGerantOuPlus(entId);
+      }
+
       // ----- 📒 Journal « qui a fait quoi » -----
       // Chacun ajoute SA ligne ; personne ne modifie ni n'efface ;
       // seuls le Propriétaire et le Gérant lisent.
@@ -346,7 +370,7 @@ service cloud.firestore {
       // ----- Toutes les autres sous-collections (comme avant) -----
       match /{collection}/{reste=**} {
         allow read: if estMembre(entId) && !(collection in ['journal', 'ecritures_comptables']);
-        allow write: if !(collection in ['produits', 'ventes', 'retours', 'comptes_clients', 'boutiques', 'transferts', 'creances', 'dettes', 'ecritures_comptables', 'journal'])
+        allow write: if !(collection in ['produits', 'ventes', 'retours', 'comptes_clients', 'boutiques', 'transferts', 'creances', 'dettes', 'ecritures_comptables', 'journal', 'clotures'])
           && (estMembre(entId) || creeParMoi(entId));
       }
     }

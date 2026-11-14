@@ -33,6 +33,8 @@ import 'package:stockly_saas/features/debts/screens/comptabilite_screen.dart';
 import 'package:stockly_saas/features/livraisons/a_livrer_screen.dart';
 import 'package:stockly_saas/features/ventes/historique_ventes_screen.dart';
 import 'package:stockly_saas/features/comptes_clients/argent_caisse_comptes.dart';
+import 'package:stockly_saas/features/cloture/cloture_screen.dart';
+import 'package:stockly_saas/features/cloture/cloture_service.dart';
 import 'package:stockly_saas/core/services/argent_vente.dart';
 import 'package:stockly_saas/core/services/ventes_refusees.dart';
 
@@ -492,6 +494,8 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                     spacing: 8,
                     runSpacing: 8,
                     children: [
+                      // 🔒 Clôture de caisse (état du jour)
+                      _boutonCloture(t, boutique),
                       _raccourci(t.accSales, Icons.receipt_long_rounded, Colors.indigo,
                           () => _ouvrir(HistoriqueVentesScreen(entrepriseId: _entrepriseId))),
                       ALivrerNavButton(entrepriseId: _entrepriseId),
@@ -801,6 +805,26 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  /// 🔒 « Clôturer la caisse » ou « Caisse clôturée à … » (boutique affichée)
+  Widget _boutonCloture(AppLocalizations t, String? boutique) {
+    void ouvrir() => _ouvrir(ClotureScreen(entrepriseId: _entrepriseId));
+    if (boutique == null) {
+      return _raccourci(t.cloButton, Icons.lock_clock_rounded, Colors.deepOrange, ouvrir);
+    }
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: ClotureService.ecouter(_entrepriseId, boutique, DateTime.now()),
+      builder: (context, snap) {
+        final faite = snap.data?.exists == true;
+        if (!faite) {
+          return _raccourci(t.cloButton, Icons.lock_clock_rounded, Colors.deepOrange, ouvrir);
+        }
+        final quand = ClotureService.date(snap.data!.data()?['createdAt']) ?? DateTime.now();
+        final heure = '${quand.hour.toString().padLeft(2, '0')}:${quand.minute.toString().padLeft(2, '0')}';
+        return _raccourci(t.cloDoneAt(heure), Icons.lock_rounded, _vert, ouvrir);
+      },
     );
   }
 
