@@ -283,3 +283,25 @@ final depensesStreamProvider = StreamProvider<List<Depense>>((ref) {
           .map((doc) => Depense.fromJson(doc.data(), doc.id))
           .toList());
 });
+
+/// 💸 Dépenses depuis minuit seulement (accueil) : on ne relit pas tout l'historique.
+/// (Après minuit, l'accueil refiltre par date : les dépenses de la veille ne comptent pas.)
+final depensesDuJourProvider = StreamProvider<List<Depense>>((ref) {
+  final entrepriseId = ref.watch(
+    userProfileProvider.select(
+      (asyncProfile) => asyncProfile.value?.entrepriseId ?? '',
+    ),
+  );
+  if (entrepriseId.isEmpty) return Stream.value(const []);
+  final now = DateTime.now();
+  final minuit = DateTime(now.year, now.month, now.day);
+  return FirebaseFirestore.instance
+      .collection('depenses')
+      .where('entrepriseId', isEqualTo: entrepriseId)
+      .orderBy('date', descending: true)
+      .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(minuit))
+      .snapshots()
+      .map((snapshot) => snapshot.docs
+          .map((doc) => Depense.fromJson(doc.data(), doc.id))
+          .toList());
+});

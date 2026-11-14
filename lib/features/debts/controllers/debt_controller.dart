@@ -27,25 +27,34 @@ final dettesStreamProvider =
 
   final db = FirebaseFirestore.instance;
 
+  // 💸 On ne relit pas tout l'historique :
+  //   - toutes les dettes EN COURS (reste à payer) ;
+  //   - les dettes soldées ou créées depuis moins de 6 mois (filtre « Soldées »).
+  final il6Mois = Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 183)));
+  Stream<List<Dette>> lire(String nomCollection) {
+    final col = db.collection('entreprises').doc(entrepriseId).collection(nomCollection);
+    List<Dette> versListe(QuerySnapshot<Map<String, dynamic>> s) =>
+        s.docs.map((doc) => Dette.fromDocument(doc)).toList();
+    return Rx.combineLatest3<List<Dette>, List<Dette>, List<Dette>, List<Dette>>(
+      col.where('montantReste', isGreaterThan: 0).snapshots().map(versListe),
+      col.where('dernierPaiement', isGreaterThanOrEqualTo: il6Mois).snapshots().map(versListe),
+      col.where('dateCreation', isGreaterThanOrEqualTo: il6Mois).snapshots().map(versListe),
+      (enCours, payees, recentes) {
+        // Une même dette peut venir de plusieurs listes : on la garde une fois
+        final parId = <String, Dette>{};
+        for (final d in [...enCours, ...payees, ...recentes]) {
+          parId[d.id] = d;
+        }
+        return parId.values.toList();
+      },
+    );
+  }
+
   // Stream 1 : Créances clients
-  final creancesStream = db
-      .collection('entreprises')
-      .doc(entrepriseId)
-      .collection('creances')
-      .snapshots()
-      .map((snapshot) => snapshot.docs
-          .map((doc) => Dette.fromDocument(doc))
-          .toList());
+  final creancesStream = lire('creances');
 
   // Stream 2 : Dettes fournisseurs
-  final dettesStream = db
-      .collection('entreprises')
-      .doc(entrepriseId)
-      .collection('dettes')
-      .snapshots()
-      .map((snapshot) => snapshot.docs
-          .map((doc) => Dette.fromDocument(doc))
-          .toList());
+  final dettesStream = lire('dettes');
 
   // Fusion et tri sécurisé
   return Rx.combineLatest2<List<Dette>, List<Dette>, List<Dette>>(

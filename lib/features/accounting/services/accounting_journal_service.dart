@@ -97,30 +97,10 @@ class AccountingJournalService {
 
     int cleanedCount = 0;
 
-    // 1. Purge de l'ancienne sous-collection plate 'journal'
-    final oldJournalRef = _firestore
-        .collection('entreprises')
-        .doc(entrepriseId)
-        .collection('journal');
-    
-    final oldJournalSnap = await oldJournalRef.get();
-    if (oldJournalSnap.docs.isNotEmpty) {
-      WriteBatch oldBatch = _firestore.batch();
-      int batchCount = 0;
-      for (var doc in oldJournalSnap.docs) {
-        oldBatch.delete(doc.reference);
-        cleanedCount++;
-        batchCount++;
-        if (batchCount >= 400) {
-          await oldBatch.commit();
-          oldBatch = _firestore.batch();
-          batchCount = 0;
-        }
-      }
-      if (batchCount > 0) await oldBatch.commit();
-    }
+    // ⚠️ L'ancienne « purge de la sous-collection journal » a été RETIRÉE :
+    //    'journal' est aujourd'hui le journal « qui a fait quoi » (à ne jamais effacer).
 
-    // 2. Nettoyage des documents sans 'lines' ou avec d'anciens champs plats
+    // Nettoyage des documents sans 'lines' ou avec d'anciens champs plats
     final ecrituresRef = _firestore
         .collection('entreprises')
         .doc(entrepriseId)

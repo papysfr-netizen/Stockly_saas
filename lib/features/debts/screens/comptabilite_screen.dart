@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stockly_saas/features/boutiques/compta_boutique.dart';
@@ -87,11 +88,21 @@ class ComptabiliteController extends FamilyAsyncNotifier<void, String> {
     state = const AsyncValue.loading();
 
     try {
-      await _journalService.cleanAndMigrateEcritures(entrepriseId);
+      // 💸 Le grand balayage (toutes les écritures et toutes les ventes) n'est
+      //    fait qu'UNE fois par téléphone. Ensuite : seulement les ventes
+      //    marquées « non comptabilisées ».
+      final prefs = await SharedPreferences.getInstance();
+      final cleBalayage = 'balayage_compta_fait_$entrepriseId';
+      final premierBalayage = prefs.getBool(cleBalayage) != true;
+      if (premierBalayage) {
+        await _journalService.cleanAndMigrateEcritures(entrepriseId);
+      }
 
       final db = FirebaseFirestore.instance;
       final orgRef = db.collection('entreprises').doc(entrepriseId);
-      final ventesSnap = await orgRef.collection('ventes').get();
+      final ventesSnap = premierBalayage
+          ? await orgRef.collection('ventes').get()
+          : await orgRef.collection('ventes').where('comptabilise', isEqualTo: false).get();
 
       final uncomptabilizedDocs = ventesSnap.docs.where((doc) {
         final data = doc.data();
@@ -99,6 +110,7 @@ class ComptabiliteController extends FamilyAsyncNotifier<void, String> {
       }).toList();
 
       if (uncomptabilizedDocs.isEmpty) {
+        if (premierBalayage) await prefs.setBool(cleBalayage, true);
         state = const AsyncValue.data(null);
         return 0;
       }
@@ -179,6 +191,8 @@ class ComptabiliteController extends FamilyAsyncNotifier<void, String> {
         await batch.commit();
       }
 
+      // Balayage réussi jusqu'au bout : la prochaine fois, seulement le nouveau
+      if (premierBalayage) await prefs.setBool(cleBalayage, true);
       state = const AsyncValue.data(null);
       return uncomptabilizedDocs.length;
     } catch (e, stack) {

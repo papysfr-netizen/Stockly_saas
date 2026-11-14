@@ -179,7 +179,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
     final boutique = ref.watch(boutiqueActiveProvider);
     final profil = ref.watch(userProfileProvider).value;
     final voirFinances = profil?.peutVoirFinances ?? false;
-    final depenses = ref.watch(depensesStreamProvider).value ?? const [];
+    final depenses = ref.watch(depensesDuJourProvider).value ?? const []; // 💸 du jour seulement
 
     // Dépenses du jour (boutique affichée)
     final now = DateTime.now();
@@ -746,7 +746,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
     String texte = resumeCourt;
     if (choix == 'detail') {
       final minuit = DateTime(now.year, now.month, now.day);
-      final depJour = (ref.read(depensesStreamProvider).value ?? const [])
+      final depJour = (ref.read(depensesDuJourProvider).value ?? const [])
           .where((d) => !d.date.isBefore(minuit) && _memeBoutique(boutique, d.boutiqueId))
           .toList();
       final stockBas = <MapEntry<String, num>>[];
