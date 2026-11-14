@@ -4656,6 +4656,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Argent prêté (pris dans la caisse)'**
   String get cloLineLent;
+
+  /// No description provided for @prodPricePositive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le prix de vente doit être supérieur à 0'**
+  String get prodPricePositive;
+
+  /// No description provided for @prodNoNegative.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de nombre négatif'**
+  String get prodNoNegative;
 }
 
 class _AppLocalizationsDelegate

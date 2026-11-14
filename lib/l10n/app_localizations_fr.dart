@@ -2767,4 +2767,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get cloLineLent => 'Argent prêté (pris dans la caisse)';
+
+  @override
+  String get prodPricePositive => 'Le prix de vente doit être supérieur à 0';
+
+  @override
+  String get prodNoNegative => 'Pas de nombre négatif';
 }

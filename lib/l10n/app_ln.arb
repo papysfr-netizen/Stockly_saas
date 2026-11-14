@@ -758,5 +758,7 @@
   "debtToDrawer": "Mbongo ekoti na kaisi",
   "debtOldPaid": "Esilaki kofutama liboso ya Nguli",
   "cloLineBorrowed": "Mbongo ya kodefa (etiami na kaisi)",
-  "cloLineLent": "Mbongo ya kodefisa (ezwami na kaisi)"
+  "cloLineLent": "Mbongo ya kodefisa (ezwami na kaisi)",
+  "prodPricePositive": "Ntalo ya koteka esengeli koleka 0",
+  "prodNoNegative": "Motango ya moins te"
 }

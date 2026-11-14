@@ -2757,4 +2757,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cloLineLent => 'Money lent (taken from the till)';
+
+  @override
+  String get prodPricePositive => 'The selling price must be above 0';
+
+  @override
+  String get prodNoNegative => 'No negative number';
 }

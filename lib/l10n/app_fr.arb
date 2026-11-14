@@ -2131,5 +2131,7 @@
   "debtToDrawer": "L'argent est entré dans la caisse",
   "debtOldPaid": "Déjà remboursé avant Nguli",
   "cloLineBorrowed": "Argent emprunté (mis en caisse)",
-  "cloLineLent": "Argent prêté (pris dans la caisse)"
+  "cloLineLent": "Argent prêté (pris dans la caisse)",
+  "prodPricePositive": "Le prix de vente doit être supérieur à 0",
+  "prodNoNegative": "Pas de nombre négatif"
 }

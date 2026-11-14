@@ -758,5 +758,7 @@
   "debtToDrawer": "The money went into the till",
   "debtOldPaid": "Already repaid before Nguli",
   "cloLineBorrowed": "Money borrowed (put in the till)",
-  "cloLineLent": "Money lent (taken from the till)"
+  "cloLineLent": "Money lent (taken from the till)",
+  "prodPricePositive": "The selling price must be above 0",
+  "prodNoNegative": "No negative number"
 }

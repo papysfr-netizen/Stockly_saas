@@ -26,7 +26,7 @@ séance de relecture.
 | `lib/core/models` | 7 | 1 314 | Produit, vente, dette, dépense, utilisateur | 🟡 |
 | `lib/core/services` | 18 | 3 482 | Reçus, PDF, Excel, IA photo, journal, équipe | 🟡 |
 | `lib/core/providers` | 9 | 1 879 | Devises, rôles et autorisations, dépenses, panier | 🟡 |
-| `lib/core/widgets` | 6 | 2 010 | Fiche produit, scanner, sauvegarde | ⬜ |
+| `lib/core/widgets` | 6 | 2 010 | Fiche produit, scanner, sauvegarde | 🟡 |
 | `lib/core/utils` | 2 | 61 | Calcul du paiement, lecture des montants | ✅ |
 | `lib/repositories` | 1 | 131 | Lecture/écriture des produits | ⬜ |
 | `lib/features/accounting` | 3 | 1 058 | Écritures SYSCOHADA | 🟡 |
@@ -140,6 +140,19 @@ avec espaces refusés (paiement de dette, compte client, dépense).
   serveur (forfait Blaze).
 - Pas encore relus dans `features/debts` : `home_screen.dart` (écran Stock),
   `comptabilite_screen.dart`, `depenses_screen.dart`, connexion et inscription.
+
+### Stock et fiche produit (relus)
+
+- `core/widgets/add_product_modal.dart` : création/modification d'un produit
+  (prix en $, stock par boutique en « différence », code-barres en double
+  détecté, journal des changements, hors ligne).
+- `features/debts/screens/home_screen.dart` : écran Stock (liste, filtres
+  rupture, valeur du stock, suppression confirmée, import Excel/photo).
+- `core/models/produit.dart` : `stockBoutique` (principale = total − autres
+  boutiques), `prixPour` (prix de la boutique, sinon prix normal).
+
+Corrigé : prix de vente à 0 ou négatif, prix d'achat et stock négatifs
+acceptés par la fiche produit.
 
 ## Déjà corrigé
 

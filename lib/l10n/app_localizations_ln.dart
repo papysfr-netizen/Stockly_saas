@@ -2761,4 +2761,10 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get cloLineLent => 'Mbongo ya kodefisa (ezwami na kaisi)';
+
+  @override
+  String get prodPricePositive => 'Ntalo ya koteka esengeli koleka 0';
+
+  @override
+  String get prodNoNegative => 'Motango ya moins te';
 }

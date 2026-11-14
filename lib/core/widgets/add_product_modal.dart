@@ -779,9 +779,9 @@ class _AddProductModalState extends State<AddProductModal> {
                               if (value == null || value.trim().isEmpty) {
                                 return null; // optionnel
                               }
-                              if (_lireDecimal(value) == null) {
-                                return _t.prodInvalidPrice;
-                              }
+                              final v = _lireDecimal(value);
+                              if (v == null) return _t.prodInvalidPrice;
+                              if (v < 0) return _t.prodNoNegative;
                               return null;
                             },
                           );
@@ -796,9 +796,10 @@ class _AddProductModalState extends State<AddProductModal> {
                               if (value == null || value.trim().isEmpty) {
                                 return _t.prodPriceRequired;
                               }
-                              if (_lireDecimal(value) == null) {
-                                return _t.prodInvalidPrice;
-                              }
+                              final v = _lireDecimal(value);
+                              if (v == null) return _t.prodInvalidPrice;
+                              // Un produit à 0 $ serait vendu gratuitement par erreur
+                              if (v <= 0) return _t.prodPricePositive;
                               return null;
                             },
                           );
@@ -837,9 +838,9 @@ class _AddProductModalState extends State<AddProductModal> {
                               if (value == null || value.trim().isEmpty) {
                                 return _t.prodStockRequired;
                               }
-                              if (_lireEntier(value) == null) {
-                                return _t.prodWholeNumber;
-                              }
+                              final q = _lireEntier(value);
+                              if (q == null) return _t.prodWholeNumber;
+                              if (q < 0) return _t.prodNoNegative;
                               return null;
                             },
                           );

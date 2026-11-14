@@ -2755,4 +2755,10 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get cloLineLent => 'Pesa iliyokopeshwa (imetolewa sandukuni)';
+
+  @override
+  String get prodPricePositive => 'Bei ya kuuza lazima iwe zaidi ya 0';
+
+  @override
+  String get prodNoNegative => 'Hakuna namba hasi';
 }

@@ -758,5 +758,7 @@
   "debtToDrawer": "Pesa imeingia kwenye sanduku",
   "debtOldPaid": "Imeshalipwa kabla ya Nguli",
   "cloLineBorrowed": "Pesa iliyokopwa (imewekwa sandukuni)",
-  "cloLineLent": "Pesa iliyokopeshwa (imetolewa sandukuni)"
+  "cloLineLent": "Pesa iliyokopeshwa (imetolewa sandukuni)",
+  "prodPricePositive": "Bei ya kuuza lazima iwe zaidi ya 0",
+  "prodNoNegative": "Hakuna namba hasi"
 }
