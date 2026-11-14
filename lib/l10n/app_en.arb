@@ -680,5 +680,7 @@
   "panRateLocked": "Only the owner (or an authorised person) can change the rate.",
   "payCreditNeedsPhone": "For a credit sale, enter the customer's phone number (at least 9 digits).",
   "debtClientPhone": "Customer phone *",
-  "debtPhoneRequired": "The customer's phone number is required for credit (at least 9 digits)."
+  "debtPhoneRequired": "The customer's phone number is required for credit (at least 9 digits).",
+  "payCreditNeedsName": "For a credit sale, enter the customer's name.",
+  "debtNameRequired": "The customer's name is required for credit."
 }

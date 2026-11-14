@@ -2507,4 +2507,12 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get debtPhoneRequired =>
       'Le numéro de téléphone du client est obligatoire pour un crédit (au moins 9 chiffres).';
+
+  @override
+  String get payCreditNeedsName =>
+      'Pour une vente à crédit, saisissez le nom du client.';
+
+  @override
+  String get debtNameRequired =>
+      'Le nom du client est obligatoire pour un crédit.';
 }

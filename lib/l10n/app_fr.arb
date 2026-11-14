@@ -2044,5 +2044,7 @@
   "panRateLocked": "Seul le patron (ou une personne autorisée) peut changer le taux.",
   "payCreditNeedsPhone": "Pour une vente à crédit, saisissez le numéro de téléphone du client (au moins 9 chiffres).",
   "debtClientPhone": "Téléphone du client *",
-  "debtPhoneRequired": "Le numéro de téléphone du client est obligatoire pour un crédit (au moins 9 chiffres)."
+  "debtPhoneRequired": "Le numéro de téléphone du client est obligatoire pour un crédit (au moins 9 chiffres).",
+  "payCreditNeedsName": "Pour une vente à crédit, saisissez le nom du client.",
+  "debtNameRequired": "Le nom du client est obligatoire pour un crédit."
 }

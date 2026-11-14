@@ -176,7 +176,15 @@ class DebtDialogs {
                   final montantTotal = parseAmount(montantTotalController.text);
                   final acompte = parseAmount(acompteController.text);
 
-                  // 📵 Pas de crédit client sans téléphone
+                  // 📵 Pas de crédit client sans nom ni téléphone
+                  if (type == TypeDette.client &&
+                      (nom.isEmpty || nom.toLowerCase() == 'client divers')) {
+                    ScaffoldMessenger.of(dialogContext).showSnackBar(SnackBar(
+                      content: Text(t.debtNameRequired),
+                      backgroundColor: Colors.red,
+                    ));
+                    return;
+                  }
                   if (type == TypeDette.client &&
                       !CompteClientService.telephoneValide(telephone)) {
                     ScaffoldMessenger.of(dialogContext).showSnackBar(SnackBar(

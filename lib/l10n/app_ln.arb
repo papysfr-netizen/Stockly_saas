@@ -680,5 +680,7 @@
   "panRateLocked": "Kaka nkolo (to moto apesami ndingisa) nde akoki kobongola taux.",
   "payCreditNeedsPhone": "Mpo na koteka na niongo, koma nimero ya telefone ya mosombi (ata mituya 9).",
   "debtClientPhone": "Telefone ya mosombi *",
-  "debtPhoneRequired": "Nimero ya telefone ya mosombi esengeli mpo na niongo (ata mituya 9)."
+  "debtPhoneRequired": "Nimero ya telefone ya mosombi esengeli mpo na niongo (ata mituya 9).",
+  "payCreditNeedsName": "Mpo na koteka na niongo, koma nkombo ya mosombi.",
+  "debtNameRequired": "Nkombo ya mosombi esengeli mpo na niongo."
 }

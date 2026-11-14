@@ -680,5 +680,7 @@
   "panRateLocked": "Mmiliki pekee (au mtu aliyeruhusiwa) ndiye anaweza kubadilisha kiwango.",
   "payCreditNeedsPhone": "Kwa mauzo ya mkopo, andika namba ya simu ya mteja (angalau tarakimu 9).",
   "debtClientPhone": "Simu ya mteja *",
-  "debtPhoneRequired": "Namba ya simu ya mteja inahitajika kwa mkopo (angalau tarakimu 9)."
+  "debtPhoneRequired": "Namba ya simu ya mteja inahitajika kwa mkopo (angalau tarakimu 9).",
+  "payCreditNeedsName": "Kwa mauzo ya mkopo, andika jina la mteja.",
+  "debtNameRequired": "Jina la mteja linahitajika kwa mkopo."
 }

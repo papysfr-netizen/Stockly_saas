@@ -126,6 +126,12 @@ service cloud.firestore {
       ]);
     }
 
+    // 📵 Un vrai nom de client (pas vide, pas « Client Divers »)
+    function nomClientValide(nom) {
+      return nom is string && nom.trim().size() > 0
+        && nom.trim().lower() != 'client divers';
+    }
+
     // 📵 Un numéro de téléphone a au moins 9 chiffres (espaces, +, tirets ignorés)
     function telephoneValide(tel) {
       return tel is string && tel.replace('[^0-9]', '').size() >= 9;
@@ -273,9 +279,10 @@ service cloud.firestore {
               || request.resource.data.get('vendeurId', '') == request.auth.uid)
           && (request.resource.data.get('remiseTotale', 0) <= 0.01
               || aPermission(entId, 'remisesRetraits'))
-          // 📵 Vente à crédit : téléphone du client obligatoire
+          // 📵 Vente à crédit : nom et téléphone du client obligatoires
           && (request.resource.data.get('resteAPayer', 0) <= 0.01
-              || telephoneValide(request.resource.data.get('telephoneClient', '')));
+              || (telephoneValide(request.resource.data.get('telephoneClient', ''))
+                  && nomClientValide(request.resource.data.get('nomClient', ''))));
         allow delete: if estGerantOuPlus(entId);
       }
       match /retours/{docId} {
@@ -306,9 +313,10 @@ service cloud.firestore {
       // 🔒 Créances / dettes : Gérant+ = tout ; les autres = paiement ou retour seulement
       match /creances/{docId} {
         allow read: if estMembre(entId);
-        // 📵 Pas de crédit client sans téléphone
+        // 📵 Pas de crédit client sans nom ni téléphone
         allow create: if estMembre(entId)
-          && telephoneValide(request.resource.data.get('telephone', ''));
+          && telephoneValide(request.resource.data.get('telephone', ''))
+          && nomClientValide(request.resource.data.get('nomTiers', ''));
         allow update: if estGerantOuPlus(entId) || (estMembre(entId) && paiementValide());
         allow delete: if estGerantOuPlus(entId);
       }

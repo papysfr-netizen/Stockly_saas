@@ -4188,6 +4188,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Le numéro de téléphone du client est obligatoire pour un crédit (au moins 9 chiffres).'**
   String get debtPhoneRequired;
+
+  /// No description provided for @payCreditNeedsName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour une vente à crédit, saisissez le nom du client.'**
+  String get payCreditNeedsName;
+
+  /// No description provided for @debtNameRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nom du client est obligatoire pour un crédit.'**
+  String get debtNameRequired;
 }
 
 class _AppLocalizationsDelegate

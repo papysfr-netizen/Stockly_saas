@@ -2499,4 +2499,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get debtPhoneRequired =>
       'The customer\'s phone number is required for credit (at least 9 digits).';
+
+  @override
+  String get payCreditNeedsName =>
+      'For a credit sale, enter the customer\'s name.';
+
+  @override
+  String get debtNameRequired => 'The customer\'s name is required for credit.';
 }

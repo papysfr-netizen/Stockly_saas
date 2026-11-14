@@ -2498,4 +2498,10 @@ class AppLocalizationsSw extends AppLocalizations {
   @override
   String get debtPhoneRequired =>
       'Namba ya simu ya mteja inahitajika kwa mkopo (angalau tarakimu 9).';
+
+  @override
+  String get payCreditNeedsName => 'Kwa mauzo ya mkopo, andika jina la mteja.';
+
+  @override
+  String get debtNameRequired => 'Jina la mteja linahitajika kwa mkopo.';
 }

@@ -2503,4 +2503,11 @@ class AppLocalizationsLn extends AppLocalizations {
   @override
   String get debtPhoneRequired =>
       'Nimero ya telefone ya mosombi esengeli mpo na niongo (ata mituya 9).';
+
+  @override
+  String get payCreditNeedsName =>
+      'Mpo na koteka na niongo, koma nkombo ya mosombi.';
+
+  @override
+  String get debtNameRequired => 'Nkombo ya mosombi esengeli mpo na niongo.';
 }
