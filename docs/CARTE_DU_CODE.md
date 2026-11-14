@@ -65,7 +65,7 @@ séance de relecture.
 5. **Rangement à moitié fait** : `features/debts` contient aussi la connexion,
    l'inscription, l'accueil du stock, la comptabilité et les dépenses.
 6. **Environ 225 textes écrits en dur** (non traduits).
-7. **48 `catch (_)` silencieux** : des erreurs disparaissent sans trace.
+7. **Environ 55 `catch (_)` silencieux** : des erreurs disparaissent sans trace.
 8. **Avertissement `use_build_context_synchronously` désactivé** dans
    `analysis_options.yaml` : risque de plantage après un écran fermé.
 
