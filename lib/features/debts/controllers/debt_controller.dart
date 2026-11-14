@@ -222,6 +222,8 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
         // 🧾 Historique : l'acompte versé à la création
         if (pureAcompte > 0)
           'paiements': [_lignePaiement(now, pureAcompte, paymentMethod, parNom)],
+        // 💵 Argent reçu aujourd'hui : visible par l'accueil et la clôture de caisse
+        if (pureAcompte > 0) 'dernierPaiement': Timestamp.fromDate(now),
       });
 
       // 2. Écriture d'engagement comptable (SYSCOHADA)

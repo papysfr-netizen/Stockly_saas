@@ -328,9 +328,7 @@ class DebtDialogs {
               onPressed: enCours
                   ? null
                   : () async {
-                      final paye = double.tryParse(
-                              montantPaiementController.text.trim().replaceAll(',', '.')) ??
-                          0.0;
+                      final paye = parseAmount(montantPaiementController.text);
                       // 🛑 Montant vide, nul ou supérieur au reste : on refuse
                       if (paye <= 0) {
                         setDialogState(() => erreurMontant = t.debtEnterAmount);

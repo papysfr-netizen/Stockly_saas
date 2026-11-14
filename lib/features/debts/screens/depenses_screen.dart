@@ -12,6 +12,7 @@ import '../../../core/providers/depense_provider.dart';
 import '../../../core/providers/user_role_provider.dart';
 import '../../../core/services/report_export_service.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
+import 'package:stockly_saas/core/utils/payment_calculator.dart';
 
 /// Nom affiché d'une catégorie (la valeur enregistrée reste en français)
 String _nomCategorie(AppLocalizations t, String cat) {
@@ -634,8 +635,7 @@ class _AjoutDepenseBottomSheetState extends ConsumerState<_AjoutDepenseBottomShe
   Future<void> _soumettre() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final parseableMontant = _montantController.text.trim().replaceAll(',', '.');
-    final montant = double.tryParse(parseableMontant);
+    final double? montant = parseAmount(_montantController.text) > 0 ? parseAmount(_montantController.text) : null;
 
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
@@ -793,8 +793,8 @@ class _AjoutDepenseBottomSheetState extends ConsumerState<_AjoutDepenseBottomShe
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) return t.depAmountRequired;
-                  final parsed = double.tryParse(val.trim().replaceAll(',', '.'));
-                  if (parsed == null || parsed <= 0) return t.depAmountInvalid;
+                  final parsed = parseAmount(val);
+                  if (parsed <= 0) return t.depAmountInvalid;
                   return null;
                 },
                 decoration: InputDecoration(

@@ -11,6 +11,7 @@ import '../../core/utils/currency_extension.dart';
 import '../../core/services/journal_service.dart';
 import 'compte_client_service.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
+import 'package:stockly_saas/core/utils/payment_calculator.dart';
 
 // ============================================================================
 // 💰 COMPTES CLIENTS : liste, dépôts, retraits, historique, relevé WhatsApp
@@ -68,7 +69,7 @@ Future<void> ouvrirOperationCompte(
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setD) {
         final montant =
-            double.tryParse(montantCtrl.text.trim().replaceAll(',', '.')) ?? 0.0;
+            parseAmount(montantCtrl.text);
         final telOk = CompteClientService.telephoneValide(telCtrl.text);
         final depasse = !estDepot && montant > solde + 0.005;
         final valide = telOk && montant > 0 && !depasse;
@@ -159,7 +160,7 @@ Future<void> ouvrirOperationCompte(
 
   final tel = telCtrl.text.trim();
   final nomSaisi = nomCtrl.text.trim();
-  final montant = double.tryParse(montantCtrl.text.trim().replaceAll(',', '.')) ?? 0.0;
+  final montant = parseAmount(montantCtrl.text);
   // 🩹 On attend la fin de l'animation de fermeture avant d'effacer les champs
   Future.delayed(const Duration(milliseconds: 500), () {
     telCtrl.dispose();

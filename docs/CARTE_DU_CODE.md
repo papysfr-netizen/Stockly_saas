@@ -115,6 +115,30 @@ bon de livraison imposé à la remise d'une marchandise.
 Reste à faire : le message WhatsApp de relance « à livrer » est écrit en
 français seulement (à passer par `MessagesClients`, comme les reçus).
 
+### Dettes et comptes clients (partie « argent » relue)
+
+- `controllers/debt_controller.dart` : création d'une dette (écriture
+  d'engagement + acompte), paiement en ligne (transaction) ou hors ligne
+  (« increments »). Respecte la règle `paiementValide`.
+- `widgets/debt_dialogs.dart`, `debt_list_view.dart`, `debt_detail_sheet.dart` :
+  saisie, liste avec filtres, détail et relances.
+- `comptes_clients/compte_client_service.dart` : dépôts, retraits, avoirs,
+  achats payés par le compte (mouvement + solde dans le même lot).
+
+Corrigé : l'acompte d'une dette créée à la main (argent réellement reçu)
+était ignoré par l'accueil et la clôture de caisse (faux surplus) ; montants
+avec espaces refusés (paiement de dette, compte client, dépense).
+
+À savoir :
+- Une dette CLIENT créée à la main est comptée comme une **vente** (701000) :
+  correct pour une vente faite hors de la caisse, faux pour une ancienne dette
+  reprise d'un cahier (le chiffre d'affaires serait gonflé). À trancher.
+- Faille de fond (comme pour les prix) : une application modifiée pourrait
+  créditer un faux « avoir » sur un compte client. Solution : fonction
+  serveur (forfait Blaze).
+- Pas encore relus dans `features/debts` : `home_screen.dart` (écran Stock),
+  `comptabilite_screen.dart`, `depenses_screen.dart`, connexion et inscription.
+
 ## Déjà corrigé
 
 - Failles du stock (règles), virgule à la caisse, crédit sans nom/téléphone,

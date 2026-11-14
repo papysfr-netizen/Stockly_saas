@@ -205,8 +205,10 @@ class ClotureService {
         final paiements = c['paiements'];
         if (paiements is! List) continue;
         for (final p in paiements.whereType<Map>()) {
-          // Acompte donné à la vente : déjà compté dans la vente
-          if (estClient && creation is Timestamp && p['date'] == creation) continue;
+          // Acompte donné à la CAISSE : déjà compté dans la vente.
+          // (Une dette créée à la main n'a pas de vente : son acompte compte.)
+          final deVente = (c['venteId'] ?? '').toString().isNotEmpty;
+          if (estClient && deVente && creation is Timestamp && p['date'] == creation) continue;
           if (!dansPeriode(date(p['date']))) continue;
           final montant = nombre(p['montant']);
           final f = famille(p['methode']);

@@ -232,8 +232,10 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
             for (final p in paiements.whereType<Map>()) {
               final quand = _date(p['date']);
               if (quand == null || quand.isBefore(minuit)) continue;
-              // Acompte donné à la vente : déjà compté dans « Encaissé »
-              if (creation is Timestamp && p['date'] == creation) continue;
+              // Acompte donné à la CAISSE : déjà compté dans « Encaissé ».
+              // (Une dette créée à la main n'a pas de vente : son acompte compte.)
+              final deVente = (c['venteId'] ?? '').toString().isNotEmpty;
+              if (deVente && creation is Timestamp && p['date'] == creation) continue;
               final montant = _nombre(p['montant']);
               dettesEncaissees += montant;
               encaissementsDettes.add({
