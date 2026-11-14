@@ -4488,6 +4488,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Calcul de l\'attendu…'**
   String get cloLoading;
+
+  /// No description provided for @cloDoneBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clôturée à {heure} par {nom}'**
+  String cloDoneBy(String heure, String nom);
+
+  /// No description provided for @cloSavedShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clôture enregistrée.'**
+  String get cloSavedShort;
 }
 
 class _AppLocalizationsDelegate

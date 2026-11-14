@@ -2665,4 +2665,12 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get cloLoading => 'Inahesabu kiasi kinachotarajiwa…';
+
+  @override
+  String cloDoneBy(String heure, String nom) {
+    return 'Imefungwa saa $heure na $nom';
+  }
+
+  @override
+  String get cloSavedShort => 'Kufunga kumehifadhiwa.';
 }

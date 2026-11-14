@@ -730,5 +730,7 @@
   "cloReopenConfirm": "Futa kufunga huku? Sanduku litaweza kuhesabiwa tena.",
   "cloAfterWarning": "Sanduku limeshafungwa leo: mauzo haya yataonyeshwa \"baada ya kufunga\".",
   "cloRate": "Kiwango: 1 $ = {taux} FC",
-  "cloLoading": "Inahesabu kiasi kinachotarajiwa…"
+  "cloLoading": "Inahesabu kiasi kinachotarajiwa…",
+  "cloDoneBy": "Imefungwa saa {heure} na {nom}",
+  "cloSavedShort": "Kufunga kumehifadhiwa."
 }

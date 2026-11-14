@@ -2671,4 +2671,12 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get cloLoading => 'Ezali kotanga oyo ezalaki kozela…';
+
+  @override
+  String cloDoneBy(String heure, String nom) {
+    return 'Ekangami na ngonga $heure na $nom';
+  }
+
+  @override
+  String get cloSavedShort => 'Kokanga ebombami.';
 }

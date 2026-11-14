@@ -2100,5 +2100,8 @@
   "cloAfterWarning": "Caisse déjà clôturée aujourd'hui : cette vente sera signalée « après clôture ».",
   "cloRate": "Taux : 1 $ = {taux} FC",
   "@cloRate": {"placeholders": {"taux": {"type": "String"}}},
-  "cloLoading": "Calcul de l'attendu…"
+  "cloLoading": "Calcul de l'attendu…",
+  "cloDoneBy": "Clôturée à {heure} par {nom}",
+  "cloSavedShort": "Clôture enregistrée.",
+  "@cloDoneBy": {"placeholders": {"heure": {"type": "String"}, "nom": {"type": "String"}}}
 }

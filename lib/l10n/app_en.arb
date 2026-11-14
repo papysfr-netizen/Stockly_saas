@@ -730,5 +730,7 @@
   "cloReopenConfirm": "Delete this closing? The register can be counted again.",
   "cloAfterWarning": "Register already closed today: this sale will be marked \"after closing\".",
   "cloRate": "Rate: 1 $ = {taux} FC",
-  "cloLoading": "Computing the expected amount…"
+  "cloLoading": "Computing the expected amount…",
+  "cloDoneBy": "Closed at {heure} by {nom}",
+  "cloSavedShort": "Closing saved."
 }

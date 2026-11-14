@@ -2677,4 +2677,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get cloLoading => 'Calcul de l\'attendu…';
+
+  @override
+  String cloDoneBy(String heure, String nom) {
+    return 'Clôturée à $heure par $nom';
+  }
+
+  @override
+  String get cloSavedShort => 'Clôture enregistrée.';
 }

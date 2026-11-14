@@ -730,5 +730,7 @@
   "cloReopenConfirm": "Longola kokanga oyo? Kaisi ekoki kotangama lisusu.",
   "cloAfterWarning": "Kaisi ekangami lelo: koteka oyo ekolakisama \"sima ya kokanga\".",
   "cloRate": "Motuya: 1 $ = {taux} FC",
-  "cloLoading": "Ezali kotanga oyo ezalaki kozela…"
+  "cloLoading": "Ezali kotanga oyo ezalaki kozela…",
+  "cloDoneBy": "Ekangami na ngonga {heure} na {nom}",
+  "cloSavedShort": "Kokanga ebombami."
 }

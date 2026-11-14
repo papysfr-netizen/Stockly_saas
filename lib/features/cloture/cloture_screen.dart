@@ -119,8 +119,9 @@ class _ClotureScreenState extends ConsumerState<ClotureScreen> {
         if (e is FirebaseException) rethrow;
       }
       if (!mounted) return;
+      final voitResultat = ref.read(userProfileProvider).value?.peutVoirFinances ?? false;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.cloSaved), backgroundColor: _vert),
+        SnackBar(content: Text(voitResultat ? t.cloSavedShort : t.cloSaved), backgroundColor: _vert),
       );
     } catch (e) {
       if (!mounted) return;
@@ -198,8 +199,8 @@ class _ClotureScreenState extends ConsumerState<ClotureScreen> {
                 _Bandeau(
                   icone: Icons.lock_rounded,
                   couleur: _vert,
-                  texte: '${t.cloDoneAt(_heure(snap.data!.data()?['createdAt']))}\n'
-                      '${t.cloBy((snap.data!.data()?['parNom'] ?? '').toString(), _heure(snap.data!.data()?['createdAt']))}',
+                  texte: t.cloDoneBy(_heure(snap.data!.data()?['createdAt']),
+                      (snap.data!.data()?['parNom'] ?? '').toString()),
                 ),
                 const SizedBox(height: 12),
                 if (voirFinances)
