@@ -130,6 +130,8 @@ jobs:
           NGULI_KEY_PASSWORD: ${{ secrets.NGULI_KEY_PASSWORD }}
         run: |
           flutter pub get
+          flutter build apk --release
+          cp build/app/outputs/flutter-apk/app-release.apk universel.apk
           flutter build apk --release --split-per-abi
 
       - name: Publier l'APK dans « Releases »
@@ -142,12 +144,13 @@ jobs:
           NOM="nguli-${VERSION}-${BRANCHE}.apk"
           cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk "$NOM"
           cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk "ancien-telephone-$NOM"
+          cp universel.apk "universel-$NOM"
           gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
-          gh release create "$TAG" "$NOM" "ancien-telephone-$NOM" \
+          gh release create "$TAG" "$NOM" "ancien-telephone-$NOM" "universel-$NOM" \
             --target "$GITHUB_SHA" --prerelease \
             --title "Nguli ${VERSION} (${GITHUB_REF_NAME})" \
             --notes "APK fabriqué automatiquement depuis la branche ${GITHUB_REF_NAME} (commit ${GITHUB_SHA::7}).
-          Téléchargez **${NOM}** (presque tous les téléphones). L'autre fichier est pour les très vieux téléphones."
+          Téléchargez **${NOM}** (presque tous les téléphones). « ancien-telephone » : très vieux téléphones. « universel » : tous les téléphones (plus gros)."
 
       - name: Garder une copie (30 jours)
         uses: actions/upload-artifact@v4

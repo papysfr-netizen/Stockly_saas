@@ -51,6 +51,10 @@ android {
                 storePassword = System.getenv("NGULI_KEYSTORE_PASSWORD")
                     ?: keystoreProperties["storePassword"] as String
             }
+            // Les 3 méthodes de signature d'Android, pour être accepté partout
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
         }
     }
 
