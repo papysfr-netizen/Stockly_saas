@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stockly_saas/core/providers/currency_provider.dart';
 import 'package:stockly_saas/core/providers/user_role_provider.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
+import 'package:stockly_saas/core/utils/payment_calculator.dart';
 
 /// 💬 Fenêtre « Prix négocié ».
 /// Tous les prix reçus et renvoyés sont en USD.
@@ -73,7 +74,8 @@ class _PrixNegocieDialogState extends ConsumerState<_PrixNegocieDialog> {
     final voirFinances = ref.watch(userProfileProvider).value?.peutVoirFinances ?? false;
     final t = AppLocalizations.of(context);
 
-    final saisi = double.tryParse(_ctrl.text.replaceAll(',', '.').trim());
+    final saisiBrut = parseAmount(_ctrl.text); // virgule et espaces acceptés
+    final double? saisi = saisiBrut > 0 ? saisiBrut : null;
     final prixUSD = saisi == null ? null : saisi / taux;
     final valide = prixUSD != null && prixUSD > 0;
     final remise = valide ? widget.prixNormal - prixUSD : 0.0;

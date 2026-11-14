@@ -2685,4 +2685,50 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get cloSavedShort => 'Clôture enregistrée.';
+
+  @override
+  String get caiTitle => 'Caisse';
+
+  @override
+  String get caiNewProduct => 'Nouveau produit';
+
+  @override
+  String get caiSettings => 'Paramètres';
+
+  @override
+  String get caiExport => 'Exporter le catalogue';
+
+  @override
+  String get caiExportExcel => 'Exporter vers Excel';
+
+  @override
+  String get caiExportPdf => 'Imprimer / PDF';
+
+  @override
+  String get caiColName => 'Produit';
+
+  @override
+  String get caiColStock => 'Stock';
+
+  @override
+  String get caiColPrice => 'Prix de vente';
+
+  @override
+  String get caiCatalogTitle => 'Catalogue des produits';
+
+  @override
+  String caiProfileError(String erreur) {
+    return 'Impossible de charger votre profil : $erreur';
+  }
+
+  @override
+  String get caiPickShop => 'Choisissez la boutique de vente';
+
+  @override
+  String caiSellingIn(String nom) {
+    return 'Vente : $nom';
+  }
+
+  @override
+  String get caiMainShop => 'Boutique principale';
 }

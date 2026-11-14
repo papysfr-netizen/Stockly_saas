@@ -20,7 +20,7 @@ séance de relecture.
 | Module | Fichiers | Lignes | Rôle | Relu |
 |---|---:|---:|---|:---:|
 | `lib/main.dart` | 1 | 479 | Démarrage, Firebase, hors ligne, langues, thème | 🟡 |
-| `lib/views/caisse` | 7 | 3 285 | Caisse : produits, panier, prix négocié, **paiement** | 🟡 |
+| `lib/views/caisse` | 5 | 2 790 | Caisse : produits, panier, prix négocié, **paiement** | ✅ |
 | `lib/views/financial_analysis` | 5 | 2 638 | Rapport (compte de résultat, marges, recherche client) | ⬜ |
 | `lib/screens` | 10 | 2 293 | Paramètres, équipe, bon de livraison | ⬜ |
 | `lib/core/models` | 7 | 1 314 | Produit, vente, dette, dépense, utilisateur | 🟡 |
@@ -68,6 +68,35 @@ séance de relecture.
 7. **Environ 55 `catch (_)` silencieux** : des erreurs disparaissent sans trace.
 8. **Avertissement `use_build_context_synchronously` désactivé** dans
    `analysis_options.yaml` : risque de plantage après un écran fermé.
+
+## Notes de relecture
+
+### Caisse (`lib/views/caisse`, relue en entier)
+
+- `caisse_screen.dart` : écran, bandeau de la boutique de vente, export du catalogue.
+- `widgets/produits_view.dart` : tuiles des produits (toucher = +1, appui long =
+  quantité/prix), scanner, **le seul panier** (`PanierView`, téléphone et tablette)
+  et `ouvrirPaiementCaisse`.
+- `dialogs/ajout_panier_dialog.dart` : quantité et prix d'un produit.
+- `dialogs/prix_negocie_dialog.dart` : prix négocié d'une ligne du panier.
+- `dialogs/paiement_dialog.dart` (≈ 1 300 lignes) : fenêtre de paiement ET
+  enregistrement de la vente (vente, écritures comptables, créance, compte
+  client, stock), reçu, WhatsApp/SMS, bon de livraison.
+- Panier : `lib/core/providers/cart_provider.dart`.
+
+Corrigé lors de la relecture : taux du franc modifiable par n'importe quel
+caissier (crayon de la barre du haut) ; champ « francs » absent quand
+l'affichage est en dollars ; deuxième panier (tablette) en double ; vieille
+fiche « nouveau produit » (virgule lue comme 0, sans boutique) remplacée par
+la fiche complète ; prix saisis avec espaces ; textes en dur de l'écran caisse ;
+export du catalogue avec le stock de la boutique.
+
+Reste à faire :
+- Sortir l'enregistrement de la vente de `paiement_dialog.dart` vers un
+  service testable (`VenteService`), pour pouvoir tester une vente complète.
+- Après chaque vente « livrée », l'écran **Bon de livraison** s'ouvre : à
+  confirmer avec le patron (utile, ou gênant à chaque vente ?).
+- La monnaie rendue n'indique pas sa monnaie ($ ou FC).
 
 ## Déjà corrigé
 

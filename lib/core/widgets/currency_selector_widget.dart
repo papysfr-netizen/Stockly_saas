@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/currency_provider.dart';
+import 'package:stockly_saas/core/providers/user_role_provider.dart';
 
 class CurrencySelectorWidget extends ConsumerWidget {
   final bool showRateDialogOption;
@@ -14,6 +15,8 @@ class CurrencySelectorWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currencyState = ref.watch(currencyProvider);
     final activeInfo = currencyState.activeCurrencyInfo;
+    // 🔒 Changer le taux : le patron, ou l'autorisation « Paramètres sensibles »
+    final peutChangerTaux = ref.watch(userProfileProvider).value?.peutParametres ?? false;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -44,7 +47,7 @@ class CurrencySelectorWidget extends ConsumerWidget {
             },
           ),
         ),
-        if (showRateDialogOption && activeInfo.code != 'USD') ...[
+        if (showRateDialogOption && peutChangerTaux && activeInfo.code != 'USD') ...[
           const SizedBox(width: 4),
           IconButton(
             icon: const Icon(Icons.edit, size: 18, color: Colors.teal),

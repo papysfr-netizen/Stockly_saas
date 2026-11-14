@@ -2679,4 +2679,50 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get cloSavedShort => 'Kokanga ebombami.';
+
+  @override
+  String get caiTitle => 'Kaisi';
+
+  @override
+  String get caiNewProduct => 'Eloko ya sika';
+
+  @override
+  String get caiSettings => 'Mibongiseli';
+
+  @override
+  String get caiExport => 'Bimisa liste ya biloko';
+
+  @override
+  String get caiExportExcel => 'Bimisa na Excel';
+
+  @override
+  String get caiExportPdf => 'Kokokola / PDF';
+
+  @override
+  String get caiColName => 'Eloko';
+
+  @override
+  String get caiColStock => 'Stock';
+
+  @override
+  String get caiColPrice => 'Ntalo ya koteka';
+
+  @override
+  String get caiCatalogTitle => 'Liste ya biloko';
+
+  @override
+  String caiProfileError(String erreur) {
+    return 'Ekoki kofungola profil na yo te: $erreur';
+  }
+
+  @override
+  String get caiPickShop => 'Pona butiki ya koteka';
+
+  @override
+  String caiSellingIn(String nom) {
+    return 'Koteka: $nom';
+  }
+
+  @override
+  String get caiMainShop => 'Butiki ya liboso';
 }

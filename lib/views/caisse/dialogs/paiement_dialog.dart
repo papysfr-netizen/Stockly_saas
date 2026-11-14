@@ -116,7 +116,9 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
 
   void _preremplirMontant() {
     if (!mounted) return;
-    final activeInfo = ref.read(currencyProvider).activeCurrencyInfo;
+    final devise = ref.read(currencyProvider);
+    final activeInfo = devise.activeCurrencyInfo;
+    final localInfo = devise.currencies['CDF'] ?? activeInfo;
     final aPayer = _totalAPayer;
 
     if (aPayer <= 0.001) {
@@ -132,7 +134,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         _verseUSDController.text = aPayer.toStringAsFixed(2);
         _verseLocalController.clear();
       } else {
-        final totalLocal = aPayer * activeInfo.rateToUSD;
+        final totalLocal = aPayer * localInfo.rateToUSD;
         _verseLocalController.text = _formatAmount(totalLocal);
         _verseUSDController.clear();
       }
@@ -256,6 +258,8 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
   Widget build(BuildContext context) {
     final currencyState = ref.watch(currencyProvider);
     final activeInfo = currencyState.activeCurrencyInfo;
+    // 💱 Le champ « francs » est TOUJOURS là (même si l'affichage est en dollars)
+    final localInfo = currencyState.currencies['CDF'] ?? activeInfo;
 
     final paidUSD = parseAmount(_verseUSDController.text);
     final paidLocal = parseAmount(_verseLocalController.text);
@@ -264,11 +268,11 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
       totalUSD: _totalAPayer,
       paidUSD: paidUSD,
       paidLocal: paidLocal,
-      localRate: activeInfo.rateToUSD,
+      localRate: localInfo.rateToUSD,
     );
 
-    final eqUSDinLocal = paidUSD * activeInfo.rateToUSD;
-    final eqLocalinUSD = activeInfo.rateToUSD > 0 ? paidLocal / activeInfo.rateToUSD : 0.0;
+    final eqUSDinLocal = paidUSD * localInfo.rateToUSD;
+    final eqLocalinUSD = localInfo.rateToUSD > 0 ? paidLocal / localInfo.rateToUSD : 0.0;
 
     final dateLimiteApercu = DateTime.now().add(Duration(days: delaiRetraitJours));
     final soldeUtilise = _montantSoldeUtilise;
@@ -535,19 +539,19 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                                   backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF22262E) : Colors.white,
                                   padding: EdgeInsets.zero,
                                 ),
-                                if (activeInfo.code != 'USD') ...[
+                                if (localInfo.code != 'USD') ...[
                                   ActionChip(
                                     avatar: const Icon(Icons.currency_exchange, size: 15, color: Colors.teal),
-                                    label: Text(t.payAllIn(activeInfo.code), style: const TextStyle(fontSize: 11)),
-                                    onPressed: () => _payerToutLocal(activeInfo.rateToUSD),
+                                    label: Text(t.payAllIn(localInfo.code), style: const TextStyle(fontSize: 11)),
+                                    onPressed: () => _payerToutLocal(localInfo.rateToUSD),
                                     backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF22262E) : Colors.white,
                                     padding: EdgeInsets.zero,
                                   ),
                                   if (calc.remainingUSD > 0 && paidUSD > 0)
                                     ActionChip(
                                       avatar: const Icon(Icons.add_card, size: 15, color: Colors.orange),
-                                      label: Text(t.payRestIn(activeInfo.code), style: const TextStyle(fontSize: 11)),
-                                      onPressed: () => _completerResteLocal(calc, activeInfo.rateToUSD),
+                                      label: Text(t.payRestIn(localInfo.code), style: const TextStyle(fontSize: 11)),
+                                      onPressed: () => _completerResteLocal(calc, localInfo.rateToUSD),
                                       backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF3A2A14) : Colors.orange.shade50,
                                       padding: EdgeInsets.zero,
                                     ),
@@ -565,23 +569,23 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                                 prefixText: '\$ ',
                                 isDense: true,
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                                helperText: paidUSD > 0 && activeInfo.code != 'USD'
-                                    ? '≈ ${_formatAmount(eqUSDinLocal)} ${activeInfo.symbol}'
+                                helperText: paidUSD > 0 && localInfo.code != 'USD'
+                                    ? '≈ ${_formatAmount(eqUSDinLocal)} ${localInfo.symbol}'
                                     : null,
                                 helperStyle: const TextStyle(color: Colors.teal, fontWeight: FontWeight.bold, fontSize: 11),
                               ),
-                              onChanged: (_) => _onMontantChanged(activeInfo.rateToUSD),
+                              onChanged: (_) => _onMontantChanged(localInfo.rateToUSD),
                             ),
                             const SizedBox(height: 8),
 
                             // Saisie dynamique Devise Locale
-                            if (activeInfo.code != 'USD') ...[
+                            if (localInfo.code != 'USD') ...[
                               TextField(
                                 controller: _verseLocalController,
                                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                 decoration: InputDecoration(
-                                  labelText: t.payReceived(activeInfo.code),
-                                  suffixText: activeInfo.symbol,
+                                  labelText: t.payReceived(localInfo.code),
+                                  suffixText: localInfo.symbol,
                                   isDense: true,
                                   contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                                   helperText: paidLocal > 0
@@ -589,7 +593,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                                       : null,
                                   helperStyle: const TextStyle(color: Colors.teal, fontWeight: FontWeight.bold, fontSize: 11),
                                 ),
-                                onChanged: (_) => _onMontantChanged(activeInfo.rateToUSD),
+                                onChanged: (_) => _onMontantChanged(localInfo.rateToUSD),
                               ),
                               const SizedBox(height: 8),
                             ],
@@ -602,7 +606,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                                 children: [
                                   Text(t.payRemaining, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 12)),
                                   Text(
-                                    '${calc.remainingUSD.toStringAsFixed(2)} \$ (${_formatAmount(calc.remainingUSD * activeInfo.rateToUSD)} ${activeInfo.symbol})',
+                                    '${calc.remainingUSD.toStringAsFixed(2)} \$ (${_formatAmount(calc.remainingUSD * localInfo.rateToUSD)} ${localInfo.symbol})',
                                     style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 12),
                                   ),
                                 ],
@@ -618,13 +622,13 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                                   ),
                                 ],
                               ),
-                              if (activeInfo.code != 'USD')
+                              if (localInfo.code != 'USD')
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(t.payChange(activeInfo.code), style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w600, fontSize: 12)),
+                                    Text(t.payChange(localInfo.code), style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w600, fontSize: 12)),
                                     Text(
-                                      '${_formatAmount(calc.changeInLocal)} ${activeInfo.symbol}',
+                                      '${_formatAmount(calc.changeInLocal)} ${localInfo.symbol}',
                                       style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12),
                                     ),
                                   ],
@@ -844,7 +848,9 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
     final t = AppLocalizations.of(context);
     final langueMsg = _langueMessage ?? Localizations.localeOf(context).languageCode;
 
-    final activeInfoValidation = ref.read(currencyProvider).activeCurrencyInfo;
+    final deviseValidation = ref.read(currencyProvider);
+    final activeInfoValidation =
+        deviseValidation.currencies['CDF'] ?? deviseValidation.activeCurrencyInfo;
     final double soldeUtilise = _montantSoldeUtilise;
     final calc = PaymentResult(
       totalUSD: _totalAPayer,

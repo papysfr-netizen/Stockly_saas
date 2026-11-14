@@ -732,5 +732,19 @@
   "cloRate": "Kiwango: 1 $ = {taux} FC",
   "cloLoading": "Inahesabu kiasi kinachotarajiwa…",
   "cloDoneBy": "Imefungwa saa {heure} na {nom}",
-  "cloSavedShort": "Kufunga kumehifadhiwa."
+  "cloSavedShort": "Kufunga kumehifadhiwa.",
+  "caiTitle": "Mauzo",
+  "caiNewProduct": "Bidhaa mpya",
+  "caiSettings": "Mipangilio",
+  "caiExport": "Hamisha orodha",
+  "caiExportExcel": "Hamisha kwenda Excel",
+  "caiExportPdf": "Chapisha / PDF",
+  "caiColName": "Bidhaa",
+  "caiColStock": "Akiba",
+  "caiColPrice": "Bei ya kuuza",
+  "caiCatalogTitle": "Orodha ya bidhaa",
+  "caiProfileError": "Haiwezekani kupakia wasifu wako: {erreur}",
+  "caiPickShop": "Chagua duka la kuuzia",
+  "caiSellingIn": "Mauzo: {nom}",
+  "caiMainShop": "Duka kuu"
 }

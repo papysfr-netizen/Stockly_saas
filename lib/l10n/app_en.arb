@@ -732,5 +732,19 @@
   "cloRate": "Rate: 1 $ = {taux} FC",
   "cloLoading": "Computing the expected amount…",
   "cloDoneBy": "Closed at {heure} by {nom}",
-  "cloSavedShort": "Closing saved."
+  "cloSavedShort": "Closing saved.",
+  "caiTitle": "Till",
+  "caiNewProduct": "New product",
+  "caiSettings": "Settings",
+  "caiExport": "Export the catalogue",
+  "caiExportExcel": "Export to Excel",
+  "caiExportPdf": "Print / PDF",
+  "caiColName": "Product",
+  "caiColStock": "Stock",
+  "caiColPrice": "Selling price",
+  "caiCatalogTitle": "Product catalogue",
+  "caiProfileError": "Could not load your profile: {erreur}",
+  "caiPickShop": "Choose the selling shop",
+  "caiSellingIn": "Selling in: {nom}",
+  "caiMainShop": "Main shop"
 }

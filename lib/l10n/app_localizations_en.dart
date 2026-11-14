@@ -2675,4 +2675,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cloSavedShort => 'Closing saved.';
+
+  @override
+  String get caiTitle => 'Till';
+
+  @override
+  String get caiNewProduct => 'New product';
+
+  @override
+  String get caiSettings => 'Settings';
+
+  @override
+  String get caiExport => 'Export the catalogue';
+
+  @override
+  String get caiExportExcel => 'Export to Excel';
+
+  @override
+  String get caiExportPdf => 'Print / PDF';
+
+  @override
+  String get caiColName => 'Product';
+
+  @override
+  String get caiColStock => 'Stock';
+
+  @override
+  String get caiColPrice => 'Selling price';
+
+  @override
+  String get caiCatalogTitle => 'Product catalogue';
+
+  @override
+  String caiProfileError(String erreur) {
+    return 'Could not load your profile: $erreur';
+  }
+
+  @override
+  String get caiPickShop => 'Choose the selling shop';
+
+  @override
+  String caiSellingIn(String nom) {
+    return 'Selling in: $nom';
+  }
+
+  @override
+  String get caiMainShop => 'Main shop';
 }

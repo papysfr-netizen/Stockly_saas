@@ -79,7 +79,9 @@ void ouvrirPaiementCaisse(BuildContext context, WidgetRef ref) {
 }
 
 class ProduitsView extends ConsumerStatefulWidget {
-  const ProduitsView({super.key});
+  /// Barre « Encaisser » en bas (inutile sur tablette : le panier est à côté)
+  final bool barreEncaisser;
+  const ProduitsView({super.key, this.barreEncaisser = true});
 
   @override
   ConsumerState<ProduitsView> createState() => _ProduitsViewState();
@@ -399,7 +401,7 @@ class _ProduitsViewState extends ConsumerState<ProduitsView> {
       ),
 
       // BARRE D'ENCAISSEMENT (toujours visible dès qu'il y a un article)
-      bottomNavigationBar: cartItems.isEmpty
+      bottomNavigationBar: cartItems.isEmpty || !widget.barreEncaisser
           ? null
           : SafeArea(
               top: false,

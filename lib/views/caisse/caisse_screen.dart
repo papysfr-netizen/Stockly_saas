@@ -1,23 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:stockly_saas/core/widgets/add_product_modal.dart';
 import 'package:stockly_saas/core/widgets/currency_selector_widget.dart';
 import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
+import 'package:stockly_saas/features/boutiques/boutiques_screen.dart' show BoutiquesService;
+import 'package:stockly_saas/l10n/app_localizations.dart';
+import 'package:stockly_saas/screens/settings_screen.dart';
 import '../../core/providers/currency_provider.dart';
 import '../../core/providers/produit_provider.dart';
 import '../../core/providers/user_role_provider.dart';
 import '../../core/services/report_export_service.dart';
-import 'package:stockly_saas/screens/settings_screen.dart';
-import 'dialogs/nouveau_produit_dialog.dart';
-import 'widgets/panier_view.dart';
-import 'widgets/produits_view.dart' hide PanierView;
+import 'widgets/produits_view.dart';
 
+/// 🧾 Écran de la caisse.
+///  - Téléphone : les produits, et le panier dans une fenêtre du bas.
+///  - Tablette (≥ 700 px) : les produits à gauche, le panier à droite.
 class CaisseScreen extends ConsumerWidget {
   const CaisseScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(userProfileProvider);
+    final t = AppLocalizations.of(context);
 
     return profileAsync.when(
       loading: () => const Scaffold(
@@ -28,7 +33,7 @@ class CaisseScreen extends ConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              'Erreur de chargement du profil : $err',
+              t.caiProfileError('$err'),
               textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.red),
             ),
@@ -37,18 +42,12 @@ class CaisseScreen extends ConsumerWidget {
       ),
       data: (profile) {
         final entrepriseId = profile.entrepriseId;
-        final userId = profile.uid;
-
-        // 🔐 Droits selon le rôle
-        // ➕ Nouveau produit : Propriétaire + Gérant (et permission activée)
-        final canAddProduct =
-            profile.peutGererStock;
-        // ⚙️ Paramètres : Propriétaire seulement
+        // 🔐 Droits : « Gérer le stock » pour créer un produit, patron pour les paramètres
+        final canAddProduct = profile.peutGererStock;
         final estProprietaire = profile.role.peutGererEquipe;
         // 🏬 Bandeau de la boutique de vente (dès 2 boutiques)
         final plusieursBoutiques =
             ref.watch(boutiquesActivesProvider(entrepriseId)).length > 1;
-
 
         return LayoutBuilder(
           builder: (context, constraints) {
@@ -56,7 +55,7 @@ class CaisseScreen extends ConsumerWidget {
 
             return Scaffold(
               appBar: AppBar(
-                title: const Text('Caisse / POS'),
+                title: Text(t.caiTitle),
                 bottom: plusieursBoutiques
                     ? PreferredSize(
                         preferredSize: const Size.fromHeight(46),
@@ -68,8 +67,8 @@ class CaisseScreen extends ConsumerWidget {
                     : null,
                 actions: [
                   ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: 180),
-                    child: FittedBox(
+                    constraints: const BoxConstraints(maxWidth: 180),
+                    child: const FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerRight,
                       child: Padding(
@@ -81,80 +80,43 @@ class CaisseScreen extends ConsumerWidget {
                   if (canAddProduct)
                     IconButton(
                       icon: const Icon(Icons.add_box, size: 24),
-                      tooltip: 'Nouveau Produit en Stock',
-                      onPressed: () =>
-                          _afficherDialogNouveauProduit(context, entrepriseId),
+                      tooltip: t.caiNewProduct,
+                      // Même fiche complète que l'écran Stock (boutique, code-barres, journal…)
+                      onPressed: () => AddProductModal.show(
+                        context,
+                        entrepriseId: entrepriseId,
+                        boutiqueId: ref.read(boutiqueActiveProvider),
+                      ),
                     ),
-                  // 🔐 Paramètres : Propriétaire seulement
                   if (estProprietaire)
                     IconButton(
                       icon: const Icon(Icons.settings, size: 24),
-                      tooltip: 'Paramètres',
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SettingsScreen(),
-                          ),
-                        );
-                      },
+                      tooltip: t.caiSettings,
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                      ),
                     ),
                   PopupMenuButton<String>(
                     icon: const Icon(Icons.more_vert, size: 24),
-                    tooltip: 'Options d\'exportation',
-                    onSelected: (value) async {
-                      final produits =
-                          ref.read(produitsStreamProvider).value ?? [];
-                      final currencyState = ref.read(currencyProvider);
-
-                      final enTetes = [
-                        'Nom du produit',
-                        'Stock disponible',
-                        'Prix Vente'
-                      ];
-                      final lignes = produits
-                          .map((p) => [
-                                p.nom,
-                                p.quantite,
-                                currencyState.formatPrice(p.prixVente),
-                              ])
-                          .toList();
-
-                      if (value == 'excel') {
-                        await ReportExportService.exporterExcel(
-                          titreRapport: 'Catalogue_Produits_Caisse',
-                          enTetes: enTetes,
-                          lignes: lignes,
-                        );
-                      } else if (value == 'pdf') {
-                        await ReportExportService.exporterPDF(
-                          titreRapport: 'Catalogue des Produits (Caisse)',
-                          nomBoutique: 'Nguli',
-                          enTetes: enTetes,
-                          lignes: lignes,
-                        );
-                      }
-                    },
-                    itemBuilder: (context) => const [
+                    tooltip: t.caiExport,
+                    onSelected: (value) => _exporter(ref, t, value),
+                    itemBuilder: (context) => [
                       PopupMenuItem(
                         value: 'excel',
-                        child: Row(
-                          children: [
-                            Icon(Icons.table_chart, color: Colors.green),
-                            SizedBox(width: 8),
-                            Text('Exporter vers Excel'),
-                          ],
-                        ),
+                        child: Row(children: [
+                          const Icon(Icons.table_chart, color: Colors.green),
+                          const SizedBox(width: 8),
+                          Text(t.caiExportExcel),
+                        ]),
                       ),
                       PopupMenuItem(
                         value: 'pdf',
-                        child: Row(
-                          children: [
-                            Icon(Icons.picture_as_pdf, color: Colors.red),
-                            SizedBox(width: 8),
-                            Text('Imprimer / PDF'),
-                          ],
-                        ),
+                        child: Row(children: [
+                          const Icon(Icons.picture_as_pdf, color: Colors.red),
+                          const SizedBox(width: 8),
+                          Text(t.caiExportPdf),
+                        ]),
                       ),
                     ],
                   ),
@@ -162,21 +124,12 @@ class CaisseScreen extends ConsumerWidget {
               ),
               body: isMobile
                   ? const ProduitsView()
-                  : Row(
+                  : const Row(
                       children: [
-                        const Expanded(flex: 2, child: ProduitsView()),
-                        const VerticalDivider(
-                          width: 1,
-                          thickness: 2,
-                          color: Colors.grey,
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: PanierView(
-                            entrepriseId: entrepriseId,
-                            userId: userId,
-                          ),
-                        ),
+                        // Sur tablette, le panier est déjà à droite : pas de 2ᵉ barre « Encaisser »
+                        Expanded(flex: 2, child: ProduitsView(barreEncaisser: false)),
+                        VerticalDivider(width: 1, thickness: 2, color: Colors.grey),
+                        Expanded(flex: 1, child: PanierView()),
                       ],
                     ),
             );
@@ -186,18 +139,36 @@ class CaisseScreen extends ConsumerWidget {
     );
   }
 
+  /// Catalogue de la boutique de vente (stock de CETTE boutique)
+  Future<void> _exporter(WidgetRef ref, AppLocalizations t, String format) async {
+    final produits = ref.read(produitsStreamProvider).value ?? [];
+    final devise = ref.read(currencyProvider);
+    final boutique = ref.read(boutiqueActiveProvider) ?? BoutiquesService.idPrincipale;
+    final enTetes = [t.caiColName, t.caiColStock, t.caiColPrice];
+    final lignes = produits
+        .map((p) => [
+              p.nom,
+              p.stockBoutique(boutique),
+              devise.formatPrice((p.prixPour(boutique) as num).toDouble()),
+            ])
+        .toList();
 
-  void _afficherDialogNouveauProduit(
-      BuildContext context, String entrepriseId) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) =>
-          NouveauProduitDialog(entrepriseId: entrepriseId),
-    );
+    if (format == 'excel') {
+      await ReportExportService.exporterExcel(
+        titreRapport: t.caiCatalogTitle.replaceAll(' ', '_'),
+        enTetes: enTetes,
+        lignes: lignes,
+      );
+    } else {
+      await ReportExportService.exporterPDF(
+        titreRapport: t.caiCatalogTitle,
+        nomBoutique: 'Nguli',
+        enTetes: enTetes,
+        lignes: lignes,
+      );
+    }
   }
-
 }
-
 
 // ============================================================================
 // 🏬 BANDEAU « VENTE : <BOUTIQUE> »
@@ -214,11 +185,11 @@ class BandeauBoutiqueVente extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context);
     final choisie = ref.watch(boutiqueActiveProvider);
     final boutiques = ref.watch(boutiquesActivesProvider(entrepriseId));
-    final id = choisie ?? 'principale';
-    final nom = boutiques.where((b) => b.id == id).map((b) => b.nom).firstOrNull ??
-        'Boutique principale';
+    final id = choisie ?? BoutiquesService.idPrincipale;
+    final nom = boutiques.where((b) => b.id == id).map((b) => b.nom).firstOrNull ?? t.caiMainShop;
     // Propriétaire sur « Toutes les boutiques » : il doit choisir
     final attention = estProprietaire && choisie == null;
 
@@ -237,7 +208,7 @@ class BandeauBoutiqueVente extends ConsumerWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              attention ? 'Choisissez la boutique de vente' : 'Vente : $nom',
+              attention ? t.caiPickShop : t.caiSellingIn(nom),
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),

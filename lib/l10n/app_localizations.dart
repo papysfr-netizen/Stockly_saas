@@ -4500,6 +4500,90 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Clôture enregistrée.'**
   String get cloSavedShort;
+
+  /// No description provided for @caiTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Caisse'**
+  String get caiTitle;
+
+  /// No description provided for @caiNewProduct.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau produit'**
+  String get caiNewProduct;
+
+  /// No description provided for @caiSettings.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paramètres'**
+  String get caiSettings;
+
+  /// No description provided for @caiExport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter le catalogue'**
+  String get caiExport;
+
+  /// No description provided for @caiExportExcel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter vers Excel'**
+  String get caiExportExcel;
+
+  /// No description provided for @caiExportPdf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Imprimer / PDF'**
+  String get caiExportPdf;
+
+  /// No description provided for @caiColName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Produit'**
+  String get caiColName;
+
+  /// No description provided for @caiColStock.
+  ///
+  /// In fr, this message translates to:
+  /// **'Stock'**
+  String get caiColStock;
+
+  /// No description provided for @caiColPrice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix de vente'**
+  String get caiColPrice;
+
+  /// No description provided for @caiCatalogTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catalogue des produits'**
+  String get caiCatalogTitle;
+
+  /// No description provided for @caiProfileError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger votre profil : {erreur}'**
+  String caiProfileError(String erreur);
+
+  /// No description provided for @caiPickShop.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez la boutique de vente'**
+  String get caiPickShop;
+
+  /// No description provided for @caiSellingIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vente : {nom}'**
+  String caiSellingIn(String nom);
+
+  /// No description provided for @caiMainShop.
+  ///
+  /// In fr, this message translates to:
+  /// **'Boutique principale'**
+  String get caiMainShop;
 }
 
 class _AppLocalizationsDelegate

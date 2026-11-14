@@ -7,6 +7,7 @@ import '../../../core/providers/cart_provider.dart';
 import '../../../core/providers/currency_provider.dart';
 import '../../../core/providers/user_role_provider.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
+import 'package:stockly_saas/core/utils/payment_calculator.dart';
 
 class AjoutPanierDialog extends ConsumerStatefulWidget {
   final Produit produit;
@@ -95,7 +96,7 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
     final voirFinances = ref.watch(userProfileProvider).value?.peutVoirFinances ?? false;
     final t = AppLocalizations.of(context);
 
-    final prixSaisi = double.tryParse(_prixController.text.replaceAll(',', '.').trim()) ?? 0.0;
+    final prixSaisi = parseAmount(_prixController.text);
     final qteSaisie = int.tryParse(_qteController.text.replaceAll(',', '.').trim()) ?? 0;
     final sousTotalLocal = prixSaisi * qteSaisie;
 
@@ -209,15 +210,14 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
           onPressed: _erreurStock != null
               ? null
               : () async {
-                  final prixTexte = _prixController.text.replaceAll(',', '.').trim();
                   final qteTexte = _qteController.text.replaceAll(',', '.').trim();
 
                   final prixNormal = _prixNormalUSD;
-                  final saisi = double.tryParse(prixTexte);
+                  final saisi = parseAmount(_prixController.text);
                   final qte = int.tryParse(qteTexte) ?? 1;
 
                   // Sans autorisation : toujours le prix normal
-                  final double prixUSD = (!peutChangerPrix || saisi == null || saisi <= 0)
+                  final double prixUSD = (!peutChangerPrix || saisi <= 0)
                       ? prixNormal
                       : saisi / rate;
 

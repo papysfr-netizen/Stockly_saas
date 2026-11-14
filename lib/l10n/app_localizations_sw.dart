@@ -2673,4 +2673,50 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get cloSavedShort => 'Kufunga kumehifadhiwa.';
+
+  @override
+  String get caiTitle => 'Mauzo';
+
+  @override
+  String get caiNewProduct => 'Bidhaa mpya';
+
+  @override
+  String get caiSettings => 'Mipangilio';
+
+  @override
+  String get caiExport => 'Hamisha orodha';
+
+  @override
+  String get caiExportExcel => 'Hamisha kwenda Excel';
+
+  @override
+  String get caiExportPdf => 'Chapisha / PDF';
+
+  @override
+  String get caiColName => 'Bidhaa';
+
+  @override
+  String get caiColStock => 'Akiba';
+
+  @override
+  String get caiColPrice => 'Bei ya kuuza';
+
+  @override
+  String get caiCatalogTitle => 'Orodha ya bidhaa';
+
+  @override
+  String caiProfileError(String erreur) {
+    return 'Haiwezekani kupakia wasifu wako: $erreur';
+  }
+
+  @override
+  String get caiPickShop => 'Chagua duka la kuuzia';
+
+  @override
+  String caiSellingIn(String nom) {
+    return 'Mauzo: $nom';
+  }
+
+  @override
+  String get caiMainShop => 'Duka kuu';
 }

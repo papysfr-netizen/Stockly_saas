@@ -732,5 +732,19 @@
   "cloRate": "Motuya: 1 $ = {taux} FC",
   "cloLoading": "Ezali kotanga oyo ezalaki kozela…",
   "cloDoneBy": "Ekangami na ngonga {heure} na {nom}",
-  "cloSavedShort": "Kokanga ebombami."
+  "cloSavedShort": "Kokanga ebombami.",
+  "caiTitle": "Kaisi",
+  "caiNewProduct": "Eloko ya sika",
+  "caiSettings": "Mibongiseli",
+  "caiExport": "Bimisa liste ya biloko",
+  "caiExportExcel": "Bimisa na Excel",
+  "caiExportPdf": "Kokokola / PDF",
+  "caiColName": "Eloko",
+  "caiColStock": "Stock",
+  "caiColPrice": "Ntalo ya koteka",
+  "caiCatalogTitle": "Liste ya biloko",
+  "caiProfileError": "Ekoki kofungola profil na yo te: {erreur}",
+  "caiPickShop": "Pona butiki ya koteka",
+  "caiSellingIn": "Koteka: {nom}",
+  "caiMainShop": "Butiki ya liboso"
 }

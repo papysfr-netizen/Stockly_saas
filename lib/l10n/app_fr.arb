@@ -2103,5 +2103,21 @@
   "cloLoading": "Calcul de l'attendu…",
   "cloDoneBy": "Clôturée à {heure} par {nom}",
   "cloSavedShort": "Clôture enregistrée.",
-  "@cloDoneBy": {"placeholders": {"heure": {"type": "String"}, "nom": {"type": "String"}}}
+  "@cloDoneBy": {"placeholders": {"heure": {"type": "String"}, "nom": {"type": "String"}}},
+  "caiTitle": "Caisse",
+  "caiNewProduct": "Nouveau produit",
+  "caiSettings": "Paramètres",
+  "caiExport": "Exporter le catalogue",
+  "caiExportExcel": "Exporter vers Excel",
+  "caiExportPdf": "Imprimer / PDF",
+  "caiColName": "Produit",
+  "caiColStock": "Stock",
+  "caiColPrice": "Prix de vente",
+  "caiCatalogTitle": "Catalogue des produits",
+  "caiProfileError": "Impossible de charger votre profil : {erreur}",
+  "@caiProfileError": {"placeholders": {"erreur": {"type": "String"}}},
+  "caiPickShop": "Choisissez la boutique de vente",
+  "caiSellingIn": "Vente : {nom}",
+  "@caiSellingIn": {"placeholders": {"nom": {"type": "String"}}},
+  "caiMainShop": "Boutique principale"
 }
