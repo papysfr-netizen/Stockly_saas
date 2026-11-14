@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:stockly_saas/core/services/journal_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rxdart/rxdart.dart';
 import '../models/depense.dart';
 import 'user_role_provider.dart';
 
@@ -86,6 +87,9 @@ class DepenseRepository {
         m.contains('cheque')) {
       return const MapEntry('521000', 'Banques');
     }
+    if (m.contains('mobile')) {
+      return const MapEntry('572000', 'Monnaie électronique (Mobile Money)');
+    }
     return const MapEntry('571000', 'Caisse');
   }
 
@@ -162,7 +166,7 @@ class DepenseRepository {
     final nouvelleDepense = avecId.copyWith(comptabilise: comptabiliser);
 
     final batch = _firestore.batch();
-    batch.set(docRef, nouvelleDepense.toJson());
+    batch.set(docRef, nouvelleDepense.toFirestore()); // 📅 vraie date (pas du texte)
     if (comptabiliser) {
       batch.set(
         _refEcriture(nouvelleDepense.entrepriseId, nouvelleDepense.id),
@@ -191,7 +195,7 @@ class DepenseRepository {
     final maj = depense.copyWith(comptabilise: comptabiliser);
 
     final batch = _firestore.batch();
-    batch.update(_firestore.collection('depenses').doc(maj.id), maj.toJson());
+    batch.update(_firestore.collection('depenses').doc(maj.id), maj.toFirestore());
 
     if (comptabiliser) {
       batch.set(_refEcriture(maj.entrepriseId, maj.id), _ecriture(maj));
@@ -295,13 +299,18 @@ final depensesDuJourProvider = StreamProvider<List<Depense>>((ref) {
   if (entrepriseId.isEmpty) return Stream.value(const []);
   final now = DateTime.now();
   final minuit = DateTime(now.year, now.month, now.day);
-  return FirebaseFirestore.instance
+  final base = FirebaseFirestore.instance
       .collection('depenses')
       .where('entrepriseId', isEqualTo: entrepriseId)
-      .orderBy('date', descending: true)
-      .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(minuit))
-      .snapshots()
-      .map((snapshot) => snapshot.docs
-          .map((doc) => Depense.fromJson(doc.data(), doc.id))
-          .toList());
+      .orderBy('date', descending: true);
+  // 📅 Les dépenses ont été enregistrées avec une date en TEXTE jusqu'en
+  //    novembre 2026, puis avec une vraie date : on lit les deux.
+  return Rx.combineLatest2<QuerySnapshot<Map<String, dynamic>>, QuerySnapshot<Map<String, dynamic>>,
+      List<Depense>>(
+    base.where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(minuit)).snapshots(),
+    base.where('date', isGreaterThanOrEqualTo: minuit.toIso8601String()).snapshots(),
+    (a, b) => [
+      for (final doc in [...a.docs, ...b.docs]) Depense.fromJson(doc.data(), doc.id),
+    ],
+  );
 });

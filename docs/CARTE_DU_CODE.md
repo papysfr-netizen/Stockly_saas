@@ -21,7 +21,7 @@ séance de relecture.
 |---|---:|---:|---|:---:|
 | `lib/main.dart` | 1 | 479 | Démarrage, Firebase, hors ligne, langues, thème | 🟡 |
 | `lib/views/caisse` | 5 | 2 790 | Caisse : produits, panier, prix négocié, **paiement** | ✅ |
-| `lib/views/financial_analysis` | 5 | 2 638 | Rapport (compte de résultat, marges, recherche client) | ⬜ |
+| `lib/views/financial_analysis` | 5 | 2 700 | Rapport (compte de résultat, marges, recherche client) | 🟡 |
 | `lib/screens` | 10 | 2 293 | Paramètres, équipe, bon de livraison | ⬜ |
 | `lib/core/models` | 7 | 1 314 | Produit, vente, dette, dépense, utilisateur | 🟡 |
 | `lib/core/services` | 18 | 3 482 | Reçus, PDF, Excel, IA photo, journal, équipe | 🟡 |
@@ -153,6 +153,23 @@ avec espaces refusés (paiement de dette, compte client, dépense).
 
 Corrigé : prix de vente à 0 ou négatif, prix d'achat et stock négatifs
 acceptés par la fiche produit.
+
+### Finances (relu : calcul du bénéfice et dépenses)
+
+- `financial_analysis/services/financial_calculation_service.dart` : compte
+  de résultat (CA net, coût des marchandises au prix d'achat du jour de la
+  vente, marge, autres produits, dépenses, pertes). Fonction `calculer`
+  testée par `test/finances/compte_resultat_test.dart` (8 cas).
+- `core/providers/depense_provider.dart` : dépenses + écriture comptable
+  (compte de charge selon la catégorie, trésorerie selon le moyen).
+
+Corrigé : les « ventes hors caisse » (Crédit) absentes du Rapport ; dépense
+Mobile Money comptée en caisse (571 au lieu de 572) ; **dépenses enregistrées
+avec une date en texte**, donc invisibles pour l'accueil et la clôture depuis
+la 1.2.1 (lecture des deux formats + vraies dates désormais).
+
+Pas encore relus en détail : l'écran du Rapport (1 500 lignes, textes en dur),
+`comptabilite_screen.dart` (journal, bilan), `ecriture_form_screen.dart`.
 
 ## Déjà corrigé
 

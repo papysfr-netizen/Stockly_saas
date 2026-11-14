@@ -112,10 +112,54 @@ class FinancialCalculationService {
     return _num(item['prixUnitaire'] ?? item['prix'] ?? item['price']) * qte;
   }
 
+  /// 🛒 Une dette « Vente hors caisse » (Crédit) est lue comme une vente :
+  /// montant = montant initial, payé = acompte, date = date de création.
+  /// Seules les dettes CLIENT marquées explicitement « vente » comptent
+  /// (pas les anciennes dettes du cahier ni l'argent prêté).
+  static Map<String, dynamic>? venteHorsCaisse(Map<String, dynamic> d) {
+    if (d['origine'] != 'vente') return null;
+    if ((d['type'] ?? 'client').toString() != 'client') return null;
+    if ((d['venteId'] ?? '').toString().isNotEmpty) return null; // déjà une vente de la caisse
+    return {
+      'entrepriseId': d['entrepriseId'],
+      'boutiqueId': d['boutiqueId'],
+      'montantTotal': _num(d['montantInitial']),
+      'montantPaye': _num(d['acomptePaye']),
+      'resteAPayer': _num(d['montantReste'] ?? d['montantRestant']),
+      'nomClient': d['nomTiers'] ?? d['nomClient'] ?? '',
+      'date': d['dateCreation'] ?? d['createdAt'],
+      'vendeurNom': '',
+      'horsCaisse': true,
+    };
+  }
+
   static FinancialCalculationResult computePL({
     required List<dynamic> toutesLesDepenses,
     required List<QueryDocumentSnapshot> produitsDocs,
     required List<QueryDocumentSnapshot> ventesDocs,
+    required DateTimeRange dateRange,
+    required String entrepriseId,
+  }) {
+    return calculer(
+      toutesLesDepenses: toutesLesDepenses,
+      produits: [
+        for (final p in produitsDocs) (id: p.id, data: (p.data() as Map<String, dynamic>?) ?? {}),
+      ],
+      ventes: [
+        for (final v in ventesDocs)
+          (v.data() as Map<String, dynamic>?) ?? <String, dynamic>{},
+      ],
+      dateRange: dateRange,
+      entrepriseId: entrepriseId,
+    );
+  }
+
+  /// Même calcul, à partir de simples données (utilisé par les tests).
+  /// Les dettes « Vente hors caisse » peuvent être mêlées aux ventes.
+  static FinancialCalculationResult calculer({
+    required List<dynamic> toutesLesDepenses,
+    required List<({String id, Map<String, dynamic> data})> produits,
+    required List<Map<String, dynamic>> ventes,
     required DateTimeRange dateRange,
     required String entrepriseId,
   }) {
@@ -147,8 +191,8 @@ class FinancialCalculationService {
     final Map<String, double> prixAchatParId = {};
     final Map<String, double> prixAchatParNom = {};
 
-    for (final prodDoc in produitsDocs) {
-      final pData = prodDoc.data() as Map<String, dynamic>;
+    for (final prodDoc in produits) {
+      final pData = prodDoc.data;
       final pId = prodDoc.id;
       final pCustomId = pData['id']?.toString();
       final pNom =
@@ -183,8 +227,12 @@ class FinancialCalculationService {
     final List<Map<String, dynamic>> detailsAutresProduitsList = [];
     final List<Map<String, dynamic>> detailsPertesList = [];
 
-    for (final doc in ventesDocs) {
-      final data = doc.data() as Map<String, dynamic>;
+    for (final brut in ventes) {
+      // Une dette « Vente hors caisse » devient une vente (les autres dettes sont ignorées)
+      final estDette = brut.containsKey('montantInitial') && !brut.containsKey('montantTotal');
+      final Map<String, dynamic>? lue = estDette ? venteHorsCaisse(brut) : brut;
+      if (lue == null) continue;
+      final data = lue;
 
       final docEntrepriseId = data['entrepriseId']?.toString();
       if (entrepriseId.isNotEmpty &&

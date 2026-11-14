@@ -244,22 +244,25 @@ class ClotureService {
 
     // 3. Dépenses de la boutique
     try {
-      QuerySnapshot<Map<String, dynamic>> s;
+      // 📅 Date en vraie date (récentes) OU en texte (anciennes) : on lit les deux
+      final base = FirebaseFirestore.instance
+          .collection('depenses')
+          .where('entrepriseId', isEqualTo: entrepriseId)
+          .orderBy('date', descending: true);
+      List<QueryDocumentSnapshot<Map<String, dynamic>>> docs;
       try {
-        s = await FirebaseFirestore.instance
-            .collection('depenses')
-            .where('entrepriseId', isEqualTo: entrepriseId)
-            .orderBy('date', descending: true)
-            .where('date', isGreaterThanOrEqualTo: depuis)
-            .get();
+        final enDate = await base.where('date', isGreaterThanOrEqualTo: depuis).get();
+        final enTexte = await base.where('date', isGreaterThanOrEqualTo: debut.toIso8601String()).get();
+        docs = [...enDate.docs, ...enTexte.docs];
       } catch (_) {
         // Sans index : on lit tout et on trie ici
-        s = await FirebaseFirestore.instance
-            .collection('depenses')
-            .where('entrepriseId', isEqualTo: entrepriseId)
-            .get();
+        docs = (await FirebaseFirestore.instance
+                .collection('depenses')
+                .where('entrepriseId', isEqualTo: entrepriseId)
+                .get())
+            .docs;
       }
-      for (final doc in s.docs) {
+      for (final doc in docs) {
         final d = doc.data();
         if (!memeBoutique(boutiqueId, d['boutiqueId'])) continue;
         if (!dansPeriode(date(d['date']))) continue;

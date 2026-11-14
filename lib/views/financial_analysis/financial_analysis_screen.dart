@@ -255,11 +255,23 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
             .where('date', isLessThan: Timestamp.fromDate(finLecture))
             .snapshots();
         final anciennes = ventes.where('date', isGreaterThanOrEqualTo: '').snapshots();
-        _fluxVentes = Rx.combineLatest2(
+        // 🛒 Dettes « Vente hors caisse » de la période (lues comme des ventes par le calcul)
+        final horsCaisse = racine
+            .collection('creances')
+            .where('dateCreation', isGreaterThanOrEqualTo: Timestamp.fromDate(debutLecture))
+            .where('dateCreation', isLessThan: Timestamp.fromDate(finLecture))
+            .snapshots();
+        _fluxVentes = Rx.combineLatest3(
           recentes,
           anciennes,
-          (QuerySnapshot<Map<String, dynamic>> a, QuerySnapshot<Map<String, dynamic>> b) =>
-              <QueryDocumentSnapshot>[...a.docs, ...b.docs],
+          horsCaisse,
+          (QuerySnapshot<Map<String, dynamic>> a, QuerySnapshot<Map<String, dynamic>> b,
+                  QuerySnapshot<Map<String, dynamic>> c) =>
+              <QueryDocumentSnapshot>[
+                ...a.docs,
+                ...b.docs,
+                ...c.docs.where((d) => d.data()['origine'] == 'vente'),
+              ],
         ).shareReplay(maxSize: 1);
       }
       ventesStream = _fluxVentes;
