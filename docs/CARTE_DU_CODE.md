@@ -22,7 +22,7 @@ séance de relecture.
 | `lib/main.dart` | 1 | 479 | Démarrage, Firebase, hors ligne, langues, thème | 🟡 |
 | `lib/views/caisse` | 5 | 2 790 | Caisse : produits, panier, prix négocié, **paiement** | ✅ |
 | `lib/views/financial_analysis` | 5 | 2 700 | Rapport (compte de résultat, marges, recherche client) | 🟡 |
-| `lib/screens` | 10 | 2 293 | Paramètres, équipe, bon de livraison | ⬜ |
+| `lib/screens` | 10 | 2 293 | Paramètres, équipe, bon de livraison | 🟡 |
 | `lib/core/models` | 7 | 1 314 | Produit, vente, dette, dépense, utilisateur | 🟡 |
 | `lib/core/services` | 18 | 3 482 | Reçus, PDF, Excel, IA photo, journal, équipe | 🟡 |
 | `lib/core/providers` | 9 | 1 879 | Devises, rôles et autorisations, dépenses, panier | 🟡 |
@@ -170,6 +170,22 @@ la 1.2.1 (lecture des deux formats + vraies dates désormais).
 
 Pas encore relus en détail : l'écran du Rapport (1 500 lignes, textes en dur),
 `comptabilite_screen.dart` (journal, bilan), `ecriture_form_screen.dart`.
+
+### Équipe et autorisations (relu)
+
+- `core/services/equipe_service.dart` : création d'un employé avec un
+  identifiant simple (`nom.code@stockly.app`) par une 2ᵉ connexion cachée
+  (le patron reste connecté) ; compte supprimé si le profil échoue.
+- `core/providers/user_role_provider.dart` : rôles (patron, gérant,
+  caissier ; anciens noms acceptés) et 8 autorisations ; valeurs par défaut
+  identiques à celles des règles Firestore.
+- `screens/gestion_equipe_screen.dart` : autorisations modifiables par le
+  patron seulement ; « administrateur d'équipe » limité à bloquer/débloquer
+  et au rôle gérant/caissier.
+
+Rien à corriger. Manque connu : un employé qui oublie son mot de passe ne
+peut pas être réinitialisé par le patron (il faut recréer son compte) ;
+une réinitialisation par le patron demande une fonction serveur (Blaze).
 
 ## Déjà corrigé
 
