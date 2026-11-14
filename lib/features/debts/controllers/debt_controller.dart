@@ -30,15 +30,26 @@ final dettesStreamProvider =
   // 💸 On ne relit pas tout l'historique :
   //   - toutes les dettes EN COURS (reste à payer) ;
   //   - les dettes soldées ou créées depuis moins de 6 mois (filtre « Soldées »).
-  final il6Mois = Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 183)));
+  final il6Mois =
+      Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 183)));
   Stream<List<Dette>> lire(String nomCollection) {
-    final col = db.collection('entreprises').doc(entrepriseId).collection(nomCollection);
+    final col = db
+        .collection('entreprises')
+        .doc(entrepriseId)
+        .collection(nomCollection);
     List<Dette> versListe(QuerySnapshot<Map<String, dynamic>> s) =>
         s.docs.map((doc) => Dette.fromDocument(doc)).toList();
-    return Rx.combineLatest3<List<Dette>, List<Dette>, List<Dette>, List<Dette>>(
+    return Rx.combineLatest3<List<Dette>, List<Dette>, List<Dette>,
+        List<Dette>>(
       col.where('montantReste', isGreaterThan: 0).snapshots().map(versListe),
-      col.where('dernierPaiement', isGreaterThanOrEqualTo: il6Mois).snapshots().map(versListe),
-      col.where('dateCreation', isGreaterThanOrEqualTo: il6Mois).snapshots().map(versListe),
+      col
+          .where('dernierPaiement', isGreaterThanOrEqualTo: il6Mois)
+          .snapshots()
+          .map(versListe),
+      col
+          .where('dateCreation', isGreaterThanOrEqualTo: il6Mois)
+          .snapshots()
+          .map(versListe),
       (enCours, payees, recentes) {
         // Une même dette peut venir de plusieurs listes : on la garde une fois
         final parId = <String, Dette>{};
@@ -153,6 +164,9 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
     DateTime? dateEcheance,
     PaymentMethod paymentMethod = PaymentMethod.cash,
     String boutiqueId = 'principale', // 🏬
+    String? origine, // 🧭 voir OrigineDette (par défaut : vente / achat)
+    bool viaCaisse =
+        true, // prêt / emprunt : l'argent sort de / entre dans la caisse
   }) async {
     final entrepriseId = arg;
 
@@ -176,7 +190,8 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
         throw ArgumentError('Le numéro de facture est obligatoire.');
       }
       if (montantTotal <= 0) {
-        throw ArgumentError('Le montant total doit être strictement supérieur à zéro.');
+        throw ArgumentError(
+            'Le montant total doit être strictement supérieur à zéro.');
       }
 
       final parNom = await _nomConnecte();
@@ -197,6 +212,14 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
       }
 
       final bool isClient = type == TypeDette.client;
+      final String org = origine ?? OrigineDette.parDefaut(type);
+      final bool estPretOuEmprunt =
+          org == OrigineDette.pret || org == OrigineDette.emprunt;
+      final bool estCahier = org == OrigineDette.cahier;
+      final String compteTiers = OrigineDette.compteTiers(type, org);
+      // Un prêt ou un emprunt est un mouvement d'argent, pas un remboursement : pas d'acompte
+      final double acompteCaisse =
+          (estPretOuEmprunt || estCahier) ? 0.0 : pureAcompte;
 
       // 1. Enregistrement du document Dette/Créance
       final dette = Dette(
@@ -215,65 +238,90 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
         dateEcheance: dateEcheance,
         entrepriseId: entrepriseId,
         comptabilise: true,
+        origine: org,
       );
 
       batch.set(targetRef, {
         ...dette.toFirestore(),
-        // 🧾 Historique : l'acompte versé à la création
-        if (pureAcompte > 0)
-          'paiements': [_lignePaiement(now, pureAcompte, paymentMethod, parNom)],
-        // 💵 Argent reçu aujourd'hui : visible par l'accueil et la clôture de caisse
-        if (pureAcompte > 0) 'dernierPaiement': Timestamp.fromDate(now),
+        // 🧾 Historique : l'acompte versé à la création (argent reçu AUJOURD'HUI)
+        if (acompteCaisse > 0)
+          'paiements': [
+            _lignePaiement(now, acompteCaisse, paymentMethod, parNom)
+          ],
+        // 💵 Visible par l'accueil et la clôture de caisse
+        if (acompteCaisse > 0) 'dernierPaiement': Timestamp.fromDate(now),
+        // 🤝 Prêt / emprunt en espèces : la clôture de caisse compte cette sortie / entrée
+        if (estPretOuEmprunt && viaCaisse) 'mouvementCaisse': true,
       });
 
-      // 2. Écriture d'engagement comptable (SYSCOHADA)
+      // 2. Écriture d'engagement comptable (SYSCOHADA), selon l'origine :
+      //    vente : 411 / 701   · prêt : 471 / caisse (ou 108 exploitant) · cahier : 411 / 108
+      //    achat : 601 / 401   · emprunt : caisse (ou 108) / 168          · cahier : 108 / 401
       final ecritureEngagementRef = _ecrituresRef(entrepriseId).doc();
-      final String codeDebit = isClient ? '411000' : '601000';
-      final String codeCredit = isClient ? '701000' : '401000';
+      final String contrepartie = viaCaisse ? '571000' : '108000';
+      final String labelTiers =
+          '${isClient ? 'Débiteur' : 'Créancier'} - $cleanNom';
+      String libelle(String code) => switch (code) {
+            '571000' => 'Caisse',
+            '108000' => "Compte de l'exploitant",
+            '471000' => 'Débiteurs divers - $cleanNom',
+            '168000' => 'Autres emprunts - $cleanNom',
+            '411000' => 'Clients - $cleanNom',
+            '401000' => 'Fournisseurs - $cleanNom',
+            _ => JournalEntry.getAccountLabel(code),
+          };
+      final (String codeDebit, String codeCredit) = switch (org) {
+        OrigineDette.pret => ('471000', contrepartie),
+        OrigineDette.emprunt => (contrepartie, '168000'),
+        OrigineDette.cahier =>
+          isClient ? ('411000', '108000') : ('108000', '401000'),
+        _ => isClient ? ('411000', '701000') : ('601000', '401000'),
+      };
+      final String labelDebit =
+          codeDebit == compteTiers ? labelTiers : libelle(codeDebit);
+      final String labelCredit =
+          codeCredit == compteTiers ? labelTiers : libelle(codeCredit);
 
-      final String labelDebit = isClient
-          ? 'Clients - $cleanNom'
-          : JournalEntry.getAccountLabel('601000');
-      final String labelCredit = isClient
-          ? JournalEntry.getAccountLabel('701000')
-          : 'Fournisseurs - $cleanNom';
+      // Ancienne dette : seul ce qui reste dû est inscrit (le reste a été réglé avant Nguli)
+      final double montantEngage = estCahier ? montantReste : totalArrondi;
+      if (montantEngage > 0) {
+        final engagementEntry = JournalEntry(
+          id: ecritureEngagementRef.id,
+          entrepriseId: entrepriseId,
+          date: now,
+          reference: targetRef.id,
+          journalCode: isClient ? 'VT' : 'HA',
+          description: isClient
+              ? 'Créance Client : $cleanNom (Facture $cleanFacture)'
+              : 'Dette Fournisseur : $cleanNom (Facture $cleanFacture)',
+          lines: [
+            JournalEntryLine(
+              accountCode: codeDebit,
+              accountLabel: labelDebit,
+              debit: montantEngage,
+              credit: 0.0,
+            ),
+            JournalEntryLine(
+              accountCode: codeCredit,
+              accountLabel: labelCredit,
+              debit: 0.0,
+              credit: montantEngage,
+            ),
+          ],
+        );
 
-      final engagementEntry = JournalEntry(
-        id: ecritureEngagementRef.id,
-        entrepriseId: entrepriseId,
-        date: now,
-        reference: targetRef.id,
-        journalCode: isClient ? 'VT' : 'HA',
-        description: isClient
-            ? 'Créance Client : $cleanNom (Facture $cleanFacture)'
-            : 'Dette Fournisseur : $cleanNom (Facture $cleanFacture)',
-        lines: [
-          JournalEntryLine(
-            accountCode: codeDebit,
-            accountLabel: labelDebit,
-            debit: totalArrondi,
-            credit: 0.0,
-          ),
-          JournalEntryLine(
-            accountCode: codeCredit,
-            accountLabel: labelCredit,
-            debit: 0.0,
-            credit: totalArrondi,
-          ),
-        ],
-      );
+        batch.set(ecritureEngagementRef,
+            {...engagementEntry.toFirestore(), 'boutiqueId': boutiqueId}); // 🏬 compta
+      }
 
-      batch.set(ecritureEngagementRef,
-          {...engagementEntry.toFirestore(), 'boutiqueId': boutiqueId}); // 🏬 compta
-
-      // 3. Écriture d'acompte comptable
-      if (pureAcompte > 0) {
+      // 3. Écriture d'acompte comptable (argent reçu / payé aujourd'hui)
+      if (acompteCaisse > 0) {
         final ecritureAcompteRef = _ecrituresRef(entrepriseId).doc();
         final String codeTresorerie =
             AccountingJournalService.getAccountCodeForPayment(paymentMethod);
 
-        final String acompteDebit = isClient ? codeTresorerie : '401000';
-        final String acompteCredit = isClient ? '411000' : codeTresorerie;
+        final String acompteDebit = isClient ? codeTresorerie : compteTiers;
+        final String acompteCredit = isClient ? compteTiers : codeTresorerie;
 
         final String acompteDebitLabel = isClient
             ? JournalEntry.getAccountLabel(codeTresorerie)
@@ -295,21 +343,23 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
             JournalEntryLine(
               accountCode: acompteDebit,
               accountLabel: acompteDebitLabel,
-              debit: pureAcompte,
+              debit: acompteCaisse,
               credit: 0.0,
             ),
             JournalEntryLine(
               accountCode: acompteCredit,
               accountLabel: acompteCreditLabel,
               debit: 0.0,
-              credit: pureAcompte,
+              credit: acompteCaisse,
             ),
           ],
-          montantEncaisse: isClient ? pureAcompte : 0.0,
+          montantEncaisse: isClient ? acompteCaisse : 0.0,
         );
 
-        batch.set(ecritureAcompteRef,
-            {...acompteEntry.toFirestore(), 'boutiqueId': boutiqueId}); // 🏬 compta
+        batch.set(ecritureAcompteRef, {
+          ...acompteEntry.toFirestore(),
+          'boutiqueId': boutiqueId
+        }); // 🏬 compta
       }
 
       await batch.commit();
@@ -356,13 +406,15 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
       docRef = _getTargetRef(entrepriseId, type).doc(detteId);
       snapshot = await lireCache(docRef);
     } else {
-      final creanceRef = _getTargetRef(entrepriseId, TypeDette.client).doc(detteId);
+      final creanceRef =
+          _getTargetRef(entrepriseId, TypeDette.client).doc(detteId);
       final s = await lireCache(creanceRef);
       if (s != null && s.exists) {
         docRef = creanceRef;
         snapshot = s;
       } else {
-        docRef = _getTargetRef(entrepriseId, TypeDette.fournisseur).doc(detteId);
+        docRef =
+            _getTargetRef(entrepriseId, TypeDette.fournisseur).doc(detteId);
         snapshot = await lireCache(docRef);
       }
     }
@@ -380,7 +432,8 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
     final double montantEffectif = _roundMoney(
       montantPaye > dette.montantReste ? dette.montantReste : montantPaye,
     );
-    final double nouveauReste = _roundMoney(dette.montantReste - montantEffectif);
+    final double nouveauReste =
+        _roundMoney(dette.montantReste - montantEffectif);
     final String nouveauStatut = nouveauReste <= 0 ? 'paye' : 'partiel';
     final now = DateTime.now();
     final bool isClient = dette.type == TypeDette.client;
@@ -393,8 +446,9 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
     batch.update(docRef, {
       // « increment » : juste, même si un autre paiement arrive en même temps
       'montantReste': FieldValue.increment(-montantEffectif),
-      'montantRestant':
-          aMontantRestant ? FieldValue.increment(-montantEffectif) : nouveauReste,
+      'montantRestant': aMontantRestant
+          ? FieldValue.increment(-montantEffectif)
+          : nouveauReste,
       'acomptePaye': FieldValue.increment(montantEffectif),
       'statut': nouveauStatut,
       'dernierPaiement': FieldValue.serverTimestamp(),
@@ -408,8 +462,8 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
     final ecritureRef = _ecrituresRef(entrepriseId).doc();
     final String codeTresorerie =
         AccountingJournalService.getAccountCodeForPayment(paymentMethod);
-    final String debitCode = isClient ? codeTresorerie : '401000';
-    final String creditCode = isClient ? '411000' : codeTresorerie;
+    final String debitCode = isClient ? codeTresorerie : dette.compteTiers;
+    final String creditCode = isClient ? dette.compteTiers : codeTresorerie;
 
     final journalEntry = JournalEntry(
       id: ecritureRef.id,
@@ -515,14 +569,16 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
           docRef = _getTargetRef(entrepriseId, type).doc(detteId);
           snapshot = await transaction.get(docRef);
         } else {
-          final creanceRef = _getTargetRef(entrepriseId, TypeDette.client).doc(detteId);
+          final creanceRef =
+              _getTargetRef(entrepriseId, TypeDette.client).doc(detteId);
           final creanceSnap = await transaction.get(creanceRef);
 
           if (creanceSnap.exists) {
             docRef = creanceRef;
             snapshot = creanceSnap;
           } else {
-            docRef = _getTargetRef(entrepriseId, TypeDette.fournisseur).doc(detteId);
+            docRef =
+                _getTargetRef(entrepriseId, TypeDette.fournisseur).doc(detteId);
             snapshot = await transaction.get(docRef);
           }
         }
@@ -540,18 +596,22 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
         final double montantEffectif = _roundMoney(
           montantPaye > dette.montantReste ? dette.montantReste : montantPaye,
         );
-        final double nouveauReste = _roundMoney(dette.montantReste - montantEffectif);
-        final double acompteCumule = _roundMoney(dette.acomptePaye + montantEffectif);
+        final double nouveauReste =
+            _roundMoney(dette.montantReste - montantEffectif);
+        final double acompteCumule =
+            _roundMoney(dette.acomptePaye + montantEffectif);
         final String nouveauStatut = nouveauReste <= 0 ? 'paye' : 'partiel';
         final now = DateTime.now();
         final bool isClient = dette.type == TypeDette.client;
 
-        infoJournal = '${isClient ? 'Client' : 'Fournisseur'} ${dette.nomTiers} · '
+        infoJournal =
+            '${isClient ? 'Client' : 'Fournisseur'} ${dette.nomTiers} · '
             'payé ${montantEffectif.toStringAsFixed(2)} \$ · '
             '${nouveauReste <= 0 ? 'soldé' : 'reste ${nouveauReste.toStringAsFixed(2)} \$'} · '
             '${JournalEntry.getAccountLabel(AccountingJournalService.getAccountCodeForPayment(paymentMethod))}';
         montantJournal = montantEffectif;
-        boutiqueJournal = dette.boutiqueId.isEmpty ? 'principale' : dette.boutiqueId;
+        boutiqueJournal =
+            dette.boutiqueId.isEmpty ? 'principale' : dette.boutiqueId;
 
         transaction.update(docRef, {
           'montantReste': nouveauReste,
@@ -570,8 +630,8 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
         final String codeTresorerie =
             AccountingJournalService.getAccountCodeForPayment(paymentMethod);
 
-        final String debitCode = isClient ? codeTresorerie : '401000';
-        final String creditCode = isClient ? '411000' : codeTresorerie;
+        final String debitCode = isClient ? codeTresorerie : dette.compteTiers;
+        final String creditCode = isClient ? dette.compteTiers : codeTresorerie;
 
         final journalEntry = JournalEntry(
           id: ecritureRef.id,
@@ -605,7 +665,9 @@ class DebtController extends FamilyAsyncNotifier<void, String> {
 
         transaction.set(ecritureRef, {
           ...journalEntry.toFirestore(),
-          'boutiqueId': dette.boutiqueId.isEmpty ? 'principale' : dette.boutiqueId, // 🏬 compta
+          'boutiqueId': dette.boutiqueId.isEmpty
+              ? 'principale'
+              : dette.boutiqueId, // 🏬 compta
         });
       });
 

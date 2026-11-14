@@ -2728,4 +2728,37 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get payDeliveryNote => 'Mokanda ya bopesi';
+
+  @override
+  String get debtOrigin => 'Niongo oyo euti wapi?';
+
+  @override
+  String get debtOriginSale => 'Koteka libanda ya kaisi';
+
+  @override
+  String get debtOriginLoan => 'Mbongo ya kodefisa';
+
+  @override
+  String get debtOriginOld => 'Niongo ya kala (kayé)';
+
+  @override
+  String get debtOriginPurchase => 'Kosomba na niongo';
+
+  @override
+  String get debtOriginBorrow => 'Mbongo ya kodefa';
+
+  @override
+  String get debtFromDrawer => 'Mbongo ebimi na kaisi';
+
+  @override
+  String get debtToDrawer => 'Mbongo ekoti na kaisi';
+
+  @override
+  String get debtOldPaid => 'Esilaki kofutama liboso ya Nguli';
+
+  @override
+  String get cloLineBorrowed => 'Mbongo ya kodefa (etiami na kaisi)';
+
+  @override
+  String get cloLineLent => 'Mbongo ya kodefisa (ezwami na kaisi)';
 }

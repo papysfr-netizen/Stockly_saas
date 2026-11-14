@@ -747,5 +747,16 @@
   "caiPickShop": "Choose the selling shop",
   "caiSellingIn": "Selling in: {nom}",
   "caiMainShop": "Main shop",
-  "payDeliveryNote": "Delivery note"
+  "payDeliveryNote": "Delivery note",
+  "debtOrigin": "Where does this debt come from?",
+  "debtOriginSale": "Sale outside the till",
+  "debtOriginLoan": "Money lent",
+  "debtOriginOld": "Old debt (notebook)",
+  "debtOriginPurchase": "Purchase on credit",
+  "debtOriginBorrow": "Money borrowed",
+  "debtFromDrawer": "The money came out of the till",
+  "debtToDrawer": "The money went into the till",
+  "debtOldPaid": "Already repaid before Nguli",
+  "cloLineBorrowed": "Money borrowed (put in the till)",
+  "cloLineLent": "Money lent (taken from the till)"
 }

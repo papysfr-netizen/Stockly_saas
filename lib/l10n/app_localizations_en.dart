@@ -2724,4 +2724,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payDeliveryNote => 'Delivery note';
+
+  @override
+  String get debtOrigin => 'Where does this debt come from?';
+
+  @override
+  String get debtOriginSale => 'Sale outside the till';
+
+  @override
+  String get debtOriginLoan => 'Money lent';
+
+  @override
+  String get debtOriginOld => 'Old debt (notebook)';
+
+  @override
+  String get debtOriginPurchase => 'Purchase on credit';
+
+  @override
+  String get debtOriginBorrow => 'Money borrowed';
+
+  @override
+  String get debtFromDrawer => 'The money came out of the till';
+
+  @override
+  String get debtToDrawer => 'The money went into the till';
+
+  @override
+  String get debtOldPaid => 'Already repaid before Nguli';
+
+  @override
+  String get cloLineBorrowed => 'Money borrowed (put in the till)';
+
+  @override
+  String get cloLineLent => 'Money lent (taken from the till)';
 }

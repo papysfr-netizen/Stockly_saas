@@ -747,5 +747,16 @@
   "caiPickShop": "Pona butiki ya koteka",
   "caiSellingIn": "Koteka: {nom}",
   "caiMainShop": "Butiki ya liboso",
-  "payDeliveryNote": "Mokanda ya bopesi"
+  "payDeliveryNote": "Mokanda ya bopesi",
+  "debtOrigin": "Niongo oyo euti wapi?",
+  "debtOriginSale": "Koteka libanda ya kaisi",
+  "debtOriginLoan": "Mbongo ya kodefisa",
+  "debtOriginOld": "Niongo ya kala (kayé)",
+  "debtOriginPurchase": "Kosomba na niongo",
+  "debtOriginBorrow": "Mbongo ya kodefa",
+  "debtFromDrawer": "Mbongo ebimi na kaisi",
+  "debtToDrawer": "Mbongo ekoti na kaisi",
+  "debtOldPaid": "Esilaki kofutama liboso ya Nguli",
+  "cloLineBorrowed": "Mbongo ya kodefa (etiami na kaisi)",
+  "cloLineLent": "Mbongo ya kodefisa (ezwami na kaisi)"
 }

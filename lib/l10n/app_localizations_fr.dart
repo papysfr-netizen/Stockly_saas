@@ -2734,4 +2734,37 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payDeliveryNote => 'Bon de livraison';
+
+  @override
+  String get debtOrigin => 'D\'où vient cette dette ?';
+
+  @override
+  String get debtOriginSale => 'Vente hors caisse';
+
+  @override
+  String get debtOriginLoan => 'Argent prêté';
+
+  @override
+  String get debtOriginOld => 'Ancienne dette (cahier)';
+
+  @override
+  String get debtOriginPurchase => 'Achat à crédit';
+
+  @override
+  String get debtOriginBorrow => 'Argent emprunté';
+
+  @override
+  String get debtFromDrawer => 'L\'argent est sorti de la caisse';
+
+  @override
+  String get debtToDrawer => 'L\'argent est entré dans la caisse';
+
+  @override
+  String get debtOldPaid => 'Déjà remboursé avant Nguli';
+
+  @override
+  String get cloLineBorrowed => 'Argent emprunté (mis en caisse)';
+
+  @override
+  String get cloLineLent => 'Argent prêté (pris dans la caisse)';
 }

@@ -2722,4 +2722,37 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get payDeliveryNote => 'Hati ya uwasilishaji';
+
+  @override
+  String get debtOrigin => 'Deni hili linatoka wapi?';
+
+  @override
+  String get debtOriginSale => 'Mauzo nje ya sanduku';
+
+  @override
+  String get debtOriginLoan => 'Pesa iliyokopeshwa';
+
+  @override
+  String get debtOriginOld => 'Deni la zamani (daftari)';
+
+  @override
+  String get debtOriginPurchase => 'Ununuzi kwa mkopo';
+
+  @override
+  String get debtOriginBorrow => 'Pesa iliyokopwa';
+
+  @override
+  String get debtFromDrawer => 'Pesa imetoka kwenye sanduku';
+
+  @override
+  String get debtToDrawer => 'Pesa imeingia kwenye sanduku';
+
+  @override
+  String get debtOldPaid => 'Imeshalipwa kabla ya Nguli';
+
+  @override
+  String get cloLineBorrowed => 'Pesa iliyokopwa (imewekwa sandukuni)';
+
+  @override
+  String get cloLineLent => 'Pesa iliyokopeshwa (imetolewa sandukuni)';
 }

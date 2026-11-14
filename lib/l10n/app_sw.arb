@@ -747,5 +747,16 @@
   "caiPickShop": "Chagua duka la kuuzia",
   "caiSellingIn": "Mauzo: {nom}",
   "caiMainShop": "Duka kuu",
-  "payDeliveryNote": "Hati ya uwasilishaji"
+  "payDeliveryNote": "Hati ya uwasilishaji",
+  "debtOrigin": "Deni hili linatoka wapi?",
+  "debtOriginSale": "Mauzo nje ya sanduku",
+  "debtOriginLoan": "Pesa iliyokopeshwa",
+  "debtOriginOld": "Deni la zamani (daftari)",
+  "debtOriginPurchase": "Ununuzi kwa mkopo",
+  "debtOriginBorrow": "Pesa iliyokopwa",
+  "debtFromDrawer": "Pesa imetoka kwenye sanduku",
+  "debtToDrawer": "Pesa imeingia kwenye sanduku",
+  "debtOldPaid": "Imeshalipwa kabla ya Nguli",
+  "cloLineBorrowed": "Pesa iliyokopwa (imewekwa sandukuni)",
+  "cloLineLent": "Pesa iliyokopeshwa (imetolewa sandukuni)"
 }

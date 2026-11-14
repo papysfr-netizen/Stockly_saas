@@ -358,6 +358,8 @@ class _CarteResultatState extends ConsumerState<CarteResultat> {
                 _Detail(t.cloLineExpenses, -(a.depensesEspeces + a.depensesMobile)),
                 _Detail(t.cloLineSuppliers, -(a.fournisseursEspeces + a.fournisseursMobile)),
                 _Detail(t.cloLineRefunds, -a.remboursementsEspeces),
+                _Detail(t.cloLineBorrowed, a.empruntsEspeces),
+                _Detail(t.cloLineLent, -a.pretsEspeces),
                 if (a.autres > 0.005) _Detail(t.cloLineOther, a.autres, gris: true),
                 if ((cloture['note'] ?? '').toString().isNotEmpty)
                   Padding(

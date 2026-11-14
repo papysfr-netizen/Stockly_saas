@@ -4,6 +4,31 @@ import 'package:flutter/foundation.dart';
 /// Énumération intégrée pour le type de dette / créance
 enum TypeDette { client, fournisseur }
 
+/// 🧭 Origine d'une dette : d'où vient l'argent dû
+///  - quelqu'un me doit : vente hors caisse, argent prêté, ancienne dette (cahier)
+///  - je dois : achat de marchandises à crédit, argent emprunté, ancienne dette (cahier)
+class OrigineDette {
+  OrigineDette._();
+  static const vente = 'vente';
+  static const pret = 'pret';
+  static const achat = 'achat';
+  static const emprunt = 'emprunt';
+  static const cahier = 'cahier';
+
+  static const pourClient = [vente, pret, cahier];
+  static const pourFournisseur = [achat, emprunt, cahier];
+
+  /// Origine des anciennes dettes (avant ce choix) : vente ou achat
+  static String parDefaut(TypeDette type) => type == TypeDette.client ? vente : achat;
+
+  /// Compte comptable du tiers (SYSCOHADA)
+  static String compteTiers(TypeDette type, String origine) {
+    if (origine == pret) return '471000'; // débiteurs divers
+    if (origine == emprunt) return '168000'; // autres emprunts
+    return type == TypeDette.client ? '411000' : '401000';
+  }
+}
+
 @immutable
 class Dette {
   final String id;
@@ -28,6 +53,10 @@ class Dette {
   final String entrepriseId;
   final bool comptabilise;
 
+  /// 🧭 Origine (voir [OrigineDette])
+  final String origine;
+  String get compteTiers => OrigineDette.compteTiers(type, origine);
+
   const Dette({
     required this.id,
     required this.nomTiers,
@@ -47,7 +76,8 @@ class Dette {
     this.dernierPaiement,
     required this.entrepriseId,
     this.comptabilise = true,
-  });
+    String? origine,
+  }) : origine = origine ?? (type == TypeDette.client ? OrigineDette.vente : OrigineDette.achat);
 
   /// Indique si la créance/dette est en retard de paiement
   bool get estEnRetard {
@@ -185,6 +215,7 @@ class Dette {
           json['dernierPaiement'] ?? json['lastPaymentDate']),
       entrepriseId: json['entrepriseId']?.toString() ?? '',
       comptabilise: _parseBool(json['comptabilise'], defaultValue: true),
+      origine: (json['origine'] ?? '').toString().isEmpty ? null : json['origine'].toString(),
     );
   }
 
@@ -219,6 +250,7 @@ class Dette {
       'dernierPaiement': dernierPaiement?.toIso8601String(),
       'entrepriseId': entrepriseId,
       'comptabilise': comptabilise,
+      'origine': origine,
     };
   }
 
@@ -245,6 +277,7 @@ class Dette {
           : null,
       'entrepriseId': entrepriseId,
       'comptabilise': comptabilise,
+      'origine': origine,
     };
   }
 
@@ -288,6 +321,7 @@ class Dette {
       dernierPaiement: dernierPaiement ?? this.dernierPaiement,
       entrepriseId: entrepriseId ?? this.entrepriseId,
       comptabilise: comptabilise ?? this.comptabilise,
+      origine: origine,
     );
   }
 

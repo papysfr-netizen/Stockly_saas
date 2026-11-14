@@ -32,6 +32,16 @@ class DebtDialogs {
     final noteController = TextEditingController();
     DateTime? dateEcheanceSelectionnee;
     final t = AppLocalizations.of(context);
+    // 🧭 Origine de la dette (vente / prêt / cahier — achat / emprunt / cahier)
+    String origine = OrigineDette.parDefaut(type);
+    bool viaCaisse = true;
+    String libelleOrigine(String o) => switch (o) {
+          OrigineDette.vente => t.debtOriginSale,
+          OrigineDette.pret => t.debtOriginLoan,
+          OrigineDette.achat => t.debtOriginPurchase,
+          OrigineDette.emprunt => t.debtOriginBorrow,
+          _ => t.debtOriginOld,
+        };
 
     showDialog(
       context: context,
@@ -47,6 +57,37 @@ class DebtDialogs {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // 🧭 D'où vient cette dette ?
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(t.debtOrigin,
+                        style: const TextStyle(fontWeight: FontWeight.w600)),
+                  ),
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    children: [
+                      for (final o in type == TypeDette.client
+                          ? OrigineDette.pourClient
+                          : OrigineDette.pourFournisseur)
+                        ChoiceChip(
+                          label: Text(libelleOrigine(o), style: const TextStyle(fontSize: 12)),
+                          selected: origine == o,
+                          onSelected: (_) => setDialogState(() => origine = o),
+                        ),
+                    ],
+                  ),
+                  if (origine == OrigineDette.pret || origine == OrigineDette.emprunt)
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                      value: viaCaisse,
+                      title: Text(origine == OrigineDette.pret ? t.debtFromDrawer : t.debtToDrawer,
+                          style: const TextStyle(fontSize: 13)),
+                      onChanged: (v) => setDialogState(() => viaCaisse = v),
+                    ),
+                  const SizedBox(height: 10),
                   TextField(
                     controller: nomController,
                     decoration: InputDecoration(
@@ -88,16 +129,20 @@ class DebtDialogs {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  TextField(
-                    controller: acompteController,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    decoration: InputDecoration(
-                      labelText: t.debtAlreadyPaid,
-                      prefixIcon: Icon(Icons.payments),
-                      hintText: '0.0',
+                  // Prêt / emprunt : pas d'acompte (c'est un mouvement d'argent, pas un remboursement)
+                  if (origine != OrigineDette.pret && origine != OrigineDette.emprunt)
+                    TextField(
+                      controller: acompteController,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      decoration: InputDecoration(
+                        labelText: origine == OrigineDette.cahier
+                            ? t.debtOldPaid
+                            : t.debtAlreadyPaid,
+                        prefixIcon: const Icon(Icons.payments),
+                        hintText: '0.0',
+                      ),
                     ),
-                  ),
                   const SizedBox(height: 12),
                   InkWell(
                     onTap: () async {
@@ -174,7 +219,9 @@ class DebtDialogs {
                   final telephone = telephoneController.text.trim();
                   // Virgule ou point, espaces acceptés (« 1 500,5 »)
                   final montantTotal = parseAmount(montantTotalController.text);
-                  final acompte = parseAmount(acompteController.text);
+                  final acompte = (origine == OrigineDette.pret || origine == OrigineDette.emprunt)
+                      ? 0.0
+                      : parseAmount(acompteController.text);
 
                   // 📵 Pas de crédit client sans nom ni téléphone
                   if (type == TypeDette.client &&
@@ -217,6 +264,8 @@ class DebtDialogs {
                           type: type,
                           note: noteController.text.trim(),
                           dateEcheance: dateEcheanceSelectionnee,
+                          origine: origine,
+                          viaCaisse: viaCaisse,
                           boutiqueId: ref.read(boutiqueActiveProvider) ?? 'principale', // 🏬
                         );
                   }

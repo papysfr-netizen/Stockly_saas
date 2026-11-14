@@ -223,6 +223,25 @@ class ClotureService {
       }
     }
 
+    // 2 bis. 🤝 Argent prêté (sortie) ou emprunté (entrée) en espèces, ce jour-là
+    for (final col in const ['creances', 'dettes']) {
+      QuerySnapshot<Map<String, dynamic>> s;
+      try {
+        s = await ent.collection(col).where('dateCreation', isGreaterThanOrEqualTo: depuis).get();
+      } catch (_) {
+        continue;
+      }
+      for (final doc in s.docs) {
+        final c = doc.data();
+        if (c['mouvementCaisse'] != true) continue;
+        if (!memeBoutique(boutiqueId, c['boutiqueId'])) continue;
+        if (!dansPeriode(date(c['dateCreation']))) continue;
+        final montant = nombre(c['montantInitial']);
+        if (c['origine'] == 'pret') a.pretsEspeces += montant;
+        if (c['origine'] == 'emprunt') a.empruntsEspeces += montant;
+      }
+    }
+
     // 3. Dépenses de la boutique
     try {
       QuerySnapshot<Map<String, dynamic>> s;
@@ -306,6 +325,7 @@ class Attendu {
   double fournisseursEspeces = 0, fournisseursMobile = 0;
   double depensesEspeces = 0, depensesMobile = 0;
   double remboursementsEspeces = 0;
+  double pretsEspeces = 0, empruntsEspeces = 0;
   double depotsEspeces = 0, retraitsEspeces = 0, depotsMobile = 0, retraitsMobile = 0;
   int nombreVentes = 0;
   int ventesApresCloture = 0;
@@ -316,7 +336,9 @@ class Attendu {
   double get especes =>
       ventesEspeces +
       dettesEspeces +
-      depotsEspeces -
+      depotsEspeces +
+      empruntsEspeces -
+      pretsEspeces -
       depensesEspeces -
       fournisseursEspeces -
       remboursementsEspeces -

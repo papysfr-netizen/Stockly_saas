@@ -4590,6 +4590,72 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Bon de livraison'**
   String get payDeliveryNote;
+
+  /// No description provided for @debtOrigin.
+  ///
+  /// In fr, this message translates to:
+  /// **'D\'où vient cette dette ?'**
+  String get debtOrigin;
+
+  /// No description provided for @debtOriginSale.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vente hors caisse'**
+  String get debtOriginSale;
+
+  /// No description provided for @debtOriginLoan.
+  ///
+  /// In fr, this message translates to:
+  /// **'Argent prêté'**
+  String get debtOriginLoan;
+
+  /// No description provided for @debtOriginOld.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ancienne dette (cahier)'**
+  String get debtOriginOld;
+
+  /// No description provided for @debtOriginPurchase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Achat à crédit'**
+  String get debtOriginPurchase;
+
+  /// No description provided for @debtOriginBorrow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Argent emprunté'**
+  String get debtOriginBorrow;
+
+  /// No description provided for @debtFromDrawer.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'argent est sorti de la caisse'**
+  String get debtFromDrawer;
+
+  /// No description provided for @debtToDrawer.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'argent est entré dans la caisse'**
+  String get debtToDrawer;
+
+  /// No description provided for @debtOldPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déjà remboursé avant Nguli'**
+  String get debtOldPaid;
+
+  /// No description provided for @cloLineBorrowed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Argent emprunté (mis en caisse)'**
+  String get cloLineBorrowed;
+
+  /// No description provided for @cloLineLent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Argent prêté (pris dans la caisse)'**
+  String get cloLineLent;
 }
 
 class _AppLocalizationsDelegate

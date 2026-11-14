@@ -2120,5 +2120,16 @@
   "caiSellingIn": "Vente : {nom}",
   "@caiSellingIn": {"placeholders": {"nom": {"type": "String"}}},
   "caiMainShop": "Boutique principale",
-  "payDeliveryNote": "Bon de livraison"
+  "payDeliveryNote": "Bon de livraison",
+  "debtOrigin": "D'où vient cette dette ?",
+  "debtOriginSale": "Vente hors caisse",
+  "debtOriginLoan": "Argent prêté",
+  "debtOriginOld": "Ancienne dette (cahier)",
+  "debtOriginPurchase": "Achat à crédit",
+  "debtOriginBorrow": "Argent emprunté",
+  "debtFromDrawer": "L'argent est sorti de la caisse",
+  "debtToDrawer": "L'argent est entré dans la caisse",
+  "debtOldPaid": "Déjà remboursé avant Nguli",
+  "cloLineBorrowed": "Argent emprunté (mis en caisse)",
+  "cloLineLent": "Argent prêté (pris dans la caisse)"
 }

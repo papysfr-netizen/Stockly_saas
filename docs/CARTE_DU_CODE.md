@@ -130,9 +130,11 @@ Corrigé : l'acompte d'une dette créée à la main (argent réellement reçu)
 avec espaces refusés (paiement de dette, compte client, dépense).
 
 À savoir :
-- Une dette CLIENT créée à la main est comptée comme une **vente** (701000) :
-  correct pour une vente faite hors de la caisse, faux pour une ancienne dette
-  reprise d'un cahier (le chiffre d'affaires serait gonflé). À trancher.
+- **Origine des dettes** (`OrigineDette` dans `core/models/dette.dart`) :
+  quelqu'un me doit (vente hors caisse 411/701, argent prêté 471/caisse,
+  ancienne dette 411/108) ; je dois (achat à crédit 601/401, argent emprunté
+  caisse/168, ancienne dette 108/401). Prêt/emprunt « en caisse » : champ
+  `mouvementCaisse`, compté par la clôture.
 - Faille de fond (comme pour les prix) : une application modifiée pourrait
   créditer un faux « avoir » sur un compte client. Solution : fonction
   serveur (forfait Blaze).
