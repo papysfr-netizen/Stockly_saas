@@ -135,6 +135,7 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
 
     _telAvoirCtrl = TextEditingController(
         text: (widget.data['telephoneClient'] ?? '').toString());
+    _chargerDette();
   }
 
   @override
@@ -158,7 +159,19 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
     return _arrondi(t);
   }
 
-  double get _detteVente => _nombre(widget.data['resteAPayer']);
+  /// Dette ACTUELLE du client pour cette vente : celle de la créance (le client a
+  /// pu payer depuis la vente), sinon le reste noté sur la vente.
+  double? _detteCreance;
+  double get _detteVente => _detteCreance ?? _nombre(widget.data['resteAPayer']);
+
+  Future<void> _chargerDette() async {
+    final doc = await _lireCreance(FirebaseFirestore.instance
+        .collection('entreprises')
+        .doc(widget.entrepriseId)
+        .collection('creances'));
+    if (!mounted || doc == null) return;
+    setState(() => _detteCreance = _nombre(doc.data()?['montantReste']));
+  }
 
   double get _reductionPrevue => _arrondi(math.min(_montant, _detteVente));
 

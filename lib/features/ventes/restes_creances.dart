@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rxdart/rxdart.dart';
 
 /// 💳 Reste réel de chaque vente à crédit, lu dans sa dette (collection « creances »).
 /// La dette baisse quand le client revient payer ; la vente, elle, garde le reste du jour de la vente.
@@ -10,14 +11,19 @@ double _nombre(dynamic v) => v is num ? v.toDouble() : double.tryParse('${v ?? '
 final restesCreancesProvider =
     StreamProvider.family<Map<String, double>, String>((ref, entrepriseId) {
   if (entrepriseId.isEmpty) return Stream.value(const <String, double>{});
-  return FirebaseFirestore.instance
-      .collection('entreprises')
-      .doc(entrepriseId)
-      .collection('creances')
-      .snapshots()
-      .map((s) {
+  // 💸 Pas tout l'historique : les dettes en cours, et celles payées depuis 6 mois
+  final col = FirebaseFirestore.instance.collection('entreprises').doc(entrepriseId).collection('creances');
+  final il6Mois = Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 183)));
+  return Rx.combineLatest2<QuerySnapshot<Map<String, dynamic>>, QuerySnapshot<Map<String, dynamic>>,
+      Map<String, double>>(
+    col.where('montantReste', isGreaterThan: 0).snapshots(),
+    col.where('dernierPaiement', isGreaterThanOrEqualTo: il6Mois).snapshots(),
+    (enCours, payees) {
+    final parId = <String, QueryDocumentSnapshot<Map<String, dynamic>>>{
+      for (final d in [...enCours.docs, ...payees.docs]) d.id: d,
+    };
     final m = <String, double>{};
-    for (final doc in s.docs) {
+    for (final doc in parId.values) {
       final d = doc.data();
       final venteId = (d['venteId'] ?? '').toString();
       if (venteId.isEmpty) continue;
@@ -27,7 +33,8 @@ final restesCreancesProvider =
     }
     restesParVente = m;
     return m;
-  });
+    },
+  );
 });
 
 /// Reste à payer d'une vente : le plus petit entre la vente et sa dette.

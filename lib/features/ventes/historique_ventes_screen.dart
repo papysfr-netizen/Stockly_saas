@@ -13,21 +13,30 @@ import 'restes_creances.dart';
 import 'retour_vente_screen.dart';
 
 // ============================================================================
-// 🧾 HISTORIQUE DES VENTES (les 500 plus récentes)
+// 🧾 HISTORIQUE DES VENTES
+//  - Aujourd'hui / 7 jours / 30 jours : TOUTES les ventes de la période
+//    (lues par le serveur à partir de la date de début : totaux justes).
+//  - « Tout » : les 500 plus récentes.
 // ============================================================================
 final historiqueVentesProvider = StreamProvider.family<
-    List<QueryDocumentSnapshot<Map<String, dynamic>>>, String>((ref, entrepriseId) {
-  if (entrepriseId.isEmpty) {
+    List<QueryDocumentSnapshot<Map<String, dynamic>>>,
+    ({String entrepriseId, int joursAvant})>((ref, cle) {
+  if (cle.entrepriseId.isEmpty) {
     return Stream.value(const <QueryDocumentSnapshot<Map<String, dynamic>>>[]);
   }
-  return FirebaseFirestore.instance
+  Query<Map<String, dynamic>> q = FirebaseFirestore.instance
       .collection('entreprises')
-      .doc(entrepriseId)
+      .doc(cle.entrepriseId)
       .collection('ventes')
-      .orderBy('date', descending: true)
-      .limit(500)
-      .snapshots()
-      .map((snap) => snap.docs);
+      .orderBy('date', descending: true);
+  if (cle.joursAvant < 0) {
+    q = q.limit(500);
+  } else {
+    final now = DateTime.now();
+    final debut = DateTime(now.year, now.month, now.day).subtract(Duration(days: cle.joursAvant));
+    q = q.where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(debut));
+  }
+  return q.snapshots().map((snap) => snap.docs);
 });
 
 DateTime _dateVente(Map<String, dynamic> d) {
@@ -63,6 +72,14 @@ String _client(AppLocalizations t, Map<String, dynamic> d) {
 enum _Periode { aujourdhui, semaine, mois, tout }
 
 extension on _Periode {
+  /// Jours avant aujourd'hui lus par le serveur (-1 = les 500 plus récentes)
+  int get joursAvant => switch (this) {
+        _Periode.aujourdhui => 0,
+        _Periode.semaine => 6,
+        _Periode.mois => 29,
+        _Periode.tout => -1,
+      };
+
   String label(AppLocalizations t) => switch (this) {
         _Periode.aujourdhui => t.histToday,
         _Periode.semaine => t.hist7Days,
@@ -129,7 +146,8 @@ class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen>
 
   @override
   Widget build(BuildContext context) {
-    final async = ref.watch(historiqueVentesProvider(widget.entrepriseId));
+    final async = ref.watch(historiqueVentesProvider(
+        (entrepriseId: widget.entrepriseId, joursAvant: _periode.joursAvant)));
     ref.watch(restesCreancesProvider(widget.entrepriseId)); // 💳 reste réel des dettes
     final l = AppLocalizations.of(context);
 

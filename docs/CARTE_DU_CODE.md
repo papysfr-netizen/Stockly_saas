@@ -38,9 +38,9 @@ séance de relecture.
 | `lib/features/debts` | 11 | 5 675 | Dettes, crédit, dépenses, comptabilité, accueil stock, connexion/inscription | 🟡 |
 | `lib/features/import` | 1 | 432 | Aperçu d'import (Excel, photo IA) | ⬜ |
 | `lib/features/journal` | 1 | 366 | Journal « qui a fait quoi » | 🟡 |
-| `lib/features/livraisons` | 1 | 936 | Ventes à livrer | ⬜ |
+| `lib/features/livraisons` | 1 | 936 | Ventes à livrer, remise totale ou partielle | ✅ |
 | `lib/features/shell` | 4 | 1 523 | Accueil, navigation, résumé du jour | 🟡 |
-| `lib/features/ventes` | 3 | 1 779 | Historique, retours et annulations | 🟡 |
+| `lib/features/ventes` | 4 | 2 200 | Historique, retours et annulations, **enregistrement des ventes** | ✅ |
 
 ## Ce qui protège l'application
 
@@ -96,6 +96,24 @@ export du catalogue avec le stock de la boutique.
 
 Reste à faire :
 - La monnaie rendue n'indique pas sa monnaie ($ ou FC).
+
+### Ventes et livraisons (relues)
+
+- `retour_vente_screen.dart` : retours (marchandise remise) et annulations
+  (jamais retirée). Dette réduite d'abord, puis espèces, avoir sur compte
+  client, ou acompte gardé. Écritures inverses et stock remis. Solide.
+- `historique_ventes_screen.dart` : liste, totaux nets, facture PDF, retour.
+- `restes_creances.dart` : reste réel de chaque vente (lu dans les dettes).
+- `a_livrer_screen.dart` : ventes « Non livré », remise totale ou partielle,
+  relance WhatsApp, annulation.
+
+Corrigé : l'historique ne lisait que les 500 dernières ventes (« 30 jours »
+incomplet pour une boutique active) ; aperçu du retour basé sur la dette du
+jour de la vente au lieu de la dette actuelle ; dettes relues en entier ;
+bon de livraison imposé à la remise d'une marchandise.
+
+Reste à faire : le message WhatsApp de relance « à livrer » est écrit en
+français seulement (à passer par `MessagesClients`, comme les reçus).
 
 ## Déjà corrigé
 

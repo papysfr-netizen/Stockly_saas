@@ -602,18 +602,7 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
     } else {
       texte = t.livPartialSaved(restantApres);
     }
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(texte),
-        backgroundColor: horsLigne
-            ? Colors.orange.shade800
-            : (toutLivre ? Colors.green.shade700 : Colors.blue.shade700),
-      ),
-    );
-
-    if (sortieArticles.isEmpty) return;
-
-    // Bon de livraison : seulement ce qui sort aujourd'hui
+    // Bon de livraison (seulement ce qui sort aujourd'hui) : FACULTATIF, bouton dans le message
     final itemsBL = <CartItem>[
       for (var i = 0; i < articles.length; i++)
         if (aRemettre[i] > 0)
@@ -625,16 +614,30 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
             stock: 0,
           ),
     ];
-
-    navigator.push(
-      MaterialPageRoute(
-        builder: (_) => BonLivraisonScreen(
-          entrepriseId: widget.entrepriseId,
-          nomClient: client,
-          adresseClient: '',
-          telephoneClient: telephone,
-          articles: itemsBL,
-        ),
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(texte),
+        backgroundColor: horsLigne
+            ? Colors.orange.shade800
+            : (toutLivre ? Colors.green.shade700 : Colors.blue.shade700),
+        duration: const Duration(seconds: 6),
+        action: itemsBL.isEmpty
+            ? null
+            : SnackBarAction(
+                label: t.payDeliveryNote,
+                textColor: Colors.white,
+                onPressed: () => navigator.push(
+                  MaterialPageRoute(
+                    builder: (_) => BonLivraisonScreen(
+                      entrepriseId: widget.entrepriseId,
+                      nomClient: client,
+                      adresseClient: '',
+                      telephoneClient: telephone,
+                      articles: itemsBL,
+                    ),
+                  ),
+                ),
+              ),
       ),
     );
   }
