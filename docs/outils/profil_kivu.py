@@ -239,7 +239,7 @@ coller(c)
 
 texte((S // 2, 135), "Le grenier de ton commerce", 42, 'white')
 texte((S // 2, 832), "Nguli", 116, 'white')
-texte((S // 2, 985), "Caisse • Stock • Crédit", 40, JAUNE)
+texte((S // 2, 962), "Vente • Caisse • Stock • Crédit", 34, JAUNE)
 
 img.save('/home/user/stockly_saas/docs/nguli_profil_whatsapp_kivu.png')
 m = Image.new('L', (S, S), 0); ImageDraw.Draw(m).ellipse([0, 0, S, S], fill=255)
