@@ -203,6 +203,12 @@ class VenteService {
     final numeroFacture = venteId.substring(0, venteId.length < 8 ? venteId.length : 8).toUpperCase();
     final p = v.paiement;
 
+    final prixVendus = <String, double>{};
+    for (final item in v.panier) {
+      final avant = prixVendus[item.id];
+      if (avant == null || item.prix < avant) prixVendus[item.id] = item.prix;
+    }
+
     // 1. La vente
     final vente = <String, dynamic>{
       'id': venteId,
@@ -231,6 +237,9 @@ class VenteService {
       'comptabilise': true,
       'coutMarchandises': cout,
       'remiseTotale': v.panier.fold<double>(0.0, (s, i) => s + i.remiseTotale),
+      // 🔒 Prix vendu par produit (le plus bas s'il y a plusieurs lignes) :
+      //    le serveur le compare au prix normal quand le stock baisse
+      'prixVendus': prixVendus,
       'articles': v.panier
           .map((item) => {
                 'produitId': item.id,
@@ -413,6 +422,8 @@ class VenteService {
     for (final s in plan.stock) {
       lot.update(ent.collection('produits').doc(s.produitId), {
         'quantite': FieldValue.increment(-s.quantite),
+        // 🔒 La vente qui fait baisser ce stock (le serveur y lit le prix vendu)
+        'derniereVente': plan.venteId,
         if (v.boutiqueId != 'principale') 'stocks.${v.boutiqueId}': FieldValue.increment(-s.quantite),
         'updatedAt': maintenant,
       });

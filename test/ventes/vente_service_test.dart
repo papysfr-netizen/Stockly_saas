@@ -174,6 +174,12 @@ void main() {
       expect(p.vente['remiseTotale'], 4);
     });
 
+    test('prix vendus par produit (le plus bas), lus par le serveur', () {
+      const remise = CartItem(id: 'p1', nom: 'Chemise', prix: 8, prixNormal: 10, quantite: 1, stock: 20);
+      final p = preparer(vente(panier: const [chemise, remise, jean], usd: 53));
+      expect(p.vente['prixVendus'], {'p1': 8, 'p2': 25});
+    });
+
     test('produit sans prix d\'achat : pas d\'écriture de coût', () {
       const inconnu = CartItem(id: 'p9', nom: 'Sac', prix: 5, quantite: 1, stock: 3);
       final p = preparer(vente(panier: const [inconnu], usd: 5));

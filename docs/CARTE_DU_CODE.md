@@ -53,8 +53,19 @@ séance de relecture.
 
 ## Problèmes connus (à traiter)
 
-1. **Prix non vérifié par le serveur** : une application modifiée pourrait
-   vendre à un faux prix. Solution : une fonction serveur (forfait Blaze).
+1. **Prix et avoirs : vérifiés par les règles (novembre 2026), sans forfait Blaze.**
+   - Sans « Remises et retraits », une vente enregistre `prixVendus` ; chaque
+     fiche produit dont le stock baisse lit cette vente (`derniereVente`) et
+     refuse un prix sous le prix normal (ou celui de la boutique). Le total
+     encaissé doit couvrir quantité × prix vendu, jusqu'à 30 lignes (au-delà,
+     il faut « Remises et retraits »).
+   - Un avoir sur un compte client exige un vrai retour créé dans le même
+     envoi ; le solde ne bouge que par un mouvement ; un retour ne rend jamais
+     plus que la vente.
+   - Limite : le serveur ne compte que 1 000 calculs par envoi, d'où les
+     règles « à plat ». Trou restant : une application modifiée pourrait
+     déclarer une vente sans baisser le stock (l'écart se verra à l'inventaire).
+     Une fonction serveur (Blaze) le fermerait.
 2. **Montants en `double`** et monnaie rendue sans indication de la monnaie
    ($ ou FC) : écarts d'arrondi possibles, pas de suivi du tiroir par monnaie.
 3. **Comptabilité** : lit toutes les écritures pour le bilan (coût Firebase

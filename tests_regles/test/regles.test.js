@@ -53,6 +53,7 @@ beforeEach(async () => {
       caissier: { role: 'caissier', entrepriseId: E },
       caissierB2: { role: 'caissier', entrepriseId: E, boutiqueId: 'b2' },
       caissierRetours: { role: 'caissier', entrepriseId: E, permissions: { retours: true } },
+      caissierRemises: { role: 'caissier', entrepriseId: E, permissions: { remisesRetraits: true } },
       bloque: { role: 'caissier', entrepriseId: E, estActif: false },
       autre: { role: 'owner', entrepriseId: E2 },
     };
@@ -82,21 +83,26 @@ function dbDe(uid) {
 }
 
 /** Une vente complète comme celle de la caisse (vente + écriture + stock) */
-function batchVente(db, { vendeurId, boutiqueId = 'principale', remiseTotale = 0, qte = 1 }) {
+function batchVente(db, { vendeurId, boutiqueId = 'principale', remiseTotale = 0, qte = 1,
+  prix = 10, total = null, prixVendus = null, sansStock = false, avecLien = true }) {
   const b = writeBatch(db);
   const venteRef = doc(collection(db, `entreprises/${E}/ventes`));
   b.set(venteRef, {
     id: venteRef.id, entrepriseId: E, vendeurId, boutiqueId,
-    montantTotal: 10 * qte, remiseTotale, statutLivraison: 'Livré',
-    articles: [{ produitId: 'p1', quantite: qte, prixUnitaire: 10 }],
+    montantTotal: total ?? prix * qte, remiseTotale, statutLivraison: 'Livré',
+    articles: [{ produitId: 'p1', quantite: qte, prixUnitaire: prix }],
+    prixVendus: prixVendus ?? { p1: prix },
   });
   b.set(doc(collection(db, `entreprises/${E}/ecritures_comptables`)), {
     entrepriseId: E, reference: venteRef.id, lines: [],
   });
-  b.update(doc(db, `entreprises/${E}/produits/p1`), {
-    quantite: increment(-qte),
-    ...(boutiqueId !== 'principale' ? { [`stocks.${boutiqueId}`]: increment(-qte) } : {}),
-  });
+  if (!sansStock) {
+    b.update(doc(db, `entreprises/${E}/produits/p1`), {
+      quantite: increment(-qte),
+      ...(boutiqueId !== 'principale' ? { [`stocks.${boutiqueId}`]: increment(-qte) } : {}),
+      ...(avecLien ? { derniereVente: venteRef.id } : {}),
+    });
+  }
   return b.commit();
 }
 
@@ -144,7 +150,8 @@ describe('Ventes', () => {
   it('vente à crédit : nom et téléphone obligatoires', async () => {
     const vente = (extra) => setDoc(doc(collection(dbDe('caissier'), `entreprises/${E}/ventes`)), {
       entrepriseId: E, vendeurId: 'caissier', boutiqueId: 'principale',
-      montantTotal: 120, remiseTotale: 0, resteAPayer: 120, nomClient: 'Mama Neema', ...extra,
+      montantTotal: 120, remiseTotale: 0, resteAPayer: 120, nomClient: 'Mama Neema',
+      articles: [{ produitId: 'p1', quantite: 12, prixUnitaire: 10 }], prixVendus: { p1: 10 }, ...extra,
     });
     await assertFails(vente({ telephoneClient: '' }));
     await assertFails(vente({ telephoneClient: '0812' }));
@@ -184,9 +191,7 @@ describe('Stock des produits', () => {
   });
 
   it('boutique b2 : le total et la boutique baissent ensemble', async () => {
-    await assertSucceeds(updateDoc(p1('caissierB2'), {
-      quantite: increment(-2), 'stocks.b2': increment(-2),
-    }));
+    await assertSucceeds(batchVente(dbDe('caissierB2'), { vendeurId: 'caissierB2', boutiqueId: 'b2', qte: 2 }));
   });
 
   it('boutique b2 : impossible de baisser seulement le total ou seulement la boutique', async () => {
@@ -352,5 +357,138 @@ describe('Profils et équipe', () => {
   it('personne ne modifie l\'entreprise d\'un autre', async () => {
     await assertFails(updateDoc(doc(dbDe('autre'), `entreprises/${E}`), { nom: 'Piraté' }));
     await assertFails(updateDoc(doc(dbDe('gerant'), `entreprises/${E}`), { ownerId: 'gerant' }));
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+describe('Prix de vente vérifiés par le serveur', () => {
+  it('un caissier ne peut pas vendre sous le prix normal', async () => {
+    await assertFails(batchVente(dbDe('caissier'), { vendeurId: 'caissier', prix: 8 }));
+  });
+
+  it('un caissier peut vendre au-dessus du prix normal', async () => {
+    await assertSucceeds(batchVente(dbDe('caissier'), { vendeurId: 'caissier', prix: 12 }));
+  });
+
+  it('avec « Remises et retraits », on peut vendre moins cher', async () => {
+    await assertSucceeds(batchVente(dbDe('caissierRemises'), { vendeurId: 'caissierRemises', prix: 8 }));
+  });
+
+  it('impossible de déclarer un faux prix vendu ou un total plus bas', async () => {
+    // prixVendus gonflé mais la ligne est vendue moins cher
+    await assertFails(batchVente(dbDe('caissier'), { vendeurId: 'caissier', prix: 8, prixVendus: { p1: 10 } }));
+    // lignes au bon prix, mais total encaissé plus bas
+    await assertFails(batchVente(dbDe('caissier'), { vendeurId: 'caissier', qte: 2, total: 5 }));
+  });
+
+  it('impossible de baisser le stock sans vente liée', async () => {
+    await assertFails(updateDoc(doc(dbDe('caissier'), `entreprises/${E}/produits/p1`), { quantite: increment(-1) }));
+    await assertFails(batchVente(dbDe('caissier'), { vendeurId: 'caissier', avecLien: false }));
+  });
+
+  it('le prix propre à une boutique est respecté', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await updateDoc(doc(ctx.firestore(), `entreprises/${E}/produits/p1`), { prixParBoutique: { b2: 12 } });
+    });
+    await assertFails(batchVente(dbDe('caissierB2'), { vendeurId: 'caissierB2', boutiqueId: 'b2', prix: 10 }));
+    await assertSucceeds(batchVente(dbDe('caissierB2'), { vendeurId: 'caissierB2', boutiqueId: 'b2', prix: 12 }));
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+describe('Comptes clients et avoirs', () => {
+  const TEL = '0812345678';
+  const compte = (db) => doc(db, `entreprises/${E}/comptes_clients/${TEL}`);
+
+  // Mouvement + solde dans le même envoi (comme l'application)
+  function mouvement(db, { type, montant, sens, retourId = null, lot = null }) {
+    const b = lot ?? writeBatch(db);
+    const mvt = doc(collection(db, `entreprises/${E}/comptes_clients/${TEL}/mouvements`));
+    b.set(compte(db), {
+      telephone: TEL, solde: increment(sens * montant), dernierMouvementId: mvt.id,
+    }, { merge: true });
+    b.set(mvt, { id: mvt.id, type, montant, sens, retourId });
+    return lot ? b : b.commit();
+  }
+
+  it('un caissier peut enregistrer un dépôt d\'argent', async () => {
+    await assertSucceeds(mouvement(dbDe('caissier'), { type: 'depot', montant: 50, sens: 1 }));
+  });
+
+  it('pas de faux avoir sans retour de marchandise', async () => {
+    await assertFails(mouvement(dbDe('caissierRetours'), { type: 'avoir', montant: 50, sens: 1 }));
+  });
+
+  it('un « achat » ne peut pas augmenter le solde', async () => {
+    await assertFails(mouvement(dbDe('caissier'), { type: 'achat', montant: 50, sens: 1 }));
+  });
+
+  it('le solde ne bouge pas sans mouvement', async () => {
+    await assertFails(setDoc(compte(dbDe('caissier')), { telephone: TEL, solde: 500 }));
+  });
+
+  // Retour de la vente v1 (10 $) remboursé en avoir
+  function retourEnAvoir(db, { montant = 10, avoir = 10 }) {
+    const b = writeBatch(db);
+    const retour = doc(collection(db, `entreprises/${E}/retours`));
+    b.set(retour, {
+      id: retour.id, venteId: 'v1', montant, reductionDette: 0,
+      montantRembourse: avoir, montantConserve: 0, modeRemboursement: 'avoir', compteClient: TEL,
+    });
+    b.update(doc(db, `entreprises/${E}/ventes/v1`), { montantRetourne: increment(montant) });
+    mouvement(db, { type: 'avoir', montant: avoir, sens: 1, retourId: retour.id, lot: b });
+    return b.commit();
+  }
+
+  it('un vrai retour peut créditer un avoir', async () => {
+    await assertSucceeds(retourEnAvoir(dbDe('caissierRetours'), {}));
+  });
+
+  it('impossible de rendre plus que la vente', async () => {
+    await assertFails(retourEnAvoir(dbDe('caissierRetours'), { montant: 30, avoir: 30 }));
+    await assertFails(retourEnAvoir(dbDe('caissierRetours'), { montant: 10, avoir: 25 }));
+  });
+
+  it('un retour déjà fait ne peut pas être « effacé » de la vente', async () => {
+    await assertSucceeds(retourEnAvoir(dbDe('caissierRetours'), {}));
+    await assertFails(updateDoc(doc(dbDe('caissier'), `entreprises/${E}/ventes/v1`), { montantRetourne: 0 }));
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+describe('Grosse vente', () => {
+  async function venteDe(n, uid = 'caissier') {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      const fdb = ctx.firestore();
+      const b = writeBatch(fdb);
+      for (let i = 0; i < n; i++) {
+        b.set(doc(fdb, `entreprises/${E}/produits/g${i}`), { nom: `G${i}`, prixVente: 2, quantite: 50 });
+      }
+      await b.commit();
+    });
+    const db = dbDe(uid);
+    const b = writeBatch(db);
+    const venteRef = doc(collection(db, `entreprises/${E}/ventes`));
+    const articles = [];
+    const prixVendus = {};
+    for (let i = 0; i < n; i++) {
+      articles.push({ produitId: `g${i}`, quantite: 3, prixUnitaire: 2.5 });
+      prixVendus[`g${i}`] = 2.5;
+      b.update(doc(db, `entreprises/${E}/produits/g${i}`), { quantite: increment(-3), derniereVente: venteRef.id });
+    }
+    b.set(venteRef, {
+      id: venteRef.id, entrepriseId: E, vendeurId: uid, boutiqueId: 'principale',
+      montantTotal: 7.5 * n, remiseTotale: 0, statutLivraison: 'Livré', articles, prixVendus,
+    });
+    return b.commit();
+  }
+
+  it('30 articles différents : accepté', async () => {
+    await assertSucceeds(venteDe(30));
+  });
+
+  it('plus de 30 articles : il faut l\'autorisation « Remises et retraits »', async () => {
+    await assertFails(venteDe(31));
+    await assertSucceeds(venteDe(31, 'caissierRemises'));
   });
 });

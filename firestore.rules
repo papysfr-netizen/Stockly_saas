@@ -122,8 +122,32 @@ service cloud.firestore {
         'vendeurId', 'vendeurNom', 'boutiqueId', 'date', 'createdAt',
         'nomClient', 'telephoneClient', 'methodePaiement', 'tauxEchange',
         'montantPayeUSD', 'montantPayeLocal', 'montantCompteClient',
-        'monnaieRendueUSD', 'monnaieRendueLocal', 'comptabilise', 'coutMarchandises'
+        'monnaieRendueUSD', 'monnaieRendueLocal', 'comptabilise', 'coutMarchandises',
+        'prixVendus'
       ]);
+    }
+
+    // 🔒 Vente sans droit de remise (au plus 30 lignes) : le montant encaissé
+    //    couvre au moins chaque quantité × le prix vendu déclaré pour ce produit
+    //    (prixVendus, lui-même vérifié sur la fiche produit quand le stock baisse).
+    //    Écrit à plat : le serveur limite le nombre de calculs par envoi.
+    function lignesCoherentes(v) {
+      return verifLignes(v.articles, v.prixVendus, v.montantTotal);
+    }
+
+    function verifLignes(a, p, total) {
+      return a is list && a.size() <= 30 && p is map
+        && total >= (
+             (a.size() <= 0 ? 0 : p[a[0].produitId] * a[0].quantite) + (a.size() <= 1 ? 0 : p[a[1].produitId] * a[1].quantite) + (a.size() <= 2 ? 0 : p[a[2].produitId] * a[2].quantite)
+           + (a.size() <= 3 ? 0 : p[a[3].produitId] * a[3].quantite) + (a.size() <= 4 ? 0 : p[a[4].produitId] * a[4].quantite) + (a.size() <= 5 ? 0 : p[a[5].produitId] * a[5].quantite)
+           + (a.size() <= 6 ? 0 : p[a[6].produitId] * a[6].quantite) + (a.size() <= 7 ? 0 : p[a[7].produitId] * a[7].quantite) + (a.size() <= 8 ? 0 : p[a[8].produitId] * a[8].quantite)
+           + (a.size() <= 9 ? 0 : p[a[9].produitId] * a[9].quantite) + (a.size() <= 10 ? 0 : p[a[10].produitId] * a[10].quantite) + (a.size() <= 11 ? 0 : p[a[11].produitId] * a[11].quantite)
+           + (a.size() <= 12 ? 0 : p[a[12].produitId] * a[12].quantite) + (a.size() <= 13 ? 0 : p[a[13].produitId] * a[13].quantite) + (a.size() <= 14 ? 0 : p[a[14].produitId] * a[14].quantite)
+           + (a.size() <= 15 ? 0 : p[a[15].produitId] * a[15].quantite) + (a.size() <= 16 ? 0 : p[a[16].produitId] * a[16].quantite) + (a.size() <= 17 ? 0 : p[a[17].produitId] * a[17].quantite)
+           + (a.size() <= 18 ? 0 : p[a[18].produitId] * a[18].quantite) + (a.size() <= 19 ? 0 : p[a[19].produitId] * a[19].quantite) + (a.size() <= 20 ? 0 : p[a[20].produitId] * a[20].quantite)
+           + (a.size() <= 21 ? 0 : p[a[21].produitId] * a[21].quantite) + (a.size() <= 22 ? 0 : p[a[22].produitId] * a[22].quantite) + (a.size() <= 23 ? 0 : p[a[23].produitId] * a[23].quantite)
+           + (a.size() <= 24 ? 0 : p[a[24].produitId] * a[24].quantite) + (a.size() <= 25 ? 0 : p[a[25].produitId] * a[25].quantite) + (a.size() <= 26 ? 0 : p[a[26].produitId] * a[26].quantite)
+           + (a.size() <= 27 ? 0 : p[a[27].produitId] * a[27].quantite) + (a.size() <= 28 ? 0 : p[a[28].produitId] * a[28].quantite) + (a.size() <= 29 ? 0 : p[a[29].produitId] * a[29].quantite)) - 0.05;
     }
 
     // 📵 Un vrai nom de client (pas vide, pas « Client Divers »)
@@ -222,29 +246,53 @@ service cloud.firestore {
         allow create, delete: if aPermission(entId, 'gererStock');
         // Modifier : « Gérer le stock » (tout) ;
         //            les autres : seulement le stock lors d'une vente / d'un retour
-        allow update: if aPermission(entId, 'gererStock')
-          || (estMembre(entId)
-              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['quantite', 'stocks', 'updatedAt'])
-              && (aToutesBoutiques(entId)
-                  || (request.resource.data.get('stocks', {}).diff(resource.data.get('stocks', {})).affectedKeys().hasOnly([maBoutique()])
-                      && stockBoutiqueSuitLeTotal()))
-              // 📦 Remettre du stock (retour) : autorisation « Retours et annulations »
-              && (ecartQuantite() <= 0 || aPermission(entId, 'retours')));
+        allow update: if majProduit();
 
-        // Écart du stock total (négatif = vente, positif = retour)
-        function ecartQuantite() {
-          return request.resource.data.get('quantite', 0) - resource.data.get('quantite', 0);
+        // Tout est lu UNE fois (le serveur limite le nombre de calculs par envoi :
+        // une vente de nombreux articles modifie autant de fiches produit)
+        function majProduit() {
+          let profil = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+          let perms = profil.get('permissions', {});
+          let gerant = profil.get('role', 'caissier') in ['owner', 'proprietaire', 'patron', 'gerant', 'admin',
+                           'administrateur', 'chefboutique', 'chef_boutique', 'chef', 'comptable'];
+          let proprio = get(/databases/$(database)/documents/entreprises/$(entId)).data.ownerId == request.auth.uid;
+          let b = profil.get('boutiqueId', '') == '' ? 'principale' : profil.get('boutiqueId', '');
+          let apres = request.resource.data;
+          let ecart = apres.get('quantite', 0) - resource.data.get('quantite', 0);
+          return profil.get('entrepriseId', '') == entId
+            && profil.get('estActif', true) != false
+            && (
+              // Modifier tout : le patron ou « Gérer le stock »
+              proprio || perms.get('gererStock', gerant) == true
+              // Les autres : seulement le stock, lors d'une vente / d'un retour
+              || (apres.diff(resource.data).affectedKeys().hasOnly(['quantite', 'stocks', 'updatedAt', 'derniereVente'])
+                  && (perms.get('toutesBoutiques', false) == true
+                      || (apres.get('stocks', {}).diff(resource.data.get('stocks', {})).affectedKeys().hasOnly([b])
+                          // Boutique secondaire : son stock bouge exactement comme le total
+                          // (sinon c'est un transfert caché)
+                          && (b == 'principale'
+                              || apres.get('stocks', {}).get(b, 0) - resource.data.get('stocks', {}).get(b, 0) == ecart)))
+                  // 📦 Remettre du stock (retour) : « Retours et annulations »
+                  && (ecart <= 0 || perms.get('retours', gerant) == true)
+                  // 🔒 Vendre (le stock baisse) : au prix normal au moins,
+                  //    sauf avec « Remises et retraits »
+                  && (ecart >= 0 || perms.get('remisesRetraits', gerant) == true || venduAuBonPrix())));
         }
 
-        // Dans une boutique secondaire, le stock de la boutique bouge
-        // exactement comme le total (sinon c'est un transfert caché).
-        // Dans la principale, les autres boutiques ne bougent pas (vérifié au-dessus).
-        function stockBoutiqueSuitLeTotal() {
-          let b = maBoutique();
-          return b == 'principale'
-            || request.resource.data.get('stocks', {}).get(b, 0)
-               - resource.data.get('stocks', {}).get(b, 0) == ecartQuantite();
+        // La vente créée dans le MÊME envoi (derniereVente) vend ce produit
+        // au moins à son prix normal dans la boutique de la vente
+        function venduAuBonPrix() {
+          let venteId = request.resource.data.get('derniereVente', '');
+          let chemin = /databases/$(database)/documents/entreprises/$(entId)/ventes/$(venteId);
+          let vente = getAfter(chemin).data;
+          let b = vente.get('boutiqueId', '');
+          let prixBoutique = resource.data.get('prixParBoutique', {}).get(b, 0);
+          let normal = prixBoutique > 0 ? prixBoutique : resource.data.get('prixVente', 0);
+          return venteId != ''
+            && !exists(chemin)
+            && vente.get('prixVendus', {}).get(produitId, -1) >= normal - 0.01;
         }
+
       }
 
       // ----- Ventes, créances, dettes : tout le monde crée et met à jour ; effacer = Gérant+ -----
@@ -268,7 +316,10 @@ service cloud.firestore {
         // 🔒 Modifier : Gérant+ = tout ; les autres = livraison, retour, paiement seulement ;
         //    « Maintenance » = rattrapage du coût des marchandises
         allow update: if estGerantOuPlus(entId)
-          || (estMembre(entId) && venteIntacte())
+          || (estMembre(entId) && venteIntacte()
+              // 🔒 les montants déjà retournés / annulés ne font que monter
+              && request.resource.data.get('montantRetourne', 0) >= resource.data.get('montantRetourne', 0)
+              && request.resource.data.get('montantAnnule', 0) >= resource.data.get('montantAnnule', 0))
           || (aPermission(entId, 'maintenance')
               && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['coutMarchandises']));
         // 🔒 Créer : dans sa boutique, À SON NOM (sauf Gérant+),
@@ -277,7 +328,8 @@ service cloud.firestore {
           && boutiqueAutorisee(entId, request.resource.data.get('boutiqueId', ''))
           && (estGerantOuPlus(entId)
               || request.resource.data.get('vendeurId', '') == request.auth.uid)
-          && (request.resource.data.get('remiseTotale', 0) <= 0.01
+          && ((request.resource.data.get('remiseTotale', 0) <= 0.01
+               && lignesCoherentes(request.resource.data))
               || aPermission(entId, 'remisesRetraits'))
           // 📵 Vente à crédit : nom et téléphone du client obligatoires
           && (request.resource.data.get('resteAPayer', 0) <= 0.01
@@ -289,25 +341,71 @@ service cloud.firestore {
         // Retours / annulations : tout le monde voit ;
         // créer = autorisation « Retours et annulations » ; personne ne modifie
         allow read: if estMembre(entId);
-        allow create: if aPermission(entId, 'retours');
+        allow create: if aPermission(entId, 'retours') && retourCoherent();
         allow update, delete: if false;
+
+        // 🔒 Un retour suit sa vente : la vente enregistre le même montant
+        //    dans le même envoi, on ne rend jamais plus que la vente,
+        //    et l'argent rendu / la dette effacée ne dépassent pas le retour
+        function retourCoherent() {
+          let r = request.resource.data;
+          let chemin = /databases/$(database)/documents/entreprises/$(entId)/ventes/$(r.get('venteId', ''));
+          let avant = get(chemin).data;
+          let apres = getAfter(chemin).data;
+          let deja = avant.get('montantRetourne', 0) + avant.get('montantAnnule', 0);
+          let ensuite = apres.get('montantRetourne', 0) + apres.get('montantAnnule', 0);
+          return math.abs(ensuite - deja - r.get('montant', 0)) <= 0.01
+            && ensuite <= avant.get('montantTotal', 0) + 0.01
+            && r.get('montantRembourse', 0) + r.get('reductionDette', 0) + r.get('montantConserve', 0)
+               <= r.get('montant', 0) + 0.01;
+        }
       }
       match /comptes_clients/{compteId} {
         // Comptes clients (dépôts / avoirs) : on ne supprime jamais.
         // Un RETRAIT (totalRetire change) = autorisation « Remises et retraits »
-        allow read, create: if estMembre(entId);
+        allow read: if estMembre(entId);
+        // 🔒 Le solde ne bouge que par un mouvement écrit dans le même envoi
+        //    (le patron, lui, peut tout corriger, ex. restauration de sauvegarde)
+        allow create: if estMembre(entId) && (estProprietaireDe(entId) || soldeJustifie(0));
         allow update: if estMembre(entId) && (
           !request.resource.data.diff(resource.data).affectedKeys().hasAny(['totalRetire'])
           || aPermission(entId, 'remisesRetraits')
-        );
+        ) && (estProprietaireDe(entId) || soldeJustifie(resource.data.get('solde', 0)));
         allow delete: if false;
+
+        function soldeJustifie(soldeAvant) {
+          let ecart = request.resource.data.get('solde', 0) - soldeAvant;
+          let mvtId = request.resource.data.get('dernierMouvementId', '');
+          let chemin = /databases/$(database)/documents/entreprises/$(entId)/comptes_clients/$(compteId)/mouvements/$(mvtId);
+          return math.abs(ecart) <= 0.005
+            || (mvtId != '' && !exists(chemin)
+                && math.abs(getAfter(chemin).data.montant * getAfter(chemin).data.sens - ecart) <= 0.01);
+        }
+
         match /mouvements/{mvtId} {
           allow read: if estMembre(entId);
-          allow create: if estMembre(entId) && (
-            request.resource.data.get('type', '') != 'retrait'
-            || aPermission(entId, 'remisesRetraits')
-          );
+          // 🔒 Crédit (solde qui monte) : dépôt d'argent ou avoir d'un vrai retour
+          allow create: if estMembre(entId)
+            && request.resource.data.get('type', '') in ['depot', 'avoir', 'achat', 'retrait']
+            && request.resource.data.get('montant', -1) >= 0
+            && (request.resource.data.get('sens', 0) == -1
+                || (request.resource.data.get('sens', 0) == 1
+                    && request.resource.data.type in ['depot', 'avoir']))
+            && (request.resource.data.type != 'retrait' || aPermission(entId, 'remisesRetraits'))
+            && (request.resource.data.type != 'avoir' || avoirJustifie());
           allow update, delete: if false;
+
+          // L'avoir vient d'un retour créé dans le même envoi, remboursé
+          // « en avoir » sur CE compte, du même montant
+          function avoirJustifie() {
+            let retourId = request.resource.data.get('retourId', '');
+            let chemin = /databases/$(database)/documents/entreprises/$(entId)/retours/$(retourId);
+            let r = getAfter(chemin).data;
+            return retourId != '' && !exists(chemin)
+              && r.get('modeRemboursement', '') == 'avoir'
+              && r.get('compteClient', '') == compteId
+              && math.abs(r.get('montantRembourse', 0) - request.resource.data.montant) <= 0.01;
+          }
         }
       }
       // 🔒 Créances / dettes : Gérant+ = tout ; les autres = paiement ou retour seulement
