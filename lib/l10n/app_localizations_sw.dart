@@ -2820,4 +2820,8 @@ class AppLocalizationsSw extends AppLocalizations {
   String delTypeConfirm(String mot) {
     return 'Kuthibitisha, andika $mot';
   }
+
+  @override
+  String get delEmployeeAskOwner =>
+      'Ni mwajiri wako tu anayeweza kufuta ufikiaji wako wa Nguli. Mwombe, au tuandikie kwa anwani iliyo kwenye sera ya faragha.';
 }

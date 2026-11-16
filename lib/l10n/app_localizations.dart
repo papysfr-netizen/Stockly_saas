@@ -4764,6 +4764,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Pour confirmer, écrivez {mot}'**
   String delTypeConfirm(String mot);
+
+  /// No description provided for @delEmployeeAskOwner.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seul votre patron peut supprimer votre accès à Nguli. Demandez-le-lui, ou écrivez-nous à l\'adresse indiquée dans la politique de confidentialité.'**
+  String get delEmployeeAskOwner;
 }
 
 class _AppLocalizationsDelegate

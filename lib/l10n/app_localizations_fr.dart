@@ -2832,4 +2832,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String delTypeConfirm(String mot) {
     return 'Pour confirmer, écrivez $mot';
   }
+
+  @override
+  String get delEmployeeAskOwner =>
+      'Seul votre patron peut supprimer votre accès à Nguli. Demandez-le-lui, ou écrivez-nous à l\'adresse indiquée dans la politique de confidentialité.';
 }

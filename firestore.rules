@@ -233,10 +233,12 @@ service cloud.firestore {
         )
       );
 
-      // 🗑️ Supprimer son compte : son propre profil ;
-      //    le patron qui supprime son entreprise : les profils de ses employés
+      // 🗑️ Seul le patron supprime des comptes : quand il supprime son entreprise,
+      //    les profils de ses employés, puis le sien (l'entreprise n'existe plus).
+      //    Un employé ne peut pas effacer son propre accès : il le demande au patron.
       allow delete: if estConnecte() && (
-        request.auth.uid == userId
+        (request.auth.uid == userId
+          && !exists(/databases/$(database)/documents/entreprises/$(resource.data.entrepriseId)))
         || (estProprietaireDe(resource.data.entrepriseId) && enSuppression(resource.data.entrepriseId))
       );
     }

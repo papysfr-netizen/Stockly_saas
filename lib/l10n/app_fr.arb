@@ -2151,5 +2151,6 @@
   "delErrUnknown": "La suppression n'a pas pu se terminer. Réessayez : ce qui est déjà effacé ne revient pas.",
   "delDone": "Votre compte a été supprimé.",
   "delTypeConfirm": "Pour confirmer, écrivez {mot}",
-  "@delTypeConfirm": {"placeholders": {"mot": {"type": "String"}}}
+  "@delTypeConfirm": {"placeholders": {"mot": {"type": "String"}}},
+  "delEmployeeAskOwner": "Seul votre patron peut supprimer votre accès à Nguli. Demandez-le-lui, ou écrivez-nous à l'adresse indiquée dans la politique de confidentialité."
 }

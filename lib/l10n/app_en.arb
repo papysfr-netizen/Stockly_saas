@@ -776,5 +776,6 @@
   "delErrNetwork": "No internet connection. Deletion needs the internet: try again.",
   "delErrUnknown": "Deletion could not finish. Try again: what is already erased will not come back.",
   "delDone": "Your account has been deleted.",
-  "delTypeConfirm": "To confirm, type {mot}"
+  "delTypeConfirm": "To confirm, type {mot}",
+  "delEmployeeAskOwner": "Only your employer can delete your Nguli access. Ask them, or write to us at the address given in the privacy policy."
 }

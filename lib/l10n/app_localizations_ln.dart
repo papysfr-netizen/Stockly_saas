@@ -2826,4 +2826,8 @@ class AppLocalizationsLn extends AppLocalizations {
   String delTypeConfirm(String mot) {
     return 'Mpo na kondima, koma $mot';
   }
+
+  @override
+  String get delEmployeeAskOwner =>
+      'Kaka patron na yo nde akoki kolongola nzela na yo ya Nguli. Senga ye yango, to komela biso na adresse oyo ezali na politique ya confidentialité.';
 }

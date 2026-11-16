@@ -776,5 +776,6 @@
   "delErrNetwork": "Hakuna intaneti. Kufuta kunahitaji intaneti: jaribu tena.",
   "delErrUnknown": "Kufuta hakukukamilika. Jaribu tena: kilichofutwa hakitarudi.",
   "delDone": "Akaunti yako imefutwa.",
-  "delTypeConfirm": "Kuthibitisha, andika {mot}"
+  "delTypeConfirm": "Kuthibitisha, andika {mot}",
+  "delEmployeeAskOwner": "Ni mwajiri wako tu anayeweza kufuta ufikiaji wako wa Nguli. Mwombe, au tuandikie kwa anwani iliyo kwenye sera ya faragha."
 }

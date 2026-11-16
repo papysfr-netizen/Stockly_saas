@@ -43,10 +43,10 @@ Les échanges sont chiffrés (HTTPS). Des règles de sécurité vérifiées par 
 Les données sont gardées tant que le compte existe.
 
 **Pour supprimer votre compte** :
-- dans l'application : **Paramètres → Mon compte → Supprimer mon compte** ;
+- dans l'application (propriétaire) : **Paramètres → Mon compte → Supprimer mon compte** ;
 - ou par e-mail à **[VOTRE ADRESSE NGULI]**, avec pour objet « Suppression de compte ». La demande est traitée sous 30 jours.
 
-Si vous êtes **employé**, votre accès est supprimé ; les ventes que vous avez faites restent dans les registres de l'entreprise de votre employeur.
+Si vous êtes **employé**, c'est votre patron qui gère votre accès : demandez-lui de le supprimer, ou écrivez-nous à l'adresse ci-dessous. Votre accès est alors supprimé ; les ventes que vous avez faites restent dans les registres de l'entreprise de votre employeur.
 
 Si vous êtes **propriétaire**, **toute l'entreprise** est effacée : produits, ventes, dettes, comptabilité, comptes clients, dépenses et accès des employés. Les rapports d'erreur techniques liés à votre compte sont effacés sur simple demande par e-mail.
 
@@ -107,9 +107,9 @@ Connections are encrypted (HTTPS). Server-checked security rules prevent outside
 
 Data is kept as long as the account exists.
 
-**To delete your account:** in the app, **Settings → My account → Delete my account**; or by e-mail to **[YOUR NGULI ADDRESS]** with the subject "Account deletion". Requests are handled within 30 days.
+**To delete your account:** the owner uses **Settings → My account → Delete my account** in the app; an employee asks their employer, or writes to us by e-mail to **[YOUR NGULI ADDRESS]** with the subject "Account deletion". Requests are handled within 30 days.
 
-An **employee**'s access is deleted; the sales they made stay in their employer's business records. An **owner**'s deletion erases **the whole business**: products, sales, debts, accounting, customer accounts, expenses and employee access. Technical crash reports linked to your account are erased on request by e-mail.
+An **employee**'s access is then deleted; the sales they made stay in their employer's business records. An **owner**'s deletion erases **the whole business**: products, sales, debts, accounting, customer accounts, expenses and employee access. Technical crash reports linked to your account are erased on request by e-mail.
 
 ## 6. Your customers' data
 

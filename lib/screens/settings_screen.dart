@@ -326,7 +326,20 @@ class _MonCompteCard extends ConsumerWidget {
           ListTile(
             leading: Icon(Icons.delete_forever_rounded, color: Colors.red.shade300),
             title: Text(t.delAccount, style: TextStyle(color: Colors.red.shade300, fontSize: 13)),
-            onTap: () => SupprimerCompteDialog.show(context, estProprietaire: estProprietaire),
+            // Seul le patron supprime (toute l'entreprise) ; un employé le demande au patron
+            onTap: () => estProprietaire
+                ? SupprimerCompteDialog.show(context, estProprietaire: true)
+                : showDialog<void>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      icon: const Icon(Icons.info_outline_rounded),
+                      title: Text(t.delAccount),
+                      content: Text(t.delEmployeeAskOwner),
+                      actions: [
+                        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK')),
+                      ],
+                    ),
+                  ),
           ),
         ],
       ),

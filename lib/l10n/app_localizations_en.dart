@@ -2822,4 +2822,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String delTypeConfirm(String mot) {
     return 'To confirm, type $mot';
   }
+
+  @override
+  String get delEmployeeAskOwner =>
+      'Only your employer can delete your Nguli access. Ask them, or write to us at the address given in the privacy policy.';
 }

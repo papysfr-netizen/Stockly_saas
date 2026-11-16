@@ -497,8 +497,8 @@ describe('Grosse vente', () => {
 describe('Supprimer son compte (Google Play)', () => {
   const marquer = (uid) => updateDoc(doc(dbDe(uid), `entreprises/${E}`), { enSuppression: true });
 
-  it('un employé peut supprimer son propre profil, pas celui d\'un autre', async () => {
-    await assertSucceeds(deleteDoc(doc(dbDe('caissier'), 'users/caissier')));
+  it('un employé ne peut supprimer ni son propre accès ni celui d\'un autre', async () => {
+    await assertFails(deleteDoc(doc(dbDe('caissier'), 'users/caissier')));
     await assertFails(deleteDoc(doc(dbDe('gerant'), 'users/caissierB2')));
   });
 
@@ -523,6 +523,8 @@ describe('Supprimer son compte (Google Play)', () => {
     await assertSucceeds(deleteDoc(doc(dbDe('patron'), `entreprises/${E}/ventes/v1`)));
     await assertSucceeds(deleteDoc(doc(dbDe('patron'), 'users/caissier')));
     await assertSucceeds(deleteDoc(doc(dbDe('patron'), `entreprises/${E}`)));
+    // l'entreprise effacée, le patron efface son propre profil
+    await assertSucceeds(deleteDoc(doc(dbDe('patron'), 'users/patron')));
   });
 
   it('un gérant ne peut ni demander la suppression ni tout effacer', async () => {
