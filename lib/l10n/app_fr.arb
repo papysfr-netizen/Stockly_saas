@@ -1093,11 +1093,11 @@
   },
   "teamOwnerAll": "Le propriétaire a tous les droits.",
   "teamRoleChanged": "Rôle modifié",
-  "teamActive": "Compte actif",
+  "teamActive": "Accès actif (désactivez pour suspendre)",
   "teamCanLogin": "Peut se connecter",
-  "teamDisabledInfo": "Désactivé : ne peut plus travailler",
-  "teamReactivated": "Compte réactivé",
-  "teamDeactivated": "Compte désactivé",
+  "teamDisabledInfo": "Suspendu : ne peut plus travailler, réactivable à tout moment",
+  "teamReactivated": "Accès réactivé",
+  "teamDeactivated": "Employé suspendu",
   "teamPermissions": "Autorisations ({count}/{total})",
   "@teamPermissions": {
     "placeholders": {

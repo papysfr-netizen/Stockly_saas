@@ -1399,19 +1399,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get teamRoleChanged => 'Role changed';
 
   @override
-  String get teamActive => 'Active account';
+  String get teamActive => 'Access active (turn off to suspend)';
 
   @override
   String get teamCanLogin => 'Can sign in';
 
   @override
-  String get teamDisabledInfo => 'Disabled: can no longer work';
+  String get teamDisabledInfo =>
+      'Suspended: cannot work, can be reactivated anytime';
 
   @override
-  String get teamReactivated => 'Account reactivated';
+  String get teamReactivated => 'Access reactivated';
 
   @override
-  String get teamDeactivated => 'Account disabled';
+  String get teamDeactivated => 'Employee suspended';
 
   @override
   String teamPermissions(int count, int total) {

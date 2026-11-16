@@ -464,14 +464,14 @@ class _CompteDesactiveScreen extends StatelessWidget {
               Icon(Icons.block, size: 72, color: Colors.red.shade400),
               const SizedBox(height: 16),
               Text(
-                supprime ? t.accountRemovedTitle : 'Compte désactivé',
+                supprime ? t.accountRemovedTitle : 'Compte suspendu',
                 style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               Text(
                 supprime
                     ? t.accountRemovedInfo
-                    : "Le propriétaire de la boutique a désactivé ce compte.\n"
+                    : "Le patron a suspendu votre accès.\n"
                         "Contactez-le pour le réactiver.",
                 textAlign: TextAlign.center,
               ),

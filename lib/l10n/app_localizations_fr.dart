@@ -1404,19 +1404,20 @@ class AppLocalizationsFr extends AppLocalizations {
   String get teamRoleChanged => 'Rôle modifié';
 
   @override
-  String get teamActive => 'Compte actif';
+  String get teamActive => 'Accès actif (désactivez pour suspendre)';
 
   @override
   String get teamCanLogin => 'Peut se connecter';
 
   @override
-  String get teamDisabledInfo => 'Désactivé : ne peut plus travailler';
+  String get teamDisabledInfo =>
+      'Suspendu : ne peut plus travailler, réactivable à tout moment';
 
   @override
-  String get teamReactivated => 'Compte réactivé';
+  String get teamReactivated => 'Accès réactivé';
 
   @override
-  String get teamDeactivated => 'Compte désactivé';
+  String get teamDeactivated => 'Employé suspendu';
 
   @override
   String teamPermissions(int count, int total) {

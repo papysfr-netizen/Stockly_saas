@@ -2380,7 +2380,7 @@ abstract class AppLocalizations {
   /// No description provided for @teamActive.
   ///
   /// In fr, this message translates to:
-  /// **'Compte actif'**
+  /// **'Accès actif (désactivez pour suspendre)'**
   String get teamActive;
 
   /// No description provided for @teamCanLogin.
@@ -2392,19 +2392,19 @@ abstract class AppLocalizations {
   /// No description provided for @teamDisabledInfo.
   ///
   /// In fr, this message translates to:
-  /// **'Désactivé : ne peut plus travailler'**
+  /// **'Suspendu : ne peut plus travailler, réactivable à tout moment'**
   String get teamDisabledInfo;
 
   /// No description provided for @teamReactivated.
   ///
   /// In fr, this message translates to:
-  /// **'Compte réactivé'**
+  /// **'Accès réactivé'**
   String get teamReactivated;
 
   /// No description provided for @teamDeactivated.
   ///
   /// In fr, this message translates to:
-  /// **'Compte désactivé'**
+  /// **'Employé suspendu'**
   String get teamDeactivated;
 
   /// No description provided for @teamPermissions.
