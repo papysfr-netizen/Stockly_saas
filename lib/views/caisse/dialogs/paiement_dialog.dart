@@ -518,7 +518,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                                 ActionChip(
                                   avatar: const Icon(Icons.attach_money, size: 15, color: Colors.teal),
                                   label: Text(t.payAllIn('\$'), style: const TextStyle(fontSize: 11)),
-                                  onPressed: _payerToutUSD,
+                                  onPressed: _totalAPayer <= 0.001 ? null : _payerToutUSD,
                                   backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF22262E) : Colors.white,
                                   padding: EdgeInsets.zero,
                                 ),
@@ -526,7 +526,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                                   ActionChip(
                                     avatar: const Icon(Icons.currency_exchange, size: 15, color: Colors.teal),
                                     label: Text(t.payAllIn(localInfo.code), style: const TextStyle(fontSize: 11)),
-                                    onPressed: () => _payerToutLocal(localInfo.rateToUSD),
+                                    onPressed: _totalAPayer <= 0.001 ? null : () => _payerToutLocal(localInfo.rateToUSD),
                                     backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF22262E) : Colors.white,
                                     padding: EdgeInsets.zero,
                                   ),
@@ -546,6 +546,8 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                             // Saisie dynamique USD
                             TextField(
                               controller: _verseUSDController,
+                              // Tout payé par le compte client : rien à saisir
+                              enabled: _totalAPayer > 0.001,
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
                               decoration: InputDecoration(
                                 labelText: t.payReceived('USD'),
@@ -565,6 +567,8 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                             if (localInfo.code != 'USD') ...[
                               TextField(
                                 controller: _verseLocalController,
+                                // Tout payé par le compte client : rien à saisir
+                                enabled: _totalAPayer > 0.001,
                                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                 decoration: InputDecoration(
                                   labelText: t.payReceived(localInfo.code),
