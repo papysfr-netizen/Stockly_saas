@@ -51,6 +51,9 @@ class AccueilScreen extends ConsumerStatefulWidget {
 }
 
 class _AccueilScreenState extends ConsumerState<AccueilScreen> {
+  /// Dernier montant rendu en espèces (évite un clignotement à chaque rafraîchissement)
+  double _dernierRembourse = 0;
+
   Stream<QuerySnapshot<Map<String, dynamic>>>? _ventesDuJour;
   Stream<QuerySnapshot<Map<String, dynamic>>>? _dettesPayeesDuJour; // 💰
   DateTime? _jour;
@@ -355,7 +358,17 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                         const SizedBox(height: 16),
                         Row(
                           children: [
-                            _petiteCase(t.accCashed, devise.formatPrice(encaisse), Icons.payments_rounded, _vert),
+                            // 💵 Encaissé = reçu aux ventes − rendu en espèces pour les retours du jour
+                            //    (sinon une vente retournée affiche 0 $ de ventes mais 60 $ encaissés)
+                            StreamBuilder<double>(
+                              stream: remboursementsDuJour(widget.currentUser.entrepriseId, minuit, boutique),
+                              initialData: _dernierRembourse,
+                              builder: (context, snapR) {
+                                _dernierRembourse = snapR.data ?? 0;
+                                return _petiteCase(t.accCashed, devise.formatPrice(encaisse - _dernierRembourse),
+                                    Icons.payments_rounded, _vert);
+                              },
+                            ),
                             const SizedBox(width: 8),
                             _petiteCase(t.accCredit, devise.formatPrice(credit), Icons.receipt_long_rounded, Colors.indigo),
                             const SizedBox(width: 8),
@@ -727,7 +740,7 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
     final t = StringBuffer()
       ..writeln('📊 *$nomBoutique — $date*')
       ..writeln(l.sumSales(nbVentes, devise.formatPrice(ventes)))
-      ..writeln(l.sumCollected(devise.formatPrice(encaisse)))
+      ..writeln(l.sumCollected(devise.formatPrice(encaisse - caisseJour.remboursementsEspeces)))
       ..writeln(l.sumCredit(devise.formatPrice(credit)))
       ..writeln(l.sumExpenses(devise.formatPrice(depenses)));
     if (dettesEncaissees > 0.005) {
