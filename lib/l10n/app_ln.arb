@@ -777,5 +777,11 @@
   "delErrUnknown": "Kolongola esilaki te. Meka lisusu: oyo elongwaki ekozonga te.",
   "delDone": "Compte na yo elongwami.",
   "delTypeConfirm": "Mpo na kondima, koma {mot}",
-  "delEmployeeAskOwner": "Kaka patron na yo nde akoki kolongola nzela na yo ya Nguli. Senga ye yango, to komela biso na adresse oyo ezali na politique ya confidentialité."
+  "delEmployeeAskOwner": "Kaka patron na yo nde akoki kolongola nzela na yo ya Nguli. Senga ye yango, to komela biso na adresse oyo ezali na politique ya confidentialité.",
+  "teamRemove": "Longola na équipe",
+  "teamRemoveQuestion": "Olongola {nom} na équipe?",
+  "teamRemoveInfo": "Nzela na ye elongwami libela: akokota lisusu na butiki te. Ba ventes asalaki etikali. Soki azali kaka absent, kanga ye nde.",
+  "teamRemoved": "{nom} alongwami na équipe",
+  "accountRemovedTitle": "Nzela elongwami",
+  "accountRemovedInfo": "Nzela na yo ya butiki oyo elongwami. Benga patron soki ezali libunga."
 }

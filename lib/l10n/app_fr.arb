@@ -2152,5 +2152,13 @@
   "delDone": "Votre compte a été supprimé.",
   "delTypeConfirm": "Pour confirmer, écrivez {mot}",
   "@delTypeConfirm": {"placeholders": {"mot": {"type": "String"}}},
-  "delEmployeeAskOwner": "Seul votre patron peut supprimer votre accès à Nguli. Demandez-le-lui, ou écrivez-nous à l'adresse indiquée dans la politique de confidentialité."
+  "delEmployeeAskOwner": "Seul votre patron peut supprimer votre accès à Nguli. Demandez-le-lui, ou écrivez-nous à l'adresse indiquée dans la politique de confidentialité.",
+  "teamRemove": "Retirer de l'équipe",
+  "teamRemoveQuestion": "Retirer {nom} de l'équipe ?",
+  "@teamRemoveQuestion": {"placeholders": {"nom": {"type": "String"}}},
+  "teamRemoveInfo": "Son accès est supprimé pour toujours : il ne pourra plus entrer dans la boutique. Les ventes qu'il a faites restent. Pour une absence, désactivez-le plutôt.",
+  "teamRemoved": "{nom} a été retiré de l'équipe",
+  "@teamRemoved": {"placeholders": {"nom": {"type": "String"}}},
+  "accountRemovedTitle": "Accès supprimé",
+  "accountRemovedInfo": "Votre accès à cette boutique a été supprimé. Contactez le patron si c'est une erreur."
 }

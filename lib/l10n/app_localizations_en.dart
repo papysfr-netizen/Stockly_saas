@@ -2826,4 +2826,28 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get delEmployeeAskOwner =>
       'Only your employer can delete your Nguli access. Ask them, or write to us at the address given in the privacy policy.';
+
+  @override
+  String get teamRemove => 'Remove from team';
+
+  @override
+  String teamRemoveQuestion(String nom) {
+    return 'Remove $nom from the team?';
+  }
+
+  @override
+  String get teamRemoveInfo =>
+      'Their access is deleted forever: they can no longer enter the shop. The sales they made remain. For an absence, deactivate them instead.';
+
+  @override
+  String teamRemoved(String nom) {
+    return '$nom was removed from the team';
+  }
+
+  @override
+  String get accountRemovedTitle => 'Access removed';
+
+  @override
+  String get accountRemovedInfo =>
+      'Your access to this shop has been removed. Contact the owner if this is a mistake.';
 }

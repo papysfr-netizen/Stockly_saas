@@ -111,6 +111,11 @@ class EquipeService {
   static Future<void> changerActif(String uid, bool actif) =>
       FirebaseFirestore.instance.collection('users').doc(uid).update({'estActif': actif});
 
+  /// 🗑️ Retire un membre de l'équipe : son profil est effacé, il ne peut plus
+  /// entrer dans la boutique (patron, ou employé autorisé « Gérer l'équipe »).
+  static Future<void> supprimerMembre(String uid) =>
+      FirebaseFirestore.instance.collection('users').doc(uid).delete();
+
   static Future<void> changerPermission(String uid, String cle, bool valeur) =>
       FirebaseFirestore.instance.collection('users').doc(uid).update({'permissions.$cle': valeur});
 

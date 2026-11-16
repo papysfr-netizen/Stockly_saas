@@ -777,5 +777,11 @@
   "delErrUnknown": "Kufuta hakukukamilika. Jaribu tena: kilichofutwa hakitarudi.",
   "delDone": "Akaunti yako imefutwa.",
   "delTypeConfirm": "Kuthibitisha, andika {mot}",
-  "delEmployeeAskOwner": "Ni mwajiri wako tu anayeweza kufuta ufikiaji wako wa Nguli. Mwombe, au tuandikie kwa anwani iliyo kwenye sera ya faragha."
+  "delEmployeeAskOwner": "Ni mwajiri wako tu anayeweza kufuta ufikiaji wako wa Nguli. Mwombe, au tuandikie kwa anwani iliyo kwenye sera ya faragha.",
+  "teamRemove": "Ondoa kwenye timu",
+  "teamRemoveQuestion": "Ondoa {nom} kwenye timu?",
+  "teamRemoveInfo": "Ufikiaji wake unafutwa milele: hataweza tena kuingia dukani. Mauzo aliyofanya yanabaki. Kwa kutokuwepo, mzime badala yake.",
+  "teamRemoved": "{nom} ameondolewa kwenye timu",
+  "accountRemovedTitle": "Ufikiaji umefutwa",
+  "accountRemovedInfo": "Ufikiaji wako wa duka hili umefutwa. Wasiliana na mmiliki ikiwa ni kosa."
 }

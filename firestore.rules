@@ -240,6 +240,12 @@ service cloud.firestore {
         (request.auth.uid == userId
           && !exists(/databases/$(database)/documents/entreprises/$(resource.data.entrepriseId)))
         || (estProprietaireDe(resource.data.entrepriseId) && enSuppression(resource.data.entrepriseId))
+        // 👥 Retirer un employé de l'équipe : le patron,
+        //    ou la personne qu'il a mandatée (« Gérer l'équipe »), sauf un autre administrateur
+        || (request.auth.uid != userId
+            && resource.data.get('role', '') in ['gerant', 'caissier']
+            && (estProprietaireDe(resource.data.entrepriseId)
+                || (estAdminEquipe(resource.data.entrepriseId) && !profilEstAdmin(resource.data))))
       );
     }
 

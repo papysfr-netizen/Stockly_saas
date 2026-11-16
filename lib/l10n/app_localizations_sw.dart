@@ -2824,4 +2824,28 @@ class AppLocalizationsSw extends AppLocalizations {
   @override
   String get delEmployeeAskOwner =>
       'Ni mwajiri wako tu anayeweza kufuta ufikiaji wako wa Nguli. Mwombe, au tuandikie kwa anwani iliyo kwenye sera ya faragha.';
+
+  @override
+  String get teamRemove => 'Ondoa kwenye timu';
+
+  @override
+  String teamRemoveQuestion(String nom) {
+    return 'Ondoa $nom kwenye timu?';
+  }
+
+  @override
+  String get teamRemoveInfo =>
+      'Ufikiaji wake unafutwa milele: hataweza tena kuingia dukani. Mauzo aliyofanya yanabaki. Kwa kutokuwepo, mzime badala yake.';
+
+  @override
+  String teamRemoved(String nom) {
+    return '$nom ameondolewa kwenye timu';
+  }
+
+  @override
+  String get accountRemovedTitle => 'Ufikiaji umefutwa';
+
+  @override
+  String get accountRemovedInfo =>
+      'Ufikiaji wako wa duka hili umefutwa. Wasiliana na mmiliki ikiwa ni kosa.';
 }

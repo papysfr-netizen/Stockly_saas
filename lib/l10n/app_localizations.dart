@@ -4770,6 +4770,42 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Seul votre patron peut supprimer votre accès à Nguli. Demandez-le-lui, ou écrivez-nous à l\'adresse indiquée dans la politique de confidentialité.'**
   String get delEmployeeAskOwner;
+
+  /// No description provided for @teamRemove.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer de l\'équipe'**
+  String get teamRemove;
+
+  /// No description provided for @teamRemoveQuestion.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer {nom} de l\'équipe ?'**
+  String teamRemoveQuestion(String nom);
+
+  /// No description provided for @teamRemoveInfo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Son accès est supprimé pour toujours : il ne pourra plus entrer dans la boutique. Les ventes qu\'il a faites restent. Pour une absence, désactivez-le plutôt.'**
+  String get teamRemoveInfo;
+
+  /// No description provided for @teamRemoved.
+  ///
+  /// In fr, this message translates to:
+  /// **'{nom} a été retiré de l\'équipe'**
+  String teamRemoved(String nom);
+
+  /// No description provided for @accountRemovedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accès supprimé'**
+  String get accountRemovedTitle;
+
+  /// No description provided for @accountRemovedInfo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre accès à cette boutique a été supprimé. Contactez le patron si c\'est une erreur.'**
+  String get accountRemovedInfo;
 }
 
 class _AppLocalizationsDelegate

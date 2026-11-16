@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -5,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/providers/user_role_provider.dart';
 import '../core/services/equipe_service.dart';
+import '../core/services/journal_service.dart';
 import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
 
@@ -558,10 +561,51 @@ class _CarteMembre extends StatelessWidget {
                   ],
                 ),
               ),
+              // 🗑️ Retirer de l'équipe : le patron, ou la personne qu'il a mandatée
+              if (peutModifier && !estMoi)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    style: TextButton.styleFrom(foregroundColor: Colors.red.shade400),
+                    icon: const Icon(Icons.person_remove_outlined, size: 18),
+                    label: Text(t.teamRemove),
+                    onPressed: () => _retirer(context, nom),
+                  ),
+                ),
             ],
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _retirer(BuildContext context, String nom) async {
+    final t = AppLocalizations.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: Icon(Icons.person_remove_outlined, color: Colors.red.shade400),
+        title: Text(t.teamRemoveQuestion(nom)),
+        content: Text(t.teamRemoveInfo),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(t.cancel)),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(t.teamRemove),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    final entrepriseId = (doc.data()['entrepriseId'] ?? '').toString();
+    await _action(context, () async {
+      await EquipeService.supprimerMembre(doc.id);
+      unawaited(noterJournal(
+        entrepriseId: entrepriseId,
+        action: ActionsJournal.equipe,
+        details: 'Accès supprimé : $nom',
+      ));
+    }, t.teamRemoved(nom));
   }
 }

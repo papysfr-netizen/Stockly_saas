@@ -502,13 +502,27 @@ describe('Supprimer son compte (Google Play)', () => {
     await assertFails(deleteDoc(doc(dbDe('gerant'), 'users/caissierB2')));
   });
 
+  it('le patron, ou la personne mandatée « Gérer l\'équipe », retire un employé', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      const fdb = ctx.firestore();
+      await setDoc(doc(fdb, 'users/admin'), { role: 'gerant', entrepriseId: E, permissions: { gererEquipe: true } });
+      await setDoc(doc(fdb, 'users/admin2'), { role: 'gerant', entrepriseId: E, permissions: { gererEquipe: true } });
+    });
+    await assertSucceeds(deleteDoc(doc(dbDe('patron'), 'users/caissier')));
+    await assertSucceeds(deleteDoc(doc(dbDe('admin'), 'users/caissierB2')));
+    // jamais le patron, un autre administrateur, ni un employé d'une autre entreprise
+    await assertFails(deleteDoc(doc(dbDe('admin'), 'users/patron')));
+    await assertFails(deleteDoc(doc(dbDe('admin'), 'users/admin2')));
+    await assertFails(deleteDoc(doc(dbDe('autre'), 'users/gerant')));
+    await assertFails(deleteDoc(doc(dbDe('patron'), 'users/autre')));
+  });
+
   it('sans suppression demandée, le patron ne peut pas effacer les ventes, retours ou l\'entreprise', async () => {
     await env.withSecurityRulesDisabled(async (ctx) => {
       await setDoc(doc(ctx.firestore(), `entreprises/${E}/retours/r1`), { venteId: 'v1', montant: 1 });
     });
     await assertFails(deleteDoc(doc(dbDe('patron'), `entreprises/${E}/retours/r1`)));
     await assertFails(deleteDoc(doc(dbDe('patron'), `entreprises/${E}`)));
-    await assertFails(deleteDoc(doc(dbDe('patron'), 'users/caissier')));
   });
 
   it('suppression demandée : le patron efface tout, puis l\'entreprise', async () => {

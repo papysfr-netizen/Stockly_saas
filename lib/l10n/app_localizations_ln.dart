@@ -2830,4 +2830,28 @@ class AppLocalizationsLn extends AppLocalizations {
   @override
   String get delEmployeeAskOwner =>
       'Kaka patron na yo nde akoki kolongola nzela na yo ya Nguli. Senga ye yango, to komela biso na adresse oyo ezali na politique ya confidentialité.';
+
+  @override
+  String get teamRemove => 'Longola na équipe';
+
+  @override
+  String teamRemoveQuestion(String nom) {
+    return 'Olongola $nom na équipe?';
+  }
+
+  @override
+  String get teamRemoveInfo =>
+      'Nzela na ye elongwami libela: akokota lisusu na butiki te. Ba ventes asalaki etikali. Soki azali kaka absent, kanga ye nde.';
+
+  @override
+  String teamRemoved(String nom) {
+    return '$nom alongwami na équipe';
+  }
+
+  @override
+  String get accountRemovedTitle => 'Nzela elongwami';
+
+  @override
+  String get accountRemovedInfo =>
+      'Nzela na yo ya butiki oyo elongwami. Benga patron soki ezali libunga.';
 }

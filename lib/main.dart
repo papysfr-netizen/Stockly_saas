@@ -383,6 +383,11 @@ class AuthWrapper extends ConsumerWidget {
               final doc = userSnapshot.data!;
               final rawData = doc.data() as Map<String, dynamic>? ?? {};
 
+              // 🗑️ Profil effacé (retiré de l'équipe) : confirmé par le serveur
+              if (!doc.exists && !doc.metadata.isFromCache) {
+                return const _CompteDesactiveScreen(supprime: true);
+              }
+
               // ⛔ Compte désactivé par le propriétaire (même en cours d'utilisation)
               if (rawData['estActif'] == false) {
                 return const _CompteDesactiveScreen();
@@ -442,10 +447,13 @@ class AuthWrapper extends ConsumerWidget {
 // ⛔ ÉCRAN « COMPTE DÉSACTIVÉ »
 // ============================================================================
 class _CompteDesactiveScreen extends StatelessWidget {
-  const _CompteDesactiveScreen();
+  /// true = accès supprimé (retiré de l'équipe), false = désactivé
+  final bool supprime;
+  const _CompteDesactiveScreen({this.supprime = false});
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     return Scaffold(
       body: Center(
         child: Padding(
@@ -455,14 +463,16 @@ class _CompteDesactiveScreen extends StatelessWidget {
             children: [
               Icon(Icons.block, size: 72, color: Colors.red.shade400),
               const SizedBox(height: 16),
-              const Text(
-                'Compte désactivé',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              Text(
+                supprime ? t.accountRemovedTitle : 'Compte désactivé',
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-              const Text(
-                "Le propriétaire de la boutique a désactivé ce compte.\n"
-                "Contactez-le pour le réactiver.",
+              Text(
+                supprime
+                    ? t.accountRemovedInfo
+                    : "Le propriétaire de la boutique a désactivé ce compte.\n"
+                        "Contactez-le pour le réactiver.",
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),

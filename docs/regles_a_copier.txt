@@ -198,6 +198,11 @@ service cloud.firestore {
         (request.auth.uid == userId
           && !exists(/databases/$(database)/documents/entreprises/$(resource.data.entrepriseId)))
         || (estProprietaireDe(resource.data.entrepriseId) && enSuppression(resource.data.entrepriseId))
+
+        || (request.auth.uid != userId
+            && resource.data.get('role', '') in ['gerant', 'caissier']
+            && (estProprietaireDe(resource.data.entrepriseId)
+                || (estAdminEquipe(resource.data.entrepriseId) && !profilEstAdmin(resource.data))))
       );
     }
 
