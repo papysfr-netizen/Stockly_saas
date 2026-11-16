@@ -107,12 +107,16 @@ class _SupprimerCompteDialogState extends State<SupprimerCompteDialog> {
               ),
             ),
             const SizedBox(height: 14),
+            // La consigne au-dessus (le libellé du champ coupait le mot à écrire)
+            Text(t.delTypeConfirm(t.delConfirmWord),
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 6),
             TextField(
               controller: _mot,
               enabled: !_enCours,
               textCapitalization: TextCapitalization.characters,
               decoration: InputDecoration(
-                labelText: t.delTypeConfirm(t.delConfirmWord),
+                hintText: t.delConfirmWord,
                 border: const OutlineInputBorder(),
                 isDense: true,
               ),
