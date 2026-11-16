@@ -2767,4 +2767,9 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get prodNoNegative => 'Motango ya moins te';
+
+  @override
+  String payChangeToAccount(String montant) {
+    return 'Tia mbongo ya kozongisa ($montant) na compte ya client';
+  }
 }

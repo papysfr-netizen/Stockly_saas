@@ -760,5 +760,6 @@
   "cloLineBorrowed": "Money borrowed (put in the till)",
   "cloLineLent": "Money lent (taken from the till)",
   "prodPricePositive": "The selling price must be above 0",
-  "prodNoNegative": "No negative number"
+  "prodNoNegative": "No negative number",
+  "payChangeToAccount": "Put the change ({montant}) on the customer's account"
 }

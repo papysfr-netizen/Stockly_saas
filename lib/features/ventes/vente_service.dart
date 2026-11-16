@@ -59,6 +59,9 @@ class NouvelleVente {
   /// Vente faite après la clôture de caisse du jour
   final bool apresCloture;
 
+  /// 💰 La monnaie à rendre est mise sur le compte du client (dépôt) au lieu d'être rendue
+  final bool monnaieSurCompte;
+
   const NouvelleVente({
     required this.entrepriseId,
     required this.userId,
@@ -77,6 +80,7 @@ class NouvelleVente {
     this.motif = '',
     this.prixAchat = const {},
     this.apresCloture = false,
+    this.monnaieSurCompte = false,
   });
 
   String get client => nomSaisi.trim().isEmpty ? clientDivers : nomSaisi.trim();
@@ -110,6 +114,10 @@ class PlanVente {
   final String methodeEnregistree;
   final DateTime finJourLimite;
 
+  /// 💰 Monnaie déposée sur le compte client (USD, 0 = aucune) et son écriture
+  final double depotCompte;
+  final Map<String, dynamic>? ecritureDepot;
+
   const PlanVente({
     required this.venteId,
     required this.numeroFacture,
@@ -126,15 +134,29 @@ class PlanVente {
     required this.coutMarchandises,
     required this.methodeEnregistree,
     required this.finJourLimite,
+    this.depotCompte = 0,
+    this.ecritureDepot,
   });
 
   String get idEcritureCout => 'STK-$venteId';
+  String get idEcritureDepot => 'DEP-$venteId';
 }
 
 class VenteService {
   VenteService._();
 
   static double _arrondi(double v) => (v * 100).roundToDouble() / 100;
+
+  /// 💰 Part payée par le compte client : l'argent versé paie d'abord,
+  /// le compte paie le reste (sans dépasser son solde ni la facture).
+  /// Ex. facture 120 $, 20 $ versés, solde 500 $ → 100 $ pris sur le compte.
+  static double partCompte({required double total, required double verse, required double solde}) {
+    final plafond = solde < total ? solde : total;
+    if (plafond <= 0) return 0.0;
+    final besoin = total - verse;
+    if (besoin <= 0) return 0.0;
+    return _arrondi(besoin < plafond ? besoin : plafond);
+  }
 
   /// Vente à crédit : il faut un vrai nom et un téléphone (sinon impossible de relancer)
   static ProblemeCredit? verifierCredit(NouvelleVente v) {
@@ -188,6 +210,14 @@ class VenteService {
     final verseCaisse = reste > 0 ? _arrondi(aPayer - reste) : aPayer;
     final verseTotal = _arrondi(verseCaisse + soldeUtilise);
 
+    // 💰 Monnaie mise sur le compte du client (seulement sans paiement par le compte)
+    final p = v.paiement;
+    final depot = (v.monnaieSurCompte &&
+            soldeUtilise <= 0.005 &&
+            CompteClientService.telephoneValide(v.telephone))
+        ? _arrondi(p.changeInUSD)
+        : 0.0;
+
     final methodeEnregistree = soldeUtilise > 0.005
         ? (verseCaisse > 0.005 ? '${v.methodePaiement} + Compte client' : 'Compte client')
         : v.methodePaiement;
@@ -201,7 +231,6 @@ class VenteService {
     final limite = maintenant.toDate().add(Duration(days: v.delaiRetraitJours));
     final finJourLimite = DateTime(limite.year, limite.month, limite.day, 23, 59, 59);
     final numeroFacture = venteId.substring(0, venteId.length < 8 ? venteId.length : 8).toUpperCase();
-    final p = v.paiement;
 
     final prixVendus = <String, double>{};
     for (final item in v.panier) {
@@ -219,8 +248,9 @@ class VenteService {
       'montantPayeUSD': p.paidUSD,
       'montantPayeLocal': p.paidLocal,
       'montantCompteClient': soldeUtilise,
-      'monnaieRendueUSD': p.changeInUSD,
-      'monnaieRendueLocal': p.changeInLocal,
+      'monnaieRendueUSD': depot > 0.005 ? 0.0 : p.changeInUSD,
+      'monnaieRendueLocal': depot > 0.005 ? 0.0 : p.changeInLocal,
+      if (depot > 0.005) 'monnaieSurCompte': depot,
       'tauxEchange': p.localRate,
       'resteAPayer': reste,
       'statutPaiement': reste <= 0 ? 'Payé' : (verseTotal > 0 ? 'Acompte' : 'Dette'),
@@ -360,6 +390,36 @@ class VenteService {
             'dateCreation': maintenant,
           };
 
+    // 5. 💰 Dépôt de la monnaie sur le compte client : trésorerie / 419100
+    final ecritureDepot = depot <= 0.005
+        ? null
+        : <String, dynamic>{
+            'id': 'DEP-$venteId',
+            'entrepriseId': v.entrepriseId,
+            'reference': CompteClientService.normaliser(v.telephone),
+            'venteId': venteId,
+            'type': 'depot_client',
+            'description': 'Monnaie mise sur le compte client - $client (facture $numeroFacture)',
+            'date': maintenant,
+            'lines': [
+              {
+                'accountCode': CompteClientService.compteTresorerie(v.methodePaiement),
+                'accountLabel': CompteClientService.libelleTresorerie(v.methodePaiement),
+                'debit': depot,
+                'credit': 0.0,
+              },
+              {
+                'accountCode': CompteClientService.compteAvances,
+                'accountLabel': '${CompteClientService.libelleAvances} - $client',
+                'debit': 0.0,
+                'credit': depot,
+              },
+            ],
+            'montantEncaisse': depot,
+            'montantDecaisse': 0.0,
+            'boutiqueId': v.boutiqueId,
+          };
+
     return PlanVente(
       venteId: venteId,
       numeroFacture: numeroFacture,
@@ -377,6 +437,8 @@ class VenteService {
       coutMarchandises: cout,
       methodeEnregistree: methodeEnregistree,
       finJourLimite: finJourLimite,
+      depotCompte: depot,
+      ecritureDepot: ecritureDepot,
     );
   }
 
@@ -416,6 +478,27 @@ class VenteService {
         parNom: v.vendeurNom,
         venteId: plan.venteId,
       );
+    }
+
+    // 💰 Compte client : la monnaie y est déposée au lieu d'être rendue
+    final ecritureDepot = plan.ecritureDepot;
+    if (plan.depotCompte > 0.005 && ecritureDepot != null) {
+      CompteClientService.ajouterMouvement(
+        lot,
+        entrepriseId: v.entrepriseId,
+        telephone: v.telephone,
+        nom: v.client == clientDivers ? '' : v.client,
+        type: 'depot',
+        delta: plan.depotCompte,
+        soldeAvant: v.soldeAvant,
+        description: 'Monnaie de la facture ${plan.numeroFacture}',
+        date: maintenant,
+        uid: v.userId,
+        parNom: v.vendeurNom,
+        methode: v.methodePaiement,
+        venteId: plan.venteId,
+      );
+      lot.set(ent.collection('ecritures_comptables').doc(plan.idEcritureDepot), ecritureDepot);
     }
 
     // 📦 Stock : le total, et la boutique (la principale = total − autres boutiques)

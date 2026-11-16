@@ -760,5 +760,6 @@
   "cloLineBorrowed": "Pesa iliyokopwa (imewekwa sandukuni)",
   "cloLineLent": "Pesa iliyokopeshwa (imetolewa sandukuni)",
   "prodPricePositive": "Bei ya kuuza lazima iwe zaidi ya 0",
-  "prodNoNegative": "Hakuna namba hasi"
+  "prodNoNegative": "Hakuna namba hasi",
+  "payChangeToAccount": "Weka chenji ({montant}) kwenye akaunti ya mteja"
 }

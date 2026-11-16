@@ -75,10 +75,22 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
   double _soldeCompte = 0.0;
   bool _utiliserSolde = false;
 
-  /// Part de la facture payée par le compte client (en USD).
+  // 💰 Mettre la monnaie sur le compte du client au lieu de la rendre
+  bool _monnaieSurCompte = false;
+
+  /// Argent versé (espèces, Mobile Money…), converti en USD
+  double get _verseEnUSD {
+    final devise = ref.read(currencyProvider);
+    final rate = (devise.currencies['CDF'] ?? devise.activeCurrencyInfo).rateToUSD;
+    return parseAmount(_verseUSDController.text) +
+        (rate > 0 ? parseAmount(_verseLocalController.text) / rate : 0.0);
+  }
+
+  /// Part de la facture payée par le compte client (en USD) :
+  /// l'argent versé paie d'abord, le compte paie le reste.
   double get _montantSoldeUtilise {
     if (!_utiliserSolde || _soldeCompte <= 0) return 0.0;
-    return _soldeCompte < widget.total ? _soldeCompte : widget.total;
+    return VenteService.partCompte(total: widget.total, verse: _verseEnUSD, solde: _soldeCompte);
   }
 
   /// Ce qu'il reste à encaisser (espèces, Mobile Money…) après le compte client.
@@ -118,6 +130,9 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
     final devise = ref.read(currencyProvider);
     final activeInfo = devise.activeCurrencyInfo;
     final localInfo = devise.currencies['CDF'] ?? activeInfo;
+    // On repart de zéro : le compte client paie ce qu'il peut, on préremplit le reste
+    _verseUSDController.clear();
+    _verseLocalController.clear();
     final aPayer = _totalAPayer;
 
     if (aPayer <= 0.001) {
@@ -161,6 +176,8 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
 
   void _payerToutUSD() {
     setState(() {
+      _verseUSDController.clear();
+      _verseLocalController.clear();
       _verseUSDController.text = _totalAPayer.toStringAsFixed(2);
       _verseLocalController.clear();
       statutPaiement = 'Payé';
@@ -169,6 +186,8 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
 
   void _payerToutLocal(double rate) {
     setState(() {
+      _verseUSDController.clear();
+      _verseLocalController.clear();
       _verseLocalController.text = _formatAmount(_totalAPayer * rate);
       _verseUSDController.clear();
       statutPaiement = 'Payé';
@@ -518,7 +537,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                                 ActionChip(
                                   avatar: const Icon(Icons.attach_money, size: 15, color: Colors.teal),
                                   label: Text(t.payAllIn('\$'), style: const TextStyle(fontSize: 11)),
-                                  onPressed: _totalAPayer <= 0.001 ? null : _payerToutUSD,
+                                  onPressed: _payerToutUSD,
                                   backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF22262E) : Colors.white,
                                   padding: EdgeInsets.zero,
                                 ),
@@ -526,7 +545,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                                   ActionChip(
                                     avatar: const Icon(Icons.currency_exchange, size: 15, color: Colors.teal),
                                     label: Text(t.payAllIn(localInfo.code), style: const TextStyle(fontSize: 11)),
-                                    onPressed: _totalAPayer <= 0.001 ? null : () => _payerToutLocal(localInfo.rateToUSD),
+                                    onPressed: () => _payerToutLocal(localInfo.rateToUSD),
                                     backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF22262E) : Colors.white,
                                     padding: EdgeInsets.zero,
                                   ),
@@ -546,8 +565,6 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                             // Saisie dynamique USD
                             TextField(
                               controller: _verseUSDController,
-                              // Tout payé par le compte client : rien à saisir
-                              enabled: _totalAPayer > 0.001,
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
                               decoration: InputDecoration(
                                 labelText: t.payReceived('USD'),
@@ -567,8 +584,6 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                             if (localInfo.code != 'USD') ...[
                               TextField(
                                 controller: _verseLocalController,
-                                // Tout payé par le compte client : rien à saisir
-                                enabled: _totalAPayer > 0.001,
                                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                 decoration: InputDecoration(
                                   labelText: t.payReceived(localInfo.code),
@@ -619,6 +634,21 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                                       style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12),
                                     ),
                                   ],
+                                ),
+                              // 💰 Pas de petite monnaie ? On la met sur le compte du client
+                              if (calc.changeInUSD > 0.005 &&
+                                  soldeUtilise <= 0.005 &&
+                                  CompteClientService.telephoneValide(_telephoneController.text))
+                                SwitchListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  dense: true,
+                                  value: _monnaieSurCompte,
+                                  activeThumbColor: Colors.green.shade700,
+                                  title: Text(
+                                    t.payChangeToAccount(currencyState.formatPrice(calc.changeInUSD)),
+                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                                  ),
+                                  onChanged: (v) => setState(() => _monnaieSurCompte = v),
                                 ),
                             ],
                           ],
@@ -851,7 +881,11 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
 
       // 💰 Vérifie que le solde du compte client est toujours suffisant
       double soldeAvant = _soldeCompte;
-      if (soldeUtilise > 0.005) {
+      final monnaieSurCompte = _monnaieSurCompte &&
+          calc.changeInUSD > 0.005 &&
+          soldeUtilise <= 0.005 &&
+          CompteClientService.telephoneValide(telephone);
+      if (soldeUtilise > 0.005 || monnaieSurCompte) {
         soldeAvant = await CompteClientService.lireSolde(widget.entrepriseId, telephone);
         if (soldeAvant < soldeUtilise - 0.005) {
           throw Exception(t.payBalanceChanged(soldeAvant.toStringAsFixed(2)));
@@ -879,6 +913,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         motif: _motifController.text,
         prixAchat: prixAchat,
         apresCloture: _apresCloture,
+        monnaieSurCompte: monnaieSurCompte,
       );
 
       // 📵 Pas de crédit sans nom ni numéro de téléphone (sinon impossible de relancer)

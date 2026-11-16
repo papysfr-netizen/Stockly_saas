@@ -2761,4 +2761,9 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get prodNoNegative => 'Hakuna namba hasi';
+
+  @override
+  String payChangeToAccount(String montant) {
+    return 'Weka chenji ($montant) kwenye akaunti ya mteja';
+  }
 }

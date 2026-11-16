@@ -132,6 +132,10 @@ class CompteClientService {
     });
   }
 
+  /// Compte de trésorerie (SYSCOHADA) d'un moyen de paiement : 572 Mobile Money, sinon 571 caisse
+  static String compteTresorerie(String methode) => _compteTresorerie(methode);
+  static String libelleTresorerie(String methode) => _libelleTresorerie(methode);
+
   static String _compteTresorerie(String methode) =>
       methode == 'Mobile Money' ? '572000' : '571000';
 

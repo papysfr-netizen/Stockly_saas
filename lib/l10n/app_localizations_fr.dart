@@ -2773,4 +2773,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get prodNoNegative => 'Pas de nombre négatif';
+
+  @override
+  String payChangeToAccount(String montant) {
+    return 'Mettre la monnaie ($montant) sur le compte du client';
+  }
 }

@@ -4668,6 +4668,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Pas de nombre négatif'**
   String get prodNoNegative;
+
+  /// No description provided for @payChangeToAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mettre la monnaie ({montant}) sur le compte du client'**
+  String payChangeToAccount(String montant);
 }
 
 class _AppLocalizationsDelegate

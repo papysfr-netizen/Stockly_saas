@@ -760,5 +760,6 @@
   "cloLineBorrowed": "Mbongo ya kodefa (etiami na kaisi)",
   "cloLineLent": "Mbongo ya kodefisa (ezwami na kaisi)",
   "prodPricePositive": "Ntalo ya koteka esengeli koleka 0",
-  "prodNoNegative": "Motango ya moins te"
+  "prodNoNegative": "Motango ya moins te",
+  "payChangeToAccount": "Tia mbongo ya kozongisa ({montant}) na compte ya client"
 }

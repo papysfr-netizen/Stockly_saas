@@ -22,6 +22,7 @@ NouvelleVente vente({
   String methode = 'Cash',
   String boutique = 'principale',
   bool apresCloture = false,
+  bool monnaieSurCompte = false,
 }) {
   final total = panier.fold<double>(0, (s, i) => s + i.totalPrice);
   return NouvelleVente(
@@ -44,6 +45,7 @@ NouvelleVente vente({
     methodePaiement: methode,
     prixAchat: const {'p1': 6, 'p2': 15},
     apresCloture: apresCloture,
+    monnaieSurCompte: monnaieSurCompte,
   );
 }
 
@@ -185,6 +187,34 @@ void main() {
       final p = preparer(vente(panier: const [inconnu], usd: 5));
       expect(p.coutMarchandises, 0);
       expect(p.ecritureCout, isNull);
+    });
+  });
+
+  group('Monnaie et compte client', () {
+    test('l\'argent versé paie d\'abord, le compte paie le reste', () {
+      // Facture 120 $, solde 500 $ : 20 $ versés → 100 $ pris sur le compte (reste 400 $)
+      expect(VenteService.partCompte(total: 120, verse: 20, solde: 500), 100);
+      expect(VenteService.partCompte(total: 120, verse: 0, solde: 500), 120);
+      expect(VenteService.partCompte(total: 120, verse: 0, solde: 50), 50);
+      expect(VenteService.partCompte(total: 120, verse: 150, solde: 500), 0);
+      expect(VenteService.partCompte(total: 120, verse: 20, solde: 0), 0);
+    });
+
+    test('monnaie mise sur le compte : pas de monnaie rendue, dépôt équilibré', () {
+      final p = preparer(vente(usd: 50, tel: '0812345678', nom: 'Mama', monnaieSurCompte: true));
+      expect(p.depotCompte, 5);
+      expect(p.vente['monnaieRendueUSD'], 0);
+      expect(p.vente['monnaieSurCompte'], 5);
+      expect(p.vente['statutPaiement'], 'Payé');
+      expectEquilibree(p.ecritureVente);
+      expectEquilibree(p.ecritureDepot!);
+      expect((p.ecritureDepot!['lines'] as List).first['accountCode'], '571000');
+    });
+
+    test('sans téléphone ou sans monnaie : rien sur le compte', () {
+      expect(preparer(vente(usd: 50, monnaieSurCompte: true)).depotCompte, 0);
+      expect(preparer(vente(usd: 45, tel: '0812345678', monnaieSurCompte: true)).ecritureDepot, isNull);
+      expect(preparer(vente(usd: 50, tel: '0812345678')).vente['monnaieRendueUSD'], closeTo(5, 0.0001));
     });
   });
 }
