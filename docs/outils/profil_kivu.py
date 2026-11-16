@@ -1,4 +1,4 @@
-import math, random
+import math, os, random
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
@@ -204,8 +204,13 @@ d = ImageDraw.Draw(img)
 for bx, by, s in [(420, 200, 12), (455, 220, 9), (390, 230, 8), (880, 330, 10)]:
     d.line([(bx - s, by - s * 0.4), (bx, by), (bx + s, by - s * 0.4)], fill=(40, 40, 50), width=3, joint='curve')
 
+# Fond de l'icône de l'application : le paysage seul (la commerçante est la couche de devant)
+if os.environ.get('ICONE') == '1':
+    img.save(os.environ.get('SORTIE', 'fond_icone.png'))
+    raise SystemExit
+
 # ---------- Commerçante Nguli ----------
-fg = Image.open('/home/user/stockly_saas/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png').convert('RGBA')
+fg = Image.open('/home/user/stockly_saas/docs/outils/commercante.png').convert('RGBA')
 fg = fg.crop(fg.getbbox()); h = 300; w = int(fg.width * h / fg.height); fg = fg.resize((w, h), Image.LANCZOS)
 fx, fyb = (S - w) // 2, 752
 ombre = couche(); ImageDraw.Draw(ombre).ellipse([S // 2 - 90, fyb - 14, S // 2 + 90, fyb + 14], fill=(0, 0, 0, 110))
