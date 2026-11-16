@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:stockly_saas/core/widgets/changer_mot_de_passe_dialog.dart';
+import 'package:stockly_saas/features/compte/supprimer_compte_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:stockly_saas/features/boutiques/boutiques_screen.dart';
 import 'package:flutter/material.dart';
@@ -273,7 +274,7 @@ class _TeamCard extends StatelessWidget {
 // ============================================================================
 // 👤 MON COMPTE : mot de passe + déconnexion (tout le monde)
 // ============================================================================
-class _MonCompteCard extends StatelessWidget {
+class _MonCompteCard extends ConsumerWidget {
   const _MonCompteCard();
 
   Future<void> _deconnecter(BuildContext context) async {
@@ -297,8 +298,9 @@ class _MonCompteCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final email = FirebaseAuth.instance.currentUser?.email ?? '';
+    final estProprietaire = ref.watch(userProfileProvider).value?.role.isOwner ?? false;
     final t = AppLocalizations.of(context);
     return Card(
       child: Column(
@@ -319,6 +321,12 @@ class _MonCompteCard extends StatelessWidget {
             leading: const Icon(Icons.logout_rounded, color: Colors.red),
             title: Text(t.logout, style: const TextStyle(color: Colors.red)),
             onTap: () => _deconnecter(context),
+          ),
+          // 🗑️ Exigé par Google Play
+          ListTile(
+            leading: Icon(Icons.delete_forever_rounded, color: Colors.red.shade300),
+            title: Text(t.delAccount, style: TextStyle(color: Colors.red.shade300, fontSize: 13)),
+            onTap: () => SupprimerCompteDialog.show(context, estProprietaire: estProprietaire),
           ),
         ],
       ),

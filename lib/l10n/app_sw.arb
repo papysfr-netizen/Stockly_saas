@@ -761,5 +761,20 @@
   "cloLineLent": "Pesa iliyokopeshwa (imetolewa sandukuni)",
   "prodPricePositive": "Bei ya kuuza lazima iwe zaidi ya 0",
   "prodNoNegative": "Hakuna namba hasi",
-  "payChangeToAccount": "Weka chenji ({montant}) kwenye akaunti ya mteja"
+  "payChangeToAccount": "Weka chenji ({montant}) kwenye akaunti ya mteja",
+  "delAccount": "Futa akaunti yangu",
+  "delTitle": "Futa akaunti?",
+  "delOwnerWarning": "Wewe ni mmiliki: biashara YOTE itafutwa milele (bidhaa, mauzo, madeni, hesabu, akaunti za wateja, matumizi) na wafanyakazi wako hawataweza kuingia tena. Fanya nakala kwanza ukitaka kuhifadhi takwimu zako.",
+  "delEmployeeWarning": "Ufikiaji wako utafutwa milele. Mauzo uliyofanya yanabaki kwenye kumbukumbu za biashara.",
+  "delConfirmWord": "FUTA",
+  "delPassword": "Nenosiri lako",
+  "delSmsHint": "Akaunti ya SMS: toka, ingia tena, kisha futa ndani ya dakika 5.",
+  "delButton": "Futa milele",
+  "delProgress": "Inafuta… Acha programu wazi na ubaki kwenye intaneti.",
+  "delErrPassword": "Nenosiri si sahihi.",
+  "delErrRelogin": "Kwa usalama, toka, ingia tena, kisha jaribu tena ndani ya dakika 5.",
+  "delErrNetwork": "Hakuna intaneti. Kufuta kunahitaji intaneti: jaribu tena.",
+  "delErrUnknown": "Kufuta hakukukamilika. Jaribu tena: kilichofutwa hakitarudi.",
+  "delDone": "Akaunti yako imefutwa.",
+  "delTypeConfirm": "Kuthibitisha, andika {mot}"
 }

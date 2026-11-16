@@ -2135,5 +2135,21 @@
   "prodPricePositive": "Le prix de vente doit être supérieur à 0",
   "prodNoNegative": "Pas de nombre négatif",
   "payChangeToAccount": "Mettre la monnaie ({montant}) sur le compte du client",
-  "@payChangeToAccount": {"placeholders": {"montant": {"type": "String"}}}
+  "@payChangeToAccount": {"placeholders": {"montant": {"type": "String"}}},
+  "delAccount": "Supprimer mon compte",
+  "delTitle": "Supprimer le compte ?",
+  "delOwnerWarning": "Vous êtes le propriétaire : TOUTE l'entreprise sera effacée pour toujours (produits, ventes, dettes, comptabilité, comptes clients, dépenses) et vos employés n'auront plus accès. Faites une sauvegarde avant si vous voulez garder vos chiffres.",
+  "delEmployeeWarning": "Votre accès sera supprimé pour toujours. Les ventes que vous avez faites restent dans les registres de l'entreprise.",
+  "delConfirmWord": "SUPPRIMER",
+  "delPassword": "Votre mot de passe",
+  "delSmsHint": "Compte par SMS : déconnectez-vous, reconnectez-vous, puis supprimez dans les 5 minutes.",
+  "delButton": "Supprimer pour toujours",
+  "delProgress": "Suppression en cours… Gardez l'application ouverte et restez connecté à internet.",
+  "delErrPassword": "Mot de passe incorrect.",
+  "delErrRelogin": "Par sécurité, déconnectez-vous, reconnectez-vous, puis recommencez dans les 5 minutes.",
+  "delErrNetwork": "Pas de connexion internet. La suppression a besoin d'internet : réessayez.",
+  "delErrUnknown": "La suppression n'a pas pu se terminer. Réessayez : ce qui est déjà effacé ne revient pas.",
+  "delDone": "Votre compte a été supprimé.",
+  "delTypeConfirm": "Pour confirmer, écrivez {mot}",
+  "@delTypeConfirm": {"placeholders": {"mot": {"type": "String"}}}
 }

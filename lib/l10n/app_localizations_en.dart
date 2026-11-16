@@ -2768,4 +2768,58 @@ class AppLocalizationsEn extends AppLocalizations {
   String payChangeToAccount(String montant) {
     return 'Put the change ($montant) on the customer\'s account';
   }
+
+  @override
+  String get delAccount => 'Delete my account';
+
+  @override
+  String get delTitle => 'Delete the account?';
+
+  @override
+  String get delOwnerWarning =>
+      'You are the owner: the WHOLE business will be erased forever (products, sales, debts, accounts, customer accounts, expenses) and your employees will lose access. Make a backup first if you want to keep your figures.';
+
+  @override
+  String get delEmployeeWarning =>
+      'Your access will be removed forever. The sales you made stay in the business records.';
+
+  @override
+  String get delConfirmWord => 'DELETE';
+
+  @override
+  String get delPassword => 'Your password';
+
+  @override
+  String get delSmsHint =>
+      'SMS account: log out, log in again, then delete within 5 minutes.';
+
+  @override
+  String get delButton => 'Delete forever';
+
+  @override
+  String get delProgress =>
+      'Deleting… Keep the app open and stay connected to the internet.';
+
+  @override
+  String get delErrPassword => 'Wrong password.';
+
+  @override
+  String get delErrRelogin =>
+      'For security, log out, log in again, then try again within 5 minutes.';
+
+  @override
+  String get delErrNetwork =>
+      'No internet connection. Deletion needs the internet: try again.';
+
+  @override
+  String get delErrUnknown =>
+      'Deletion could not finish. Try again: what is already erased will not come back.';
+
+  @override
+  String get delDone => 'Your account has been deleted.';
+
+  @override
+  String delTypeConfirm(String mot) {
+    return 'To confirm, type $mot';
+  }
 }

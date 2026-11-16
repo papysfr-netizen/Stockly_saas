@@ -2778,4 +2778,58 @@ class AppLocalizationsFr extends AppLocalizations {
   String payChangeToAccount(String montant) {
     return 'Mettre la monnaie ($montant) sur le compte du client';
   }
+
+  @override
+  String get delAccount => 'Supprimer mon compte';
+
+  @override
+  String get delTitle => 'Supprimer le compte ?';
+
+  @override
+  String get delOwnerWarning =>
+      'Vous êtes le propriétaire : TOUTE l\'entreprise sera effacée pour toujours (produits, ventes, dettes, comptabilité, comptes clients, dépenses) et vos employés n\'auront plus accès. Faites une sauvegarde avant si vous voulez garder vos chiffres.';
+
+  @override
+  String get delEmployeeWarning =>
+      'Votre accès sera supprimé pour toujours. Les ventes que vous avez faites restent dans les registres de l\'entreprise.';
+
+  @override
+  String get delConfirmWord => 'SUPPRIMER';
+
+  @override
+  String get delPassword => 'Votre mot de passe';
+
+  @override
+  String get delSmsHint =>
+      'Compte par SMS : déconnectez-vous, reconnectez-vous, puis supprimez dans les 5 minutes.';
+
+  @override
+  String get delButton => 'Supprimer pour toujours';
+
+  @override
+  String get delProgress =>
+      'Suppression en cours… Gardez l\'application ouverte et restez connecté à internet.';
+
+  @override
+  String get delErrPassword => 'Mot de passe incorrect.';
+
+  @override
+  String get delErrRelogin =>
+      'Par sécurité, déconnectez-vous, reconnectez-vous, puis recommencez dans les 5 minutes.';
+
+  @override
+  String get delErrNetwork =>
+      'Pas de connexion internet. La suppression a besoin d\'internet : réessayez.';
+
+  @override
+  String get delErrUnknown =>
+      'La suppression n\'a pas pu se terminer. Réessayez : ce qui est déjà effacé ne revient pas.';
+
+  @override
+  String get delDone => 'Votre compte a été supprimé.';
+
+  @override
+  String delTypeConfirm(String mot) {
+    return 'Pour confirmer, écrivez $mot';
+  }
 }

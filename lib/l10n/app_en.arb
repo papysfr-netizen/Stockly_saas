@@ -761,5 +761,20 @@
   "cloLineLent": "Money lent (taken from the till)",
   "prodPricePositive": "The selling price must be above 0",
   "prodNoNegative": "No negative number",
-  "payChangeToAccount": "Put the change ({montant}) on the customer's account"
+  "payChangeToAccount": "Put the change ({montant}) on the customer's account",
+  "delAccount": "Delete my account",
+  "delTitle": "Delete the account?",
+  "delOwnerWarning": "You are the owner: the WHOLE business will be erased forever (products, sales, debts, accounts, customer accounts, expenses) and your employees will lose access. Make a backup first if you want to keep your figures.",
+  "delEmployeeWarning": "Your access will be removed forever. The sales you made stay in the business records.",
+  "delConfirmWord": "DELETE",
+  "delPassword": "Your password",
+  "delSmsHint": "SMS account: log out, log in again, then delete within 5 minutes.",
+  "delButton": "Delete forever",
+  "delProgress": "Deleting… Keep the app open and stay connected to the internet.",
+  "delErrPassword": "Wrong password.",
+  "delErrRelogin": "For security, log out, log in again, then try again within 5 minutes.",
+  "delErrNetwork": "No internet connection. Deletion needs the internet: try again.",
+  "delErrUnknown": "Deletion could not finish. Try again: what is already erased will not come back.",
+  "delDone": "Your account has been deleted.",
+  "delTypeConfirm": "To confirm, type {mot}"
 }

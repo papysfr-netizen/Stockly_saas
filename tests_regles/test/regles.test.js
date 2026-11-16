@@ -492,3 +492,48 @@ describe('Grosse vente', () => {
     await assertSucceeds(venteDe(31, 'caissierRemises'));
   });
 });
+
+// ─────────────────────────────────────────────────────────────
+describe('Supprimer son compte (Google Play)', () => {
+  const marquer = (uid) => updateDoc(doc(dbDe(uid), `entreprises/${E}`), { enSuppression: true });
+
+  it('un employé peut supprimer son propre profil, pas celui d\'un autre', async () => {
+    await assertSucceeds(deleteDoc(doc(dbDe('caissier'), 'users/caissier')));
+    await assertFails(deleteDoc(doc(dbDe('gerant'), 'users/caissierB2')));
+  });
+
+  it('sans suppression demandée, le patron ne peut pas effacer les ventes, retours ou l\'entreprise', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), `entreprises/${E}/retours/r1`), { venteId: 'v1', montant: 1 });
+    });
+    await assertFails(deleteDoc(doc(dbDe('patron'), `entreprises/${E}/retours/r1`)));
+    await assertFails(deleteDoc(doc(dbDe('patron'), `entreprises/${E}`)));
+    await assertFails(deleteDoc(doc(dbDe('patron'), 'users/caissier')));
+  });
+
+  it('suppression demandée : le patron efface tout, puis l\'entreprise', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      const fdb = ctx.firestore();
+      await setDoc(doc(fdb, `entreprises/${E}/retours/r1`), { venteId: 'v1', montant: 1 });
+      await setDoc(doc(fdb, `entreprises/${E}/comptes_clients/c1/mouvements/m1`), { montant: 1 });
+    });
+    await assertSucceeds(marquer('patron'));
+    await assertSucceeds(deleteDoc(doc(dbDe('patron'), `entreprises/${E}/retours/r1`)));
+    await assertSucceeds(deleteDoc(doc(dbDe('patron'), `entreprises/${E}/comptes_clients/c1/mouvements/m1`)));
+    await assertSucceeds(deleteDoc(doc(dbDe('patron'), `entreprises/${E}/ventes/v1`)));
+    await assertSucceeds(deleteDoc(doc(dbDe('patron'), 'users/caissier')));
+    await assertSucceeds(deleteDoc(doc(dbDe('patron'), `entreprises/${E}`)));
+  });
+
+  it('un gérant ne peut ni demander la suppression ni tout effacer', async () => {
+    await assertFails(marquer('gerant'));
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      const fdb = ctx.firestore();
+      await updateDoc(doc(fdb, `entreprises/${E}`), { enSuppression: true });
+      await setDoc(doc(fdb, `entreprises/${E}/retours/r1`), { venteId: 'v1', montant: 1 });
+    });
+    await assertFails(deleteDoc(doc(dbDe('gerant'), `entreprises/${E}/retours/r1`)));
+    await assertFails(deleteDoc(doc(dbDe('gerant'), `entreprises/${E}`)));
+    await assertFails(deleteDoc(doc(dbDe('autre'), `entreprises/${E}/ventes/v1`)));
+  });
+});

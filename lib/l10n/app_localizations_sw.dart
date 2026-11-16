@@ -2766,4 +2766,58 @@ class AppLocalizationsSw extends AppLocalizations {
   String payChangeToAccount(String montant) {
     return 'Weka chenji ($montant) kwenye akaunti ya mteja';
   }
+
+  @override
+  String get delAccount => 'Futa akaunti yangu';
+
+  @override
+  String get delTitle => 'Futa akaunti?';
+
+  @override
+  String get delOwnerWarning =>
+      'Wewe ni mmiliki: biashara YOTE itafutwa milele (bidhaa, mauzo, madeni, hesabu, akaunti za wateja, matumizi) na wafanyakazi wako hawataweza kuingia tena. Fanya nakala kwanza ukitaka kuhifadhi takwimu zako.';
+
+  @override
+  String get delEmployeeWarning =>
+      'Ufikiaji wako utafutwa milele. Mauzo uliyofanya yanabaki kwenye kumbukumbu za biashara.';
+
+  @override
+  String get delConfirmWord => 'FUTA';
+
+  @override
+  String get delPassword => 'Nenosiri lako';
+
+  @override
+  String get delSmsHint =>
+      'Akaunti ya SMS: toka, ingia tena, kisha futa ndani ya dakika 5.';
+
+  @override
+  String get delButton => 'Futa milele';
+
+  @override
+  String get delProgress =>
+      'Inafuta… Acha programu wazi na ubaki kwenye intaneti.';
+
+  @override
+  String get delErrPassword => 'Nenosiri si sahihi.';
+
+  @override
+  String get delErrRelogin =>
+      'Kwa usalama, toka, ingia tena, kisha jaribu tena ndani ya dakika 5.';
+
+  @override
+  String get delErrNetwork =>
+      'Hakuna intaneti. Kufuta kunahitaji intaneti: jaribu tena.';
+
+  @override
+  String get delErrUnknown =>
+      'Kufuta hakukukamilika. Jaribu tena: kilichofutwa hakitarudi.';
+
+  @override
+  String get delDone => 'Akaunti yako imefutwa.';
+
+  @override
+  String delTypeConfirm(String mot) {
+    return 'Kuthibitisha, andika $mot';
+  }
 }

@@ -4674,6 +4674,96 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Mettre la monnaie ({montant}) sur le compte du client'**
   String payChangeToAccount(String montant);
+
+  /// No description provided for @delAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer mon compte'**
+  String get delAccount;
+
+  /// No description provided for @delTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer le compte ?'**
+  String get delTitle;
+
+  /// No description provided for @delOwnerWarning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous êtes le propriétaire : TOUTE l\'entreprise sera effacée pour toujours (produits, ventes, dettes, comptabilité, comptes clients, dépenses) et vos employés n\'auront plus accès. Faites une sauvegarde avant si vous voulez garder vos chiffres.'**
+  String get delOwnerWarning;
+
+  /// No description provided for @delEmployeeWarning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre accès sera supprimé pour toujours. Les ventes que vous avez faites restent dans les registres de l\'entreprise.'**
+  String get delEmployeeWarning;
+
+  /// No description provided for @delConfirmWord.
+  ///
+  /// In fr, this message translates to:
+  /// **'SUPPRIMER'**
+  String get delConfirmWord;
+
+  /// No description provided for @delPassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre mot de passe'**
+  String get delPassword;
+
+  /// No description provided for @delSmsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte par SMS : déconnectez-vous, reconnectez-vous, puis supprimez dans les 5 minutes.'**
+  String get delSmsHint;
+
+  /// No description provided for @delButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer pour toujours'**
+  String get delButton;
+
+  /// No description provided for @delProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suppression en cours… Gardez l\'application ouverte et restez connecté à internet.'**
+  String get delProgress;
+
+  /// No description provided for @delErrPassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe incorrect.'**
+  String get delErrPassword;
+
+  /// No description provided for @delErrRelogin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par sécurité, déconnectez-vous, reconnectez-vous, puis recommencez dans les 5 minutes.'**
+  String get delErrRelogin;
+
+  /// No description provided for @delErrNetwork.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de connexion internet. La suppression a besoin d\'internet : réessayez.'**
+  String get delErrNetwork;
+
+  /// No description provided for @delErrUnknown.
+  ///
+  /// In fr, this message translates to:
+  /// **'La suppression n\'a pas pu se terminer. Réessayez : ce qui est déjà effacé ne revient pas.'**
+  String get delErrUnknown;
+
+  /// No description provided for @delDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre compte a été supprimé.'**
+  String get delDone;
+
+  /// No description provided for @delTypeConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour confirmer, écrivez {mot}'**
+  String delTypeConfirm(String mot);
 }
 
 class _AppLocalizationsDelegate

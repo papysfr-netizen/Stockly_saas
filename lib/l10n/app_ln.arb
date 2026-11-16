@@ -761,5 +761,20 @@
   "cloLineLent": "Mbongo ya kodefisa (ezwami na kaisi)",
   "prodPricePositive": "Ntalo ya koteka esengeli koleka 0",
   "prodNoNegative": "Motango ya moins te",
-  "payChangeToAccount": "Tia mbongo ya kozongisa ({montant}) na compte ya client"
+  "payChangeToAccount": "Tia mbongo ya kozongisa ({montant}) na compte ya client",
+  "delAccount": "Longola compte na ngai",
+  "delTitle": "Olongola compte?",
+  "delOwnerWarning": "Ozali nkolo: mombongo MOBIMBA ekolongwa libela (biloko, ba ventes, ba niongo, comptabilité, ba compte ya ba clients, ba dépenses) mpe ba employés na yo bakokota lisusu te. Sala sauvegarde liboso soki olingi kobatela ba chiffres na yo.",
+  "delEmployeeWarning": "Nzela na yo ya kokota ekolongwa libela. Ba ventes osalaki etikali na ba registres ya mombongo.",
+  "delConfirmWord": "LONGOLA",
+  "delPassword": "Mot de passe na yo",
+  "delSmsHint": "Compte ya SMS: bima, kota lisusu, sima longola na kati ya miniti 5.",
+  "delButton": "Longola libela",
+  "delProgress": "Ezali kolongola… Tika application efungwama mpe tikala na internet.",
+  "delErrPassword": "Mot de passe ezali malamu te.",
+  "delErrRelogin": "Mpo na libateli, bima, kota lisusu, sima meka lisusu na kati ya miniti 5.",
+  "delErrNetwork": "Internet ezali te. Kolongola esengeli internet: meka lisusu.",
+  "delErrUnknown": "Kolongola esilaki te. Meka lisusu: oyo elongwaki ekozonga te.",
+  "delDone": "Compte na yo elongwami.",
+  "delTypeConfirm": "Mpo na kondima, koma {mot}"
 }

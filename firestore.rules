@@ -161,6 +161,11 @@ service cloud.firestore {
       return tel is string && tel.replace('[^0-9]', '').size() >= 9;
     }
 
+    // 🗑️ Le propriétaire a demandé la suppression de son entreprise (compte supprimé)
+    function enSuppression(entId) {
+      return get(/databases/$(database)/documents/entreprises/$(entId)).data.get('enSuppression', false) == true;
+    }
+
     // Employé autorisé « Gérer l'équipe » par le patron
     // (éteint par défaut, même pour un gérant)
     function estAdminEquipe(entId) {
@@ -228,7 +233,12 @@ service cloud.firestore {
         )
       );
 
-      allow delete: if false;
+      // 🗑️ Supprimer son compte : son propre profil ;
+      //    le patron qui supprime son entreprise : les profils de ses employés
+      allow delete: if estConnecte() && (
+        request.auth.uid == userId
+        || (estProprietaireDe(resource.data.entrepriseId) && enSuppression(resource.data.entrepriseId))
+      );
     }
 
     // ---------- Entreprises ----------
@@ -237,7 +247,14 @@ service cloud.firestore {
       allow create: if estConnecte() && request.resource.data.ownerId == request.auth.uid;
       // Infos de la boutique (Paramètres) : Propriétaire seulement
       allow update: if estProprietaireDe(entId) && request.resource.data.ownerId == resource.data.ownerId;
-      allow delete: if false;
+      // 🗑️ Effacée seulement par son propriétaire, après l'avoir marquée « enSuppression »
+      allow delete: if estProprietaireDe(entId) && resource.data.get('enSuppression', false) == true;
+
+      // 🗑️ Suppression du compte du propriétaire : il peut tout effacer
+      //    (ventes, retours, journal… d'habitude jamais effaçables)
+      match /{partie=**} {
+        allow delete: if estProprietaireDe(entId) && enSuppression(entId);
+      }
 
       // ----- Produits -----
       match /produits/{produitId} {

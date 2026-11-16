@@ -2772,4 +2772,58 @@ class AppLocalizationsLn extends AppLocalizations {
   String payChangeToAccount(String montant) {
     return 'Tia mbongo ya kozongisa ($montant) na compte ya client';
   }
+
+  @override
+  String get delAccount => 'Longola compte na ngai';
+
+  @override
+  String get delTitle => 'Olongola compte?';
+
+  @override
+  String get delOwnerWarning =>
+      'Ozali nkolo: mombongo MOBIMBA ekolongwa libela (biloko, ba ventes, ba niongo, comptabilité, ba compte ya ba clients, ba dépenses) mpe ba employés na yo bakokota lisusu te. Sala sauvegarde liboso soki olingi kobatela ba chiffres na yo.';
+
+  @override
+  String get delEmployeeWarning =>
+      'Nzela na yo ya kokota ekolongwa libela. Ba ventes osalaki etikali na ba registres ya mombongo.';
+
+  @override
+  String get delConfirmWord => 'LONGOLA';
+
+  @override
+  String get delPassword => 'Mot de passe na yo';
+
+  @override
+  String get delSmsHint =>
+      'Compte ya SMS: bima, kota lisusu, sima longola na kati ya miniti 5.';
+
+  @override
+  String get delButton => 'Longola libela';
+
+  @override
+  String get delProgress =>
+      'Ezali kolongola… Tika application efungwama mpe tikala na internet.';
+
+  @override
+  String get delErrPassword => 'Mot de passe ezali malamu te.';
+
+  @override
+  String get delErrRelogin =>
+      'Mpo na libateli, bima, kota lisusu, sima meka lisusu na kati ya miniti 5.';
+
+  @override
+  String get delErrNetwork =>
+      'Internet ezali te. Kolongola esengeli internet: meka lisusu.';
+
+  @override
+  String get delErrUnknown =>
+      'Kolongola esilaki te. Meka lisusu: oyo elongwaki ekozonga te.';
+
+  @override
+  String get delDone => 'Compte na yo elongwami.';
+
+  @override
+  String delTypeConfirm(String mot) {
+    return 'Mpo na kondima, koma $mot';
+  }
 }
