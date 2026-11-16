@@ -71,7 +71,8 @@ class _SupprimerCompteDialogState extends State<SupprimerCompteDialog> {
           ErreurSuppression.motDePasseIncorrect => t.delErrPassword,
           ErreurSuppression.reconnexionRequise => t.delErrRelogin,
           ErreurSuppression.pasDeConnexion => t.delErrNetwork,
-          ErreurSuppression.inconnue => t.delErrUnknown,
+          // Le code technique aide à trouver la cause (ex. permission-denied)
+          ErreurSuppression.inconnue => e.detail.isEmpty ? t.delErrUnknown : '${t.delErrUnknown} (${e.detail})',
         };
       });
     } catch (_) {
