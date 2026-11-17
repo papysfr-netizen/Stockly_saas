@@ -29,6 +29,7 @@ const _sousCollections = [
   'mouvements_stock',
   'livraisons',
   'inventaires',
+  'arrivages',
   'categories',
 ];
 

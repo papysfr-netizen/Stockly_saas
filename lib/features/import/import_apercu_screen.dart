@@ -22,6 +22,16 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
   Color _pastel(Color clair, Color base) => _sombre ? base.withValues(alpha: 0.22) : clair;
   ModeImport _mode = ModeImport.arrivage;
   bool _enCours = false;
+  // 📦 Fiche de l'arrivage
+  final _fournisseur = TextEditingController();
+  final _numero = TextEditingController();
+
+  @override
+  void dispose() {
+    _fournisseur.dispose();
+    _numero.dispose();
+    super.dispose();
+  }
   String _progression = '';
 
   String _prix(double v) => v <= 0 ? '—' : v.toStringAsFixed(2);
@@ -55,6 +65,8 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
     });
 
     final navigator = Navigator.of(context);
+    a.fournisseur = _fournisseur.text;
+    a.numero = _numero.text;
     try {
       final resultat = await widget.service.appliquer(
         a,
@@ -316,6 +328,38 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
                       color: _mode == ModeImport.arrivage ? Colors.teal.shade800 : Colors.red.shade700,
                     ),
                   ),
+                  // 📦 Arrivage : la packing list est gardée comme une fiche
+                  if (_mode == ModeImport.arrivage) ...[
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _fournisseur,
+                            enabled: !_enCours,
+                            textCapitalization: TextCapitalization.words,
+                            decoration: const InputDecoration(
+                              labelText: 'Fournisseur',
+                              isDense: true,
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: _numero,
+                            enabled: !_enCours,
+                            decoration: const InputDecoration(
+                              labelText: 'N° de la liste',
+                              isDense: true,
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 12),
 
                   // Résumé

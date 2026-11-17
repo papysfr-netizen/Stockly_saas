@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:stockly_saas/core/services/utilisateur_service.dart';
 import 'package:stockly_saas/core/services/journal_service.dart';
 import 'package:csv/csv.dart';
 import 'package:excel/excel.dart';
@@ -361,6 +363,10 @@ class AnalyseImport {
   final String boutiqueId;
   final String nomBoutique;
 
+  /// 📦 Fiche de l'arrivage (saisis sur l'écran d'aperçu)
+  String fournisseur = '';
+  String numero = '';
+
   int get nbNouveaux => lignes.where((l) => l.statut == StatutLigne.nouveau).length;
   int get nbExistants => lignes.where((l) => l.statut == StatutLigne.existant).length;
   int get nbIgnores => lignes.where((l) => l.statut == StatutLigne.ignore).length;
@@ -372,6 +378,8 @@ class AnalyseImport {
 }
 
 class ResultatImport {
+  /// 📦 Fiche d'arrivage créée (mode Arrivage)
+  String? arrivageId;
   int nouveaux = 0;
   int misAJour = 0;
   int ignores = 0;
@@ -656,9 +664,61 @@ class PackingListService {
     const taille = 400;
     int faits = 0;
 
+    // 📦 Arrivage : la packing list est gardée comme une fiche à part
+    //    (entreprises/{id}/arrivages/{auto}), avec l'identifiant de chaque produit
+    final arrivage = mode == ModeImport.arrivage;
+    final idsNouveaux = <LigneImport, String>{
+      for (final l in aEcrire)
+        if (!(l.statut == StatutLigne.existant && l.idExistant != null)) l: collection.doc().id,
+    };
+    DocumentReference<Map<String, dynamic>>? ficheRef;
+    Map<String, dynamic>? fiche;
+    if (arrivage && aEcrire.isNotEmpty) {
+      ficheRef = _firestore
+          .collection('entreprises')
+          .doc(analyse.entrepriseId)
+          .collection('arrivages')
+          .doc();
+      var parNom = '';
+      try {
+        parNom = await nomUtilisateurConnecte();
+      } catch (_) {}
+      final lignesFiche = [
+        for (final l in aEcrire)
+          {
+            'produitId': idsNouveaux[l] ?? l.idExistant,
+            'nom': l.statut == StatutLigne.existant && l.nomExistant.isNotEmpty ? l.nomExistant : l.nom,
+            'codeBarre': l.codeBarre,
+            'quantite': l.quantite,
+            'prixAchat': l.prixAchat,
+            'prixVente': l.prixVente,
+            'nouveau': idsNouveaux.containsKey(l),
+          },
+      ];
+      fiche = {
+        'id': ficheRef.id,
+        'numero': analyse.numero.trim(),
+        'fournisseur': analyse.fournisseur.trim(),
+        'boutiqueId': analyse.boutiqueId,
+        'nomBoutique': analyse.nomBoutique,
+        'nomFichier': analyse.nomFichier,
+        'date': FieldValue.serverTimestamp(),
+        'statut': 'actif',
+        'lignes': lignesFiche,
+        'nbProduits': lignesFiche.length,
+        'totalPieces': aEcrire.fold<int>(0, (s, l) => s + l.quantite),
+        'coutTotal': aEcrire.fold<double>(0, (s, l) => s + l.quantite * l.prixAchat),
+        'parUid': FirebaseAuth.instance.currentUser?.uid,
+        'parNom': parNom,
+      };
+      resultat.arrivageId = ficheRef.id;
+    }
+
     for (int i = 0; i < aEcrire.length; i += taille) {
       final batch = _firestore.batch();
       final paquet = aEcrire.skip(i).take(taille).toList();
+      // 📦 La fiche part avec le premier paquet de produits
+      if (i == 0 && ficheRef != null && fiche != null) batch.set(ficheRef, fiche);
 
       for (final l in paquet) {
         if (l.statut == StatutLigne.existant && l.idExistant != null) {
@@ -688,7 +748,7 @@ class PackingListService {
           batch.update(collection.doc(l.idExistant), maj);
           resultat.misAJour++;
         } else {
-          batch.set(collection.doc(), {
+          batch.set(collection.doc(idsNouveaux[l]), {
             'nom': l.nom,
             'codeBarre': l.codeBarre,
             'code_barre': l.codeBarre,
@@ -722,11 +782,13 @@ class PackingListService {
 
     // 📒 Journal « qui a fait quoi » (n'empêche jamais l'import)
     if (aEcrire.isNotEmpty) {
-      final arrivage = mode == ModeImport.arrivage;
       final pieces = aEcrire.fold<num>(0, (s, l) => s + l.quantite);
       final nomB =
           analyse.nomBoutique.isEmpty ? analyse.boutiqueId : analyse.nomBoutique;
-      var detailsImport = '${arrivage ? 'Arrivage' : 'Inventaire'} · $nomB · '
+      final numeroFiche = analyse.numero.trim().isEmpty ? '' : ' n° ${analyse.numero.trim()}';
+      final fournisseurFiche =
+          analyse.fournisseur.trim().isEmpty ? '' : ' · ${analyse.fournisseur.trim()}';
+      var detailsImport = '${arrivage ? 'Arrivage$numeroFiche$fournisseurFiche' : 'Inventaire'} · $nomB · '
           '${resultat.nouveaux} nouveau(x), ${resultat.misAJour} mis à jour · '
           '$pieces pièce(s)';
       if (!arrivage) {
@@ -744,6 +806,7 @@ class PackingListService {
         action: ActionsJournal.import,
         details: detailsImport,
         boutiqueId: analyse.boutiqueId,
+        reference: resultat.arrivageId,
       ));
     }
 

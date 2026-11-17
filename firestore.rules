@@ -457,6 +457,18 @@ service cloud.firestore {
         allow update, delete: if estGerantOuPlus(entId);
       }
 
+      // ----- 📦 Arrivages (packing lists) : une fiche par import « Arrivage » -----
+      // Tout le monde voit ; créer / annuler : « Gérer le stock » ; jamais effacé
+      match /arrivages/{arrivageId} {
+        allow read: if estMembre(entId);
+        allow create: if aPermission(entId, 'gererStock');
+        allow update: if aPermission(entId, 'gererStock')
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['statut', 'annuleLe', 'annulePar'])
+          && resource.data.get('statut', 'actif') == 'actif'
+          && request.resource.data.statut == 'annule';
+        allow delete: if false;
+      }
+
       // ----- 📊 Résumés mensuels du bilan (calculés par l'application) -----
       // Lire / écrire : autorisation « Voir les finances » ; effacer (résumé périmé) aussi
       match /soldes_mensuels/{mois} {
@@ -499,7 +511,7 @@ service cloud.firestore {
       // ----- Toutes les autres sous-collections (comme avant) -----
       match /{collection}/{reste=**} {
         allow read: if estMembre(entId) && !(collection in ['journal', 'ecritures_comptables', 'soldes_mensuels']);
-        allow write: if !(collection in ['produits', 'ventes', 'retours', 'comptes_clients', 'boutiques', 'transferts', 'creances', 'dettes', 'ecritures_comptables', 'journal', 'clotures', 'soldes_mensuels'])
+        allow write: if !(collection in ['produits', 'ventes', 'retours', 'comptes_clients', 'boutiques', 'transferts', 'creances', 'dettes', 'ecritures_comptables', 'journal', 'clotures', 'soldes_mensuels', 'arrivages'])
           && (estMembre(entId) || creeParMoi(entId));
       }
     }

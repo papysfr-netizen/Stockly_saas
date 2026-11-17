@@ -44,6 +44,7 @@ class SuppressionCompteService {
     'retours',
     'clotures',
     'soldes_mensuels',
+    'arrivages',
     'journal',
     'clients',
     'fournisseurs',

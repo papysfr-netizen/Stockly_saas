@@ -388,6 +388,16 @@ service cloud.firestore {
         allow update, delete: if estGerantOuPlus(entId);
       }
 
+      match /arrivages/{arrivageId} {
+        allow read: if estMembre(entId);
+        allow create: if aPermission(entId, 'gererStock');
+        allow update: if aPermission(entId, 'gererStock')
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['statut', 'annuleLe', 'annulePar'])
+          && resource.data.get('statut', 'actif') == 'actif'
+          && request.resource.data.statut == 'annule';
+        allow delete: if false;
+      }
+
       match /soldes_mensuels/{mois} {
         allow read, write: if aPermission(entId, 'voirFinances');
       }
@@ -421,7 +431,7 @@ service cloud.firestore {
 
       match /{collection}/{reste=**} {
         allow read: if estMembre(entId) && !(collection in ['journal', 'ecritures_comptables', 'soldes_mensuels']);
-        allow write: if !(collection in ['produits', 'ventes', 'retours', 'comptes_clients', 'boutiques', 'transferts', 'creances', 'dettes', 'ecritures_comptables', 'journal', 'clotures', 'soldes_mensuels'])
+        allow write: if !(collection in ['produits', 'ventes', 'retours', 'comptes_clients', 'boutiques', 'transferts', 'creances', 'dettes', 'ecritures_comptables', 'journal', 'clotures', 'soldes_mensuels', 'arrivages'])
           && (estMembre(entId) || creeParMoi(entId));
       }
     }

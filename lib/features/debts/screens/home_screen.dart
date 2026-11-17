@@ -1,3 +1,4 @@
+import 'package:stockly_saas/features/arrivages/arrivages_screen.dart';
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:stockly_saas/core/services/journal_service.dart';
@@ -215,6 +216,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         actions: [
           // 📥 Import Excel : Propriétaire + Gérant
           if (_peutGererStock) ...[
+            // 📦 Arrivages : chaque packing list importée, en fiche
+            IconButton(
+              icon: const Icon(Icons.local_shipping_outlined),
+              tooltip: 'Arrivages (packing lists)',
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ArrivagesScreen(entrepriseId: widget.currentUser.entrepriseId),
+                ),
+              ),
+            ),
             _isImporting
                 ? Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),

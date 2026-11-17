@@ -567,3 +567,26 @@ describe('Résumés mensuels du bilan', () => {
     await assertFails(getDoc(resume('caissier')));
   });
 });
+
+// ─────────────────────────────────────────────────────────────
+describe('Arrivages (packing lists)', () => {
+  const fiche = (uid) => doc(dbDe(uid), `entreprises/${E}/arrivages/a1`);
+  const donnees = { numero: 'PL-1', statut: 'actif', lignes: [], totalPieces: 10 };
+
+  it('le gérant crée une fiche ; un caissier la voit mais ne peut pas en créer', async () => {
+    await assertSucceeds(setDoc(fiche('gerant'), donnees));
+    await assertSucceeds(getDoc(fiche('caissier')));
+    await assertFails(setDoc(doc(dbDe('caissier'), `entreprises/${E}/arrivages/a2`), donnees));
+  });
+
+  it('annuler : seulement le statut, une seule fois, jamais effacée', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), `entreprises/${E}/arrivages/a1`), donnees);
+    });
+    await assertFails(updateDoc(fiche('gerant'), { totalPieces: 1 }));
+    await assertFails(updateDoc(fiche('caissier'), { statut: 'annule', annulePar: 'X' }));
+    await assertSucceeds(updateDoc(fiche('gerant'), { statut: 'annule', annulePar: 'G' }));
+    await assertFails(updateDoc(fiche('gerant'), { statut: 'actif' }));
+    await assertFails(deleteDoc(fiche('patron')));
+  });
+});
