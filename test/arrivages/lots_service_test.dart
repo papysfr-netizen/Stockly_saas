@@ -45,6 +45,18 @@ void main() {
       expect(LotsService.rendreEnPlus(vente, 15, 8, 4), [const AllocationLot('B', 1), const AllocationLot('A', 3)]);
     });
 
+    test('Nguli propose le plus ancien ; on peut choisir un autre arrivage', () {
+      expect(LotsService.proposition(produit), LotsService.ancien);
+      expect(LotsService.proposition({...produit, 'quantite': 26}), 'A'); // plus de stock ancien
+      // 8 pièces depuis B : tout vient de B
+      expect(LotsService.allouer(produit, 8, choix: 'B'), [const AllocationLot('B', 8)]);
+      // 25 pièces depuis A (6 restantes) : 6 de A, puis 5 anciennes, puis 14 de B
+      expect(LotsService.allouer(produit, 25, choix: 'A'), [const AllocationLot('A', 6), const AllocationLot('B', 14)]);
+      // choix « ancien » ou arrivage vide : le plus ancien d'abord
+      expect(LotsService.allouer(produit, 8, choix: LotsService.ancien), [const AllocationLot('A', 3)]);
+      expect(LotsService.allouer(produit, 8, choix: 'Z'), [const AllocationLot('A', 3)]);
+    });
+
     test('sans arrivage suivi : rien n\'est noté', () {
       expect(LotsService.allouer({'quantite': 12}, 5), isEmpty);
       expect(LotsService.stockAncien({'quantite': 12}), 12);

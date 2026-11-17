@@ -77,9 +77,40 @@ class LotsService {
     return a > 0 ? a : 0;
   }
 
-  /// D'où viennent [quantite] pièces vendues : le stock ancien d'abord (non noté),
-  /// puis les arrivages du plus ancien au plus récent
-  static List<AllocationLot> allouer(Map<String, dynamic> produit, int quantite) {
+  /// Valeur du choix « stock d'avant les arrivages »
+  static const String ancien = 'ancien';
+
+  /// Ce que Nguli propose : la source la plus ancienne qui a encore des pièces
+  static String? proposition(Map<String, dynamic> produit) {
+    if (stockAncien(produit) > 0) return ancien;
+    for (final l in lots(produit)) {
+      if (l.restant > 0) return l.arrivageId;
+    }
+    return null;
+  }
+
+  /// D'où viennent [quantite] pièces vendues : d'abord l'arrivage [choix]
+  /// (s'il en reste), puis le reste du plus ancien au plus récent
+  static List<AllocationLot> allouer(Map<String, dynamic> produit, int quantite, {String? choix}) {
+    if (choix == null || choix == ancien) return _allouerAncien(produit, quantite);
+    final lot = lots(produit).where((l) => l.arrivageId == choix);
+    final pris = lot.isEmpty ? 0 : (lot.first.restant < quantite ? lot.first.restant : quantite);
+    if (pris <= 0) return _allouerAncien(produit, quantite);
+    final vendus = Map<String, dynamic>.from(
+        produit['lotsVendus'] is Map ? produit['lotsVendus'] as Map : const {});
+    vendus[choix] = _i(vendus[choix]) + pris;
+    final suite = _allouerAncien(
+      {...produit, 'lotsVendus': vendus, 'quantite': _i(produit['quantite']) - pris},
+      quantite - pris,
+    );
+    final res = <String, int>{choix: pris};
+    for (final a in suite) {
+      res[a.arrivageId] = (res[a.arrivageId] ?? 0) + a.quantite;
+    }
+    return [for (final e in res.entries) AllocationLot(e.key, e.value)];
+  }
+
+  static List<AllocationLot> _allouerAncien(Map<String, dynamic> produit, int quantite) {
     var reste = quantite - stockAncien(produit);
     final res = <AllocationLot>[];
     for (final l in lots(produit)) {

@@ -22,6 +22,10 @@ class CartItem {
   /// Prix d'achat (USD, 0 = inconnu) : pour prévenir d'une vente à perte
   final double prixAchat;
 
+  /// 📦 Arrivage choisi pour ces pièces : null = le plus ancien d'abord,
+  ///    'ancien' = stock d'avant les arrivages, sinon l'identifiant de l'arrivage
+  final String? arrivageId;
+
   const CartItem({
     required this.id,
     required this.nom,
@@ -30,6 +34,7 @@ class CartItem {
     required this.stock,
     double? prixNormal,
     this.prixAchat = 0.0,
+    this.arrivageId,
   }) : prixNormal = prixNormal ?? prix;
 
   double get totalPrice => prix * quantite;
@@ -53,6 +58,7 @@ class CartItem {
     double? prixAchat,
   }) {
     return CartItem(
+      arrivageId: arrivageId,
       id: id ?? this.id,
       nom: nom ?? this.nom,
       prix: prix ?? this.prix,
@@ -77,6 +83,7 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
     int stock, {
     double? prixNormal,
     double prixAchat = 0.0,
+    String? arrivageId,
   }) {
     final index = state.indexWhere((item) => item.id == id);
 
@@ -86,8 +93,16 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
         return CartOperationResult.stockLimitReached;
       }
       final updatedList = List<CartItem>.from(state);
-      updatedList[index] = itemActuel.copyWith(
+      updatedList[index] = CartItem(
+        id: itemActuel.id,
+        nom: itemActuel.nom,
+        prix: itemActuel.prix,
         quantite: itemActuel.quantite + quantite,
+        stock: itemActuel.stock,
+        prixNormal: itemActuel.prixNormal,
+        prixAchat: itemActuel.prixAchat,
+        // 📦 le dernier choix d'arrivage s'applique à toute la ligne
+        arrivageId: arrivageId ?? itemActuel.arrivageId,
       );
       state = updatedList;
       return CartOperationResult.success;
@@ -105,6 +120,7 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
           stock: stock,
           prixNormal: prixNormal,
           prixAchat: prixAchat,
+          arrivageId: arrivageId,
         ),
       ];
       return CartOperationResult.success;

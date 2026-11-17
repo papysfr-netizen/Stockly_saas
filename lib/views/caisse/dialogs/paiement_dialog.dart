@@ -865,12 +865,15 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
   /// 📦 D'où viennent les pièces du panier (plus ancien arrivage d'abord)
   Map<String, List<AllocationLot>> _lots(Map<String, Map<String, dynamic>> produits) {
     final quantites = <String, int>{};
+    final choix = <String, String?>{};
     for (final item in widget.cart) {
       quantites[item.id] = (quantites[item.id] ?? 0) + item.quantite;
+      choix[item.id] ??= item.arrivageId; // l'arrivage choisi au moment de l'ajout
     }
     return {
       for (final e in quantites.entries)
-        if (produits[e.key] != null) e.key: LotsService.allouer(produits[e.key]!, e.value),
+        if (produits[e.key] != null)
+          e.key: LotsService.allouer(produits[e.key]!, e.value, choix: choix[e.key]),
     };
   }
 

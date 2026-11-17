@@ -3,6 +3,7 @@ import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/produit.dart';
+import '../../../features/arrivages/lots_service.dart';
 import '../../../core/providers/cart_provider.dart';
 import '../../../core/providers/currency_provider.dart';
 import '../../../core/providers/user_role_provider.dart';
@@ -21,6 +22,9 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
   late final TextEditingController _qteController;
   late final TextEditingController _prixController;
   String? _erreurStock;
+
+  /// 📦 Arrivage choisi (Nguli propose le plus ancien qui a encore des pièces)
+  late String? _arrivage = LotsService.proposition(widget.produit.suiviLots);
 
   /// Prix normal du produit dans la boutique de vente (USD)
   double get _prixNormalUSD => (widget.produit.prixPour(ref.boutiqueVente) as num).toDouble();
@@ -61,6 +65,55 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
         _erreurStock = null;
       }
     });
+  }
+
+  /// 📦 Liste des arrivages qui ont encore des pièces, le plus ancien en premier
+  List<Widget> _choixArrivage() {
+    final suivi = widget.produit.suiviLots;
+    if (suivi.isEmpty) return const [];
+    final ancien = LotsService.stockAncien(suivi);
+    final lots = LotsService.lots(suivi).where((l) => l.restant > 0).toList();
+    final etiquettes = <String, String>{
+      for (final l in (suivi['lots'] as List?) ?? const [])
+        if (l is Map) (l['a'] ?? '').toString(): [
+          if ((l['n'] ?? '').toString().isNotEmpty) 'N° ${l['n']}',
+          if ((l['f'] ?? '').toString().isNotEmpty) l['f'].toString(),
+          if (l['d'] is num) () {
+            final d = DateTime.fromMillisecondsSinceEpoch((l['d'] as num).toInt());
+            return '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+          }(),
+        ].join(' · '),
+    };
+    final choix = [
+      if (ancien > 0) (LotsService.ancien, 'Stock d\'avant les arrivages', ancien),
+      for (final l in lots)
+        (l.arrivageId, (etiquettes[l.arrivageId] ?? '').isEmpty ? 'Arrivage' : etiquettes[l.arrivageId]!, l.restant),
+    ];
+    if (choix.length < 2) return const [];
+    final propose = LotsService.proposition(suivi);
+    return [
+      DropdownButtonFormField<String>(
+        initialValue: _arrivage,
+        isExpanded: true,
+        decoration: const InputDecoration(
+          labelText: 'Vendre depuis l\'arrivage',
+          isDense: true,
+          border: OutlineInputBorder(),
+        ),
+        items: [
+          for (final c in choix)
+            DropdownMenuItem(
+              value: c.$1,
+              child: Text(
+                '${c.$2} (reste ${c.$3})${c.$1 == propose ? ' · proposé' : ''}',
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+        ],
+        onChanged: (v) => setState(() => _arrivage = v),
+      ),
+      const SizedBox(height: 10),
+    ];
   }
 
   /// Demande confirmation avant une vente à perte
@@ -118,6 +171,8 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // 📦 Choix de l'arrivage (seulement s'il y en a plusieurs possibles)
+            ..._choixArrivage(),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
@@ -237,6 +292,7 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
                     stock,
                     prixNormal: prixNormal,
                     prixAchat: prixAchat,
+                    arrivageId: _arrivage,
                   );
 
                   if (result == CartOperationResult.stockLimitReached) {

@@ -19,6 +19,11 @@ class Produit {
   /// 🏬 Prix de vente propre à une boutique : {idBoutique: prix}
   final Map<String, double> prixParBoutique;
 
+  /// 📦 Stock par arrivage, LU SEULEMENT : {quantite, lots, lotsVendus, lotsCA}.
+  ///    Jamais renvoyé par toMap() : une modification de la fiche produit ne
+  ///    doit pas écraser les compteurs des ventes.
+  final Map<String, dynamic> suiviLots;
+
   const Produit({
     required this.id,
     required this.entrepriseId,
@@ -32,6 +37,7 @@ class Produit {
     this.imageUrl,
     this.stocks = const {},
     this.prixParBoutique = const {},
+    this.suiviLots = const {},
   });
 
   // ================= GETTERS MÉTIER =================
@@ -180,6 +186,14 @@ class Produit {
       prixParBoutique: (map['prixParBoutique'] is Map)
           ? (map['prixParBoutique'] as Map).map((k, v) => MapEntry(k.toString(), parseDouble(v)))
           : const {},
+      suiviLots: map['lots'] is List
+          ? {
+              'quantite': map['quantite'],
+              'lots': map['lots'],
+              'lotsVendus': map['lotsVendus'] ?? const {},
+              'lotsCA': map['lotsCA'] ?? const {},
+            }
+          : const {},
     );
   }
 
@@ -210,6 +224,8 @@ class Produit {
   Map<String, dynamic> toFirestore() => toMap();
 
   // ================= ÉGALITÉ & HASHCODE =================
+  String get _signatureLots => suiviLots.isEmpty ? '' : '${suiviLots['lots']}|${suiviLots['lotsVendus']}';
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -225,7 +241,8 @@ class Produit {
         other.seuilAlerte == seuilAlerte &&
         other.imageUrl == imageUrl &&
         mapEquals(other.stocks, stocks) &&
-        mapEquals(other.prixParBoutique, prixParBoutique);
+        mapEquals(other.prixParBoutique, prixParBoutique) &&
+        other._signatureLots == _signatureLots;
   }
 
   @override
@@ -243,6 +260,7 @@ class Produit {
       imageUrl,
       Object.hashAll(stocks.entries),
       Object.hashAll(prixParBoutique.entries),
+      _signatureLots,
     );
   }
 

@@ -95,8 +95,11 @@ séance de relecture.
 - `lib/features/arrivages/lots_service.dart` : stock par arrivage, plus
   ancien d'abord. Fiche produit : `lots` [{a, q, pa}], `lotsVendus` et
   `lotsCA` (compteurs). Le stock d'avant les arrivages suivis (« ancien »)
-  part en premier. La vente note `articles[i].lots` ; un retour rend les
-  pièces aux mêmes arrivages (`rendreEnPlus`).
+  part en premier, SAUF si le vendeur choisit un autre arrivage dans la
+  fenêtre d'ajout au panier (Nguli propose le plus ancien ; `CartItem.arrivageId`,
+  `LotsService.allouer(choix:)`). La vente note `articles[i].lots` ; un retour
+  rend les pièces aux mêmes arrivages (`rendreEnPlus`). `Produit.suiviLots`
+  est lu seulement (jamais réécrit par toMap).
 - Limites : le stock par arrivage est global (pas par boutique) ; un
   inventaire ou une sortie de stock hors vente n'est pas imputé à un
   arrivage ; deux ventes au même instant peuvent dépasser légèrement un lot

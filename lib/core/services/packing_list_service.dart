@@ -714,6 +714,17 @@ class PackingListService {
       resultat.arrivageId = ficheRef.id;
     }
 
+    // 📦 Le lot d'un produit : arrivage, pièces, prix d'achat, n°, fournisseur, date
+    final quand = DateTime.now().millisecondsSinceEpoch;
+    Map<String, dynamic> etiquetteLot(LigneImport l) => {
+          'a': ficheRef!.id,
+          'q': l.quantite,
+          'pa': l.prixAchat,
+          'n': analyse.numero.trim(),
+          'f': analyse.fournisseur.trim(),
+          'd': quand,
+        };
+
     for (int i = 0; i < aEcrire.length; i += taille) {
       final batch = _firestore.batch();
       final paquet = aEcrire.skip(i).take(taille).toList();
@@ -747,9 +758,7 @@ class PackingListService {
           }
           // 📦 Cet arrivage devient un lot du produit (vendu après le stock plus ancien)
           if (ficheRef != null && l.quantite > 0) {
-            maj['lots'] = FieldValue.arrayUnion([
-              {'a': ficheRef.id, 'q': l.quantite, 'pa': l.prixAchat},
-            ]);
+            maj['lots'] = FieldValue.arrayUnion([etiquetteLot(l)]);
           }
           batch.update(collection.doc(l.idExistant), maj);
           resultat.misAJour++;
@@ -768,9 +777,7 @@ class PackingListService {
             if (analyse.boutiqueId != 'principale') 'stocks': {analyse.boutiqueId: l.quantite},
             // 📦 Son premier lot : cet arrivage
             if (ficheRef != null && l.quantite > 0)
-              'lots': [
-                {'a': ficheRef.id, 'q': l.quantite, 'pa': l.prixAchat},
-              ],
+              'lots': [etiquetteLot(l)],
             'entrepriseId': analyse.entrepriseId,
             'isPublicEcommerce': false,
             'createdAt': FieldValue.serverTimestamp(),
