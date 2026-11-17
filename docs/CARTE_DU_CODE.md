@@ -87,6 +87,20 @@ séance de relecture.
 8. **Avertissement `use_build_context_synchronously` désactivé** dans
    `analysis_options.yaml` : risque de plantage après un écran fermé.
 
+## Lectures Firebase (vérifiées en novembre 2026)
+
+Le forfait gratuit donne 50 000 lectures par jour pour TOUT le projet.
+Toutes les lectures de l'application sont limitées : par jour (accueil,
+clôture), par période (Rapport, Historique : 500 ventes au plus pour
+« Tout »), par mois (Comptabilité), aux dettes en cours + 6 derniers mois
+(Dettes, recherche client). Le catalogue des produits est lu par UN seul
+flux pour toute l'application (`produitsStreamProvider`) ; les autres
+écrans qui écoutent la même collection le partagent. Lectures complètes
+restantes, une seule fois par téléphone : « Synchroniser » de la
+Comptabilité et le rattrapage des boutiques des écritures.
+Point à surveiller : les très anciennes ventes dont la date est en texte
+sont relues par le Rapport (`where('date', >= '')`).
+
 ## Notes de relecture
 
 ### Caisse (`lib/views/caisse`, relue en entier)

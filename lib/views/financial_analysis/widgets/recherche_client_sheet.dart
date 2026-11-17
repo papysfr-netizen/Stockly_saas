@@ -87,15 +87,27 @@ class _RechercheClientSheetState extends State<RechercheClientSheet> {
 
   Future<void> _chargerCreances() async {
     try {
-      final snap = await FirebaseFirestore.instance
+      // ⚡ Comme l'écran Dettes : les dettes en cours + celles des 6 derniers mois
+      //    (avant : TOUTES les dettes depuis le début, à chaque ouverture)
+      final col = FirebaseFirestore.instance
           .collection('entreprises')
           .doc(widget.entrepriseId)
-          .collection('creances')
-          .get()
-          .timeout(const Duration(seconds: 15));
-      _creances = [
-        for (final d in snap.docs) {'_id': d.id, ...d.data()},
-      ];
+          .collection('creances');
+      final debutPeriode = widget.periode.start;
+      final il6Mois = DateTime.now().subtract(const Duration(days: 183));
+      final depuis = Timestamp.fromDate(debutPeriode.isBefore(il6Mois) ? debutPeriode : il6Mois);
+      final lots = await Future.wait([
+        col.where('montantReste', isGreaterThan: 0).get(),
+        col.where('dernierPaiement', isGreaterThanOrEqualTo: depuis).get(),
+        col.where('dateCreation', isGreaterThanOrEqualTo: depuis).get(),
+      ]).timeout(const Duration(seconds: 15));
+      final parId = <String, Map<String, dynamic>>{};
+      for (final lot in lots) {
+        for (final d in lot.docs) {
+          parId[d.id] = {'_id': d.id, ...d.data()};
+        }
+      }
+      _creances = parId.values.toList();
     } catch (e) {
       debugPrint('Recherche client : créances non lues : $e');
     }
