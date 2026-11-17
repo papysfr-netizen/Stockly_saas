@@ -457,6 +457,12 @@ service cloud.firestore {
         allow update, delete: if estGerantOuPlus(entId);
       }
 
+      // ----- 📊 Résumés mensuels du bilan (calculés par l'application) -----
+      // Lire / écrire : autorisation « Voir les finances » ; effacer (résumé périmé) aussi
+      match /soldes_mensuels/{mois} {
+        allow read, write: if aPermission(entId, 'voirFinances');
+      }
+
       // ----- 🔒 Clôtures de caisse : une par boutique et par jour -----
       // Chacun clôture SA boutique, à SON nom, une seule fois (jamais modifiée).
       // Supprimer = « rouvrir » : Gérant+ seulement.
@@ -492,8 +498,8 @@ service cloud.firestore {
 
       // ----- Toutes les autres sous-collections (comme avant) -----
       match /{collection}/{reste=**} {
-        allow read: if estMembre(entId) && !(collection in ['journal', 'ecritures_comptables']);
-        allow write: if !(collection in ['produits', 'ventes', 'retours', 'comptes_clients', 'boutiques', 'transferts', 'creances', 'dettes', 'ecritures_comptables', 'journal', 'clotures'])
+        allow read: if estMembre(entId) && !(collection in ['journal', 'ecritures_comptables', 'soldes_mensuels']);
+        allow write: if !(collection in ['produits', 'ventes', 'retours', 'comptes_clients', 'boutiques', 'transferts', 'creances', 'dettes', 'ecritures_comptables', 'journal', 'clotures', 'soldes_mensuels'])
           && (estMembre(entId) || creeParMoi(entId));
       }
     }

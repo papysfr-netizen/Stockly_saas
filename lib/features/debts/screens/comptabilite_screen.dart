@@ -10,21 +10,21 @@ import 'package:stockly_saas/features/accounting/models/journal_entry.dart';
 import 'package:stockly_saas/core/models/payment_method.dart';
 import 'package:stockly_saas/core/providers/currency_provider.dart';
 import 'package:stockly_saas/features/accounting/services/accounting_journal_service.dart';
+import 'package:stockly_saas/features/accounting/services/soldes_mensuels_service.dart';
 import 'package:stockly_saas/features/accounting/screens/ecriture_form_screen.dart';
 // ============================================================================
 // 1. PROVIDERS & STREAMS (RIVERPOD - ISOLATION MULTI-TENANT)
 // ============================================================================
 
-/// Flux en temps réel des écritures comptables sous /entreprises/{entrepriseId}/ecritures_comptables
-final ecrituresComptablesProvider =
-    StreamProvider.family<List<JournalEntry>, String>((ref, entrepriseId) {
-  if (entrepriseId.isEmpty) return Stream.value([]);
+/// 📅 Écritures d'UN mois, en direct (avant : toutes les écritures depuis le début,
+///    relues à chaque ouverture). [mois] = 'AAAA-MM'.
+final ecrituresDuMoisProvider =
+    StreamProvider.family<List<JournalEntry>, ({String entrepriseId, String mois})>((ref, cle) {
+  if (cle.entrepriseId.isEmpty) return Stream.value([]);
+  final morceaux = cle.mois.split('-');
+  final mois = DateTime(int.parse(morceaux[0]), int.parse(morceaux[1]));
 
-  return FirebaseFirestore.instance
-      .collection('entreprises')
-      .doc(entrepriseId)
-      .collection('ecritures_comptables')
-      .orderBy('date', descending: true)
+  return SoldesMensuelsService.requeteDuMois(cle.entrepriseId, mois)
       .snapshots()
       .map((snapshot) {
         // 🏬 On note la boutique de chaque écriture (pour le filtre)
@@ -34,6 +34,23 @@ final ecrituresComptablesProvider =
         return snapshot.docs.map((doc) => JournalEntry.fromFirestore(doc)).toList();
       });
 });
+
+/// 📊 Soldes cumulés des mois passés (résumés mensuels). [version] change
+///    quand on demande « Recalculer » (tout est relu une fois).
+final soldesAvantProvider = FutureProvider.family<SoldesParBoutique,
+    ({String entrepriseId, String mois, int version})>((ref, cle) {
+  if (cle.entrepriseId.isEmpty) return Future.value(<String, Map<String, double>>{});
+  final morceaux = cle.mois.split('-');
+  return SoldesMensuelsService.cumulAvant(
+    cle.entrepriseId,
+    DateTime(int.parse(morceaux[0]), int.parse(morceaux[1])),
+    toutRecalculer: cle.version > 0,
+  );
+});
+
+const _nomsMois = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet',
+    'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+String _libelleMois(DateTime m) => '${_nomsMois[m.month - 1]} ${m.year}';
 
 /// Controller pour les opérations d'écriture et de synchronisation comptable
 final comptabiliteControllerProvider =
@@ -242,7 +259,7 @@ class ComptabiliteController extends FamilyAsyncNotifier<void, String> {
   }
 
   /// Suppression d'une écriture comptable
-  Future<void> supprimerEcriture(String ecritureId) async {
+  Future<void> supprimerEcriture(String ecritureId, {DateTime? date}) async {
     final entrepriseId = arg;
     if (entrepriseId.isEmpty) return;
 
@@ -254,6 +271,8 @@ class ComptabiliteController extends FamilyAsyncNotifier<void, String> {
           .collection('ecritures_comptables')
           .doc(ecritureId)
           .delete();
+      // 📊 Le résumé du mois (s'il est passé) sera refait
+      if (date != null) await SoldesMensuelsService.invalider(entrepriseId, date);
 
       state = const AsyncValue.data(null);
     } catch (e, stack) {
@@ -281,6 +300,10 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
   late TabController _tabController;
   String _searchQuery = '';
   String? _selectedAccountFilter;
+  // 📅 Mois affiché dans le Journal
+  DateTime _mois = SoldesMensuelsService.debutMois(DateTime.now());
+  // 📊 > 0 : « Recalculer » le bilan (relit tout une fois)
+  int _versionBilan = 0;
 
   @override
   void initState() {
@@ -293,7 +316,13 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
       try {
         final profil = await futur.timeout(const Duration(seconds: 10));
         if (!profil.role.isAdminOrOwner) return;
-        await rattraperBoutiquesEcritures(profil.entrepriseId);
+        // Une seule fois par téléphone : les nouvelles écritures ont déjà leur boutique
+        final prefs = await SharedPreferences.getInstance();
+        final cle = 'boutiques_ecritures_ok_${profil.entrepriseId}';
+        if (prefs.getBool(cle) == true) return;
+        if (await rattraperBoutiquesEcritures(profil.entrepriseId)) {
+          await prefs.setBool(cle, true);
+        }
       } catch (_) {}
     });
   }
@@ -383,7 +412,7 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
     }
   }
 
-  Future<void> _supprimer(String entryId) async {
+  Future<void> _supprimer(String entryId, DateTime date) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -409,7 +438,7 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
     try {
       await ref
           .read(comptabiliteControllerProvider(widget.entrepriseId).notifier)
-          .supprimerEcriture(entryId);
+          .supprimerEcriture(entryId, date: date);
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -425,8 +454,8 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
 
   @override
   Widget build(BuildContext context) {
-    final ecrituresAsync =
-        ref.watch(ecrituresComptablesProvider(widget.entrepriseId));
+    final ecrituresAsync = ref.watch(ecrituresDuMoisProvider(
+        (entrepriseId: widget.entrepriseId, mois: SoldesMensuelsService.cleMois(_mois))));
     final controllerState =
         ref.watch(comptabiliteControllerProvider(widget.entrepriseId));
     final currencyState = ref.watch(currencyProvider);
@@ -517,7 +546,7 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
             controller: _tabController,
             children: [
               _buildJournalTab(ecritures, currencyState, isSyncing),
-              _buildBilanSyntheseTab(ecritures, currencyState),
+              _buildBilanSyntheseTab(boutique, currencyState),
             ],
           );
         },
@@ -557,10 +586,28 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
       return matchesSearch && matchesAccount;
     }).toList();
 
+    final ceMois = SoldesMensuelsService.debutMois(DateTime.now());
     return Column(
       children: [
+        // 📅 Un mois à la fois (lecture rapide et économique)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.chevron_left),
+              onPressed: () => setState(() => _mois = DateTime(_mois.year, _mois.month - 1)),
+            ),
+            Text(_libelleMois(_mois), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            IconButton(
+              icon: const Icon(Icons.chevron_right),
+              onPressed: _mois.isBefore(ceMois)
+                  ? () => setState(() => _mois = DateTime(_mois.year, _mois.month + 1))
+                  : null,
+            ),
+          ],
+        ),
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
           child: Row(
             children: [
               Expanded(
@@ -693,7 +740,7 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
                 if (action == 'reverse') {
                   _extourner(entry);
                 } else if (action == 'delete') {
-                  _supprimer(entry.id);
+                  _supprimer(entry.id, entry.date);
                 }
               },
               itemBuilder: (context) => [
@@ -744,41 +791,53 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
   }
 
   // --- ONGLET 2 : BILAN & SYNTHÈSE ENRICHI ---
-  Widget _buildBilanSyntheseTab(List<JournalEntry> ecritures, CurrencyState currencyState) {
+  Widget _buildBilanSyntheseTab(String? boutique, CurrencyState currencyState) {
+    // 📊 Bilan = résumés des mois passés + écritures du mois en cours (en direct)
+    final ceMois = SoldesMensuelsService.debutMois(DateTime.now());
+    final cleMois = SoldesMensuelsService.cleMois(ceMois);
+    final avant = ref.watch(soldesAvantProvider(
+        (entrepriseId: widget.entrepriseId, mois: cleMois, version: _versionBilan)));
+    final courant = ref.watch(ecrituresDuMoisProvider((entrepriseId: widget.entrepriseId, mois: cleMois)));
+
+    if (avant.isLoading || courant.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (avant.hasError || courant.hasError) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text('Erreur de chargement : ${avant.error ?? courant.error}',
+              textAlign: TextAlign.center, style: const TextStyle(color: Colors.red)),
+        ),
+      );
+    }
+
+    final soldes = SoldesMensuelsService.pourBoutique(avant.value ?? const {}, boutique);
+    for (final entry in courant.value ?? const <JournalEntry>[]) {
+      if (boutique != null && boutiqueEcriture(entry.id) != boutique) continue;
+      for (final line in entry.lines) {
+        soldes[line.accountCode] = (soldes[line.accountCode] ?? 0) + line.debit - line.credit;
+      }
+    }
+
     double totalTresorerie = 0.0;
     double totalCreances = 0.0;
     double totalVentes = 0.0;
     double totalCharges = 0.0;
     double totalAvances = 0.0;
 
-    for (var entry in ecritures) {
-      for (var line in entry.lines) {
-        final code = line.accountCode;
-
-        if (code.startsWith('571') ||
-            code.startsWith('531') ||
-            code.startsWith('521') ||
-            code.startsWith('572')) {
-          totalTresorerie += (line.debit - line.credit);
-        }
-
-        if (code.startsWith('411')) {
-          totalCreances += (line.debit - line.credit);
-        }
-
-        if (code.startsWith('419')) {
-          totalAvances += (line.credit - line.debit);
-        }
-
-        if (code.startsWith('7')) {
-          totalVentes += (line.credit - line.debit);
-        }
-
-        if (code.startsWith('6')) {
-          totalCharges += (line.debit - line.credit);
-        }
+    soldes.forEach((code, net) {
+      if (code.startsWith('571') ||
+          code.startsWith('531') ||
+          code.startsWith('521') ||
+          code.startsWith('572')) {
+        totalTresorerie += net;
       }
-    }
+      if (code.startsWith('411')) totalCreances += net;
+      if (code.startsWith('419')) totalAvances -= net;
+      if (code.startsWith('7')) totalVentes -= net;
+      if (code.startsWith('6')) totalCharges += net;
+    });
 
     final double resultat = totalVentes - totalCharges;
 
@@ -838,6 +897,18 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
                 ],
               ),
             ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Depuis le début, jusqu\'à aujourd\'hui. Les mois terminés sont résumés '
+            'une fois pour aller vite.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+          ),
+          TextButton.icon(
+            icon: const Icon(Icons.refresh, size: 18),
+            label: const Text('Recalculer tout le bilan'),
+            onPressed: () => setState(() => _versionBilan++),
           ),
         ],
       ),

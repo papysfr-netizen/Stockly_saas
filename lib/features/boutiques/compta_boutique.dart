@@ -29,8 +29,9 @@ bool _rattrapageFait = false;
 
 /// 🏬 Les anciennes écritures sans boutique reçoivent celle de leur
 /// vente / dette / dépense d'origine (sinon « principale »). Une fois par session.
-Future<void> rattraperBoutiquesEcritures(String entrepriseId) async {
-  if (_rattrapageFait || entrepriseId.isEmpty) return;
+/// Retourne true quand tout est fait (on ne le refera plus sur ce téléphone).
+Future<bool> rattraperBoutiquesEcritures(String entrepriseId) async {
+  if (_rattrapageFait || entrepriseId.isEmpty) return false;
   _rattrapageFait = true;
   final db = FirebaseFirestore.instance;
   final ent = db.collection('entreprises').doc(entrepriseId);
@@ -53,7 +54,7 @@ Future<void> rattraperBoutiquesEcritures(String entrepriseId) async {
         aFaire.add(doc);
       }
     }
-    if (aFaire.isEmpty) return;
+    if (aFaire.isEmpty) return true;
 
     // Lit un document sans jamais planter (introuvable / refusé -> '')
     Future<String> lire(DocumentReference<Map<String, dynamic>> r) async {
@@ -108,8 +109,10 @@ Future<void> rattraperBoutiquesEcritures(String entrepriseId) async {
       }
       await batch.commit().timeout(const Duration(seconds: 30));
     }
+    return true;
   } catch (_) {
     // Pas de réseau ou refus : on réessaiera à la prochaine ouverture
     _rattrapageFait = false;
+    return false;
   }
 }

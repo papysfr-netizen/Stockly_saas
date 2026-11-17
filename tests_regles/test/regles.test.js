@@ -553,3 +553,17 @@ describe('Supprimer son compte (Google Play)', () => {
     await assertFails(deleteDoc(doc(dbDe('autre'), `entreprises/${E}/ventes/v1`)));
   });
 });
+
+// ─────────────────────────────────────────────────────────────
+describe('Résumés mensuels du bilan', () => {
+  const resume = (uid) => doc(dbDe(uid), `entreprises/${E}/soldes_mensuels/2026-10`);
+  it('le gérant (Voir les finances) lit et écrit les résumés', async () => {
+    await assertSucceeds(setDoc(resume('gerant'), { mois: '2026-10', nb: 1, parBoutique: {} }));
+    await assertSucceeds(getDoc(resume('gerant')));
+    await assertSucceeds(deleteDoc(resume('patron')));
+  });
+  it('un caissier ne peut ni lire ni fausser un résumé', async () => {
+    await assertFails(setDoc(resume('caissier'), { mois: '2026-10', nb: 1, parBoutique: {} }));
+    await assertFails(getDoc(resume('caissier')));
+  });
+});

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:stockly_saas/features/accounting/services/soldes_mensuels_service.dart';
 import 'package:stockly_saas/core/services/journal_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -203,6 +204,8 @@ class DepenseRepository {
       batch.delete(_refEcriture(maj.entrepriseId, maj.id));
     }
     await _valider(batch);
+    // 📊 Montant changé dans un mois passé : son résumé du bilan sera refait
+    unawaited(SoldesMensuelsService.invalider(maj.entrepriseId, maj.date));
 
     // 📒 Journal « qui a fait quoi »
     final json = maj.toJson();

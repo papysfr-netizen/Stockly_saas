@@ -68,8 +68,15 @@ séance de relecture.
      Une fonction serveur (Blaze) le fermerait.
 2. **Montants en `double`** et monnaie rendue sans indication de la monnaie
    ($ ou FC) : écarts d'arrondi possibles, pas de suivi du tiroir par monnaie.
-3. **Comptabilité** : lit toutes les écritures pour le bilan (coût Firebase
-   qui grandit avec l'historique). Solution : totaux par mois.
+3. **Comptabilité : réglé (novembre 2026).** Le Journal lit un mois à la fois ;
+   le Bilan additionne des résumés mensuels (`soldes_mensuels/{AAAA-MM}`,
+   `lib/features/accounting/services/soldes_mensuels_service.dart`) et le mois
+   en cours en direct. Un résumé est refait si le nombre d'écritures du mois
+   change (comptage Firebase) ou s'il est effacé (écriture supprimée, dépense
+   modifiée) ; bouton « Recalculer tout le bilan ». Limite : une écriture
+   ancienne modifiée ailleurs sans changer le nombre n'est vue qu'après
+   « Recalculer » ; les très anciennes écritures avec une date en texte
+   (et non en date Firebase) ne sont pas comptées.
 4. **Fichiers trop gros** : `financial_analysis_screen.dart` (1 481 lignes),
    `paiement_dialog.dart` (1 300), `add_product_modal.dart` (1 035),
    `aide_screen.dart` (1 036) : écran et calculs mélangés.
