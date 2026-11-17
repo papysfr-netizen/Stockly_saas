@@ -16,6 +16,7 @@ import 'package:stockly_saas/core/providers/cart_provider.dart';
 import 'package:stockly_saas/core/utils/payment_calculator.dart';
 import 'package:stockly_saas/features/accounting/services/accounting_journal_service.dart';
 import 'package:stockly_saas/features/comptes_clients/compte_client_service.dart';
+import 'package:stockly_saas/features/arrivages/lots_service.dart';
 
 /// Nom enregistré quand le vendeur n'a pas saisi de client
 const String clientDivers = 'Client Divers';
@@ -62,6 +63,9 @@ class NouvelleVente {
   /// 💰 La monnaie à rendre est mise sur le compte du client (dépôt) au lieu d'être rendue
   final bool monnaieSurCompte;
 
+  /// 📦 D'où viennent les pièces vendues (produitId → arrivages), plus ancien d'abord
+  final Map<String, List<AllocationLot>> lots;
+
   const NouvelleVente({
     required this.entrepriseId,
     required this.userId,
@@ -81,6 +85,7 @@ class NouvelleVente {
     this.prixAchat = const {},
     this.apresCloture = false,
     this.monnaieSurCompte = false,
+    this.lots = const {},
   });
 
   String get client => nomSaisi.trim().isEmpty ? clientDivers : nomSaisi.trim();
@@ -91,7 +96,11 @@ class NouvelleVente {
 class BaisseStock {
   final String produitId;
   final int quantite;
-  const BaisseStock(this.produitId, this.quantite);
+
+  /// 📦 Arrivages d'où viennent ces pièces, et prix de vente (pour le bénéfice par arrivage)
+  final List<AllocationLot> lots;
+  final double prix;
+  const BaisseStock(this.produitId, this.quantite, {this.lots = const [], this.prix = 0});
 }
 
 /// Tout ce qui sera écrit pour une vente
@@ -157,6 +166,10 @@ class VenteService {
     if (besoin <= 0) return 0.0;
     return _arrondi(besoin < plafond ? besoin : plafond);
   }
+
+  /// La ligne [i] est-elle la première du panier pour son produit ?
+  static bool _premiereLigne(List<CartItem> panier, int i) =>
+      panier.indexWhere((x) => x.id == panier[i].id) == i;
 
   /// Vente à crédit : il faut un vrai nom et un téléphone (sinon impossible de relancer)
   static ProblemeCredit? verifierCredit(NouvelleVente v) {
@@ -270,18 +283,22 @@ class VenteService {
       // 🔒 Prix vendu par produit (le plus bas s'il y a plusieurs lignes) :
       //    le serveur le compare au prix normal quand le stock baisse
       'prixVendus': prixVendus,
-      'articles': v.panier
-          .map((item) => {
-                'produitId': item.id,
-                'nom': item.nom,
-                'prixUnitaire': item.prix,
-                'prixNormal': item.prixNormal,
-                'remise': item.remiseTotale,
-                'prixAchat': v.prixAchat[item.id] ?? 0.0,
-                'quantite': item.quantite,
-                'totalItem': item.prix * item.quantite,
-              })
-          .toList(),
+      'articles': [
+        for (var i = 0; i < v.panier.length; i++)
+          {
+            'produitId': v.panier[i].id,
+            'nom': v.panier[i].nom,
+            'prixUnitaire': v.panier[i].prix,
+            'prixNormal': v.panier[i].prixNormal,
+            'remise': v.panier[i].remiseTotale,
+            'prixAchat': v.prixAchat[v.panier[i].id] ?? 0.0,
+            'quantite': v.panier[i].quantite,
+            'totalItem': v.panier[i].prix * v.panier[i].quantite,
+            // 📦 Arrivages d'où viennent les pièces (sur la 1re ligne du produit)
+            if (_premiereLigne(v.panier, i) && (v.lots[v.panier[i].id] ?? const []).isNotEmpty)
+              'lots': [for (final a in v.lots[v.panier[i].id]!) a.versMap()],
+          },
+      ],
       'createdAt': maintenant,
       'date': maintenant,
     };
@@ -430,7 +447,15 @@ class VenteService {
       creanceId: creance == null ? null : creanceId,
       creance: creance,
       // 4. Stock (même si à livrer plus tard : la marchandise est réservée)
-      stock: [for (final item in v.panier) BaisseStock(item.id, item.quantite)],
+      stock: [
+        for (var i = 0; i < v.panier.length; i++)
+          BaisseStock(
+            v.panier[i].id,
+            v.panier[i].quantite,
+            lots: _premiereLigne(v.panier, i) ? (v.lots[v.panier[i].id] ?? const []) : const [],
+            prix: v.panier[i].prix,
+          ),
+      ],
       verseCaisse: verseCaisse,
       verseTotal: verseTotal,
       reste: reste,
@@ -507,6 +532,9 @@ class VenteService {
         'quantite': FieldValue.increment(-s.quantite),
         // 🔒 La vente qui fait baisser ce stock (le serveur y lit le prix vendu)
         'derniereVente': plan.venteId,
+        // 📦 Pièces vendues et argent, par arrivage
+        for (final a in s.lots) 'lotsVendus.${a.arrivageId}': FieldValue.increment(a.quantite),
+        for (final a in s.lots) 'lotsCA.${a.arrivageId}': FieldValue.increment(_arrondi(a.quantite * s.prix)),
         if (v.boutiqueId != 'principale') 'stocks.${v.boutiqueId}': FieldValue.increment(-s.quantite),
         'updatedAt': maintenant,
       });

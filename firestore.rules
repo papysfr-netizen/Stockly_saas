@@ -290,7 +290,7 @@ service cloud.firestore {
               // Modifier tout : le patron ou « Gérer le stock »
               proprio || perms.get('gererStock', gerant) == true
               // Les autres : seulement le stock, lors d'une vente / d'un retour
-              || (apres.diff(resource.data).affectedKeys().hasOnly(['quantite', 'stocks', 'updatedAt', 'derniereVente'])
+              || (apres.diff(resource.data).affectedKeys().hasOnly(['quantite', 'stocks', 'updatedAt', 'derniereVente', 'lotsVendus', 'lotsCA'])
                   && (perms.get('toutesBoutiques', false) == true
                       || (apres.get('stocks', {}).diff(resource.data.get('stocks', {})).affectedKeys().hasOnly([b])
                           // Boutique secondaire : son stock bouge exactement comme le total

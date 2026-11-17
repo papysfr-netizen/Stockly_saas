@@ -745,6 +745,12 @@ class PackingListService {
             maj['codeBarre'] = l.codeBarre;
             maj['code_barre'] = l.codeBarre;
           }
+          // 📦 Cet arrivage devient un lot du produit (vendu après le stock plus ancien)
+          if (ficheRef != null && l.quantite > 0) {
+            maj['lots'] = FieldValue.arrayUnion([
+              {'a': ficheRef.id, 'q': l.quantite, 'pa': l.prixAchat},
+            ]);
+          }
           batch.update(collection.doc(l.idExistant), maj);
           resultat.misAJour++;
         } else {
@@ -760,6 +766,11 @@ class PackingListService {
             'seuilAlerte': 5,
             // 🏬 Nouveau produit : tout son stock est dans la boutique choisie
             if (analyse.boutiqueId != 'principale') 'stocks': {analyse.boutiqueId: l.quantite},
+            // 📦 Son premier lot : cet arrivage
+            if (ficheRef != null && l.quantite > 0)
+              'lots': [
+                {'a': ficheRef.id, 'q': l.quantite, 'pa': l.prixAchat},
+              ],
             'entrepriseId': analyse.entrepriseId,
             'isPublicEcommerce': false,
             'createdAt': FieldValue.serverTimestamp(),

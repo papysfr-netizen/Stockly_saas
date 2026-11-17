@@ -87,6 +87,21 @@ séance de relecture.
 8. **Avertissement `use_build_context_synchronously` désactivé** dans
    `analysis_options.yaml` : risque de plantage après un écran fermé.
 
+## Arrivages et stock par arrivage (novembre 2026)
+
+- `lib/features/arrivages/arrivages_screen.dart` : liste et fiche des
+  arrivages (`entreprises/{id}/arrivages`), créés par l'import « Arrivage »
+  (`packing_list_service.dart`), annulables (« Gérer le stock »).
+- `lib/features/arrivages/lots_service.dart` : stock par arrivage, plus
+  ancien d'abord. Fiche produit : `lots` [{a, q, pa}], `lotsVendus` et
+  `lotsCA` (compteurs). Le stock d'avant les arrivages suivis (« ancien »)
+  part en premier. La vente note `articles[i].lots` ; un retour rend les
+  pièces aux mêmes arrivages (`rendreEnPlus`).
+- Limites : le stock par arrivage est global (pas par boutique) ; un
+  inventaire ou une sortie de stock hors vente n'est pas imputé à un
+  arrivage ; deux ventes au même instant peuvent dépasser légèrement un lot
+  (l'affichage est borné).
+
 ## Lectures Firebase (vérifiées en novembre 2026)
 
 Le forfait gratuit donne 50 000 lectures par jour pour TOUT le projet.

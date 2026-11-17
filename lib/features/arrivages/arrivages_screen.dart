@@ -17,6 +17,7 @@ import '../../core/providers/currency_provider.dart';
 import '../../core/providers/user_role_provider.dart';
 import '../../core/services/journal_service.dart';
 import '../../core/services/utilisateur_service.dart';
+import 'lots_service.dart';
 
 double _n(dynamic v) => v is num ? v.toDouble() : double.tryParse('${v ?? ''}') ?? 0.0;
 
@@ -124,6 +125,28 @@ class ArrivageDetailScreen extends ConsumerStatefulWidget {
 
 class _ArrivageDetailScreenState extends ConsumerState<ArrivageDetailScreen> {
   bool _enCours = false;
+  Future<Map<String, Map<String, dynamic>>>? _produits;
+
+  /// Fiches des produits de l'arrivage (par paquets de 30)
+  Future<Map<String, Map<String, dynamic>>> _lireProduits(List<Map> lignes) async {
+    final ids = {
+      for (final l in lignes)
+        if ((l['produitId'] ?? '').toString().isNotEmpty) l['produitId'].toString(),
+    }.toList();
+    final col = FirebaseFirestore.instance
+        .collection('entreprises')
+        .doc(widget.entrepriseId)
+        .collection('produits');
+    final res = <String, Map<String, dynamic>>{};
+    for (var i = 0; i < ids.length; i += 30) {
+      final paquet = ids.skip(i).take(30).toList();
+      final snap = await col.where(FieldPath.documentId, whereIn: paquet).get();
+      for (final d in snap.docs) {
+        res[d.id] = d.data();
+      }
+    }
+    return res;
+  }
 
   Future<void> _annuler(Map<String, dynamic> d) async {
     final messenger = ScaffoldMessenger.of(context);
@@ -191,9 +214,17 @@ class _ArrivageDetailScreenState extends ConsumerState<ArrivageDetailScreen> {
         final id = (l['produitId'] ?? '').toString();
         if (!produits.containsKey(id)) continue;
         final q = _n(l['quantite']).toInt();
+        // 📦 Le lot de cet arrivage disparaît de la fiche produit
+        final lot = ((produits[id]!['lots'] as List?) ?? const [])
+            .whereType<Map>()
+            .where((x) => x['a'] == widget.arrivageId)
+            .toList();
         batch.update(ent.collection('produits').doc(id), {
           'quantite': FieldValue.increment(-q),
           if (b != 'principale') 'stocks.$b': FieldValue.increment(-q),
+          if (lot.isNotEmpty) 'lots': FieldValue.arrayRemove(lot),
+          'lotsVendus.${widget.arrivageId}': FieldValue.delete(),
+          'lotsCA.${widget.arrivageId}': FieldValue.delete(),
           'updatedAt': FieldValue.serverTimestamp(),
         });
       }
@@ -284,20 +315,79 @@ class _ArrivageDetailScreenState extends ConsumerState<ArrivageDetailScreen> {
                 ),
               ),
               const SizedBox(height: 6),
-              for (final l in lignes)
-                Card(
-                  child: ListTile(
-                    dense: true,
-                    title: Text((l['nom'] ?? '').toString()),
-                    subtitle: Text(
-                      '${(l['codeBarre'] ?? '').toString().isEmpty ? '' : '${l['codeBarre']} · '}'
-                      'Achat ${devise.formatPrice(_n(l['prixAchat']))}'
-                      '${_n(l['prixVente']) > 0 ? ' · Vente ${devise.formatPrice(_n(l['prixVente']))}' : ''}'
-                      '${l['nouveau'] == true ? ' · nouveau produit' : ''}',
-                    ),
-                    trailing: Text('× ${l['quantite']}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                  ),
-                ),
+              // 📦 Ventes de cet arrivage : vendu, reste, argent, bénéfice
+              FutureBuilder<Map<String, Map<String, dynamic>>>(
+                future: _produits ??= _lireProduits(lignes),
+                builder: (context, snapP) {
+                  final produits = snapP.data ?? const <String, Map<String, dynamic>>{};
+                  var vendu = 0, reste = 0;
+                  double ca = 0, cout = 0;
+                  final suivi = <String, LotProduit>{};
+                  for (final l in lignes) {
+                    final id = (l['produitId'] ?? '').toString();
+                    final p = produits[id];
+                    if (p == null) continue;
+                    final lot = LotsService.lots(p).where((x) => x.arrivageId == widget.arrivageId);
+                    if (lot.isEmpty) continue;
+                    suivi[id] = lot.first;
+                    vendu += lot.first.venduBorne;
+                    reste += lot.first.restant;
+                    ca += lot.first.chiffreAffaires;
+                    cout += lot.first.cout;
+                  }
+                  return Column(
+                    children: [
+                      if (!annule)
+                        Card(
+                          color: Colors.teal.withValues(alpha: 0.10),
+                          child: Padding(
+                            padding: const EdgeInsets.all(14),
+                            child: snapP.connectionState != ConnectionState.done
+                                ? const Center(child: CircularProgressIndicator())
+                                : Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text('Ventes de cet arrivage',
+                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                      const SizedBox(height: 6),
+                                      Text('Vendu : $vendu pièce(s) · Reste : $reste pièce(s)'),
+                                      Text('Argent des ventes : ${devise.formatPrice(ca)}'),
+                                      Text('Coût des pièces vendues : ${devise.formatPrice(cout)}'),
+                                      Text(
+                                        'Bénéfice : ${devise.formatPrice(ca - cout)}',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: ca - cout >= 0 ? Colors.green.shade700 : Colors.red,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Les ventes prennent d\'abord le stock le plus ancien.',
+                                        style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                        ),
+                      for (final l in lignes)
+                        Card(
+                          child: ListTile(
+                            dense: true,
+                            title: Text((l['nom'] ?? '').toString()),
+                            subtitle: Text(
+                              '${(l['codeBarre'] ?? '').toString().isEmpty ? '' : '${l['codeBarre']} · '}'
+                              'Achat ${devise.formatPrice(_n(l['prixAchat']))}'
+                              '${_n(l['prixVente']) > 0 ? ' · Vente ${devise.formatPrice(_n(l['prixVente']))}' : ''}'
+                              '${l['nouveau'] == true ? ' · nouveau produit' : ''}'
+                              '${suivi[l['produitId']] == null || annule ? '' : '\nVendu ${suivi[l['produitId']]!.venduBorne} · reste ${suivi[l['produitId']]!.restant} · bénéfice ${devise.formatPrice(suivi[l['produitId']]!.marge)}'}',
+                            ),
+                            trailing: Text('× ${l['quantite']}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
               if (peutStock && !annule) ...[
                 const SizedBox(height: 12),
                 OutlinedButton.icon(

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stockly_saas/core/providers/cart_provider.dart';
 import 'package:stockly_saas/core/utils/payment_calculator.dart';
 import 'package:stockly_saas/features/ventes/vente_service.dart';
+import 'package:stockly_saas/features/arrivages/lots_service.dart';
 
 // Taux : 2000 FC = 1 $
 const taux = 2000.0;
@@ -215,6 +216,24 @@ void main() {
       expect(preparer(vente(usd: 50, monnaieSurCompte: true)).depotCompte, 0);
       expect(preparer(vente(usd: 45, tel: '0812345678', monnaieSurCompte: true)).ecritureDepot, isNull);
       expect(preparer(vente(usd: 50, tel: '0812345678')).vente['monnaieRendueUSD'], closeTo(5, 0.0001));
+    });
+  });
+
+  group('Arrivages', () {
+    test('la vente note les arrivages des pièces, une fois par produit', () {
+      final base = vente(usd: 45);
+      final v = NouvelleVente(
+        entrepriseId: base.entrepriseId, userId: base.userId, vendeurNom: base.vendeurNom,
+        boutiqueId: base.boutiqueId, nomSaisi: '', telephone: '', panier: base.panier,
+        total: base.total, paiement: base.paiement, prixAchat: base.prixAchat,
+        lots: const {'p1': [AllocationLot('A', 2)]},
+      );
+      final p = preparer(v);
+      final articles = (p.vente['articles'] as List).cast<Map>();
+      expect(articles.first['lots'], [{'a': 'A', 'q': 2}]);
+      expect(articles.last.containsKey('lots'), isFalse);
+      expect(p.stock.first.lots, [const AllocationLot('A', 2)]);
+      expect(p.stock.first.prix, 10);
     });
   });
 }

@@ -590,3 +590,29 @@ describe('Arrivages (packing lists)', () => {
     await assertFails(deleteDoc(fiche('patron')));
   });
 });
+
+// ─────────────────────────────────────────────────────────────
+describe('Stock par arrivage', () => {
+  it('une vente peut compter ses pièces par arrivage', async () => {
+    const db = dbDe('caissier');
+    const b = writeBatch(db);
+    const venteRef = doc(collection(db, `entreprises/${E}/ventes`));
+    b.set(venteRef, {
+      id: venteRef.id, entrepriseId: E, vendeurId: 'caissier', boutiqueId: 'principale',
+      montantTotal: 10, remiseTotale: 0, statutLivraison: 'Livré',
+      articles: [{ produitId: 'p1', quantite: 1, prixUnitaire: 10, lots: [{ a: 'A', q: 1 }] }],
+      prixVendus: { p1: 10 },
+    });
+    b.update(doc(db, `entreprises/${E}/produits/p1`), {
+      quantite: increment(-1), derniereVente: venteRef.id,
+      'lotsVendus.A': increment(1), 'lotsCA.A': increment(10),
+    });
+    await assertSucceeds(b.commit());
+  });
+
+  it('un caissier ne peut pas toucher la liste des arrivages d\'un produit', async () => {
+    await assertFails(updateDoc(doc(dbDe('caissier'), `entreprises/${E}/produits/p1`), {
+      lots: [{ a: 'X', q: 99, pa: 0 }],
+    }));
+  });
+});

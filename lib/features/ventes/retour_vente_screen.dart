@@ -1,3 +1,4 @@
+import 'package:stockly_saas/features/arrivages/lots_service.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -865,16 +866,29 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
     }
 
     // 6. Stock : articles revendables (tous, pour une annulation)
+    //    📦 et par arrivage : les pièces reviennent dans les arrivages de la vente
     for (var i = 0; i < n; i++) {
       if (_qte[i] <= 0) continue;
-      if (!_annulation && _abime[i]) continue;
       final id = (_articles[i]['produitId'] ?? '').toString();
       if (id.isEmpty) continue;
+      final remisEnStock = _annulation || !_abime[i];
+      final rendus = LotsService.rendreEnPlus(
+        LotsService.lireArticle(_articles[i]),
+        _entier(_articles[i]['quantite']),
+        _dejaRetournees[i] + _dejaAnnulees[i],
+        _qte[i],
+      );
+      final prixU = _nombre(_articles[i]['prixUnitaire']);
+      if (!remisEnStock && rendus.isEmpty) continue;
       // 🏬 le stock revient dans la boutique de la vente
       final bv = (widget.data['boutiqueId'] ?? 'principale').toString();
       batch.update(entRef.collection('produits').doc(id), {
-        'quantite': FieldValue.increment(_qte[i]),
-        if (bv.isNotEmpty && bv != 'principale') 'stocks.$bv': FieldValue.increment(_qte[i]),
+        if (remisEnStock) 'quantite': FieldValue.increment(_qte[i]),
+        if (remisEnStock && bv.isNotEmpty && bv != 'principale') 'stocks.$bv': FieldValue.increment(_qte[i]),
+        // Abîmé : la pièce reste « sortie » de l'arrivage, mais l'argent est rendu
+        for (final a in rendus)
+          if (remisEnStock) 'lotsVendus.${a.arrivageId}': FieldValue.increment(-a.quantite),
+        for (final a in rendus) 'lotsCA.${a.arrivageId}': FieldValue.increment(-_arrondi(a.quantite * prixU)),
         'updatedAt': now,
       });
     }

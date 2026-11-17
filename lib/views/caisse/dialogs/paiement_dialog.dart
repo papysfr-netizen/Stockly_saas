@@ -1,5 +1,6 @@
 // lib/views/caisse/dialogs/paiement_dialog.dart
 
+import 'package:stockly_saas/features/arrivages/lots_service.dart';
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -827,10 +828,11 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
     }
   }
 
-  Future<Map<String, double>> _chargerPrixAchat(FirebaseFirestore firestore) async {
+  /// Fiches des produits du panier (téléphone d'abord, sinon serveur)
+  Future<Map<String, Map<String, dynamic>>> _chargerProduits(FirebaseFirestore firestore) async {
     final ids = widget.cart.map((item) => item.id).toSet().toList();
 
-    Future<MapEntry<String, double>> lirePrix(String id) async {
+    Future<MapEntry<String, Map<String, dynamic>>> lire(String id) async {
       final ref = firestore
           .collection('entreprises')
           .doc(widget.entrepriseId)
@@ -847,16 +849,29 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         doc = await _lireDoc(ref);
       }
 
-      final valeur = doc?.data()?['prixAchat'];
-      final double prix = valeur is num ? valeur.toDouble() : 0.0;
-      if (prix <= 0) {
-        debugPrint('[Nguli] Prix d\'achat inconnu pour le produit $id : coût compté à 0');
-      }
-      return MapEntry(id, prix);
+      return MapEntry(id, doc?.data() ?? <String, dynamic>{});
     }
 
-    final resultats = await Future.wait(ids.map(lirePrix));
+    final resultats = await Future.wait(ids.map(lire));
     return Map.fromEntries(resultats);
+  }
+
+  /// Prix d'achat connus (produitId → USD, 0 = inconnu)
+  static Map<String, double> _prixAchat(Map<String, Map<String, dynamic>> produits) => {
+        for (final e in produits.entries)
+          e.key: (e.value['prixAchat'] is num) ? (e.value['prixAchat'] as num).toDouble() : 0.0,
+      };
+
+  /// 📦 D'où viennent les pièces du panier (plus ancien arrivage d'abord)
+  Map<String, List<AllocationLot>> _lots(Map<String, Map<String, dynamic>> produits) {
+    final quantites = <String, int>{};
+    for (final item in widget.cart) {
+      quantites[item.id] = (quantites[item.id] ?? 0) + item.quantite;
+    }
+    return {
+      for (final e in quantites.entries)
+        if (produits[e.key] != null) e.key: LotsService.allouer(produits[e.key]!, e.value),
+    };
   }
 
   // ================= ENREGISTREMENT ET COMPTABILISATION =================
@@ -894,7 +909,8 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
 
       final firestore = FirebaseFirestore.instance;
       final vendeurNom = await nomUtilisateurConnecte();
-      final prixAchat = await _chargerPrixAchat(firestore);
+      final produits = await _chargerProduits(firestore);
+      final prixAchat = _prixAchat(produits);
       final nouvelle = NouvelleVente(
         entrepriseId: widget.entrepriseId,
         userId: widget.userId,
@@ -914,6 +930,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         prixAchat: prixAchat,
         apresCloture: _apresCloture,
         monnaieSurCompte: monnaieSurCompte,
+        lots: _lots(produits),
       );
 
       // 📵 Pas de crédit sans nom ni numéro de téléphone (sinon impossible de relancer)
