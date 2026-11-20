@@ -99,7 +99,7 @@ service cloud.firestore {
         'nomClient', 'telephoneClient', 'methodePaiement', 'tauxEchange',
         'montantPayeUSD', 'montantPayeLocal', 'montantCompteClient',
         'monnaieRendueUSD', 'monnaieRendueLocal', 'comptabilise', 'coutMarchandises',
-        'prixVendus'
+        'prixVendus', 'monnaieDevise', 'monnaieDonneeUSD', 'monnaieDonneeCDF'
       ]);
     }
 

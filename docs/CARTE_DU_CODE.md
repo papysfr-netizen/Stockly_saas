@@ -66,8 +66,11 @@ séance de relecture.
      règles « à plat ». Trou restant : une application modifiée pourrait
      déclarer une vente sans baisser le stock (l'écart se verra à l'inventaire).
      Une fonction serveur (Blaze) le fermerait.
-2. **Montants en `double`** et monnaie rendue sans indication de la monnaie
-   ($ ou FC) : écarts d'arrondi possibles, pas de suivi du tiroir par monnaie.
+2. **Montants en `double`** : écarts d'arrondi possibles. La devise de la
+   monnaie rendue est notée depuis novembre 2026 (`monnaieDevise`,
+   `monnaieDonneeUSD`, `monnaieDonneeCDF`) ; la clôture montre le tiroir par
+   devise pour le fond et les ventes (les autres mouvements restent en
+   équivalent dollars).
 3. **Comptabilité : réglé (novembre 2026).** Le Journal lit un mois à la fois ;
    le Bilan additionne des résumés mensuels (`soldes_mensuels/{AAAA-MM}`,
    `lib/features/accounting/services/soldes_mensuels_service.dart`) et le mois

@@ -350,6 +350,8 @@ class _CarteResultatState extends ConsumerState<CarteResultat> {
               children: [
                 _Detail(t.cloLineFloat, r.fond),
                 _Detail('${t.cloLineSales} — ${t.cloCash}', a.ventesEspeces),
+                // 💵 Par devise : le fond et les ventes (le reste n'est pas séparé)
+                _ParDevise(cloture: cloture, attendu: a),
                 _Detail('${t.cloLineSales} — ${t.cloMobile}', a.ventesMobile),
                 _Detail('${t.cloLineDebts} — ${t.cloCash}', a.dettesEspeces),
                 _Detail('${t.cloLineDebts} — ${t.cloMobile}', a.dettesMobile),
@@ -435,6 +437,56 @@ class _LigneEcart extends StatelessWidget {
           ]),
           const SizedBox(height: 6),
           Text('${t.cloExpected} : ${_dollars(attendu)}   ·   ${t.cloCountedShort} : ${_dollars(compte)}'),
+        ],
+      ),
+    );
+  }
+}
+
+/// 💵 Tiroir par devise : fond + ventes en espèces, à côté de ce qui a été compté
+class _ParDevise extends StatelessWidget {
+  final Map<String, dynamic> cloture;
+  final Attendu attendu;
+  const _ParDevise({required this.cloture, required this.attendu});
+
+  static String _fc(double v) {
+    final s = v.round().abs().toString().replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+$)'), (m) => '${m[1]} ');
+    return '${v < 0 ? '−' : ''}$s FC';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final n = ClotureService.nombre;
+    final dollars = n(cloture['fondUSD']) + attendu.ventesDollars;
+    final francs = n(cloture['fondCDF']) + attendu.ventesFrancs;
+    final petit = TextStyle(fontSize: 12, color: Colors.grey.shade600);
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.teal.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Par devise (fond + ventes en espèces)', style: TextStyle(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 4),
+          Row(children: [
+            const Expanded(child: Text('Dollars')),
+            Text('attendu ${_dollars(dollars)} · compté ${_dollars(n(cloture['compteUSD']))}'),
+          ]),
+          Row(children: [
+            const Expanded(child: Text('Francs')),
+            Text('attendu ${_fc(francs)} · compté ${_fc(n(cloture['compteCDF']))}'),
+          ]),
+          const SizedBox(height: 4),
+          Text(
+            'Les dettes, dépenses et dépôts ne sont pas séparés par devise : '
+            'cette comparaison est juste quand la journée n\'a surtout que des ventes.'
+            '${attendu.monnaieSupposee ? ' Anciennes ventes : monnaie supposée rendue en francs.' : ''}',
+            style: petit,
+          ),
         ],
       ),
     );

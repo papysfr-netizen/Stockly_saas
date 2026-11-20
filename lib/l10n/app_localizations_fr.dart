@@ -2861,4 +2861,12 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get accountRemovedInfo =>
       'Votre accès à cette boutique a été supprimé. Contactez le patron si c\'est une erreur.';
+
+  @override
+  String get payChangeHow => 'Rendre la monnaie en :';
+
+  @override
+  String payChangeGive(String montant) {
+    return 'Donnez : $montant';
+  }
 }

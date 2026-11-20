@@ -4806,6 +4806,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Votre accès à cette boutique a été supprimé. Contactez le patron si c\'est une erreur.'**
   String get accountRemovedInfo;
+
+  /// No description provided for @payChangeHow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rendre la monnaie en :'**
+  String get payChangeHow;
+
+  /// No description provided for @payChangeGive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Donnez : {montant}'**
+  String payChangeGive(String montant);
 }
 
 class _AppLocalizationsDelegate

@@ -783,5 +783,7 @@
   "teamRemoveInfo": "Nzela na ye elongwami libela: akokota lisusu na butiki te. Ba ventes asalaki etikali. Soki azali kaka absent, kanga ye nde.",
   "teamRemoved": "{nom} alongwami na équipe",
   "accountRemovedTitle": "Nzela elongwami",
-  "accountRemovedInfo": "Nzela na yo ya butiki oyo elongwami. Benga patron soki ezali libunga."
+  "accountRemovedInfo": "Nzela na yo ya butiki oyo elongwami. Benga patron soki ezali libunga.",
+  "payChangeHow": "Zongisa mbongo na:",
+  "payChangeGive": "Pesa: {montant}"
 }

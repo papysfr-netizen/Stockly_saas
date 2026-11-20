@@ -2848,4 +2848,12 @@ class AppLocalizationsSw extends AppLocalizations {
   @override
   String get accountRemovedInfo =>
       'Ufikiaji wako wa duka hili umefutwa. Wasiliana na mmiliki ikiwa ni kosa.';
+
+  @override
+  String get payChangeHow => 'Rudisha chenji kwa:';
+
+  @override
+  String payChangeGive(String montant) {
+    return 'Toa: $montant';
+  }
 }

@@ -783,5 +783,7 @@
   "teamRemoveInfo": "Their access is deleted forever: they can no longer enter the shop. The sales they made remain. For an absence, deactivate them instead.",
   "teamRemoved": "{nom} was removed from the team",
   "accountRemovedTitle": "Access removed",
-  "accountRemovedInfo": "Your access to this shop has been removed. Contact the owner if this is a mistake."
+  "accountRemovedInfo": "Your access to this shop has been removed. Contact the owner if this is a mistake.",
+  "payChangeHow": "Give the change in:",
+  "payChangeGive": "Give: {montant}"
 }

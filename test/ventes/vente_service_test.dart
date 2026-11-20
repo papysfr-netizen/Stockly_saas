@@ -236,4 +236,23 @@ void main() {
       expect(p.stock.first.prix, 10);
     });
   });
+
+  group('Monnaie par devise', () {
+    test('en francs, en dollars, ou dollars entiers + reste en francs', () {
+      expect(VenteService.monnaieDonnee(7.5, 2000, ModeMonnaie.francs), (usd: 0.0, cdf: 15000.0));
+      expect(VenteService.monnaieDonnee(7.5, 2000, ModeMonnaie.dollars), (usd: 7.5, cdf: 0.0));
+      expect(VenteService.monnaieDonnee(7.5, 2000, ModeMonnaie.mixte), (usd: 7.0, cdf: 1000.0));
+      expect(VenteService.monnaieDonnee(5, 2000, ModeMonnaie.mixte), (usd: 5.0, cdf: 0.0));
+      expect(VenteService.monnaieDonnee(0, 2000, ModeMonnaie.mixte), (usd: 0.0, cdf: 0.0));
+    });
+
+    test('la vente garde la monnaie donnée par devise', () {
+      final p = preparer(vente(usd: 50)); // 5 $ de monnaie, en francs par défaut
+      expect(p.vente['monnaieDevise'], 'francs');
+      expect(p.vente['monnaieDonneeCDF'], 10000);
+      expect(p.vente['monnaieDonneeUSD'], 0);
+      final surCompte = preparer(vente(usd: 50, tel: '0812345678', nom: 'Mama', monnaieSurCompte: true));
+      expect(surCompte.vente['monnaieDonneeCDF'], 0);
+    });
+  });
 }

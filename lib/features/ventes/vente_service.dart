@@ -21,6 +21,18 @@ import 'package:stockly_saas/features/arrivages/lots_service.dart';
 /// Nom enregistré quand le vendeur n'a pas saisi de client
 const String clientDivers = 'Client Divers';
 
+/// 💵 Comment la monnaie est rendue au client
+enum ModeMonnaie {
+  /// tout en francs congolais
+  francs,
+
+  /// tout en dollars
+  dollars,
+
+  /// les dollars entiers en dollars, le reste en francs (le plus courant)
+  mixte,
+}
+
 /// Pourquoi une vente à crédit est refusée
 enum ProblemeCredit { nomManquant, telephoneManquant }
 
@@ -66,6 +78,9 @@ class NouvelleVente {
   /// 📦 D'où viennent les pièces vendues (produitId → arrivages), plus ancien d'abord
   final Map<String, List<AllocationLot>> lots;
 
+  /// 💵 Devise de la monnaie rendue
+  final ModeMonnaie modeMonnaie;
+
   const NouvelleVente({
     required this.entrepriseId,
     required this.userId,
@@ -86,6 +101,7 @@ class NouvelleVente {
     this.apresCloture = false,
     this.monnaieSurCompte = false,
     this.lots = const {},
+    this.modeMonnaie = ModeMonnaie.francs,
   });
 
   String get client => nomSaisi.trim().isEmpty ? clientDivers : nomSaisi.trim();
@@ -167,6 +183,22 @@ class VenteService {
     return _arrondi(besoin < plafond ? besoin : plafond);
   }
 
+  /// 💵 Monnaie réellement donnée : en dollars, et en francs (arrondis au franc)
+  static ({double usd, double cdf}) monnaieDonnee(double monnaieUSD, double taux, ModeMonnaie mode) {
+    if (monnaieUSD <= 0.005) return (usd: 0.0, cdf: 0.0);
+    final t = taux > 0 ? taux : 0.0;
+    switch (mode) {
+      case ModeMonnaie.dollars:
+        return (usd: _arrondi(monnaieUSD), cdf: 0.0);
+      case ModeMonnaie.francs:
+        return (usd: 0.0, cdf: (monnaieUSD * t).roundToDouble());
+      case ModeMonnaie.mixte:
+        final dollars = (monnaieUSD + 0.005).floorToDouble();
+        final reste = monnaieUSD - dollars;
+        return (usd: dollars, cdf: reste > 0.005 ? (reste * t).roundToDouble() : 0.0);
+    }
+  }
+
   /// La ligne [i] est-elle la première du panier pour son produit ?
   static bool _premiereLigne(List<CartItem> panier, int i) =>
       panier.indexWhere((x) => x.id == panier[i].id) == i;
@@ -231,6 +263,10 @@ class VenteService {
         ? _arrondi(p.changeInUSD)
         : 0.0;
 
+    final monnaie = depot > 0.005
+        ? (usd: 0.0, cdf: 0.0)
+        : monnaieDonnee(p.changeInUSD, p.localRate, v.modeMonnaie);
+
     final methodeEnregistree = soldeUtilise > 0.005
         ? (verseCaisse > 0.005 ? '${v.methodePaiement} + Compte client' : 'Compte client')
         : v.methodePaiement;
@@ -264,6 +300,10 @@ class VenteService {
       'monnaieRendueUSD': depot > 0.005 ? 0.0 : p.changeInUSD,
       'monnaieRendueLocal': depot > 0.005 ? 0.0 : p.changeInLocal,
       if (depot > 0.005) 'monnaieSurCompte': depot,
+      // 💵 Monnaie réellement donnée, par devise (pour compter le tiroir $ et FC)
+      'monnaieDevise': v.modeMonnaie.name,
+      'monnaieDonneeUSD': monnaie.usd,
+      'monnaieDonneeCDF': monnaie.cdf,
       'tauxEchange': p.localRate,
       'resteAPayer': reste,
       'statutPaiement': reste <= 0 ? 'Payé' : (verseTotal > 0 ? 'Acompte' : 'Dette'),

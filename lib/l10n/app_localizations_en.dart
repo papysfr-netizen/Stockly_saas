@@ -2851,4 +2851,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get accountRemovedInfo =>
       'Your access to this shop has been removed. Contact the owner if this is a mistake.';
+
+  @override
+  String get payChangeHow => 'Give the change in:';
+
+  @override
+  String payChangeGive(String montant) {
+    return 'Give: $montant';
+  }
 }

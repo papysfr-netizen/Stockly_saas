@@ -2854,4 +2854,12 @@ class AppLocalizationsLn extends AppLocalizations {
   @override
   String get accountRemovedInfo =>
       'Nzela na yo ya butiki oyo elongwami. Benga patron soki ezali libunga.';
+
+  @override
+  String get payChangeHow => 'Zongisa mbongo na:';
+
+  @override
+  String payChangeGive(String montant) {
+    return 'Pesa: $montant';
+  }
 }

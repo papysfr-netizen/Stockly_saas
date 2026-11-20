@@ -79,6 +79,16 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
   // 💰 Mettre la monnaie sur le compte du client au lieu de la rendre
   bool _monnaieSurCompte = false;
 
+  // 💵 Devise de la monnaie rendue (null = Nguli choisit : payé en $ seulement
+  //    → dollars entiers + reste en FC ; sinon tout en FC)
+  ModeMonnaie? _modeMonnaie;
+  ModeMonnaie get _modeMonnaieEffectif {
+    if (_modeMonnaie != null) return _modeMonnaie!;
+    final usd = parseAmount(_verseUSDController.text);
+    final local = parseAmount(_verseLocalController.text);
+    return usd > 0 && local <= 0 ? ModeMonnaie.mixte : ModeMonnaie.francs;
+  }
+
   /// Argent versé (espèces, Mobile Money…), converti en USD
   double get _verseEnUSD {
     final devise = ref.read(currencyProvider);
@@ -636,6 +646,37 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
                                     ),
                                   ],
                                 ),
+                              // 💵 Comment la monnaie est rendue ($, FC ou les deux)
+                              if (calc.changeInUSD > 0.005 && !_monnaieSurCompte && localInfo.code != 'USD') ...[
+                                const SizedBox(height: 6),
+                                Text(t.payChangeHow, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                                const SizedBox(height: 4),
+                                SegmentedButton<ModeMonnaie>(
+                                  showSelectedIcon: false,
+                                  style: const ButtonStyle(visualDensity: VisualDensity.compact),
+                                  segments: [
+                                    ButtonSegment(value: ModeMonnaie.francs, label: Text(localInfo.code)),
+                                    const ButtonSegment(value: ModeMonnaie.dollars, label: Text('USD')),
+                                    ButtonSegment(value: ModeMonnaie.mixte, label: Text('\$ + ${localInfo.code}')),
+                                  ],
+                                  selected: {_modeMonnaieEffectif},
+                                  onSelectionChanged: (s) => setState(() => _modeMonnaie = s.first),
+                                ),
+                                const SizedBox(height: 4),
+                                Builder(builder: (_) {
+                                  final m = VenteService.monnaieDonnee(
+                                      calc.changeInUSD, localInfo.rateToUSD, _modeMonnaieEffectif);
+                                  final morceaux = [
+                                    if (m.usd > 0) '${m.usd % 1 == 0 ? m.usd.toStringAsFixed(0) : m.usd.toStringAsFixed(2)} \$',
+                                    if (m.cdf > 0) '${_formatAmount(m.cdf)} ${localInfo.symbol}',
+                                  ];
+                                  return Text(
+                                    t.payChangeGive(morceaux.join(' + ')),
+                                    style: TextStyle(
+                                        color: Colors.green.shade800, fontWeight: FontWeight.bold, fontSize: 14),
+                                  );
+                                }),
+                              ],
                               // 💰 Pas de petite monnaie ? On la met sur le compte du client
                               if (calc.changeInUSD > 0.005 &&
                                   soldeUtilise <= 0.005 &&
@@ -934,6 +975,7 @@ class _PaiementDialogState extends ConsumerState<PaiementDialog> {
         apresCloture: _apresCloture,
         monnaieSurCompte: monnaieSurCompte,
         lots: _lots(produits),
+        modeMonnaie: _modeMonnaieEffectif,
       );
 
       // 📵 Pas de crédit sans nom ni numéro de téléphone (sinon impossible de relancer)

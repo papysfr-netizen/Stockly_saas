@@ -783,5 +783,7 @@
   "teamRemoveInfo": "Ufikiaji wake unafutwa milele: hataweza tena kuingia dukani. Mauzo aliyofanya yanabaki. Kwa kutokuwepo, mzime badala yake.",
   "teamRemoved": "{nom} ameondolewa kwenye timu",
   "accountRemovedTitle": "Ufikiaji umefutwa",
-  "accountRemovedInfo": "Ufikiaji wako wa duka hili umefutwa. Wasiliana na mmiliki ikiwa ni kosa."
+  "accountRemovedInfo": "Ufikiaji wako wa duka hili umefutwa. Wasiliana na mmiliki ikiwa ni kosa.",
+  "payChangeHow": "Rudisha chenji kwa:",
+  "payChangeGive": "Toa: {montant}"
 }

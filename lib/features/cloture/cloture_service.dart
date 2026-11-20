@@ -182,6 +182,15 @@ class ClotureService {
       switch (famille(v['methodePaiement'])) {
         case Famille.especes:
           a.ventesEspeces += argent;
+          // 💵 Par devise : argent reçu moins la monnaie donnée dans chaque devise
+          a.ventesDollars += nombre(v['montantPayeUSD']) - nombre(v['monnaieDonneeUSD']);
+          if (v.containsKey('monnaieDevise')) {
+            a.ventesFrancs += nombre(v['montantPayeLocal']) - nombre(v['monnaieDonneeCDF']);
+          } else {
+            // Ancienne vente : la devise de la monnaie n'était pas notée (supposée en FC)
+            a.ventesFrancs += nombre(v['montantPayeLocal']) - nombre(v['monnaieRendueLocal']);
+            if (nombre(v['monnaieRendueUSD']) > 0.005) a.monnaieSupposee = true;
+          }
         case Famille.mobile:
           a.ventesMobile += argent;
         case Famille.autre:
@@ -331,6 +340,10 @@ class Attendu {
   double pretsEspeces = 0, empruntsEspeces = 0;
   double depotsEspeces = 0, retraitsEspeces = 0, depotsMobile = 0, retraitsMobile = 0;
   int nombreVentes = 0;
+
+  /// 💵 Espèces des ventes par devise : dollars, et francs (en FC)
+  double ventesDollars = 0, ventesFrancs = 0;
+  bool monnaieSupposee = false;
   int ventesApresCloture = 0;
   double montantApresCloture = 0;
   bool depensesIllisibles = false;

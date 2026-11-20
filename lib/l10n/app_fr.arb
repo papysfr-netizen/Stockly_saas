@@ -2160,5 +2160,8 @@
   "teamRemoved": "{nom} a été retiré de l'équipe",
   "@teamRemoved": {"placeholders": {"nom": {"type": "String"}}},
   "accountRemovedTitle": "Accès supprimé",
-  "accountRemovedInfo": "Votre accès à cette boutique a été supprimé. Contactez le patron si c'est une erreur."
+  "accountRemovedInfo": "Votre accès à cette boutique a été supprimé. Contactez le patron si c'est une erreur.",
+  "payChangeHow": "Rendre la monnaie en :",
+  "payChangeGive": "Donnez : {montant}",
+  "@payChangeGive": {"placeholders": {"montant": {"type": "String"}}}
 }
