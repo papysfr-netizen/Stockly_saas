@@ -7436,6 +7436,42 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Réponses de l\'IA à partir des 30 derniers jours : vérifiez les chiffres importants.'**
   String get astDisclaimer;
+
+  /// No description provided for @astMicTip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Poser la question à voix haute'**
+  String get astMicTip;
+
+  /// No description provided for @astListening.
+  ///
+  /// In fr, this message translates to:
+  /// **'🎤 Je vous écoute… touchez ⏹ pour envoyer'**
+  String get astListening;
+
+  /// No description provided for @astMicDenied.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autorisez le micro dans les paramètres du téléphone pour parler à Nguli.'**
+  String get astMicDenied;
+
+  /// No description provided for @astReadAloud.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lire à voix haute'**
+  String get astReadAloud;
+
+  /// No description provided for @astVoiceOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lire les réponses à voix haute'**
+  String get astVoiceOn;
+
+  /// No description provided for @astVoiceOff.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ne plus lire les réponses'**
+  String get astVoiceOff;
 }
 
 class _AppLocalizationsDelegate

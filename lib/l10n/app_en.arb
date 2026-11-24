@@ -1221,5 +1221,11 @@
   "astNoAnswer": "I have no answer. Rephrase the question.",
   "astTimeout": "The answer is taking too long. Check the internet and try again.",
   "astError": "I could not answer (internet or service unavailable). Try again.",
-  "astDisclaimer": "AI answers based on the last 30 days: check important figures."
+  "astDisclaimer": "AI answers based on the last 30 days: check important figures.",
+  "astMicTip": "Ask the question out loud",
+  "astListening": "🎤 Listening… tap ⏹ to send",
+  "astMicDenied": "Allow the microphone in the phone settings to talk to Nguli.",
+  "astReadAloud": "Read aloud",
+  "astVoiceOn": "Read the answers aloud",
+  "astVoiceOff": "Stop reading the answers"
 }

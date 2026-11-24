@@ -1,8 +1,13 @@
 // ✨ Écran « Demandez à Nguli » (Rapport → bouton ✨)
 import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:record/record.dart';
 
 import '../../core/providers/currency_provider.dart';
 import '../../core/providers/produit_provider.dart';
@@ -26,6 +31,13 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
   String? _erreur;
   bool _reflechit = false;
 
+  // 🎤 Question à voix haute, 🔊 réponse lue à voix haute
+  final _micro = AudioRecorder();
+  final _voix = FlutterTts();
+  bool _ecoute = false;
+  bool _lireReponses = true;
+  Timer? _limite;
+
   @override
   void initState() {
     super.initState();
@@ -34,9 +46,100 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
 
   @override
   void dispose() {
+    _limite?.cancel();
+    _micro.dispose();
+    _voix.stop();
     _question.dispose();
     _defilement.dispose();
     super.dispose();
+  }
+
+  /// 🔊 Lit un texte dans la langue de l'application (lingala : voix française,
+  ///    aucune voix lingala n'existe sur Android)
+  Future<void> _lire(String texte) async {
+    final code = Localizations.localeOf(context).languageCode;
+    final essais = switch (code) {
+      'en' => ['en-US', 'en-GB'],
+      'sw' => ['sw-KE', 'sw-TZ', 'sw', 'fr-FR'],
+      _ => ['fr-FR', 'fr'],
+    };
+    for (final l in essais) {
+      try {
+        if (await _voix.isLanguageAvailable(l) == true) {
+          await _voix.setLanguage(l);
+          break;
+        }
+      } catch (_) {}
+    }
+    await _voix.setSpeechRate(0.48);
+    await _voix.stop();
+    await _voix.speak(texte.replaceAll('*', ''));
+  }
+
+  /// 🎤 Premier appui : on écoute. Deuxième appui (ou 30 s) : on envoie.
+  Future<void> _microAppui() async {
+    final t = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    if (_resume == null || _reflechit) return;
+    if (_ecoute) {
+      _limite?.cancel();
+      final chemin = await _micro.stop();
+      setState(() => _ecoute = false);
+      if (chemin == null) return;
+      final octets = await File(chemin).readAsBytes();
+      if (octets.length < 8000) return; // moins d'une demi-seconde : rien à envoyer
+      await _envoyerAudio(octets);
+      return;
+    }
+    if (!await _micro.hasPermission()) {
+      messenger.showSnackBar(SnackBar(content: Text(t.astMicDenied)));
+      return;
+    }
+    await _voix.stop();
+    final dossier = await getTemporaryDirectory();
+    await _micro.start(
+      const RecordConfig(encoder: AudioEncoder.wav, sampleRate: 16000, numChannels: 1),
+      path: '${dossier.path}/question_nguli.wav',
+    );
+    setState(() => _ecoute = true);
+    _limite = Timer(const Duration(seconds: 30), () {
+      if (_ecoute) _microAppui();
+    });
+  }
+
+  Future<void> _envoyerAudio(List<int> octets) async {
+    final t = AppLocalizations.of(context);
+    final resume = _resume;
+    if (resume == null) return;
+    setState(() {
+      _reflechit = true;
+      _echanges.add(('🎤 …', ''));
+    });
+    _enBas();
+    var question = '🎤';
+    String reponse;
+    try {
+      final (q, r) = await AssistantService.demanderAudio(
+        resume: resume,
+        audio: Uint8List.fromList(octets),
+        mimeType: 'audio/wav',
+        langue: Localizations.localeOf(context).languageCode,
+        historique: _echanges.sublist(0, _echanges.length - 1),
+      );
+      if (q.isNotEmpty) question = '🎤 $q';
+      reponse = r.isEmpty ? t.astNoAnswer : r;
+    } on TimeoutException {
+      reponse = t.astTimeout;
+    } catch (_) {
+      reponse = t.astError;
+    }
+    if (!mounted) return;
+    setState(() {
+      _echanges[_echanges.length - 1] = (question, reponse);
+      _reflechit = false;
+    });
+    _enBas();
+    if (_lireReponses) unawaited(_lire(reponse));
   }
 
   /// Lecture unique des 30 derniers jours (réutilisée pour toutes les questions)
@@ -101,6 +204,7 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
   }
 
   Widget _bulle(String texte, {required bool moi}) {
+    final t = AppLocalizations.of(context);
     final sombre = Theme.of(context).brightness == Brightness.dark;
     return Align(
       alignment: moi ? Alignment.centerRight : Alignment.centerLeft,
@@ -114,9 +218,23 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
               : (sombre ? const Color(0xFF22262E) : Colors.teal.shade50),
           borderRadius: BorderRadius.circular(16),
         ),
-        child: SelectableText(
-          texte,
-          style: TextStyle(color: moi ? Colors.white : null, fontSize: 15, height: 1.35),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SelectableText(
+              texte,
+              style: TextStyle(color: moi ? Colors.white : null, fontSize: 15, height: 1.35),
+            ),
+            // 🔊 Réécouter la réponse
+            if (!moi)
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                tooltip: t.astReadAloud,
+                icon: const Icon(Icons.volume_up_rounded, size: 20),
+                onPressed: () => _lire(texte),
+              ),
+          ],
         ),
       ),
     );
@@ -127,7 +245,20 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
     final t = AppLocalizations.of(context);
     final suggestions = [t.astSuggest1, t.astSuggest2, t.astSuggest3, t.astSuggest4];
     return Scaffold(
-      appBar: AppBar(title: Text(t.astTitle)),
+      appBar: AppBar(
+        title: Text(t.astTitle),
+        actions: [
+          // 🔊 Lire (ou non) les réponses à voix haute
+          IconButton(
+            tooltip: _lireReponses ? t.astVoiceOff : t.astVoiceOn,
+            icon: Icon(_lireReponses ? Icons.volume_up_rounded : Icons.volume_off_rounded),
+            onPressed: () {
+              setState(() => _lireReponses = !_lireReponses);
+              if (!_lireReponses) _voix.stop();
+            },
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Expanded(
@@ -196,11 +327,25 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
                       ),
                     ),
                     const SizedBox(width: 6),
+                    // 🎤 Parler au lieu de taper
+                    IconButton.filled(
+                      style: IconButton.styleFrom(backgroundColor: _ecoute ? Colors.red : Colors.teal),
+                      tooltip: t.astMicTip,
+                      icon: Icon(_ecoute ? Icons.stop_rounded : Icons.mic_rounded),
+                      onPressed: _resume == null || _reflechit ? null : _microAppui,
+                    ),
+                    const SizedBox(width: 4),
                     IconButton.filled(
                       icon: const Icon(Icons.send_rounded),
                       onPressed: _resume == null || _reflechit ? null : () => _envoyer(),
                     ),
                   ]),
+                  if (_ecoute)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(t.astListening,
+                          style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
+                    ),
                   const SizedBox(height: 4),
                   Text(t.astDisclaimer,
                       style: TextStyle(fontSize: 11, color: Colors.grey.shade600), textAlign: TextAlign.center),

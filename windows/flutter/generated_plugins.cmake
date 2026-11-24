@@ -7,7 +7,9 @@ list(APPEND FLUTTER_PLUGIN_LIST
   firebase_core
   cloud_firestore
   firebase_auth
+  flutter_tts
   printing
+  record_windows
   url_launcher_windows
   share_plus
 )

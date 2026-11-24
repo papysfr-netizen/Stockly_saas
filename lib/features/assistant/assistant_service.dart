@@ -5,6 +5,7 @@
 // envoyé à l'IA avec chaque question. Le catalogue vient du flux déjà ouvert.
 // Pas de téléphone de client dans le résumé : seulement les noms.
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_ai/firebase_ai.dart';
@@ -207,14 +208,8 @@ class AssistantService {
         _ => 'français',
       };
 
-  /// Pose une question à l'IA avec le résumé ; [historique] = échanges précédents (question, réponse)
-  static Future<String> demander({
-    required Map<String, dynamic> resume,
-    required String question,
-    required String langue,
-    List<(String, String)> historique = const [],
-  }) async {
-    final consigne = '''
+  /// Consigne donnée à l'IA : langue, règles, et les données de la boutique
+  static String _consigne(Map<String, dynamic> resume, String langue) => '''
 Tu es l'assistant de gestion de Nguli, une application de caisse et de stock pour une boutique en RD Congo.
 Tu réponds au patron, en ${_langue(langue)}, de façon courte, claire et polie (5 phrases au plus,
 ou une petite liste). Les montants sont en dollars (\$) ; donne l'équivalent en francs si le taux est fourni
@@ -230,18 +225,64 @@ Règles :
 DONNÉES :
 ${jsonEncode(resume)}
 ''';
+
+  /// 🎤 Question posée À VOIX HAUTE : l'IA écoute l'audio (français, anglais, swahili,
+  /// lingala…), écrit la question entendue et y répond. Renvoie (question, réponse).
+  static Future<(String, String)> demanderAudio({
+    required Map<String, dynamic> resume,
+    required Uint8List audio,
+    required String mimeType,
+    required String langue,
+    List<(String, String)> historique = const [],
+  }) async {
     final model = FirebaseAI.googleAI().generativeModel(
       model: PhotoIaService.modele,
-      systemInstruction: Content.system(consigne),
-      generationConfig: GenerationConfig(temperature: 0.2),
+      systemInstruction: Content.system(_consigne(resume, langue)),
+      generationConfig: GenerationConfig(
+        temperature: 0.2,
+        responseMimeType: 'application/json',
+        responseSchema: Schema.object(properties: {
+          'question': Schema.string(),
+          'reponse': Schema.string(),
+        }),
+      ),
     );
     final contenu = <Content>[
-      for (final (q, r) in historique.length > 6 ? historique.sublist(historique.length - 6) : historique) ...[
-        Content.text(q),
-        Content.model([TextPart(r)]),
-      ],
-      Content.text(question),
+      ..._historique(historique),
+      Content.multi([
+        TextPart('La question du patron est dans cet audio (il peut parler français, anglais, '
+            'swahili ou lingala, ou mélanger). Écris dans « question » ce que tu as entendu, '
+            'dans sa langue, puis réponds dans « reponse » en suivant tes règles.'),
+        InlineDataPart(mimeType, audio),
+      ]),
     ];
+    final reponse = await model.generateContent(contenu).timeout(const Duration(seconds: 60));
+    final donnees = jsonDecode((reponse.text ?? '{}').trim());
+    if (donnees is! Map) return ('', '');
+    return ((donnees['question'] ?? '').toString().trim(), (donnees['reponse'] ?? '').toString().trim());
+  }
+
+  static List<Content> _historique(List<(String, String)> historique) => [
+        for (final (q, r) in historique.length > 6 ? historique.sublist(historique.length - 6) : historique) ...[
+          Content.text(q),
+          Content.model([TextPart(r)]),
+        ],
+      ];
+
+  /// Pose une question à l'IA avec le résumé ; [historique] = échanges précédents (question, réponse)
+  static Future<String> demander({
+    required Map<String, dynamic> resume,
+    required String question,
+    required String langue,
+    List<(String, String)> historique = const [],
+  }) async {
+
+    final model = FirebaseAI.googleAI().generativeModel(
+      model: PhotoIaService.modele,
+      systemInstruction: Content.system(_consigne(resume, langue)),
+      generationConfig: GenerationConfig(temperature: 0.2),
+    );
+    final contenu = <Content>[..._historique(historique), Content.text(question)];
     final reponse = await model.generateContent(contenu).timeout(const Duration(seconds: 60));
     return (reponse.text ?? '').trim();
   }

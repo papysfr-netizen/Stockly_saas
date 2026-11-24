@@ -1,5 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- 🎤 « Demandez à Nguli » : poser la question à voix haute -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <application
         android:label="Nguli"
         android:name="${applicationName}"
@@ -65,6 +67,10 @@
         <intent>
             <action android:name="android.intent.action.VIEW"/>
             <data android:scheme="sms"/>
+        </intent>
+        <!-- 🔊 Lecture des réponses à voix haute (moteur de voix du téléphone) -->
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
         </intent>
     </queries>
 </manifest>

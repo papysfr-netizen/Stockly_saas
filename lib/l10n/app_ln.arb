@@ -1221,5 +1221,11 @@
   "astNoAnswer": "Nazali na eyano te. Tuna na lolenge mosusu.",
   "astTimeout": "Eyano ezali koumela. Tala internet mpe meka lisusu.",
   "astError": "Nakokaki koyanola te (internet to service ezali te). Meka lisusu.",
-  "astDisclaimer": "Biyano ya IA na mikolo 30 eleki: tala malamu ba chiffres ya ntina."
+  "astDisclaimer": "Biyano ya IA na mikolo 30 eleki: tala malamu ba chiffres ya ntina.",
+  "astMicTip": "Tuna motuna na mongongo",
+  "astListening": "🎤 Nazali koyoka yo… simba ⏹ mpo na kotinda",
+  "astMicDenied": "Pesa nzela na micro na ba paramètres ya telefone mpo na kosolola na Nguli.",
+  "astReadAloud": "Tanga na mongongo",
+  "astVoiceOn": "Tanga biyano na mongongo",
+  "astVoiceOff": "Tanga lisusu biyano te"
 }

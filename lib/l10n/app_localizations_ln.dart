@@ -4444,4 +4444,23 @@ class AppLocalizationsLn extends AppLocalizations {
   @override
   String get astDisclaimer =>
       'Biyano ya IA na mikolo 30 eleki: tala malamu ba chiffres ya ntina.';
+
+  @override
+  String get astMicTip => 'Tuna motuna na mongongo';
+
+  @override
+  String get astListening => '🎤 Nazali koyoka yo… simba ⏹ mpo na kotinda';
+
+  @override
+  String get astMicDenied =>
+      'Pesa nzela na micro na ba paramètres ya telefone mpo na kosolola na Nguli.';
+
+  @override
+  String get astReadAloud => 'Tanga na mongongo';
+
+  @override
+  String get astVoiceOn => 'Tanga biyano na mongongo';
+
+  @override
+  String get astVoiceOff => 'Tanga lisusu biyano te';
 }

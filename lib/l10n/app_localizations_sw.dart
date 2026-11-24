@@ -4435,4 +4435,23 @@ class AppLocalizationsSw extends AppLocalizations {
   @override
   String get astDisclaimer =>
       'Majibu ya AI kutoka siku 30 zilizopita: kagua takwimu muhimu.';
+
+  @override
+  String get astMicTip => 'Uliza swali kwa sauti';
+
+  @override
+  String get astListening => '🎤 Ninakusikiliza… gusa ⏹ kutuma';
+
+  @override
+  String get astMicDenied =>
+      'Ruhusu kipaza sauti katika mipangilio ya simu ili kuongea na Nguli.';
+
+  @override
+  String get astReadAloud => 'Soma kwa sauti';
+
+  @override
+  String get astVoiceOn => 'Soma majibu kwa sauti';
+
+  @override
+  String get astVoiceOff => 'Acha kusoma majibu';
 }

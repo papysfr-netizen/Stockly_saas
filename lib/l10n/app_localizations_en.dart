@@ -4438,4 +4438,23 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get astDisclaimer =>
       'AI answers based on the last 30 days: check important figures.';
+
+  @override
+  String get astMicTip => 'Ask the question out loud';
+
+  @override
+  String get astListening => '🎤 Listening… tap ⏹ to send';
+
+  @override
+  String get astMicDenied =>
+      'Allow the microphone in the phone settings to talk to Nguli.';
+
+  @override
+  String get astReadAloud => 'Read aloud';
+
+  @override
+  String get astVoiceOn => 'Read the answers aloud';
+
+  @override
+  String get astVoiceOff => 'Stop reading the answers';
 }

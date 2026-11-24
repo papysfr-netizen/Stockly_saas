@@ -10,7 +10,9 @@
 #include <firebase_core/firebase_core_plugin_c_api.h>
 #include <cloud_firestore/cloud_firestore_plugin_c_api.h>
 #include <firebase_auth/firebase_auth_plugin_c_api.h>
+#include <flutter_tts/flutter_tts_plugin.h>
 #include <printing/printing_plugin.h>
+#include <record_windows/record_windows_plugin_c_api.h>
 #include <url_launcher_windows/url_launcher_windows.h>
 #include <share_plus/share_plus_windows_plugin_c_api.h>
 
@@ -23,8 +25,12 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("CloudFirestorePluginCApi"));
   FirebaseAuthPluginCApiRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("FirebaseAuthPluginCApi"));
+  FlutterTtsPluginRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("FlutterTtsPlugin"));
   PrintingPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("PrintingPlugin"));
+  RecordWindowsPluginCApiRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("RecordWindowsPluginCApi"));
   UrlLauncherWindowsRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("UrlLauncherWindows"));
   SharePlusWindowsPluginCApiRegisterWithRegistrar(

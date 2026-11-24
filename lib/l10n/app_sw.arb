@@ -1221,5 +1221,11 @@
   "astNoAnswer": "Sina jibu. Uliza kwa njia nyingine.",
   "astTimeout": "Jibu linachukua muda mrefu. Angalia intaneti na ujaribu tena.",
   "astError": "Sikuweza kujibu (intaneti au huduma haipatikani). Jaribu tena.",
-  "astDisclaimer": "Majibu ya AI kutoka siku 30 zilizopita: kagua takwimu muhimu."
+  "astDisclaimer": "Majibu ya AI kutoka siku 30 zilizopita: kagua takwimu muhimu.",
+  "astMicTip": "Uliza swali kwa sauti",
+  "astListening": "🎤 Ninakusikiliza… gusa ⏹ kutuma",
+  "astMicDenied": "Ruhusu kipaza sauti katika mipangilio ya simu ili kuongea na Nguli.",
+  "astReadAloud": "Soma kwa sauti",
+  "astVoiceOn": "Soma majibu kwa sauti",
+  "astVoiceOff": "Acha kusoma majibu"
 }

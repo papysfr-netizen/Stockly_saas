@@ -4456,4 +4456,23 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get astDisclaimer =>
       'Réponses de l\'IA à partir des 30 derniers jours : vérifiez les chiffres importants.';
+
+  @override
+  String get astMicTip => 'Poser la question à voix haute';
+
+  @override
+  String get astListening => '🎤 Je vous écoute… touchez ⏹ pour envoyer';
+
+  @override
+  String get astMicDenied =>
+      'Autorisez le micro dans les paramètres du téléphone pour parler à Nguli.';
+
+  @override
+  String get astReadAloud => 'Lire à voix haute';
+
+  @override
+  String get astVoiceOn => 'Lire les réponses à voix haute';
+
+  @override
+  String get astVoiceOff => 'Ne plus lire les réponses';
 }

@@ -2715,5 +2715,11 @@
   "astNoAnswer": "Je n'ai pas de réponse. Reformulez la question.",
   "astTimeout": "La réponse prend trop de temps. Vérifiez internet et réessayez.",
   "astError": "Je n'ai pas pu répondre (internet ou service indisponible). Réessayez.",
-  "astDisclaimer": "Réponses de l'IA à partir des 30 derniers jours : vérifiez les chiffres importants."
+  "astDisclaimer": "Réponses de l'IA à partir des 30 derniers jours : vérifiez les chiffres importants.",
+  "astMicTip": "Poser la question à voix haute",
+  "astListening": "🎤 Je vous écoute… touchez ⏹ pour envoyer",
+  "astMicDenied": "Autorisez le micro dans les paramètres du téléphone pour parler à Nguli.",
+  "astReadAloud": "Lire à voix haute",
+  "astVoiceOn": "Lire les réponses à voix haute",
+  "astVoiceOff": "Ne plus lire les réponses"
 }
