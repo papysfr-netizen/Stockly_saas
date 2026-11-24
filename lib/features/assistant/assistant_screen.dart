@@ -130,8 +130,8 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
       reponse = r.isEmpty ? t.astNoAnswer : r;
     } on TimeoutException {
       reponse = t.astTimeout;
-    } catch (_) {
-      reponse = t.astError;
+    } catch (e) {
+      reponse = '${t.astError}\n(${AssistantService.raison(e)})';
     }
     if (!mounted) return;
     setState(() {
@@ -172,19 +172,25 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
       _echanges.add((q, ''));
     });
     _enBas();
-    String reponse;
+    var reponse = '';
     try {
-      reponse = await AssistantService.demander(
+      // ⚡ Le texte s'affiche au fur et à mesure qu'il arrive
+      await for (final partiel in AssistantService.demander(
         resume: resume,
         question: q,
         langue: Localizations.localeOf(context).languageCode,
         historique: _echanges.sublist(0, _echanges.length - 1),
-      );
+      )) {
+        reponse = partiel;
+        if (!mounted) return;
+        setState(() => _echanges[_echanges.length - 1] = (q, reponse));
+        _enBas();
+      }
       if (reponse.isEmpty) reponse = t.astNoAnswer;
     } on TimeoutException {
-      reponse = t.astTimeout;
-    } catch (_) {
-      reponse = t.astError;
+      reponse = reponse.isNotEmpty ? reponse : t.astTimeout;
+    } catch (e) {
+      reponse = '${t.astError}\n(${AssistantService.raison(e)})';
     }
     if (!mounted) return;
     setState(() {

@@ -9,6 +9,9 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_ai/firebase_ai.dart';
+// ThinkingConfig n'est pas encore exporté par firebase_ai 2.3.0
+// ignore: implementation_imports
+import 'package:firebase_ai/src/api.dart' show ThinkingConfig;
 
 import '../../core/models/produit.dart';
 import '../../core/services/photo_ia_service.dart';
@@ -240,6 +243,7 @@ ${jsonEncode(resume)}
       systemInstruction: Content.system(_consigne(resume, langue)),
       generationConfig: GenerationConfig(
         temperature: 0.2,
+        thinkingConfig: ThinkingConfig(thinkingBudget: 0),
         responseMimeType: 'application/json',
         responseSchema: Schema.object(properties: {
           'question': Schema.string(),
@@ -270,20 +274,39 @@ ${jsonEncode(resume)}
       ];
 
   /// Pose une question à l'IA avec le résumé ; [historique] = échanges précédents (question, réponse)
-  static Future<String> demander({
+  ///
+  /// ⚡ La réponse arrive AU FUR ET À MESURE (chaque élément = le texte reçu jusque-là),
+  ///    sans « réflexion » préalable de l'IA : bien plus rapide pour ces questions simples.
+  static Stream<String> demander({
     required Map<String, dynamic> resume,
     required String question,
     required String langue,
     List<(String, String)> historique = const [],
-  }) async {
-
+  }) async* {
     final model = FirebaseAI.googleAI().generativeModel(
       model: PhotoIaService.modele,
       systemInstruction: Content.system(_consigne(resume, langue)),
-      generationConfig: GenerationConfig(temperature: 0.2),
+      generationConfig: GenerationConfig(
+        temperature: 0.2,
+        thinkingConfig: ThinkingConfig(thinkingBudget: 0),
+      ),
     );
     final contenu = <Content>[..._historique(historique), Content.text(question)];
-    final reponse = await model.generateContent(contenu).timeout(const Duration(seconds: 60));
-    return (reponse.text ?? '').trim();
+    final morceaux = StringBuffer();
+    await for (final r in model
+        .generateContentStream(contenu)
+        .timeout(const Duration(seconds: 30))) {
+      final texte = r.text;
+      if (texte == null || texte.isEmpty) continue;
+      morceaux.write(texte);
+      yield morceaux.toString();
+    }
+  }
+
+  /// Raison courte d'un échec (affichée pour pouvoir corriger)
+  static String raison(Object e) {
+    var s = e.toString().replaceAll(RegExp(r'\s+'), ' ').trim();
+    if (s.length > 160) s = '${s.substring(0, 160)}…';
+    return s;
   }
 }
