@@ -1196,5 +1196,11 @@
   "iaFailed": "IA ekoki te kotanga mokanda. Makambo: {detail}",
   "iaNothing": "IA ezwi eloko moko te. Meka foto oyo emonani malamu, ya semba.",
   "iaOtherCurrency": "Ba ntalo na mbongo mosusu",
-  "iaRateQ": "Ba ntalo ya mokanda oyo ezali na {devise}.\n{code} boni mpo na 1 $? Ba ntalo ekobongwana na dollars."
+  "iaRateQ": "Ba ntalo ya mokanda oyo ezali na {devise}.\n{code} boni mpo na 1 $? Ba ntalo ekobongwana na dollars.",
+  "plImportPhoto": "Kotisa foto",
+  "plTargetShop": "Biloko ekobakisama na butiki:\n\n🏬 {boutique}\n\nMpo na butiki mosusu, bongola liboso butiki na application.",
+  "plContinue": "Kokoba",
+  "plImported": "Biloko {n} ekotisami to ebongolami.",
+  "plImportError": "Libunga ya import: {erreur}",
+  "plImportFile": "Kotisa fichier"
 }

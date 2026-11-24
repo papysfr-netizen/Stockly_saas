@@ -1196,5 +1196,11 @@
   "iaFailed": "AI imeshindwa kusoma hati. Maelezo: {detail}",
   "iaNothing": "AI haikupata bidhaa yoyote. Jaribu picha iliyo wazi zaidi na iliyonyooka.",
   "iaOtherCurrency": "Bei katika sarafu nyingine",
-  "iaRateQ": "Bei za hati hii ziko kwa {devise}.\n{code} ngapi kwa $1? Bei zitabadilishwa kuwa dola."
+  "iaRateQ": "Bei za hati hii ziko kwa {devise}.\n{code} ngapi kwa $1? Bei zitabadilishwa kuwa dola.",
+  "plImportPhoto": "Ingiza picha",
+  "plTargetShop": "Bidhaa zitaongezwa kwenye duka:\n\n🏬 {boutique}\n\nKwa duka jingine, badilisha duka kwanza kwenye programu.",
+  "plContinue": "Endelea",
+  "plImported": "Bidhaa {n} zimeingizwa au kusasishwa.",
+  "plImportError": "Hitilafu ya kuingiza: {erreur}",
+  "plImportFile": "Ingiza faili"
 }

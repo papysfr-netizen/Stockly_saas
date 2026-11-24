@@ -4340,4 +4340,28 @@ class AppLocalizationsSw extends AppLocalizations {
   String iaRateQ(String devise, String code) {
     return 'Bei za hati hii ziko kwa $devise.\n$code ngapi kwa \$1? Bei zitabadilishwa kuwa dola.';
   }
+
+  @override
+  String get plImportPhoto => 'Ingiza picha';
+
+  @override
+  String plTargetShop(String boutique) {
+    return 'Bidhaa zitaongezwa kwenye duka:\n\n🏬 $boutique\n\nKwa duka jingine, badilisha duka kwanza kwenye programu.';
+  }
+
+  @override
+  String get plContinue => 'Endelea';
+
+  @override
+  String plImported(String n) {
+    return 'Bidhaa $n zimeingizwa au kusasishwa.';
+  }
+
+  @override
+  String plImportError(String erreur) {
+    return 'Hitilafu ya kuingiza: $erreur';
+  }
+
+  @override
+  String get plImportFile => 'Ingiza faili';
 }

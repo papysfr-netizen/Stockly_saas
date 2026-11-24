@@ -4349,4 +4349,28 @@ class AppLocalizationsLn extends AppLocalizations {
   String iaRateQ(String devise, String code) {
     return 'Ba ntalo ya mokanda oyo ezali na $devise.\n$code boni mpo na 1 \$? Ba ntalo ekobongwana na dollars.';
   }
+
+  @override
+  String get plImportPhoto => 'Kotisa foto';
+
+  @override
+  String plTargetShop(String boutique) {
+    return 'Biloko ekobakisama na butiki:\n\n🏬 $boutique\n\nMpo na butiki mosusu, bongola liboso butiki na application.';
+  }
+
+  @override
+  String get plContinue => 'Kokoba';
+
+  @override
+  String plImported(String n) {
+    return 'Biloko $n ekotisami to ebongolami.';
+  }
+
+  @override
+  String plImportError(String erreur) {
+    return 'Libunga ya import: $erreur';
+  }
+
+  @override
+  String get plImportFile => 'Kotisa fichier';
 }

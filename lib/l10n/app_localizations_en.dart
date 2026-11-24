@@ -4343,4 +4343,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String iaRateQ(String devise, String code) {
     return 'The prices in this document are in $devise.\nHow many $code for 1 \$? Prices will be converted to dollars.';
   }
+
+  @override
+  String get plImportPhoto => 'Import a photo';
+
+  @override
+  String plTargetShop(String boutique) {
+    return 'The goods will be added to the shop:\n\n🏬 $boutique\n\nFor another shop, first switch shop in the app.';
+  }
+
+  @override
+  String get plContinue => 'Continue';
+
+  @override
+  String plImported(String n) {
+    return '$n product(s) imported or updated.';
+  }
+
+  @override
+  String plImportError(String erreur) {
+    return 'Import error: $erreur';
+  }
+
+  @override
+  String get plImportFile => 'Import a file';
 }

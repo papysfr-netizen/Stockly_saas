@@ -1,3 +1,4 @@
+import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -420,12 +421,11 @@ class PackingListService {
     final continuer = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(lirePhoto != null ? 'Importer une photo' : 'Importer un fichier'),
-        content: Text('La marchandise sera ajoutée à la boutique :\n\n🏬 $nomBoutique\n\n'
-            "Pour une autre boutique, changez d'abord de boutique dans l'application."),
+        title: Text(lirePhoto != null ? AppLocalizations.of(context).plImportPhoto : AppLocalizations.of(context).plImportFile),
+        content: Text(AppLocalizations.of(context).plTargetShop(nomBoutique)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Continuer')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(AppLocalizations.of(context).cancel)),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(AppLocalizations.of(context).plContinue)),
         ],
       ),
     );
@@ -462,14 +462,14 @@ class PackingListService {
       if (nb > 0) {
         messenger.showSnackBar(
           SnackBar(
-            content: Text('$nb produit(s) importé(s) ou mis à jour.'),
+            content: Text(AppLocalizations.of(context).plImported('$nb')),
             backgroundColor: Colors.green.shade700,
           ),
         );
       }
     } catch (e) {
       messenger.showSnackBar(
-        SnackBar(content: Text('Erreur d\'importation : $e'), backgroundColor: Colors.red.shade700),
+        SnackBar(content: Text(AppLocalizations.of(context).plImportError('$e')), backgroundColor: Colors.red.shade700),
       );
     }
   }

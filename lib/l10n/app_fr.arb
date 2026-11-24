@@ -2683,5 +2683,14 @@
   "iaNothing": "L'IA n'a trouvé aucun produit. Essayez une photo plus nette, bien droite.",
   "iaOtherCurrency": "Prix dans une autre monnaie",
   "iaRateQ": "Les prix de ce document sont en {devise}.\nCombien de {code} pour 1 $ ? Les prix seront convertis en dollars.",
-  "@iaRateQ": {"placeholders": {"devise": {"type": "String"}, "code": {"type": "String"}}}
+  "@iaRateQ": {"placeholders": {"devise": {"type": "String"}, "code": {"type": "String"}}},
+  "plImportPhoto": "Importer une photo",
+  "plTargetShop": "La marchandise sera ajoutée à la boutique :\n\n🏬 {boutique}\n\nPour une autre boutique, changez d'abord de boutique dans l'application.",
+  "@plTargetShop": {"placeholders": {"boutique": {"type": "String"}}},
+  "plContinue": "Continuer",
+  "plImported": "{n} produit(s) importé(s) ou mis à jour.",
+  "@plImported": {"placeholders": {"n": {"type": "String"}}},
+  "plImportError": "Erreur d'importation : {erreur}",
+  "@plImportError": {"placeholders": {"erreur": {"type": "String"}}},
+  "plImportFile": "Importer un fichier"
 }

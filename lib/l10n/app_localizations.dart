@@ -7286,6 +7286,42 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Les prix de ce document sont en {devise}.\nCombien de {code} pour 1 \$ ? Les prix seront convertis en dollars.'**
   String iaRateQ(String devise, String code);
+
+  /// No description provided for @plImportPhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer une photo'**
+  String get plImportPhoto;
+
+  /// No description provided for @plTargetShop.
+  ///
+  /// In fr, this message translates to:
+  /// **'La marchandise sera ajoutée à la boutique :\n\n🏬 {boutique}\n\nPour une autre boutique, changez d\'abord de boutique dans l\'application.'**
+  String plTargetShop(String boutique);
+
+  /// No description provided for @plContinue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer'**
+  String get plContinue;
+
+  /// No description provided for @plImported.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} produit(s) importé(s) ou mis à jour.'**
+  String plImported(String n);
+
+  /// No description provided for @plImportError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur d\'importation : {erreur}'**
+  String plImportError(String erreur);
+
+  /// No description provided for @plImportFile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer un fichier'**
+  String get plImportFile;
 }
 
 class _AppLocalizationsDelegate
