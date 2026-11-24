@@ -3409,4 +3409,160 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get impInventory => 'Inventaire';
+
+  @override
+  String get arrTitle => 'Arrivages (packing lists)';
+
+  @override
+  String get arrEmpty =>
+      'Aucun arrivage pour le moment.\n\nImportez une packing list en mode « Arrivage » (Stock → Importer) : elle apparaîtra ici avec son fournisseur et ses produits.';
+
+  @override
+  String arrNo(String n) {
+    return 'N° $n';
+  }
+
+  @override
+  String get arrNoSupplier => 'Fournisseur non indiqué';
+
+  @override
+  String arrListLine(
+      String date, String boutique, String produits, String pieces) {
+    return '$date · $boutique\n$produits produit(s) · $pieces pièce(s)';
+  }
+
+  @override
+  String get arrNoNet => 'Pas de connexion internet : réessayez.';
+
+  @override
+  String get arrCancelQ => 'Annuler cet arrivage ?';
+
+  @override
+  String arrCancelBody(String pieces) {
+    return 'Les quantités de cette packing list seront RETIRÉES du stock ($pieces pièce(s)). Les prix modifiés par l\'import ne changent pas.';
+  }
+
+  @override
+  String get no => 'Non';
+
+  @override
+  String get arrCancelBtn => 'Annuler l\'arrivage';
+
+  @override
+  String get arrCancelled => 'Arrivage annulé.';
+
+  @override
+  String get arrCancelOffline =>
+      'Pas de connexion : l\'annulation partira au retour d\'internet.';
+
+  @override
+  String arrCancelError(String erreur) {
+    return 'Annulation impossible : $erreur';
+  }
+
+  @override
+  String get arrSheet => 'Fiche d\'arrivage';
+
+  @override
+  String get arrNotFound => 'Arrivage introuvable.';
+
+  @override
+  String arrPlNo(String n) {
+    return 'Packing list n° $n';
+  }
+
+  @override
+  String arrReceived(String date) {
+    return 'Reçu le $date';
+  }
+
+  @override
+  String arrShop(String nom) {
+    return 'Boutique : $nom';
+  }
+
+  @override
+  String arrFile(String nom) {
+    return 'Fichier : $nom';
+  }
+
+  @override
+  String arrCounts(String produits, String pieces) {
+    return '$produits produit(s) · $pieces pièce(s)';
+  }
+
+  @override
+  String arrCancelledOn(String date) {
+    return 'ANNULÉ le $date';
+  }
+
+  @override
+  String get arrSales => 'Ventes de cet arrivage';
+
+  @override
+  String arrSoldLeft(String vendu, String reste) {
+    return 'Vendu : $vendu pièce(s) · Reste : $reste pièce(s)';
+  }
+
+  @override
+  String arrRevenue(String montant) {
+    return 'Argent des ventes : $montant';
+  }
+
+  @override
+  String arrCost(String montant) {
+    return 'Coût des pièces vendues : $montant';
+  }
+
+  @override
+  String arrProfit(String montant) {
+    return 'Bénéfice : $montant';
+  }
+
+  @override
+  String get arrOldestFirst =>
+      'Nguli propose d\'abord le stock le plus ancien ; le vendeur peut en choisir un autre.';
+
+  @override
+  String arrLineCost(String montant) {
+    return 'Achat $montant';
+  }
+
+  @override
+  String arrLinePrice(String montant) {
+    return 'Vente $montant';
+  }
+
+  @override
+  String get arrLineNew => 'nouveau produit';
+
+  @override
+  String arrLineStats(String vendu, String reste, String benefice) {
+    return 'Vendu $vendu · reste $reste · bénéfice $benefice';
+  }
+
+  @override
+  String get arrCancelThis => 'Annuler cet arrivage';
+
+  @override
+  String get stockImportExcel => 'Fichier Excel / CSV';
+
+  @override
+  String get stockImportPhoto => 'Photo de facture (IA)';
+
+  @override
+  String get arrMainShop => 'Boutique principale';
+
+  @override
+  String get arrCancelledTag => 'ANNULÉ';
+
+  @override
+  String arrCancelMissing(String n) {
+    return '$n pièce(s) ne sont plus en stock (déjà vendues ou sorties) : le stock de ces produits deviendra négatif.';
+  }
+
+  @override
+  String arrCancelDeleted(String n) {
+    return '$n produit(s) ont été supprimés depuis : ils sont ignorés.';
+  }
 }

@@ -3391,4 +3391,160 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get impInventory => 'Hesabu ya hisa';
+
+  @override
+  String get arrTitle => 'Mizigo (packing lists)';
+
+  @override
+  String get arrEmpty =>
+      'Hakuna mzigo bado.\n\nIngiza packing list kwa hali ya « Mzigo » (Hisa → Ingiza): itaonekana hapa na msambazaji na bidhaa zake.';
+
+  @override
+  String arrNo(String n) {
+    return 'Nambari $n';
+  }
+
+  @override
+  String get arrNoSupplier => 'Msambazaji hajatajwa';
+
+  @override
+  String arrListLine(
+      String date, String boutique, String produits, String pieces) {
+    return '$date · $boutique\nBidhaa $produits · vipande $pieces';
+  }
+
+  @override
+  String get arrNoNet => 'Hakuna intaneti: jaribu tena.';
+
+  @override
+  String get arrCancelQ => 'Futa mzigo huu?';
+
+  @override
+  String arrCancelBody(String pieces) {
+    return 'Idadi za packing list hii ZITAONDOLEWA kwenye hisa (vipande $pieces). Bei zilizobadilishwa na uingizaji hazibadiliki.';
+  }
+
+  @override
+  String get no => 'Hapana';
+
+  @override
+  String get arrCancelBtn => 'Futa mzigo';
+
+  @override
+  String get arrCancelled => 'Mzigo umefutwa.';
+
+  @override
+  String get arrCancelOffline =>
+      'Hakuna mtandao: ufutaji utatumwa intaneti ikirudi.';
+
+  @override
+  String arrCancelError(String erreur) {
+    return 'Imeshindwa kufuta: $erreur';
+  }
+
+  @override
+  String get arrSheet => 'Taarifa ya mzigo';
+
+  @override
+  String get arrNotFound => 'Mzigo haupatikani.';
+
+  @override
+  String arrPlNo(String n) {
+    return 'Packing list nambari $n';
+  }
+
+  @override
+  String arrReceived(String date) {
+    return 'Ilipokelewa $date';
+  }
+
+  @override
+  String arrShop(String nom) {
+    return 'Duka: $nom';
+  }
+
+  @override
+  String arrFile(String nom) {
+    return 'Faili: $nom';
+  }
+
+  @override
+  String arrCounts(String produits, String pieces) {
+    return 'Bidhaa $produits · vipande $pieces';
+  }
+
+  @override
+  String arrCancelledOn(String date) {
+    return 'IMEFUTWA $date';
+  }
+
+  @override
+  String get arrSales => 'Mauzo ya mzigo huu';
+
+  @override
+  String arrSoldLeft(String vendu, String reste) {
+    return 'Imeuzwa: vipande $vendu · Imebaki: vipande $reste';
+  }
+
+  @override
+  String arrRevenue(String montant) {
+    return 'Pesa ya mauzo: $montant';
+  }
+
+  @override
+  String arrCost(String montant) {
+    return 'Gharama ya vipande vilivyouzwa: $montant';
+  }
+
+  @override
+  String arrProfit(String montant) {
+    return 'Faida: $montant';
+  }
+
+  @override
+  String get arrOldestFirst =>
+      'Nguli inapendekeza hisa ya zamani kwanza; muuzaji anaweza kuchagua nyingine.';
+
+  @override
+  String arrLineCost(String montant) {
+    return 'Kununua $montant';
+  }
+
+  @override
+  String arrLinePrice(String montant) {
+    return 'Kuuza $montant';
+  }
+
+  @override
+  String get arrLineNew => 'bidhaa mpya';
+
+  @override
+  String arrLineStats(String vendu, String reste, String benefice) {
+    return 'Imeuzwa $vendu · imebaki $reste · faida $benefice';
+  }
+
+  @override
+  String get arrCancelThis => 'Futa mzigo huu';
+
+  @override
+  String get stockImportExcel => 'Faili ya Excel / CSV';
+
+  @override
+  String get stockImportPhoto => 'Picha ya ankara (AI)';
+
+  @override
+  String get arrMainShop => 'Duka kuu';
+
+  @override
+  String get arrCancelledTag => 'IMEFUTWA';
+
+  @override
+  String arrCancelMissing(String n) {
+    return 'Vipande $n havipo tena kwenye hisa (vimeuzwa au kutolewa): hisa ya bidhaa hizi itakuwa hasi.';
+  }
+
+  @override
+  String arrCancelDeleted(String n) {
+    return 'Bidhaa $n zimefutwa tangu hapo: zinarukwa.';
+  }
 }

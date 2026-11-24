@@ -9,6 +9,8 @@
 // Annuler une fiche retire ses quantités du stock (autorisation « Gérer le stock »).
 import 'dart:async';
 
+import 'package:stockly_saas/l10n/app_localizations.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -42,22 +44,21 @@ class ArrivagesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final devise = ref.watch(currencyProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Arrivages (packing lists)')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).arrTitle)),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: _arrivages(entrepriseId).orderBy('date', descending: true).limit(200).snapshots(),
         builder: (context, snap) {
           if (snap.hasError) {
-            return Center(child: Text('Erreur : ${snap.error}'));
+            return Center(child: Text(AppLocalizations.of(context).errorWith('${snap.error}')));
           }
           if (!snap.hasData) return const Center(child: CircularProgressIndicator());
           final docs = snap.data!.docs;
           if (docs.isEmpty) {
-            return const Center(
+            return Center(
               child: Padding(
-                padding: EdgeInsets.all(32),
+                padding: const EdgeInsets.all(32),
                 child: Text(
-                  'Aucun arrivage pour le moment.\n\nImportez une packing list en mode « Arrivage » '
-                  '(Stock → Importer) : elle apparaîtra ici avec son fournisseur et ses produits.',
+                  AppLocalizations.of(context).arrEmpty,
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -79,8 +80,8 @@ class ArrivagesScreen extends ConsumerWidget {
                   ),
                   title: Text(
                     [
-                      if (numero.isNotEmpty) 'N° $numero',
-                      fournisseur.isEmpty ? 'Fournisseur non indiqué' : fournisseur,
+                      if (numero.isNotEmpty) AppLocalizations.of(context).arrNo(numero),
+                      fournisseur.isEmpty ? AppLocalizations.of(context).arrNoSupplier : fournisseur,
                     ].join(' · '),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
@@ -88,9 +89,7 @@ class ArrivagesScreen extends ConsumerWidget {
                     ),
                   ),
                   subtitle: Text(
-                    '${_date(d['date'])} · ${(d['nomBoutique'] ?? '').toString().isEmpty ? 'Boutique principale' : d['nomBoutique']}\n'
-                    '${d['nbProduits'] ?? 0} produit(s) · ${d['totalPieces'] ?? 0} pièce(s)'
-                    '${annule ? ' · ANNULÉ' : ''}',
+                    AppLocalizations.of(context).arrListLine(_date(d['date']), (d['nomBoutique'] ?? '').toString().isEmpty ? AppLocalizations.of(context).arrMainShop : d['nomBoutique'].toString(), '${d['nbProduits'] ?? 0}', '${d['totalPieces'] ?? 0}') + (annule ? ' · ${AppLocalizations.of(context).arrCancelledTag}' : ''),
                   ),
                   isThreeLine: true,
                   trailing: Text(
@@ -166,7 +165,7 @@ class _ArrivageDetailScreenState extends ConsumerState<ArrivageDetailScreen> {
       }
     } catch (_) {
       if (mounted) setState(() => _enCours = false);
-      messenger.showSnackBar(const SnackBar(content: Text('Pas de connexion internet : réessayez.')));
+      messenger.showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).arrNoNet)));
       return;
     }
     if (!mounted) return;
@@ -186,20 +185,16 @@ class _ArrivageDetailScreenState extends ConsumerState<ArrivageDetailScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Annuler cet arrivage ?'),
+        title: Text(AppLocalizations.of(context).arrCancelQ),
         content: Text(
-          'Les quantités de cette packing list seront RETIRÉES du stock '
-          '(${d['totalPieces'] ?? 0} pièce(s)). Les prix modifiés par l\'import ne changent pas.'
-          '${manquantes > 0 ? '\n\n⚠️ $manquantes pièce(s) ne sont plus en stock (déjà vendues ou sorties) : '
-              'le stock de ces produits deviendra négatif.' : ''}'
-          '${produits.length < lignes.length ? '\n\n${lignes.length - produits.length} produit(s) ont été supprimés depuis : ils sont ignorés.' : ''}',
+          AppLocalizations.of(context).arrCancelBody('${d['totalPieces'] ?? 0}') + (manquantes > 0 ? '\n\n⚠️ ${AppLocalizations.of(context).arrCancelMissing('$manquantes')}' : '') + (produits.length < lignes.length ? '\n\n${AppLocalizations.of(context).arrCancelDeleted('${lignes.length - produits.length}')}' : ''),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Non')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(AppLocalizations.of(context).no)),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Annuler l\'arrivage'),
+            child: Text(AppLocalizations.of(context).arrCancelBtn),
           ),
         ],
       ),
@@ -243,13 +238,13 @@ class _ArrivageDetailScreenState extends ConsumerState<ArrivageDetailScreen> {
         reference: widget.arrivageId,
       ));
       messenger.showSnackBar(
-        SnackBar(content: const Text('Arrivage annulé.'), backgroundColor: Colors.green.shade700),
+        SnackBar(content: Text(AppLocalizations.of(context).arrCancelled), backgroundColor: Colors.green.shade700),
       );
     } on TimeoutException {
-      messenger.showSnackBar(const SnackBar(
-          content: Text('Pas de connexion : l\'annulation partira au retour d\'internet.')));
+      messenger.showSnackBar(SnackBar(
+          content: Text(AppLocalizations.of(context).arrCancelOffline)));
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Annulation impossible : $e')));
+      messenger.showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).arrCancelError('$e'))));
     }
     if (mounted) setState(() => _enCours = false);
   }
@@ -259,13 +254,13 @@ class _ArrivageDetailScreenState extends ConsumerState<ArrivageDetailScreen> {
     final devise = ref.watch(currencyProvider);
     final peutStock = ref.watch(userProfileProvider).value?.peutGererStock ?? false;
     return Scaffold(
-      appBar: AppBar(title: const Text('Fiche d\'arrivage')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).arrSheet)),
       body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
         stream: _arrivages(widget.entrepriseId).doc(widget.arrivageId).snapshots(),
         builder: (context, snap) {
           if (!snap.hasData) return const Center(child: CircularProgressIndicator());
           final d = snap.data!.data();
-          if (d == null) return const Center(child: Text('Arrivage introuvable.'));
+          if (d == null) return Center(child: Text(AppLocalizations.of(context).arrNotFound));
           final annule = d['statut'] == 'annule';
           final lignes = ((d['lignes'] as List?) ?? const []).whereType<Map>().toList();
           final numero = (d['numero'] ?? '').toString();
@@ -281,20 +276,19 @@ class _ArrivageDetailScreenState extends ConsumerState<ArrivageDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        fournisseur.isEmpty ? 'Fournisseur non indiqué' : fournisseur,
+                        fournisseur.isEmpty ? AppLocalizations.of(context).arrNoSupplier : fournisseur,
                         style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
-                      if (numero.isNotEmpty) Text('Packing list n° $numero'),
+                      if (numero.isNotEmpty) Text(AppLocalizations.of(context).arrPlNo(numero)),
                       const SizedBox(height: 6),
-                      Text('Reçu le ${_date(d['date'])}'
-                          '${(d['parNom'] ?? '').toString().isEmpty ? '' : ' par ${d['parNom']}'}'),
-                      Text('Boutique : ${(d['nomBoutique'] ?? '').toString().isEmpty ? 'principale' : d['nomBoutique']}'),
-                      if ((d['nomFichier'] ?? '').toString().isNotEmpty) Text('Fichier : ${d['nomFichier']}'),
+                      Text(AppLocalizations.of(context).arrReceived(_date(d['date'])) + ((d['parNom'] ?? '').toString().isEmpty ? '' : ' · ${d['parNom']}')),
+                      Text(AppLocalizations.of(context).arrShop((d['nomBoutique'] ?? '').toString().isEmpty ? AppLocalizations.of(context).arrMainShop : d['nomBoutique'].toString())),
+                      if ((d['nomFichier'] ?? '').toString().isNotEmpty) Text(AppLocalizations.of(context).arrFile('${d['nomFichier']}')),
                       const Divider(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('${d['nbProduits'] ?? 0} produit(s) · ${d['totalPieces'] ?? 0} pièce(s)'),
+                          Text(AppLocalizations.of(context).arrCounts('${d['nbProduits'] ?? 0}', '${d['totalPieces'] ?? 0}')),
                           Text(
                             devise.formatPrice(_n(d['coutTotal'])),
                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -305,8 +299,7 @@ class _ArrivageDetailScreenState extends ConsumerState<ArrivageDetailScreen> {
                         Padding(
                           padding: const EdgeInsets.only(top: 8),
                           child: Text(
-                            'ANNULÉ le ${_date(d['annuleLe'])}'
-                            '${(d['annulePar'] ?? '').toString().isEmpty ? '' : ' par ${d['annulePar']}'}',
+                            AppLocalizations.of(context).arrCancelledOn(_date(d['annuleLe'])) + ((d['annulePar'] ?? '').toString().isEmpty ? '' : ' · ${d['annulePar']}'),
                             style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
                           ),
                         ),
@@ -347,14 +340,14 @@ class _ArrivageDetailScreenState extends ConsumerState<ArrivageDetailScreen> {
                                 : Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      const Text('Ventes de cet arrivage',
+                                      Text(AppLocalizations.of(context).arrSales,
                                           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                                       const SizedBox(height: 6),
-                                      Text('Vendu : $vendu pièce(s) · Reste : $reste pièce(s)'),
-                                      Text('Argent des ventes : ${devise.formatPrice(ca)}'),
-                                      Text('Coût des pièces vendues : ${devise.formatPrice(cout)}'),
+                                      Text(AppLocalizations.of(context).arrSoldLeft('$vendu', '$reste')),
+                                      Text(AppLocalizations.of(context).arrRevenue(devise.formatPrice(ca))),
+                                      Text(AppLocalizations.of(context).arrCost(devise.formatPrice(cout))),
                                       Text(
-                                        'Bénéfice : ${devise.formatPrice(ca - cout)}',
+                                        AppLocalizations.of(context).arrProfit(devise.formatPrice(ca - cout)),
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: ca - cout >= 0 ? Colors.green.shade700 : Colors.red,
@@ -362,7 +355,7 @@ class _ArrivageDetailScreenState extends ConsumerState<ArrivageDetailScreen> {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        'Les ventes prennent d\'abord le stock le plus ancien.',
+                                        AppLocalizations.of(context).arrOldestFirst,
                                         style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
                                       ),
                                     ],
@@ -376,10 +369,10 @@ class _ArrivageDetailScreenState extends ConsumerState<ArrivageDetailScreen> {
                             title: Text((l['nom'] ?? '').toString()),
                             subtitle: Text(
                               '${(l['codeBarre'] ?? '').toString().isEmpty ? '' : '${l['codeBarre']} · '}'
-                              'Achat ${devise.formatPrice(_n(l['prixAchat']))}'
-                              '${_n(l['prixVente']) > 0 ? ' · Vente ${devise.formatPrice(_n(l['prixVente']))}' : ''}'
-                              '${l['nouveau'] == true ? ' · nouveau produit' : ''}'
-                              '${suivi[l['produitId']] == null || annule ? '' : '\nVendu ${suivi[l['produitId']]!.venduBorne} · reste ${suivi[l['produitId']]!.restant} · bénéfice ${devise.formatPrice(suivi[l['produitId']]!.marge)}'}',
+                              '${AppLocalizations.of(context).arrLineCost(devise.formatPrice(_n(l['prixAchat'])))}'
+                              '${_n(l['prixVente']) > 0 ? ' · ${AppLocalizations.of(context).arrLinePrice(devise.formatPrice(_n(l['prixVente'])))}' : ''}'
+                              '${l['nouveau'] == true ? ' · ${AppLocalizations.of(context).arrLineNew}' : ''}'
+                              '${suivi[l['produitId']] == null || annule ? '' : '\n${AppLocalizations.of(context).arrLineStats('${suivi[l['produitId']]!.venduBorne}', '${suivi[l['produitId']]!.restant}', devise.formatPrice(suivi[l['produitId']]!.marge))}'}',
                             ),
                             trailing: Text('× ${l['quantite']}', style: const TextStyle(fontWeight: FontWeight.bold)),
                           ),
@@ -395,7 +388,7 @@ class _ArrivageDetailScreenState extends ConsumerState<ArrivageDetailScreen> {
                   icon: _enCours
                       ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
                       : const Icon(Icons.undo),
-                  label: const Text('Annuler cet arrivage'),
+                  label: Text(AppLocalizations.of(context).arrCancelThis),
                   onPressed: _enCours ? null : () => _annuler(d),
                 ),
               ],

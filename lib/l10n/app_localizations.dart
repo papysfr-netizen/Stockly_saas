@@ -5713,6 +5713,235 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Inventaire'**
   String get impInventory;
+
+  /// No description provided for @arrTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Arrivages (packing lists)'**
+  String get arrTitle;
+
+  /// No description provided for @arrEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun arrivage pour le moment.\n\nImportez une packing list en mode « Arrivage » (Stock → Importer) : elle apparaîtra ici avec son fournisseur et ses produits.'**
+  String get arrEmpty;
+
+  /// No description provided for @arrNo.
+  ///
+  /// In fr, this message translates to:
+  /// **'N° {n}'**
+  String arrNo(String n);
+
+  /// No description provided for @arrNoSupplier.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fournisseur non indiqué'**
+  String get arrNoSupplier;
+
+  /// No description provided for @arrListLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'{date} · {boutique}\n{produits} produit(s) · {pieces} pièce(s)'**
+  String arrListLine(
+      String date, String boutique, String produits, String pieces);
+
+  /// No description provided for @arrNoNet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de connexion internet : réessayez.'**
+  String get arrNoNet;
+
+  /// No description provided for @arrCancelQ.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler cet arrivage ?'**
+  String get arrCancelQ;
+
+  /// No description provided for @arrCancelBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les quantités de cette packing list seront RETIRÉES du stock ({pieces} pièce(s)). Les prix modifiés par l\'import ne changent pas.'**
+  String arrCancelBody(String pieces);
+
+  /// No description provided for @no.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non'**
+  String get no;
+
+  /// No description provided for @arrCancelBtn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler l\'arrivage'**
+  String get arrCancelBtn;
+
+  /// No description provided for @arrCancelled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Arrivage annulé.'**
+  String get arrCancelled;
+
+  /// No description provided for @arrCancelOffline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de connexion : l\'annulation partira au retour d\'internet.'**
+  String get arrCancelOffline;
+
+  /// No description provided for @arrCancelError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annulation impossible : {erreur}'**
+  String arrCancelError(String erreur);
+
+  /// No description provided for @arrSheet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fiche d\'arrivage'**
+  String get arrSheet;
+
+  /// No description provided for @arrNotFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Arrivage introuvable.'**
+  String get arrNotFound;
+
+  /// No description provided for @arrPlNo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Packing list n° {n}'**
+  String arrPlNo(String n);
+
+  /// No description provided for @arrReceived.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reçu le {date}'**
+  String arrReceived(String date);
+
+  /// No description provided for @arrShop.
+  ///
+  /// In fr, this message translates to:
+  /// **'Boutique : {nom}'**
+  String arrShop(String nom);
+
+  /// No description provided for @arrFile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fichier : {nom}'**
+  String arrFile(String nom);
+
+  /// No description provided for @arrCounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'{produits} produit(s) · {pieces} pièce(s)'**
+  String arrCounts(String produits, String pieces);
+
+  /// No description provided for @arrCancelledOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'ANNULÉ le {date}'**
+  String arrCancelledOn(String date);
+
+  /// No description provided for @arrSales.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ventes de cet arrivage'**
+  String get arrSales;
+
+  /// No description provided for @arrSoldLeft.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vendu : {vendu} pièce(s) · Reste : {reste} pièce(s)'**
+  String arrSoldLeft(String vendu, String reste);
+
+  /// No description provided for @arrRevenue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Argent des ventes : {montant}'**
+  String arrRevenue(String montant);
+
+  /// No description provided for @arrCost.
+  ///
+  /// In fr, this message translates to:
+  /// **'Coût des pièces vendues : {montant}'**
+  String arrCost(String montant);
+
+  /// No description provided for @arrProfit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bénéfice : {montant}'**
+  String arrProfit(String montant);
+
+  /// No description provided for @arrOldestFirst.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nguli propose d\'abord le stock le plus ancien ; le vendeur peut en choisir un autre.'**
+  String get arrOldestFirst;
+
+  /// No description provided for @arrLineCost.
+  ///
+  /// In fr, this message translates to:
+  /// **'Achat {montant}'**
+  String arrLineCost(String montant);
+
+  /// No description provided for @arrLinePrice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vente {montant}'**
+  String arrLinePrice(String montant);
+
+  /// No description provided for @arrLineNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'nouveau produit'**
+  String get arrLineNew;
+
+  /// No description provided for @arrLineStats.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vendu {vendu} · reste {reste} · bénéfice {benefice}'**
+  String arrLineStats(String vendu, String reste, String benefice);
+
+  /// No description provided for @arrCancelThis.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler cet arrivage'**
+  String get arrCancelThis;
+
+  /// No description provided for @stockImportExcel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fichier Excel / CSV'**
+  String get stockImportExcel;
+
+  /// No description provided for @stockImportPhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo de facture (IA)'**
+  String get stockImportPhoto;
+
+  /// No description provided for @arrMainShop.
+  ///
+  /// In fr, this message translates to:
+  /// **'Boutique principale'**
+  String get arrMainShop;
+
+  /// No description provided for @arrCancelledTag.
+  ///
+  /// In fr, this message translates to:
+  /// **'ANNULÉ'**
+  String get arrCancelledTag;
+
+  /// No description provided for @arrCancelMissing.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} pièce(s) ne sont plus en stock (déjà vendues ou sorties) : le stock de ces produits deviendra négatif.'**
+  String arrCancelMissing(String n);
+
+  /// No description provided for @arrCancelDeleted.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} produit(s) ont été supprimés depuis : ils sont ignorés.'**
+  String arrCancelDeleted(String n);
 }
 
 class _AppLocalizationsDelegate

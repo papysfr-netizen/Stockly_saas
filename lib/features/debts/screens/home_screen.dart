@@ -219,7 +219,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             // 📦 Arrivages : chaque packing list importée, en fiche
             IconButton(
               icon: const Icon(Icons.local_shipping_outlined),
-              tooltip: 'Arrivages (packing lists)',
+              tooltip: AppLocalizations.of(context).arrTitle,
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -257,19 +257,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     icon: const Icon(Icons.file_upload_outlined),
                     tooltip: t.stockImportTooltip,
                     onSelected: (photo) => _importerExcel(photo: photo),
-                    itemBuilder: (_) => const [
+                    itemBuilder: (_) => [
                       PopupMenuItem<bool>(
                         value: false,
                         child: ListTile(
                           leading: Icon(Icons.table_chart_outlined),
-                          title: Text('Fichier Excel / CSV'),
+                          title: Text(AppLocalizations.of(context).stockImportExcel),
                         ),
                       ),
                       PopupMenuItem<bool>(
                         value: true,
                         child: ListTile(
                           leading: Icon(Icons.document_scanner_outlined),
-                          title: Text('Photo de facture (IA)'),
+                          title: Text(AppLocalizations.of(context).stockImportPhoto),
                         ),
                       ),
                     ],

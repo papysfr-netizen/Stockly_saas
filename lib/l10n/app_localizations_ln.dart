@@ -3399,4 +3399,160 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get impInventory => 'Inventaire';
+
+  @override
+  String get arrTitle => 'Ba arrivages (packing lists)';
+
+  @override
+  String get arrEmpty =>
+      'Arrivage moko te naino.\n\nKotisa packing list na mode « Arrivage » (Stock → Kotisa): ekomonana awa na mopesi na biloko na yango.';
+
+  @override
+  String arrNo(String n) {
+    return 'N° $n';
+  }
+
+  @override
+  String get arrNoSupplier => 'Mopesi alobami te';
+
+  @override
+  String arrListLine(
+      String date, String boutique, String produits, String pieces) {
+    return '$date · $boutique\nBiloko $produits · biteni $pieces';
+  }
+
+  @override
+  String get arrNoNet => 'Internet ezali te: meka lisusu.';
+
+  @override
+  String get arrCancelQ => 'Longola arrivage oyo?';
+
+  @override
+  String arrCancelBody(String pieces) {
+    return 'Ba motango ya packing list oyo EKOLONGWA na stock (biteni $pieces). Ba ntalo oyo import ebongolaki ekobongwana te.';
+  }
+
+  @override
+  String get no => 'Te';
+
+  @override
+  String get arrCancelBtn => 'Longola arrivage';
+
+  @override
+  String get arrCancelled => 'Arrivage elongwami.';
+
+  @override
+  String get arrCancelOffline =>
+      'Connexion ezali te: bolongoli ekotindama soki internet ezongi.';
+
+  @override
+  String arrCancelError(String erreur) {
+    return 'Bolongoli ekoki te: $erreur';
+  }
+
+  @override
+  String get arrSheet => 'Fiche ya arrivage';
+
+  @override
+  String get arrNotFound => 'Arrivage ezwami te.';
+
+  @override
+  String arrPlNo(String n) {
+    return 'Packing list n° $n';
+  }
+
+  @override
+  String arrReceived(String date) {
+    return 'Ezwamaki na $date';
+  }
+
+  @override
+  String arrShop(String nom) {
+    return 'Butiki: $nom';
+  }
+
+  @override
+  String arrFile(String nom) {
+    return 'Fichier: $nom';
+  }
+
+  @override
+  String arrCounts(String produits, String pieces) {
+    return 'Biloko $produits · biteni $pieces';
+  }
+
+  @override
+  String arrCancelledOn(String date) {
+    return 'ELONGWAMI na $date';
+  }
+
+  @override
+  String get arrSales => 'Ba ventes ya arrivage oyo';
+
+  @override
+  String arrSoldLeft(String vendu, String reste) {
+    return 'Etekami: biteni $vendu · Etikali: biteni $reste';
+  }
+
+  @override
+  String arrRevenue(String montant) {
+    return 'Mbongo ya ba ventes: $montant';
+  }
+
+  @override
+  String arrCost(String montant) {
+    return 'Ntalo ya biteni oyo etekami: $montant';
+  }
+
+  @override
+  String arrProfit(String montant) {
+    return 'Litomba: $montant';
+  }
+
+  @override
+  String get arrOldestFirst =>
+      'Nguli epesaka liboso stock ya kala; moteki akoki kopona mosusu.';
+
+  @override
+  String arrLineCost(String montant) {
+    return 'Kosomba $montant';
+  }
+
+  @override
+  String arrLinePrice(String montant) {
+    return 'Koteka $montant';
+  }
+
+  @override
+  String get arrLineNew => 'eloko ya sika';
+
+  @override
+  String arrLineStats(String vendu, String reste, String benefice) {
+    return 'Etekami $vendu · etikali $reste · litomba $benefice';
+  }
+
+  @override
+  String get arrCancelThis => 'Longola arrivage oyo';
+
+  @override
+  String get stockImportExcel => 'Fichier Excel / CSV';
+
+  @override
+  String get stockImportPhoto => 'Foto ya facture (IA)';
+
+  @override
+  String get arrMainShop => 'Butiki monene';
+
+  @override
+  String get arrCancelledTag => 'ELONGWAMI';
+
+  @override
+  String arrCancelMissing(String n) {
+    return 'Biteni $n ezali lisusu na stock te (etekami to ebimisami): stock ya biloko oyo ekokita na nse ya zéro.';
+  }
+
+  @override
+  String arrCancelDeleted(String n) {
+    return 'Biloko $n elongwamaki uta wana: etikami.';
+  }
 }
