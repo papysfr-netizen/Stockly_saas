@@ -353,7 +353,7 @@ class AuthWrapper extends ConsumerWidget {
         if (snapshot.hasError) {
           return Scaffold(
             body: Center(
-              child: Text("Erreur d'authentification : ${snapshot.error}"),
+              child: Text(AppLocalizations.of(context).authError('${snapshot.error}')),
             ),
           );
         }
@@ -424,7 +424,7 @@ class AuthWrapper extends ConsumerWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(24.0),
                     child: Text(
-                      "Erreur lors du chargement du profil :\n${userSnapshot.error}",
+                      AppLocalizations.of(context).profileLoadError('${userSnapshot.error}'),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -464,22 +464,21 @@ class _CompteDesactiveScreen extends StatelessWidget {
               Icon(Icons.block, size: 72, color: Colors.red.shade400),
               const SizedBox(height: 16),
               Text(
-                supprime ? t.accountRemovedTitle : 'Compte suspendu',
+                supprime ? t.accountRemovedTitle : t.accountSuspendedTitle,
                 style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               Text(
                 supprime
                     ? t.accountRemovedInfo
-                    : "Le patron a suspendu votre accès.\n"
-                        "Contactez-le pour le réactiver.",
+                    : t.accountSuspendedInfo,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 onPressed: () => FirebaseAuth.instance.signOut(),
                 icon: const Icon(Icons.logout),
-                label: const Text('Retour à la connexion'),
+                label: Text(t.backToLogin),
               ),
             ],
           ),

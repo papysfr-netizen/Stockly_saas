@@ -1,5 +1,6 @@
 // lib/core/widgets/quick_scanner_widget.dart
 
+import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -122,13 +123,13 @@ class _QuickScannerWidgetState extends State<QuickScannerWidget> {
     final code = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Saisir le code à la main'),
+        title: Text(AppLocalizations.of(context).scanTypeCode),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Tapez le numéro imprimé sous les barres.',
+            Text(
+              AppLocalizations.of(context).scanTypeCodeHint,
               style: TextStyle(fontSize: 13),
             ),
             const SizedBox(height: 12),
@@ -178,8 +179,8 @@ class _QuickScannerWidgetState extends State<QuickScannerWidget> {
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         elevation: 0,
-        title: const Text(
-          'Scanner le Code-barres',
+        title: Text(
+          AppLocalizations.of(context).scanTitle,
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         actions: [
@@ -199,7 +200,7 @@ class _QuickScannerWidgetState extends State<QuickScannerWidget> {
           ),
           IconButton(
             icon: const Icon(Icons.cameraswitch_rounded, color: Colors.white),
-            tooltip: 'Changer de caméra',
+            tooltip: AppLocalizations.of(context).scanSwitchCamera,
             onPressed: () => _controller.switchCamera(),
           ),
         ],
@@ -223,8 +224,8 @@ class _QuickScannerWidgetState extends State<QuickScannerWidget> {
                         size: 64,
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        'Accès à la caméra requis',
+                      Text(
+                        AppLocalizations.of(context).scanCameraNeeded,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -233,7 +234,7 @@ class _QuickScannerWidgetState extends State<QuickScannerWidget> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Veuillez autoriser l\'accès à la caméra dans les paramètres pour scanner les codes-barres.',
+                        AppLocalizations.of(context).scanCameraAllow,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.7),
@@ -248,7 +249,7 @@ class _QuickScannerWidgetState extends State<QuickScannerWidget> {
                         ),
                         onPressed: () => _controller.start(),
                         icon: const Icon(Icons.refresh_rounded),
-                        label: const Text('Réessayer'),
+                        label: Text(AppLocalizations.of(context).retry),
                       ),
                     ],
                   ),
@@ -286,7 +287,7 @@ class _QuickScannerWidgetState extends State<QuickScannerWidget> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Vérification… $_compteur/$_lecturesRequises',
+                      AppLocalizations.of(context).scanChecking('$_compteur', '$_lecturesRequises'),
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -336,16 +337,16 @@ class _QuickScannerWidgetState extends State<QuickScannerWidget> {
                       width: 1,
                     ),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.qr_code_scanner_rounded, color: Colors.white, size: 18),
-                      SizedBox(width: 8),
+                      const Icon(Icons.qr_code_scanner_rounded, color: Colors.white, size: 18),
+                      const SizedBox(width: 8),
                       Flexible(
                         child: Text(
-                          'Reculez un peu : tout le code-barres doit tenir dans le cadre',
+                          AppLocalizations.of(context).scanStepBack,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
@@ -367,8 +368,8 @@ class _QuickScannerWidgetState extends State<QuickScannerWidget> {
                     ),
                   ),
                   icon: const Icon(Icons.keyboard_rounded),
-                  label: const Text(
-                    'Saisir le code à la main',
+                  label: Text(
+                    AppLocalizations.of(context).scanTypeCode,
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),

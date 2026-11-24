@@ -4818,6 +4818,264 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Donnez : {montant}'**
   String payChangeGive(String montant);
+
+  /// No description provided for @scanTypeCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisir le code à la main'**
+  String get scanTypeCode;
+
+  /// No description provided for @scanTypeCodeHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tapez le numéro imprimé sous les barres.'**
+  String get scanTypeCodeHint;
+
+  /// No description provided for @scanTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Scanner le code-barres'**
+  String get scanTitle;
+
+  /// No description provided for @scanSwitchCamera.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer de caméra'**
+  String get scanSwitchCamera;
+
+  /// No description provided for @scanCameraNeeded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accès à la caméra requis'**
+  String get scanCameraNeeded;
+
+  /// No description provided for @scanCameraAllow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autorisez l\'accès à la caméra dans les paramètres du téléphone pour scanner les codes-barres.'**
+  String get scanCameraAllow;
+
+  /// No description provided for @retry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get retry;
+
+  /// No description provided for @scanChecking.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérification… {fait}/{total}'**
+  String scanChecking(String fait, String total);
+
+  /// No description provided for @scanStepBack.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reculez un peu : tout le code-barres doit tenir dans le cadre'**
+  String get scanStepBack;
+
+  /// No description provided for @accountSuspendedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte suspendu'**
+  String get accountSuspendedTitle;
+
+  /// No description provided for @accountSuspendedInfo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le patron a suspendu votre accès.\nContactez-le pour le réactiver.'**
+  String get accountSuspendedInfo;
+
+  /// No description provided for @backToLogin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour à la connexion'**
+  String get backToLogin;
+
+  /// No description provided for @authError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur de connexion : {erreur}'**
+  String authError(String erreur);
+
+  /// No description provided for @profileLoadError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors du chargement du profil :\n{erreur}'**
+  String profileLoadError(String erreur);
+
+  /// No description provided for @pwdOldWrong.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'ancien mot de passe est incorrect.'**
+  String get pwdOldWrong;
+
+  /// No description provided for @pwdTooWeak.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau mot de passe trop faible (6 caractères minimum).'**
+  String get pwdTooWeak;
+
+  /// No description provided for @pwdTooMany.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trop d\'essais. Patientez quelques minutes.'**
+  String get pwdTooMany;
+
+  /// No description provided for @pwdNoInternet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de connexion internet. Il faut internet pour changer le mot de passe.'**
+  String get pwdNoInternet;
+
+  /// No description provided for @pwdRelogin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par sécurité, déconnectez-vous puis reconnectez-vous, et réessayez.'**
+  String get pwdRelogin;
+
+  /// No description provided for @errorUnknown.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur inconnue.'**
+  String get errorUnknown;
+
+  /// No description provided for @pwdFillAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remplissez les trois champs.'**
+  String get pwdFillAll;
+
+  /// No description provided for @pwdMin6.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nouveau mot de passe doit avoir au moins 6 caractères.'**
+  String get pwdMin6;
+
+  /// No description provided for @pwdMismatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les deux nouveaux mots de passe ne sont pas identiques.'**
+  String get pwdMismatch;
+
+  /// No description provided for @pwdSameAsOld.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nouveau mot de passe doit être différent de l\'ancien.'**
+  String get pwdSameAsOld;
+
+  /// No description provided for @pwdSmsAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce compte ne se connecte pas avec un mot de passe (connexion par SMS).'**
+  String get pwdSmsAccount;
+
+  /// No description provided for @pwdChanged.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe changé avec succès.'**
+  String get pwdChanged;
+
+  /// No description provided for @errorWith.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur : {erreur}'**
+  String errorWith(String erreur);
+
+  /// No description provided for @pwdChangeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer mon mot de passe'**
+  String get pwdChangeTitle;
+
+  /// No description provided for @pwdOld.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ancien mot de passe'**
+  String get pwdOld;
+
+  /// No description provided for @pwdNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau mot de passe'**
+  String get pwdNew;
+
+  /// No description provided for @pwdMinHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'6 caractères minimum'**
+  String get pwdMinHint;
+
+  /// No description provided for @pwdConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer le nouveau mot de passe'**
+  String get pwdConfirm;
+
+  /// No description provided for @lotOldStock.
+  ///
+  /// In fr, this message translates to:
+  /// **'Stock d\'avant les arrivages'**
+  String get lotOldStock;
+
+  /// No description provided for @lotArrival.
+  ///
+  /// In fr, this message translates to:
+  /// **'Arrivage'**
+  String get lotArrival;
+
+  /// No description provided for @lotSellFrom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vendre depuis l\'arrivage'**
+  String get lotSellFrom;
+
+  /// No description provided for @lotChoice.
+  ///
+  /// In fr, this message translates to:
+  /// **'{nom} (reste {reste})'**
+  String lotChoice(String nom, String reste);
+
+  /// No description provided for @livMsgRest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour {client}, le reste de votre marchandise ({liste}) vous attend chez {boutique}. '**
+  String livMsgRest(String client, String liste, String boutique);
+
+  /// No description provided for @livMsgAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour {client}, votre marchandise ({liste}) vous attend chez {boutique}. '**
+  String livMsgAll(String client, String liste, String boutique);
+
+  /// No description provided for @livMsgLate.
+  ///
+  /// In fr, this message translates to:
+  /// **'La date de retrait ({date}) est dépassée : merci de passer la récupérer au plus vite. '**
+  String livMsgLate(String date);
+
+  /// No description provided for @livMsgBefore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Merci de passer la retirer avant le {date}. '**
+  String livMsgBefore(String date);
+
+  /// No description provided for @livMsgToPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reste à payer : {montant}. '**
+  String livMsgToPay(String montant);
+
+  /// No description provided for @livMsgThanks.
+  ///
+  /// In fr, this message translates to:
+  /// **'Merci !'**
+  String get livMsgThanks;
+
+  /// No description provided for @lotProposed.
+  ///
+  /// In fr, this message translates to:
+  /// **'proposé'**
+  String get lotProposed;
 }
 
 class _AppLocalizationsDelegate

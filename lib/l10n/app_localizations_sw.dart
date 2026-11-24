@@ -2856,4 +2856,159 @@ class AppLocalizationsSw extends AppLocalizations {
   String payChangeGive(String montant) {
     return 'Toa: $montant';
   }
+
+  @override
+  String get scanTypeCode => 'Andika msimbo kwa mkono';
+
+  @override
+  String get scanTypeCodeHint =>
+      'Andika namba iliyochapishwa chini ya mistari.';
+
+  @override
+  String get scanTitle => 'Changanua msimbopau';
+
+  @override
+  String get scanSwitchCamera => 'Badilisha kamera';
+
+  @override
+  String get scanCameraNeeded => 'Ruhusa ya kamera inahitajika';
+
+  @override
+  String get scanCameraAllow =>
+      'Ruhusu kamera katika mipangilio ya simu ili kuchanganua misimbopau.';
+
+  @override
+  String get retry => 'Jaribu tena';
+
+  @override
+  String scanChecking(String fait, String total) {
+    return 'Inakagua… $fait/$total';
+  }
+
+  @override
+  String get scanStepBack =>
+      'Rudi nyuma kidogo: msimbopau wote uingie ndani ya fremu';
+
+  @override
+  String get accountSuspendedTitle => 'Akaunti imesimamishwa';
+
+  @override
+  String get accountSuspendedInfo =>
+      'Mmiliki amesimamisha ufikiaji wako.\nWasiliana naye ili aufungue tena.';
+
+  @override
+  String get backToLogin => 'Rudi kwenye kuingia';
+
+  @override
+  String authError(String erreur) {
+    return 'Hitilafu ya kuingia: $erreur';
+  }
+
+  @override
+  String profileLoadError(String erreur) {
+    return 'Hitilafu ya kupakia wasifu:\n$erreur';
+  }
+
+  @override
+  String get pwdOldWrong => 'Nenosiri la zamani si sahihi.';
+
+  @override
+  String get pwdTooWeak => 'Nenosiri jipya ni dhaifu (herufi 6 angalau).';
+
+  @override
+  String get pwdTooMany => 'Majaribio mengi mno. Subiri dakika chache.';
+
+  @override
+  String get pwdNoInternet =>
+      'Hakuna intaneti. Kubadilisha nenosiri kunahitaji intaneti.';
+
+  @override
+  String get pwdRelogin => 'Kwa usalama, toka, ingia tena, kisha jaribu tena.';
+
+  @override
+  String get errorUnknown => 'Hitilafu isiyojulikana.';
+
+  @override
+  String get pwdFillAll => 'Jaza sehemu zote tatu.';
+
+  @override
+  String get pwdMin6 => 'Nenosiri jipya liwe na herufi 6 angalau.';
+
+  @override
+  String get pwdMismatch => 'Manenosiri mawili mapya hayafanani.';
+
+  @override
+  String get pwdSameAsOld => 'Nenosiri jipya liwe tofauti na la zamani.';
+
+  @override
+  String get pwdSmsAccount =>
+      'Akaunti hii haiingii kwa nenosiri (kuingia kwa SMS).';
+
+  @override
+  String get pwdChanged => 'Nenosiri limebadilishwa.';
+
+  @override
+  String errorWith(String erreur) {
+    return 'Hitilafu: $erreur';
+  }
+
+  @override
+  String get pwdChangeTitle => 'Badilisha nenosiri langu';
+
+  @override
+  String get pwdOld => 'Nenosiri la zamani';
+
+  @override
+  String get pwdNew => 'Nenosiri jipya';
+
+  @override
+  String get pwdMinHint => 'Herufi 6 angalau';
+
+  @override
+  String get pwdConfirm => 'Thibitisha nenosiri jipya';
+
+  @override
+  String get lotOldStock => 'Hisa ya kabla ya mizigo';
+
+  @override
+  String get lotArrival => 'Mzigo';
+
+  @override
+  String get lotSellFrom => 'Uza kutoka mzigo';
+
+  @override
+  String lotChoice(String nom, String reste) {
+    return '$nom (zimebaki $reste)';
+  }
+
+  @override
+  String livMsgRest(String client, String liste, String boutique) {
+    return 'Habari $client, bidhaa zako zilizobaki ($liste) zinakusubiri kwa $boutique. ';
+  }
+
+  @override
+  String livMsgAll(String client, String liste, String boutique) {
+    return 'Habari $client, bidhaa zako ($liste) zinakusubiri kwa $boutique. ';
+  }
+
+  @override
+  String livMsgLate(String date) {
+    return 'Tarehe ya kuchukua ($date) imepita: tafadhali njoo uchukue haraka. ';
+  }
+
+  @override
+  String livMsgBefore(String date) {
+    return 'Tafadhali ichukue kabla ya $date. ';
+  }
+
+  @override
+  String livMsgToPay(String montant) {
+    return 'Kiasi kilichobaki kulipa: $montant. ';
+  }
+
+  @override
+  String get livMsgThanks => 'Asante!';
+
+  @override
+  String get lotProposed => 'inapendekezwa';
 }

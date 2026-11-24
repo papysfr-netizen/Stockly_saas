@@ -1,3 +1,4 @@
+import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -41,17 +42,17 @@ class _ChangerMotDePasseDialogState extends State<ChangerMotDePasseDialog> {
     switch (e.code) {
       case 'wrong-password':
       case 'invalid-credential':
-        return "L'ancien mot de passe est incorrect.";
+        return AppLocalizations.of(context).pwdOldWrong;
       case 'weak-password':
-        return 'Nouveau mot de passe trop faible (6 caractères minimum).';
+        return AppLocalizations.of(context).pwdTooWeak;
       case 'too-many-requests':
-        return "Trop d'essais. Patientez quelques minutes.";
+        return AppLocalizations.of(context).pwdTooMany;
       case 'network-request-failed':
-        return 'Pas de connexion internet. Il faut internet pour changer le mot de passe.';
+        return AppLocalizations.of(context).pwdNoInternet;
       case 'requires-recent-login':
-        return 'Par sécurité, déconnectez-vous puis reconnectez-vous, et réessayez.';
+        return AppLocalizations.of(context).pwdRelogin;
       default:
-        return e.message ?? 'Erreur inconnue.';
+        return e.message ?? AppLocalizations.of(context).errorUnknown;
     }
   }
 
@@ -61,26 +62,26 @@ class _ChangerMotDePasseDialogState extends State<ChangerMotDePasseDialog> {
     final confirm = _confirmCtrl.text.trim();
 
     if (ancien.isEmpty || nouveau.isEmpty || confirm.isEmpty) {
-      setState(() => _erreur = 'Veuillez remplir les trois champs.');
+      setState(() => _erreur = AppLocalizations.of(context).pwdFillAll);
       return;
     }
     if (nouveau.length < 6) {
-      setState(() => _erreur = 'Le nouveau mot de passe doit avoir au moins 6 caractères.');
+      setState(() => _erreur = AppLocalizations.of(context).pwdMin6);
       return;
     }
     if (nouveau != confirm) {
-      setState(() => _erreur = 'Les deux nouveaux mots de passe ne sont pas identiques.');
+      setState(() => _erreur = AppLocalizations.of(context).pwdMismatch);
       return;
     }
     if (nouveau == ancien) {
-      setState(() => _erreur = "Le nouveau mot de passe doit être différent de l'ancien.");
+      setState(() => _erreur = AppLocalizations.of(context).pwdSameAsOld);
       return;
     }
 
     final user = FirebaseAuth.instance.currentUser;
     if (user == null || user.email == null) {
       setState(() => _erreur =
-          'Ce compte ne se connecte pas avec un mot de passe (connexion par SMS).');
+          AppLocalizations.of(context).pwdSmsAccount);
       return;
     }
 
@@ -106,14 +107,14 @@ class _ChangerMotDePasseDialogState extends State<ChangerMotDePasseDialog> {
       navigator.pop();
       messenger.showSnackBar(
         SnackBar(
-          content: const Text('Mot de passe changé avec succès.'),
+          content: Text(AppLocalizations.of(context).pwdChanged),
           backgroundColor: Colors.green.shade700,
         ),
       );
     } on FirebaseAuthException catch (e) {
       if (mounted) setState(() => _erreur = _messageErreur(e));
     } catch (e) {
-      if (mounted) setState(() => _erreur = 'Erreur : $e');
+      if (mounted) setState(() => _erreur = AppLocalizations.of(context).errorWith('$e'));
     } finally {
       if (mounted) setState(() => _enCours = false);
     }
@@ -122,11 +123,11 @@ class _ChangerMotDePasseDialogState extends State<ChangerMotDePasseDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Row(
+      title: Row(
         children: [
-          Icon(Icons.lock_reset),
-          SizedBox(width: 8),
-          Expanded(child: Text('Changer mon mot de passe')),
+          const Icon(Icons.lock_reset),
+          const SizedBox(width: 8),
+          Expanded(child: Text(AppLocalizations.of(context).pwdChangeTitle)),
         ],
       ),
       content: SingleChildScrollView(
@@ -137,7 +138,7 @@ class _ChangerMotDePasseDialogState extends State<ChangerMotDePasseDialog> {
               controller: _ancienCtrl,
               obscureText: !_voirAncien,
               decoration: InputDecoration(
-                labelText: 'Ancien mot de passe',
+                labelText: AppLocalizations.of(context).pwdOld,
                 prefixIcon: const Icon(Icons.lock_outline),
                 suffixIcon: IconButton(
                   icon: Icon(_voirAncien ? Icons.visibility_off : Icons.visibility),
@@ -150,8 +151,8 @@ class _ChangerMotDePasseDialogState extends State<ChangerMotDePasseDialog> {
               controller: _nouveauCtrl,
               obscureText: !_voirNouveau,
               decoration: InputDecoration(
-                labelText: 'Nouveau mot de passe',
-                helperText: '6 caractères minimum',
+                labelText: AppLocalizations.of(context).pwdNew,
+                helperText: AppLocalizations.of(context).pwdMinHint,
                 prefixIcon: const Icon(Icons.lock),
                 suffixIcon: IconButton(
                   icon: Icon(_voirNouveau ? Icons.visibility_off : Icons.visibility),
@@ -163,8 +164,8 @@ class _ChangerMotDePasseDialogState extends State<ChangerMotDePasseDialog> {
             TextField(
               controller: _confirmCtrl,
               obscureText: !_voirNouveau,
-              decoration: const InputDecoration(
-                labelText: 'Confirmer le nouveau mot de passe',
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).pwdConfirm,
                 prefixIcon: Icon(Icons.lock),
               ),
               onSubmitted: (_) {

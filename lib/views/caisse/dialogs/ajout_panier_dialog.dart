@@ -85,9 +85,9 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
         ].join(' · '),
     };
     final choix = [
-      if (ancien > 0) (LotsService.ancien, 'Stock d\'avant les arrivages', ancien),
+      if (ancien > 0) (LotsService.ancien, AppLocalizations.of(context).lotOldStock, ancien),
       for (final l in lots)
-        (l.arrivageId, (etiquettes[l.arrivageId] ?? '').isEmpty ? 'Arrivage' : etiquettes[l.arrivageId]!, l.restant),
+        (l.arrivageId, (etiquettes[l.arrivageId] ?? '').isEmpty ? AppLocalizations.of(context).lotArrival : etiquettes[l.arrivageId]!, l.restant),
     ];
     if (choix.length < 2) return const [];
     final propose = LotsService.proposition(suivi);
@@ -95,8 +95,8 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
       DropdownButtonFormField<String>(
         initialValue: _arrivage,
         isExpanded: true,
-        decoration: const InputDecoration(
-          labelText: 'Vendre depuis l\'arrivage',
+        decoration: InputDecoration(
+          labelText: AppLocalizations.of(context).lotSellFrom,
           isDense: true,
           border: OutlineInputBorder(),
         ),
@@ -105,7 +105,7 @@ class _AjoutPanierDialogState extends ConsumerState<AjoutPanierDialog> {
             DropdownMenuItem(
               value: c.$1,
               child: Text(
-                '${c.$2} (reste ${c.$3})${c.$1 == propose ? ' · proposé' : ''}',
+                AppLocalizations.of(context).lotChoice(c.$2, '${c.$3}') + (c.$1 == propose ? ' · ${AppLocalizations.of(context).lotProposed}' : ''),
                 overflow: TextOverflow.ellipsis,
               ),
             ),

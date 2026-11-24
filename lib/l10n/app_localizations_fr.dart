@@ -2869,4 +2869,163 @@ class AppLocalizationsFr extends AppLocalizations {
   String payChangeGive(String montant) {
     return 'Donnez : $montant';
   }
+
+  @override
+  String get scanTypeCode => 'Saisir le code à la main';
+
+  @override
+  String get scanTypeCodeHint => 'Tapez le numéro imprimé sous les barres.';
+
+  @override
+  String get scanTitle => 'Scanner le code-barres';
+
+  @override
+  String get scanSwitchCamera => 'Changer de caméra';
+
+  @override
+  String get scanCameraNeeded => 'Accès à la caméra requis';
+
+  @override
+  String get scanCameraAllow =>
+      'Autorisez l\'accès à la caméra dans les paramètres du téléphone pour scanner les codes-barres.';
+
+  @override
+  String get retry => 'Réessayer';
+
+  @override
+  String scanChecking(String fait, String total) {
+    return 'Vérification… $fait/$total';
+  }
+
+  @override
+  String get scanStepBack =>
+      'Reculez un peu : tout le code-barres doit tenir dans le cadre';
+
+  @override
+  String get accountSuspendedTitle => 'Compte suspendu';
+
+  @override
+  String get accountSuspendedInfo =>
+      'Le patron a suspendu votre accès.\nContactez-le pour le réactiver.';
+
+  @override
+  String get backToLogin => 'Retour à la connexion';
+
+  @override
+  String authError(String erreur) {
+    return 'Erreur de connexion : $erreur';
+  }
+
+  @override
+  String profileLoadError(String erreur) {
+    return 'Erreur lors du chargement du profil :\n$erreur';
+  }
+
+  @override
+  String get pwdOldWrong => 'L\'ancien mot de passe est incorrect.';
+
+  @override
+  String get pwdTooWeak =>
+      'Nouveau mot de passe trop faible (6 caractères minimum).';
+
+  @override
+  String get pwdTooMany => 'Trop d\'essais. Patientez quelques minutes.';
+
+  @override
+  String get pwdNoInternet =>
+      'Pas de connexion internet. Il faut internet pour changer le mot de passe.';
+
+  @override
+  String get pwdRelogin =>
+      'Par sécurité, déconnectez-vous puis reconnectez-vous, et réessayez.';
+
+  @override
+  String get errorUnknown => 'Erreur inconnue.';
+
+  @override
+  String get pwdFillAll => 'Remplissez les trois champs.';
+
+  @override
+  String get pwdMin6 =>
+      'Le nouveau mot de passe doit avoir au moins 6 caractères.';
+
+  @override
+  String get pwdMismatch =>
+      'Les deux nouveaux mots de passe ne sont pas identiques.';
+
+  @override
+  String get pwdSameAsOld =>
+      'Le nouveau mot de passe doit être différent de l\'ancien.';
+
+  @override
+  String get pwdSmsAccount =>
+      'Ce compte ne se connecte pas avec un mot de passe (connexion par SMS).';
+
+  @override
+  String get pwdChanged => 'Mot de passe changé avec succès.';
+
+  @override
+  String errorWith(String erreur) {
+    return 'Erreur : $erreur';
+  }
+
+  @override
+  String get pwdChangeTitle => 'Changer mon mot de passe';
+
+  @override
+  String get pwdOld => 'Ancien mot de passe';
+
+  @override
+  String get pwdNew => 'Nouveau mot de passe';
+
+  @override
+  String get pwdMinHint => '6 caractères minimum';
+
+  @override
+  String get pwdConfirm => 'Confirmer le nouveau mot de passe';
+
+  @override
+  String get lotOldStock => 'Stock d\'avant les arrivages';
+
+  @override
+  String get lotArrival => 'Arrivage';
+
+  @override
+  String get lotSellFrom => 'Vendre depuis l\'arrivage';
+
+  @override
+  String lotChoice(String nom, String reste) {
+    return '$nom (reste $reste)';
+  }
+
+  @override
+  String livMsgRest(String client, String liste, String boutique) {
+    return 'Bonjour $client, le reste de votre marchandise ($liste) vous attend chez $boutique. ';
+  }
+
+  @override
+  String livMsgAll(String client, String liste, String boutique) {
+    return 'Bonjour $client, votre marchandise ($liste) vous attend chez $boutique. ';
+  }
+
+  @override
+  String livMsgLate(String date) {
+    return 'La date de retrait ($date) est dépassée : merci de passer la récupérer au plus vite. ';
+  }
+
+  @override
+  String livMsgBefore(String date) {
+    return 'Merci de passer la retirer avant le $date. ';
+  }
+
+  @override
+  String livMsgToPay(String montant) {
+    return 'Reste à payer : $montant. ';
+  }
+
+  @override
+  String get livMsgThanks => 'Merci !';
+
+  @override
+  String get lotProposed => 'proposé';
 }

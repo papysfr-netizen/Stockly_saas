@@ -326,18 +326,18 @@ class _CarteLivraisonState extends ConsumerState<_CarteLivraison> {
     ].join(', ');
 
     final message = StringBuffer(dejaSorti
-        ? 'Bonjour $client, le reste de votre marchandise ($listeRestante) vous attend chez $boutique. '
-        : 'Bonjour $client, votre marchandise ($listeRestante) vous attend chez $boutique. ');
+        ? AppLocalizations.of(context).livMsgRest(client, listeRestante, boutique)
+        : AppLocalizations.of(context).livMsgAll(client, listeRestante, boutique));
     if (enRetard) {
       message.write(
-          'La date de retrait (${_formatJour(limite)}) est dépassée : merci de passer la récupérer au plus vite. ');
+          AppLocalizations.of(context).livMsgLate(_formatJour(limite)));
     } else {
-      message.write('Merci de passer la retirer avant le ${_formatJour(limite)}. ');
+      message.write(AppLocalizations.of(context).livMsgBefore(_formatJour(limite)));
     }
     if (reste > 0.005) {
-      message.write('Reste à payer : ${ref.formatPrice(reste)}. ');
+      message.write(AppLocalizations.of(context).livMsgToPay(ref.formatPrice(reste)));
     }
-    message.write('Merci !');
+    message.write(AppLocalizations.of(context).livMsgThanks);
 
     final uri = Uri.parse(
         'https://wa.me/${_numeroPropre(telephone)}?text=${Uri.encodeComponent(message.toString())}');

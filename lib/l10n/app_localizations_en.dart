@@ -2859,4 +2859,159 @@ class AppLocalizationsEn extends AppLocalizations {
   String payChangeGive(String montant) {
     return 'Give: $montant';
   }
+
+  @override
+  String get scanTypeCode => 'Type the code by hand';
+
+  @override
+  String get scanTypeCodeHint => 'Type the number printed under the bars.';
+
+  @override
+  String get scanTitle => 'Scan the barcode';
+
+  @override
+  String get scanSwitchCamera => 'Switch camera';
+
+  @override
+  String get scanCameraNeeded => 'Camera access required';
+
+  @override
+  String get scanCameraAllow =>
+      'Allow camera access in the phone settings to scan barcodes.';
+
+  @override
+  String get retry => 'Try again';
+
+  @override
+  String scanChecking(String fait, String total) {
+    return 'Checking… $fait/$total';
+  }
+
+  @override
+  String get scanStepBack =>
+      'Step back a little: the whole barcode must fit in the frame';
+
+  @override
+  String get accountSuspendedTitle => 'Account suspended';
+
+  @override
+  String get accountSuspendedInfo =>
+      'The owner has suspended your access.\nContact them to reactivate it.';
+
+  @override
+  String get backToLogin => 'Back to login';
+
+  @override
+  String authError(String erreur) {
+    return 'Sign-in error: $erreur';
+  }
+
+  @override
+  String profileLoadError(String erreur) {
+    return 'Error loading the profile:\n$erreur';
+  }
+
+  @override
+  String get pwdOldWrong => 'The old password is wrong.';
+
+  @override
+  String get pwdTooWeak => 'New password too weak (6 characters minimum).';
+
+  @override
+  String get pwdTooMany => 'Too many attempts. Wait a few minutes.';
+
+  @override
+  String get pwdNoInternet =>
+      'No internet connection. Changing the password needs the internet.';
+
+  @override
+  String get pwdRelogin =>
+      'For security, log out, log in again, and try again.';
+
+  @override
+  String get errorUnknown => 'Unknown error.';
+
+  @override
+  String get pwdFillAll => 'Fill in all three fields.';
+
+  @override
+  String get pwdMin6 => 'The new password must have at least 6 characters.';
+
+  @override
+  String get pwdMismatch => 'The two new passwords do not match.';
+
+  @override
+  String get pwdSameAsOld => 'The new password must differ from the old one.';
+
+  @override
+  String get pwdSmsAccount =>
+      'This account does not sign in with a password (SMS sign-in).';
+
+  @override
+  String get pwdChanged => 'Password changed successfully.';
+
+  @override
+  String errorWith(String erreur) {
+    return 'Error: $erreur';
+  }
+
+  @override
+  String get pwdChangeTitle => 'Change my password';
+
+  @override
+  String get pwdOld => 'Old password';
+
+  @override
+  String get pwdNew => 'New password';
+
+  @override
+  String get pwdMinHint => '6 characters minimum';
+
+  @override
+  String get pwdConfirm => 'Confirm the new password';
+
+  @override
+  String get lotOldStock => 'Stock from before the arrivals';
+
+  @override
+  String get lotArrival => 'Arrival';
+
+  @override
+  String get lotSellFrom => 'Sell from the arrival';
+
+  @override
+  String lotChoice(String nom, String reste) {
+    return '$nom ($reste left)';
+  }
+
+  @override
+  String livMsgRest(String client, String liste, String boutique) {
+    return 'Hello $client, the rest of your goods ($liste) is waiting for you at $boutique. ';
+  }
+
+  @override
+  String livMsgAll(String client, String liste, String boutique) {
+    return 'Hello $client, your goods ($liste) are waiting for you at $boutique. ';
+  }
+
+  @override
+  String livMsgLate(String date) {
+    return 'The pickup date ($date) has passed: please come and collect it as soon as possible. ';
+  }
+
+  @override
+  String livMsgBefore(String date) {
+    return 'Please collect it before $date. ';
+  }
+
+  @override
+  String livMsgToPay(String montant) {
+    return 'Left to pay: $montant. ';
+  }
+
+  @override
+  String get livMsgThanks => 'Thank you!';
+
+  @override
+  String get lotProposed => 'suggested';
 }

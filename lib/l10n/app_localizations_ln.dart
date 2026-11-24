@@ -2862,4 +2862,162 @@ class AppLocalizationsLn extends AppLocalizations {
   String payChangeGive(String montant) {
     return 'Pesa: $montant';
   }
+
+  @override
+  String get scanTypeCode => 'Koma code na loboko';
+
+  @override
+  String get scanTypeCodeHint => 'Koma nimero oyo ekomami na nse ya ba barres.';
+
+  @override
+  String get scanTitle => 'Scanner code-barres';
+
+  @override
+  String get scanSwitchCamera => 'Bongola caméra';
+
+  @override
+  String get scanCameraNeeded => 'Nzela ya caméra esengeli';
+
+  @override
+  String get scanCameraAllow =>
+      'Pesa nzela na caméra na ba paramètres ya telefone mpo na ko scanner ba codes-barres.';
+
+  @override
+  String get retry => 'Meka lisusu';
+
+  @override
+  String scanChecking(String fait, String total) {
+    return 'Ezali kotala… $fait/$total';
+  }
+
+  @override
+  String get scanStepBack =>
+      'Zonga sima moke: code-barres mobimba esengeli kokota na cadre';
+
+  @override
+  String get accountSuspendedTitle => 'Compte ekangami';
+
+  @override
+  String get accountSuspendedInfo =>
+      'Patron akangi nzela na yo.\nBenga ye mpo afungola yango lisusu.';
+
+  @override
+  String get backToLogin => 'Zonga na kokota';
+
+  @override
+  String authError(String erreur) {
+    return 'Libunga ya kokota: $erreur';
+  }
+
+  @override
+  String profileLoadError(String erreur) {
+    return 'Libunga na kozwa profil:\n$erreur';
+  }
+
+  @override
+  String get pwdOldWrong => 'Mot de passe ya kala ezali malamu te.';
+
+  @override
+  String get pwdTooWeak =>
+      'Mot de passe ya sika ezali makasi te (ba lettres 6 to koleka).';
+
+  @override
+  String get pwdTooMany => 'Bomeki ebele. Zela miniti moke.';
+
+  @override
+  String get pwdNoInternet =>
+      'Internet ezali te. Kobongola mot de passe esengeli internet.';
+
+  @override
+  String get pwdRelogin =>
+      'Mpo na libateli, bima, kota lisusu, sima meka lisusu.';
+
+  @override
+  String get errorUnknown => 'Libunga eyebani te.';
+
+  @override
+  String get pwdFillAll => 'Tondisa bisika nyonso misato.';
+
+  @override
+  String get pwdMin6 =>
+      'Mot de passe ya sika esengeli kozala na ba lettres 6 to koleka.';
+
+  @override
+  String get pwdMismatch => 'Ba mot de passe mibale ya sika ekokani te.';
+
+  @override
+  String get pwdSameAsOld =>
+      'Mot de passe ya sika esengeli kokesana na oyo ya kala.';
+
+  @override
+  String get pwdSmsAccount =>
+      'Compte oyo ekotaka na mot de passe te (kokota na SMS).';
+
+  @override
+  String get pwdChanged => 'Mot de passe ebongwani malamu.';
+
+  @override
+  String errorWith(String erreur) {
+    return 'Libunga: $erreur';
+  }
+
+  @override
+  String get pwdChangeTitle => 'Bongola mot de passe na ngai';
+
+  @override
+  String get pwdOld => 'Mot de passe ya kala';
+
+  @override
+  String get pwdNew => 'Mot de passe ya sika';
+
+  @override
+  String get pwdMinHint => 'Ba lettres 6 to koleka';
+
+  @override
+  String get pwdConfirm => 'Ndimisa mot de passe ya sika';
+
+  @override
+  String get lotOldStock => 'Stock ya liboso ya ba arrivages';
+
+  @override
+  String get lotArrival => 'Arrivage';
+
+  @override
+  String get lotSellFrom => 'Teka na arrivage';
+
+  @override
+  String lotChoice(String nom, String reste) {
+    return '$nom (etikali $reste)';
+  }
+
+  @override
+  String livMsgRest(String client, String liste, String boutique) {
+    return 'Mbote $client, biloko na yo oyo etikali ($liste) ezali kozela yo na $boutique. ';
+  }
+
+  @override
+  String livMsgAll(String client, String liste, String boutique) {
+    return 'Mbote $client, biloko na yo ($liste) ezali kozela yo na $boutique. ';
+  }
+
+  @override
+  String livMsgLate(String date) {
+    return 'Mokolo ya kozwa ($date) eleki: svp yaka kozwa yango noki. ';
+  }
+
+  @override
+  String livMsgBefore(String date) {
+    return 'Svp yaka kozwa yango liboso ya $date. ';
+  }
+
+  @override
+  String livMsgToPay(String montant) {
+    return 'Oyo etikali kofuta: $montant. ';
+  }
+
+  @override
+  String get livMsgThanks => 'Matondo!';
+
+  @override
+  String get lotProposed => 'epesami';
 }
