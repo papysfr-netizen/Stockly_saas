@@ -6152,6 +6152,486 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Puis saisissez le prix de vente de chaque produit dans cette boutique.'**
   String get pbPickShopInfo;
+
+  /// No description provided for @repColAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant ({devise})'**
+  String repColAmount(String devise);
+
+  /// No description provided for @repToday.
+  ///
+  /// In fr, this message translates to:
+  /// **'AUJOURD\'HUI'**
+  String get repToday;
+
+  /// No description provided for @repYesterday.
+  ///
+  /// In fr, this message translates to:
+  /// **'HIER'**
+  String get repYesterday;
+
+  /// No description provided for @rep7Days.
+  ///
+  /// In fr, this message translates to:
+  /// **'7 JOURS'**
+  String get rep7Days;
+
+  /// No description provided for @repThisMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'CE MOIS'**
+  String get repThisMonth;
+
+  /// No description provided for @repLastMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'MOIS DERNIER'**
+  String get repLastMonth;
+
+  /// No description provided for @repThisYear.
+  ///
+  /// In fr, this message translates to:
+  /// **'CETTE ANNÉE'**
+  String get repThisYear;
+
+  /// No description provided for @repDates.
+  ///
+  /// In fr, this message translates to:
+  /// **'DATES…'**
+  String get repDates;
+
+  /// No description provided for @repColItem.
+  ///
+  /// In fr, this message translates to:
+  /// **'Poste'**
+  String get repColItem;
+
+  /// No description provided for @repGross.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ventes brutes'**
+  String get repGross;
+
+  /// No description provided for @repReturns.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retours et annulations'**
+  String get repReturns;
+
+  /// No description provided for @repNetSales.
+  ///
+  /// In fr, this message translates to:
+  /// **'CHIFFRE D\'AFFAIRES NET'**
+  String get repNetSales;
+
+  /// No description provided for @repCogs.
+  ///
+  /// In fr, this message translates to:
+  /// **'Coût des marchandises vendues'**
+  String get repCogs;
+
+  /// No description provided for @repGrossMargin.
+  ///
+  /// In fr, this message translates to:
+  /// **'MARGE BRUTE'**
+  String get repGrossMargin;
+
+  /// No description provided for @repOtherIncome.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autres produits (acomptes conservés)'**
+  String get repOtherIncome;
+
+  /// No description provided for @repOfWhich.
+  ///
+  /// In fr, this message translates to:
+  /// **'dont {nom}'**
+  String repOfWhich(String nom);
+
+  /// No description provided for @repLosses.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pertes (articles abîmés)'**
+  String get repLosses;
+
+  /// No description provided for @repNet.
+  ///
+  /// In fr, this message translates to:
+  /// **'RÉSULTAT NET'**
+  String get repNet;
+
+  /// No description provided for @repNbSales.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nombre de ventes'**
+  String get repNbSales;
+
+  /// No description provided for @repAvgBasket.
+  ///
+  /// In fr, this message translates to:
+  /// **'Panier moyen'**
+  String get repAvgBasket;
+
+  /// No description provided for @repCashedLong.
+  ///
+  /// In fr, this message translates to:
+  /// **'Encaissé (payé à la vente)'**
+  String get repCashedLong;
+
+  /// No description provided for @repCreditsLong.
+  ///
+  /// In fr, this message translates to:
+  /// **'Crédits accordés (reste à payer)'**
+  String get repCreditsLong;
+
+  /// No description provided for @repByShopUp.
+  ///
+  /// In fr, this message translates to:
+  /// **'PAR BOUTIQUE'**
+  String get repByShopUp;
+
+  /// No description provided for @repShopSales.
+  ///
+  /// In fr, this message translates to:
+  /// **'CA net / nombre de ventes'**
+  String get repShopSales;
+
+  /// No description provided for @repShopCash.
+  ///
+  /// In fr, this message translates to:
+  /// **'Encaissé / crédits'**
+  String get repShopCash;
+
+  /// No description provided for @repStockCost.
+  ///
+  /// In fr, this message translates to:
+  /// **'Stock (prix d\'achat)'**
+  String get repStockCost;
+
+  /// No description provided for @repBySellerUp.
+  ///
+  /// In fr, this message translates to:
+  /// **'PAR VENDEUR'**
+  String get repBySellerUp;
+
+  /// No description provided for @repSellerLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'{nom} ({n} vente(s))'**
+  String repSellerLine(String nom, String n);
+
+  /// No description provided for @repTopUp.
+  ///
+  /// In fr, this message translates to:
+  /// **'PRODUITS LES PLUS VENDUS'**
+  String get repTopUp;
+
+  /// No description provided for @repDormantUp.
+  ///
+  /// In fr, this message translates to:
+  /// **'NE BOUGENT PAS (en stock, aucune vente)'**
+  String get repDormantUp;
+
+  /// No description provided for @repFull.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rapport complet {periode}'**
+  String repFull(String periode);
+
+  /// No description provided for @repFromTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'du {debut} au {fin}'**
+  String repFromTo(String debut, String fin);
+
+  /// No description provided for @repAllShops.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes les boutiques'**
+  String get repAllShops;
+
+  /// No description provided for @repIncomeStatement.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte de résultat'**
+  String get repIncomeStatement;
+
+  /// No description provided for @repExportExcel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter vers Excel'**
+  String get repExportExcel;
+
+  /// No description provided for @repPrintPdf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Imprimer / PDF'**
+  String get repPrintPdf;
+
+  /// No description provided for @repExpError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur dépenses : {erreur}'**
+  String repExpError(String erreur);
+
+  /// No description provided for @repLoadError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger les données : {erreur}'**
+  String repLoadError(String erreur);
+
+  /// No description provided for @repSearchClient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher un client'**
+  String get repSearchClient;
+
+  /// No description provided for @repPaidAtSale.
+  ///
+  /// In fr, this message translates to:
+  /// **'{devise} • payé à la vente'**
+  String repPaidAtSale(String devise);
+
+  /// No description provided for @repCreditsGiven.
+  ///
+  /// In fr, this message translates to:
+  /// **'Crédits accordés'**
+  String get repCreditsGiven;
+
+  /// No description provided for @repLeftToPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'{devise} • reste à payer'**
+  String repLeftToPay(String devise);
+
+  /// No description provided for @repTapDetail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Touchez une ligne pour le détail'**
+  String get repTapDetail;
+
+  /// No description provided for @repByShop.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par boutique'**
+  String get repByShop;
+
+  /// No description provided for @repTop.
+  ///
+  /// In fr, this message translates to:
+  /// **'Produits les plus vendus'**
+  String get repTop;
+
+  /// No description provided for @repDormant.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ne bougent pas'**
+  String get repDormant;
+
+  /// No description provided for @repAmountsNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montants en {devise} • Comparaison avec la période précédente de même durée.'**
+  String repAmountsNote(String devise);
+
+  /// No description provided for @repVsPrevNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'— vs période préc.'**
+  String get repVsPrevNone;
+
+  /// No description provided for @repVsPrev.
+  ///
+  /// In fr, this message translates to:
+  /// **'{pct} % vs période préc.'**
+  String repVsPrev(String pct);
+
+  /// No description provided for @repNoActivity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune activité sur cette période'**
+  String get repNoActivity;
+
+  /// No description provided for @repNetMargin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marge nette'**
+  String get repNetMargin;
+
+  /// No description provided for @repNetSalesShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'CA net'**
+  String get repNetSalesShort;
+
+  /// No description provided for @repGrossMarginShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marge brute'**
+  String get repGrossMarginShort;
+
+  /// No description provided for @repBasket.
+  ///
+  /// In fr, this message translates to:
+  /// **'Panier {montant}'**
+  String repBasket(String montant);
+
+  /// No description provided for @repDepositsKept.
+  ///
+  /// In fr, this message translates to:
+  /// **'Acomptes conservés'**
+  String get repDepositsKept;
+
+  /// No description provided for @repLossesTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pertes : articles abîmés'**
+  String get repLossesTitle;
+
+  /// No description provided for @repNoData.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune donnée sur cette période'**
+  String get repNoData;
+
+  /// No description provided for @repSalesShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'CA'**
+  String get repSalesShort;
+
+  /// No description provided for @repNbShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ventes'**
+  String get repNbShort;
+
+  /// No description provided for @repCreditsShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Crédits'**
+  String get repCreditsShort;
+
+  /// No description provided for @repStockShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Stock (achat)'**
+  String get repStockShort;
+
+  /// No description provided for @repNSales.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} vente(s)'**
+  String repNSales(String n);
+
+  /// No description provided for @repPieces.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} pièce(s)'**
+  String repPieces(String n);
+
+  /// No description provided for @repAndMore.
+  ///
+  /// In fr, this message translates to:
+  /// **'… et {n} autre(s)'**
+  String repAndMore(String n);
+
+  /// No description provided for @repAllSold.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous les produits en stock se sont vendus 👍'**
+  String get repAllSold;
+
+  /// No description provided for @repTiedUp.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} produit(s) • {montant} immobilisés (prix d\'achat)'**
+  String repTiedUp(String n, String montant);
+
+  /// No description provided for @repStockN.
+  ///
+  /// In fr, this message translates to:
+  /// **'Stock : {n}'**
+  String repStockN(String n);
+
+  /// No description provided for @repWhoOwes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Qui doit encore'**
+  String get repWhoOwes;
+
+  /// No description provided for @repPeriodSales.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ventes de la période'**
+  String get repPeriodSales;
+
+  /// No description provided for @repUnitCost.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix d\'achat unitaire : {montant}'**
+  String repUnitCost(String montant);
+
+  /// No description provided for @repMarginPerItem.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marge par article'**
+  String get repMarginPerItem;
+
+  /// No description provided for @repSaleCost.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vente : {vente} | Achat : {achat}'**
+  String repSaleCost(String vente, String achat);
+
+  /// No description provided for @repExpByCat.
+  ///
+  /// In fr, this message translates to:
+  /// **'Charges et dépenses par catégorie'**
+  String get repExpByCat;
+
+  /// No description provided for @repPctOfCosts.
+  ///
+  /// In fr, this message translates to:
+  /// **'{pct} % des charges'**
+  String repPctOfCosts(String pct);
+
+  /// No description provided for @repNetResult.
+  ///
+  /// In fr, this message translates to:
+  /// **'Résultat net'**
+  String get repNetResult;
+
+  /// No description provided for @repSold.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vendu'**
+  String get repSold;
+
+  /// No description provided for @repAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get repAmount;
+
+  /// No description provided for @repStockValue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Stock / valeur achat'**
+  String get repStockValue;
+
+  /// No description provided for @repDormantInfo.
+  ///
+  /// In fr, this message translates to:
+  /// **'En stock, aucune vente'**
+  String get repDormantInfo;
+
+  /// No description provided for @repCostsExpenses.
+  ///
+  /// In fr, this message translates to:
+  /// **'Charges et dépenses'**
+  String get repCostsExpenses;
 }
 
 class _AppLocalizationsDelegate

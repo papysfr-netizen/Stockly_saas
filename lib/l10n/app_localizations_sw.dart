@@ -3677,4 +3677,284 @@ class AppLocalizationsSw extends AppLocalizations {
   @override
   String get pbPickShopInfo =>
       'Kisha weka bei ya kuuza ya kila bidhaa katika duka hili.';
+
+  @override
+  String repColAmount(String devise) {
+    return 'Kiasi ($devise)';
+  }
+
+  @override
+  String get repToday => 'LEO';
+
+  @override
+  String get repYesterday => 'JANA';
+
+  @override
+  String get rep7Days => 'SIKU 7';
+
+  @override
+  String get repThisMonth => 'MWEZI HUU';
+
+  @override
+  String get repLastMonth => 'MWEZI ULIOPITA';
+
+  @override
+  String get repThisYear => 'MWAKA HUU';
+
+  @override
+  String get repDates => 'TAREHE…';
+
+  @override
+  String get repColItem => 'Kipengele';
+
+  @override
+  String get repGross => 'Mauzo ghafi';
+
+  @override
+  String get repReturns => 'Marejesho na kufutwa';
+
+  @override
+  String get repNetSales => 'MAUZO HALISI';
+
+  @override
+  String get repCogs => 'Gharama ya bidhaa zilizouzwa';
+
+  @override
+  String get repGrossMargin => 'FAIDA GHAFI';
+
+  @override
+  String get repOtherIncome => 'Mapato mengine (malipo ya awali yaliyobaki)';
+
+  @override
+  String repOfWhich(String nom) {
+    return 'kati yake $nom';
+  }
+
+  @override
+  String get repLosses => 'Hasara (bidhaa zilizoharibika)';
+
+  @override
+  String get repNet => 'MATOKEO HALISI';
+
+  @override
+  String get repNbSales => 'Idadi ya mauzo';
+
+  @override
+  String get repAvgBasket => 'Wastani wa ununuzi';
+
+  @override
+  String get repCashedLong => 'Iliyolipwa (wakati wa mauzo)';
+
+  @override
+  String get repCreditsLong => 'Mikopo iliyotolewa (kilichobaki kulipa)';
+
+  @override
+  String get repByShopUp => 'KWA DUKA';
+
+  @override
+  String get repShopSales => 'Mauzo halisi / idadi ya mauzo';
+
+  @override
+  String get repShopCash => 'Iliyolipwa / mikopo';
+
+  @override
+  String get repStockCost => 'Hisa (bei ya kununua)';
+
+  @override
+  String get repBySellerUp => 'KWA MUUZAJI';
+
+  @override
+  String repSellerLine(String nom, String n) {
+    return '$nom (mauzo $n)';
+  }
+
+  @override
+  String get repTopUp => 'BIDHAA ZINAZOUZWA ZAIDI';
+
+  @override
+  String get repDormantUp => 'HAZIUZWI (zipo kwenye hisa, hakuna mauzo)';
+
+  @override
+  String repFull(String periode) {
+    return 'Ripoti kamili $periode';
+  }
+
+  @override
+  String repFromTo(String debut, String fin) {
+    return 'kuanzia $debut hadi $fin';
+  }
+
+  @override
+  String get repAllShops => 'Maduka yote';
+
+  @override
+  String get repIncomeStatement => 'Taarifa ya mapato';
+
+  @override
+  String get repExportExcel => 'Hamisha kwenda Excel';
+
+  @override
+  String get repPrintPdf => 'Chapisha / PDF';
+
+  @override
+  String repExpError(String erreur) {
+    return 'Hitilafu ya matumizi: $erreur';
+  }
+
+  @override
+  String repLoadError(String erreur) {
+    return 'Imeshindwa kupakia data: $erreur';
+  }
+
+  @override
+  String get repSearchClient => 'Tafuta mteja';
+
+  @override
+  String repPaidAtSale(String devise) {
+    return '$devise • imelipwa wakati wa mauzo';
+  }
+
+  @override
+  String get repCreditsGiven => 'Mikopo iliyotolewa';
+
+  @override
+  String repLeftToPay(String devise) {
+    return '$devise • kilichobaki kulipa';
+  }
+
+  @override
+  String get repTapDetail => 'Gusa mstari kwa maelezo';
+
+  @override
+  String get repByShop => 'Kwa duka';
+
+  @override
+  String get repTop => 'Bidhaa zinazouzwa zaidi';
+
+  @override
+  String get repDormant => 'Haziuzwi';
+
+  @override
+  String repAmountsNote(String devise) {
+    return 'Kiasi kwa $devise • Ikilinganishwa na kipindi kilichopita cha urefu sawa.';
+  }
+
+  @override
+  String get repVsPrevNone => '— dhidi ya kipindi kilichopita';
+
+  @override
+  String repVsPrev(String pct) {
+    return '$pct % dhidi ya kipindi kilichopita';
+  }
+
+  @override
+  String get repNoActivity => 'Hakuna shughuli katika kipindi hiki';
+
+  @override
+  String get repNetMargin => 'Faida halisi';
+
+  @override
+  String get repNetSalesShort => 'Mauzo halisi';
+
+  @override
+  String get repGrossMarginShort => 'Faida ghafi';
+
+  @override
+  String repBasket(String montant) {
+    return 'Ununuzi $montant';
+  }
+
+  @override
+  String get repDepositsKept => 'Malipo ya awali yaliyobaki';
+
+  @override
+  String get repLossesTitle => 'Hasara: bidhaa zilizoharibika';
+
+  @override
+  String get repNoData => 'Hakuna data katika kipindi hiki';
+
+  @override
+  String get repSalesShort => 'Mauzo';
+
+  @override
+  String get repNbShort => 'Mauzo';
+
+  @override
+  String get repCreditsShort => 'Mikopo';
+
+  @override
+  String get repStockShort => 'Hisa (kununua)';
+
+  @override
+  String repNSales(String n) {
+    return 'Mauzo $n';
+  }
+
+  @override
+  String repPieces(String n) {
+    return 'Vipande $n';
+  }
+
+  @override
+  String repAndMore(String n) {
+    return '… na $n zaidi';
+  }
+
+  @override
+  String get repAllSold => 'Bidhaa zote kwenye hisa zimeuzwa 👍';
+
+  @override
+  String repTiedUp(String n, String montant) {
+    return 'Bidhaa $n • $montant zimekwama (bei ya kununua)';
+  }
+
+  @override
+  String repStockN(String n) {
+    return 'Hisa: $n';
+  }
+
+  @override
+  String get repWhoOwes => 'Nani bado anadaiwa';
+
+  @override
+  String get repPeriodSales => 'Mauzo ya kipindi';
+
+  @override
+  String repUnitCost(String montant) {
+    return 'Bei ya kununua kwa kimoja: $montant';
+  }
+
+  @override
+  String get repMarginPerItem => 'Faida kwa kila bidhaa';
+
+  @override
+  String repSaleCost(String vente, String achat) {
+    return 'Mauzo: $vente | Kununua: $achat';
+  }
+
+  @override
+  String get repExpByCat => 'Gharama na matumizi kwa aina';
+
+  @override
+  String repPctOfCosts(String pct) {
+    return '$pct % ya gharama';
+  }
+
+  @override
+  String get repNetResult => 'Matokeo halisi';
+
+  @override
+  String get repSold => 'Imeuzwa';
+
+  @override
+  String get repAmount => 'Kiasi';
+
+  @override
+  String get repStockValue => 'Hisa / thamani ya kununua';
+
+  @override
+  String get repDormantInfo => 'Zipo kwenye hisa, hakuna mauzo';
+
+  @override
+  String get repCostsExpenses => 'Gharama na matumizi';
 }

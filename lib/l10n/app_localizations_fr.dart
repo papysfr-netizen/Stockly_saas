@@ -3696,4 +3696,284 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get pbPickShopInfo =>
       'Puis saisissez le prix de vente de chaque produit dans cette boutique.';
+
+  @override
+  String repColAmount(String devise) {
+    return 'Montant ($devise)';
+  }
+
+  @override
+  String get repToday => 'AUJOURD\'HUI';
+
+  @override
+  String get repYesterday => 'HIER';
+
+  @override
+  String get rep7Days => '7 JOURS';
+
+  @override
+  String get repThisMonth => 'CE MOIS';
+
+  @override
+  String get repLastMonth => 'MOIS DERNIER';
+
+  @override
+  String get repThisYear => 'CETTE ANNÉE';
+
+  @override
+  String get repDates => 'DATES…';
+
+  @override
+  String get repColItem => 'Poste';
+
+  @override
+  String get repGross => 'Ventes brutes';
+
+  @override
+  String get repReturns => 'Retours et annulations';
+
+  @override
+  String get repNetSales => 'CHIFFRE D\'AFFAIRES NET';
+
+  @override
+  String get repCogs => 'Coût des marchandises vendues';
+
+  @override
+  String get repGrossMargin => 'MARGE BRUTE';
+
+  @override
+  String get repOtherIncome => 'Autres produits (acomptes conservés)';
+
+  @override
+  String repOfWhich(String nom) {
+    return 'dont $nom';
+  }
+
+  @override
+  String get repLosses => 'Pertes (articles abîmés)';
+
+  @override
+  String get repNet => 'RÉSULTAT NET';
+
+  @override
+  String get repNbSales => 'Nombre de ventes';
+
+  @override
+  String get repAvgBasket => 'Panier moyen';
+
+  @override
+  String get repCashedLong => 'Encaissé (payé à la vente)';
+
+  @override
+  String get repCreditsLong => 'Crédits accordés (reste à payer)';
+
+  @override
+  String get repByShopUp => 'PAR BOUTIQUE';
+
+  @override
+  String get repShopSales => 'CA net / nombre de ventes';
+
+  @override
+  String get repShopCash => 'Encaissé / crédits';
+
+  @override
+  String get repStockCost => 'Stock (prix d\'achat)';
+
+  @override
+  String get repBySellerUp => 'PAR VENDEUR';
+
+  @override
+  String repSellerLine(String nom, String n) {
+    return '$nom ($n vente(s))';
+  }
+
+  @override
+  String get repTopUp => 'PRODUITS LES PLUS VENDUS';
+
+  @override
+  String get repDormantUp => 'NE BOUGENT PAS (en stock, aucune vente)';
+
+  @override
+  String repFull(String periode) {
+    return 'Rapport complet $periode';
+  }
+
+  @override
+  String repFromTo(String debut, String fin) {
+    return 'du $debut au $fin';
+  }
+
+  @override
+  String get repAllShops => 'Toutes les boutiques';
+
+  @override
+  String get repIncomeStatement => 'Compte de résultat';
+
+  @override
+  String get repExportExcel => 'Exporter vers Excel';
+
+  @override
+  String get repPrintPdf => 'Imprimer / PDF';
+
+  @override
+  String repExpError(String erreur) {
+    return 'Erreur dépenses : $erreur';
+  }
+
+  @override
+  String repLoadError(String erreur) {
+    return 'Impossible de charger les données : $erreur';
+  }
+
+  @override
+  String get repSearchClient => 'Rechercher un client';
+
+  @override
+  String repPaidAtSale(String devise) {
+    return '$devise • payé à la vente';
+  }
+
+  @override
+  String get repCreditsGiven => 'Crédits accordés';
+
+  @override
+  String repLeftToPay(String devise) {
+    return '$devise • reste à payer';
+  }
+
+  @override
+  String get repTapDetail => 'Touchez une ligne pour le détail';
+
+  @override
+  String get repByShop => 'Par boutique';
+
+  @override
+  String get repTop => 'Produits les plus vendus';
+
+  @override
+  String get repDormant => 'Ne bougent pas';
+
+  @override
+  String repAmountsNote(String devise) {
+    return 'Montants en $devise • Comparaison avec la période précédente de même durée.';
+  }
+
+  @override
+  String get repVsPrevNone => '— vs période préc.';
+
+  @override
+  String repVsPrev(String pct) {
+    return '$pct % vs période préc.';
+  }
+
+  @override
+  String get repNoActivity => 'Aucune activité sur cette période';
+
+  @override
+  String get repNetMargin => 'Marge nette';
+
+  @override
+  String get repNetSalesShort => 'CA net';
+
+  @override
+  String get repGrossMarginShort => 'Marge brute';
+
+  @override
+  String repBasket(String montant) {
+    return 'Panier $montant';
+  }
+
+  @override
+  String get repDepositsKept => 'Acomptes conservés';
+
+  @override
+  String get repLossesTitle => 'Pertes : articles abîmés';
+
+  @override
+  String get repNoData => 'Aucune donnée sur cette période';
+
+  @override
+  String get repSalesShort => 'CA';
+
+  @override
+  String get repNbShort => 'Ventes';
+
+  @override
+  String get repCreditsShort => 'Crédits';
+
+  @override
+  String get repStockShort => 'Stock (achat)';
+
+  @override
+  String repNSales(String n) {
+    return '$n vente(s)';
+  }
+
+  @override
+  String repPieces(String n) {
+    return '$n pièce(s)';
+  }
+
+  @override
+  String repAndMore(String n) {
+    return '… et $n autre(s)';
+  }
+
+  @override
+  String get repAllSold => 'Tous les produits en stock se sont vendus 👍';
+
+  @override
+  String repTiedUp(String n, String montant) {
+    return '$n produit(s) • $montant immobilisés (prix d\'achat)';
+  }
+
+  @override
+  String repStockN(String n) {
+    return 'Stock : $n';
+  }
+
+  @override
+  String get repWhoOwes => 'Qui doit encore';
+
+  @override
+  String get repPeriodSales => 'Ventes de la période';
+
+  @override
+  String repUnitCost(String montant) {
+    return 'Prix d\'achat unitaire : $montant';
+  }
+
+  @override
+  String get repMarginPerItem => 'Marge par article';
+
+  @override
+  String repSaleCost(String vente, String achat) {
+    return 'Vente : $vente | Achat : $achat';
+  }
+
+  @override
+  String get repExpByCat => 'Charges et dépenses par catégorie';
+
+  @override
+  String repPctOfCosts(String pct) {
+    return '$pct % des charges';
+  }
+
+  @override
+  String get repNetResult => 'Résultat net';
+
+  @override
+  String get repSold => 'Vendu';
+
+  @override
+  String get repAmount => 'Montant';
+
+  @override
+  String get repStockValue => 'Stock / valeur achat';
+
+  @override
+  String get repDormantInfo => 'En stock, aucune vente';
+
+  @override
+  String get repCostsExpenses => 'Charges et dépenses';
 }

@@ -7,6 +7,7 @@
 //  - indicateurs : CA net, marge brute %, nombre de ventes, panier moyen
 //  - tableau du compte de résultat avec sous-totaux, chaque ligne détaillable
 
+import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -83,17 +84,17 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
 
     final customLabel = _customRange != null
         ? '${DateFormat('dd/MM').format(_customRange!.start)} – ${DateFormat('dd/MM').format(_customRange!.end)}'
-        : 'DATES…';
+        : AppLocalizations.of(context).repDates;
 
     return [
-      _Periode("AUJOURD'HUI", DateTimeRange(start: aujourdHui, end: _finJour(now))),
-      _Periode('HIER', DateTimeRange(start: hier, end: _finJour(hier))),
-      _Periode('7 JOURS',
+      _Periode(AppLocalizations.of(context).repToday, DateTimeRange(start: aujourdHui, end: _finJour(now))),
+      _Periode(AppLocalizations.of(context).repYesterday, DateTimeRange(start: hier, end: _finJour(hier))),
+      _Periode(AppLocalizations.of(context).rep7Days,
           DateTimeRange(start: aujourdHui.subtract(const Duration(days: 6)), end: _finJour(now))),
-      _Periode('CE MOIS', DateTimeRange(start: debutMois, end: _finJour(now))),
-      _Periode('MOIS DERNIER',
+      _Periode(AppLocalizations.of(context).repThisMonth, DateTimeRange(start: debutMois, end: _finJour(now))),
+      _Periode(AppLocalizations.of(context).repLastMonth,
           DateTimeRange(start: debutMoisDernier, end: _finJour(finMoisDernier))),
-      _Periode('CETTE ANNÉE', DateTimeRange(start: DateTime(now.year, 1, 1), end: _finJour(now))),
+      _Periode(AppLocalizations.of(context).repThisYear, DateTimeRange(start: DateTime(now.year, 1, 1), end: _finJour(now))),
       _Periode(customLabel, _customRange, isCalendar: true),
     ];
   }
@@ -139,47 +140,47 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
   Future<void> _exporter(String type, String Function(double) fmt, String currency) async {
     final r = _dernier;
     if (r == null) return;
-    final enTetes = ['Poste', 'Montant ($currency)'];
+    final enTetes = [AppLocalizations.of(context).repColItem, AppLocalizations.of(context).repColAmount(currency)];
     final lignes = <List<String>>[
-      ['Ventes brutes', fmt(r.ventesBrutes)],
-      ['Retours et annulations', '-${fmt(r.retoursAnnulations)}'],
-      ["CHIFFRE D'AFFAIRES NET", fmt(r.chiffreAffaires)],
-      ['Coût des marchandises vendues', '-${fmt(r.coutAchatStockVendu)}'],
-      ['MARGE BRUTE (${r.tauxMargeBrute.toStringAsFixed(1)} %)', fmt(r.margeBrute)],
-      ['Autres produits (acomptes conservés)', fmt(r.autresProduits)],
-      ['Charges et dépenses', '-${fmt(r.totalDepenses)}'],
-      for (final e in r.depensesParCategorie.entries) ['   dont ${e.key}', '-${fmt(e.value)}'],
-      ['Pertes (articles abîmés)', '-${fmt(r.pertes)}'],
-      ['RÉSULTAT NET (${r.tauxMargeNette.toStringAsFixed(1)} %)', fmt(r.beneficeNet)],
-      ['Nombre de ventes', '${r.nombreVentes}'],
-      ['Panier moyen', fmt(r.panierMoyen)],
-      ['Encaissé (payé à la vente)', fmt(r.encaisse)],
-      ['Crédits accordés (reste à payer)', fmt(r.creditsAccordes)],
+      [AppLocalizations.of(context).repGross, fmt(r.ventesBrutes)],
+      [AppLocalizations.of(context).repReturns, '-${fmt(r.retoursAnnulations)}'],
+      [AppLocalizations.of(context).repNetSales, fmt(r.chiffreAffaires)],
+      [AppLocalizations.of(context).repCogs, '-${fmt(r.coutAchatStockVendu)}'],
+      ['${AppLocalizations.of(context).repGrossMargin} (${r.tauxMargeBrute.toStringAsFixed(1)} %)', fmt(r.margeBrute)],
+      [AppLocalizations.of(context).repOtherIncome, fmt(r.autresProduits)],
+      [AppLocalizations.of(context).repCostsExpenses, '-${fmt(r.totalDepenses)}'],
+      for (final e in r.depensesParCategorie.entries) ['   ${AppLocalizations.of(context).repOfWhich(e.key)}', '-${fmt(e.value)}'],
+      [AppLocalizations.of(context).repLosses, '-${fmt(r.pertes)}'],
+      ['${AppLocalizations.of(context).repNet} (${r.tauxMargeNette.toStringAsFixed(1)} %)', fmt(r.beneficeNet)],
+      [AppLocalizations.of(context).repNbSales, '${r.nombreVentes}'],
+      [AppLocalizations.of(context).repAvgBasket, fmt(r.panierMoyen)],
+      [AppLocalizations.of(context).repCashedLong, fmt(r.encaisse)],
+      [AppLocalizations.of(context).repCreditsLong, fmt(r.creditsAccordes)],
       // 🏬 Par boutique
       if (_dernierComparatif.isNotEmpty) ...[
         ['', ''],
-        ['PAR BOUTIQUE', 'Résultat net'],
+        [AppLocalizations.of(context).repByShopUp, AppLocalizations.of(context).repNetResult],
         for (final e in _dernierComparatif) ...[
           [e.nom.toUpperCase(), fmt(e.r.beneficeNet)],
-          ['   CA net / nombre de ventes', '${fmt(e.r.chiffreAffaires)} / ${e.r.nombreVentes}'],
-          ['   Encaissé / crédits', '${fmt(e.r.encaisse)} / ${fmt(e.r.creditsAccordes)}'],
-          ['   Dépenses', '-${fmt(e.r.totalDepenses)}'],
-          ["   Stock (prix d'achat)", fmt(_valeurStock(_derniersProduits, e.id))],
+          ['   ${AppLocalizations.of(context).repShopSales}', '${fmt(e.r.chiffreAffaires)} / ${e.r.nombreVentes}'],
+          ['   ${AppLocalizations.of(context).repShopCash}', '${fmt(e.r.encaisse)} / ${fmt(e.r.creditsAccordes)}'],
+          ['   ${AppLocalizations.of(context).accExpenses}', '-${fmt(e.r.totalDepenses)}'],
+          ['   ${AppLocalizations.of(context).repStockCost}', fmt(_valeurStock(_derniersProduits, e.id))],
         ],
       ],
       // 👤 Par vendeur
       ['', ''],
-      ['PAR VENDEUR', 'Vendu'],
+      [AppLocalizations.of(context).repBySellerUp, AppLocalizations.of(context).repSold],
       for (final e in (r.ventesParVendeur.entries.toList()
         ..sort((a, b) => b.value.compareTo(a.value))))
-        ['${e.key} (${r.nbVentesParVendeur[e.key] ?? 0} vente(s))', fmt(e.value)],
+        [AppLocalizations.of(context).repSellerLine(e.key, '${r.nbVentesParVendeur[e.key] ?? 0}'), fmt(e.value)],
       // 📦 Produits
       ['', ''],
-      ['PRODUITS LES PLUS VENDUS', 'Montant'],
+      [AppLocalizations.of(context).repTopUp, AppLocalizations.of(context).repAmount],
       for (final e in _topProduits(r).take(15))
         ['${e.key} (x${e.value[0].toStringAsFixed(e.value[0] % 1 == 0 ? 0 : 1)})', fmt(e.value[1])],
       ['', ''],
-      ['NE BOUGENT PAS (en stock, aucune vente)', 'Stock / valeur achat'],
+      [AppLocalizations.of(context).repDormantUp, AppLocalizations.of(context).repStockValue],
       for (final e in _listeDormants(_derniersProduits, r, _derniereBoutique).take(30))
         [
           '${e.code.isEmpty ? '' : '${e.code} · '}${e.nom}',
@@ -189,13 +190,13 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
 
     if (type == 'excel') {
       await ReportExportService.exporterExcel(
-        titreRapport: 'Rapport complet $_dernierePeriode',
+        titreRapport: AppLocalizations.of(context).repFull(_dernierePeriode),
         enTetes: enTetes,
         lignes: lignes,
       );
     } else {
       await ReportExportService.exporterPDF(
-        titreRapport: 'Rapport complet – $_dernierePeriode',
+        titreRapport: AppLocalizations.of(context).repFull('– $_dernierePeriode'),
         nomBoutique: 'Nguli',
         enTetes: enTetes,
         lignes: lignes,
@@ -280,17 +281,17 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
     final dfJour = DateFormat('d MMM yyyy', 'fr_FR');
     final libellePeriode = _jour(dateRange.start) == _jour(dateRange.end)
         ? dfJour.format(dateRange.start)
-        : 'du ${dfJour.format(dateRange.start)} au ${dfJour.format(dateRange.end)}';
+        : AppLocalizations.of(context).repFromTo(dfJour.format(dateRange.start), dfJour.format(dateRange.end));
 
     final libelle = (boutiques.length < 2)
         ? libellePeriode
-        : '$libellePeriode • ${nomBoutique ?? 'Toutes les boutiques'}';
+        : '$libellePeriode • ${nomBoutique ?? AppLocalizations.of(context).repAllShops}';
 
     return Scaffold(
       backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF121418) : const Color(0xFFF3F4F6),
       appBar: AppBar(
-        title: const Text(
-          'Compte de résultat',
+        title: Text(
+          AppLocalizations.of(context).repIncomeStatement,
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         backgroundColor: _bleuNuit,
@@ -303,21 +304,21 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
             icon: const Icon(Icons.ios_share_rounded, color: Colors.white),
             tooltip: 'Exporter',
             onSelected: (v) => _exporter(v, fmt, currency),
-            itemBuilder: (context) => const [
+            itemBuilder: (context) => [
               PopupMenuItem(
                 value: 'excel',
                 child: Row(children: [
-                  Icon(Icons.table_chart, color: Colors.green),
-                  SizedBox(width: 8),
-                  Text('Exporter vers Excel'),
+                  const Icon(Icons.table_chart, color: Colors.green),
+                  const SizedBox(width: 8),
+                  Text(AppLocalizations.of(context).repExportExcel),
                 ]),
               ),
               PopupMenuItem(
                 value: 'pdf',
                 child: Row(children: [
-                  Icon(Icons.picture_as_pdf, color: Colors.red),
-                  SizedBox(width: 8),
-                  Text('Imprimer / PDF'),
+                  const Icon(Icons.picture_as_pdf, color: Colors.red),
+                  const SizedBox(width: 8),
+                  Text(AppLocalizations.of(context).repPrintPdf),
                 ]),
               ),
             ],
@@ -390,7 +391,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                   child: depensesAsync.when(
                     loading: () => const Center(child: CircularProgressIndicator()),
                     error: (err, _) => Center(
-                      child: Text('Erreur dépenses : $err', style: const TextStyle(color: Colors.grey)),
+                      child: Text(AppLocalizations.of(context).repExpError('$err'), style: const TextStyle(color: Colors.grey)),
                     ),
                     data: (toutesLesDepenses) => StreamBuilder<QuerySnapshot>(
                       stream: produitsStream,
@@ -403,7 +404,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                               child: Padding(
                                 padding: const EdgeInsets.all(24),
                                 child: Text(
-                                  'Impossible de charger les données : $erreur',
+                                  AppLocalizations.of(context).repLoadError('$erreur'),
                                   textAlign: TextAlign.center,
                                   style: TextStyle(color: Colors.red.shade700),
                                 ),
@@ -503,7 +504,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                                       borderRadius: BorderRadius.circular(14)),
                                 ),
                                 icon: const Icon(Icons.person_search_rounded),
-                                label: const Text('Rechercher un client'),
+                                label: Text(AppLocalizations.of(context).repSearchClient),
                                 onPressed: () => RechercheClientSheet.ouvrir(
                                   context,
                                   entrepriseId: entrepriseId,
@@ -529,9 +530,9 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                                       child: _tuile(
                                       icone: Icons.payments_rounded,
                                       couleur: _vert,
-                                      titre: 'Encaissé',
+                                      titre: AppLocalizations.of(context).accCashed,
                                       valeur: fmt(r.encaisse),
-                                      sousTitre: '$currency • payé à la vente',
+                                      sousTitre: AppLocalizations.of(context).repPaidAtSale(currency),
                                     ),
                                     ),
                                   ),
@@ -543,42 +544,42 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                                       child: _tuile(
                                       icone: Icons.schedule_rounded,
                                       couleur: _rouge,
-                                      titre: 'Crédits accordés',
+                                      titre: AppLocalizations.of(context).repCreditsGiven,
                                       valeur: fmt(r.creditsAccordes),
-                                      sousTitre: '$currency • reste à payer',
+                                      sousTitre: AppLocalizations.of(context).repLeftToPay(currency),
                                     ),
                                     ),
                                   ),
                                 ],
                               ),
                               const SizedBox(height: 20),
-                              _titreSection('Compte de résultat', 'Touchez une ligne pour le détail'),
+                              _titreSection(AppLocalizations.of(context).repIncomeStatement, AppLocalizations.of(context).repTapDetail),
                               const SizedBox(height: 10),
                               _tableau(context, r, fmt, currency),
                               // 🏬 Par boutique
                               if (comparatif.isNotEmpty) ...[
                                 const SizedBox(height: 20),
-                                _titreSection('Par boutique', 'Toutes les boutiques'),
+                                _titreSection(AppLocalizations.of(context).repByShop, AppLocalizations.of(context).repAllShops),
                                 const SizedBox(height: 10),
                                 _comparatif(comparatif, r, produits, fmt, currency),
                               ],
                               // 👤 Par vendeur
                               const SizedBox(height: 20),
-                              _titreSection('Par vendeur', '${r.nombreVentes} vente(s)'),
+                              _titreSection(AppLocalizations.of(context).repBySeller, AppLocalizations.of(context).repNSales('${r.nombreVentes}')),
                               const SizedBox(height: 10),
                               _vendeurs(r, fmt, currency),
                               // 📦 Produits
                               const SizedBox(height: 20),
-                              _titreSection('Produits les plus vendus', 'Top 15'),
+                              _titreSection(AppLocalizations.of(context).repTop, 'Top 15'),
                               const SizedBox(height: 10),
                               _produitsVendus(r, fmt, currency),
                               const SizedBox(height: 20),
-                              _titreSection('Ne bougent pas', 'En stock, aucune vente'),
+                              _titreSection(AppLocalizations.of(context).repDormant, AppLocalizations.of(context).repDormantInfo),
                               const SizedBox(height: 10),
                               _dormants(produits, r, boutique, fmt, currency),
                               const SizedBox(height: 14),
                               Text(
-                                'Montants en $currency • Comparaison avec la période précédente de même durée.',
+                                AppLocalizations.of(context).repAmountsNote(currency),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(fontSize: 11, color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade600)),
                               ),
@@ -606,7 +607,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
 
   Widget _badgeVariation(double? v, {bool surFondCouleur = false}) {
     if (v == null) {
-      return Text('— vs période préc.',
+      return Text(AppLocalizations.of(context).repVsPrevNone,
           style: TextStyle(
               fontSize: 11, color: surFondCouleur ? Colors.white70 : (Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade600)));
     }
@@ -619,7 +620,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
             size: 13, color: couleur),
         const SizedBox(width: 2),
         Text(
-          '${v.abs().toStringAsFixed(v.abs() >= 100 ? 0 : 1)} % vs période préc.',
+          AppLocalizations.of(context).repVsPrev(v.abs().toStringAsFixed(v.abs() >= 100 ? 0 : 1)),
           style: TextStyle(fontSize: 11, color: couleur, fontWeight: FontWeight.w600),
         ),
       ],
@@ -631,7 +632,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
     final aucuneActivite = r.nombreVentes == 0 && r.totalDepenses == 0;
     final couleur = aucuneActivite ? Colors.blueGrey.shade600 : (r.isProfit ? _vert : _rouge);
     final message = aucuneActivite
-        ? 'Aucune activité sur cette période'
+        ? AppLocalizations.of(context).repNoActivity
         : (r.isProfit ? 'Bénéfice' : 'Perte');
 
     return Container(
@@ -652,7 +653,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
         children: [
           Row(
             children: [
-              const Text('RÉSULTAT NET',
+              Text(AppLocalizations.of(context).repNet,
                   style: TextStyle(
                       color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1)),
               const Spacer(),
@@ -687,7 +688,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Marge nette', style: TextStyle(color: Colors.white70, fontSize: 11)),
+                    Text(AppLocalizations.of(context).repNetMargin, style: const TextStyle(color: Colors.white70, fontSize: 11)),
                     const SizedBox(height: 2),
                     Text('${r.tauxMargeNette.toStringAsFixed(1)} %',
                         style: const TextStyle(
@@ -711,7 +712,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
           child: _tuile(
             icone: Icons.storefront_rounded,
             couleur: Colors.teal,
-            titre: "CA net",
+            titre: AppLocalizations.of(context).repNetSalesShort,
             valeur: fmt(r.chiffreAffaires),
             sousTitre: currency,
             variation: _variation(r.chiffreAffaires, prec.chiffreAffaires),
@@ -722,7 +723,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
           child: _tuile(
             icone: Icons.percent_rounded,
             couleur: Colors.indigo,
-            titre: 'Marge brute',
+            titre: AppLocalizations.of(context).repGrossMarginShort,
             valeur: '${r.tauxMargeBrute.toStringAsFixed(1)} %',
             sousTitre: '${fmt(r.margeBrute)} $currency',
           ),
@@ -734,7 +735,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
             couleur: Colors.orange.shade800,
             titre: 'Ventes',
             valeur: '${r.nombreVentes}',
-            sousTitre: 'Panier ${fmt(r.panierMoyen)}',
+            sousTitre: AppLocalizations.of(context).repBasket(fmt(r.panierMoyen)),
           ),
         ),
       ],
@@ -807,28 +808,28 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
       String Function(double) fmt, String currency) {
     final lignes = <Widget>[
       _ligne(
-        libelle: 'Ventes brutes',
+        libelle: AppLocalizations.of(context).repGross,
         montant: r.ventesBrutes,
         fmt: fmt,
         onTap: () => _detailVentes(context, r, fmt, currency),
       ),
       if (r.retoursAnnulations > 0.005)
         _ligne(
-          libelle: 'Retours et annulations',
+          libelle: AppLocalizations.of(context).repReturns,
           montant: -r.retoursAnnulations,
           fmt: fmt,
-          onTap: () => _detailSimple(context, 'Retours et annulations', r.detailsRetoursList,
+          onTap: () => _detailSimple(context, AppLocalizations.of(context).repReturns, r.detailsRetoursList,
               fmt, currency, negatif: true, icone: Icons.assignment_return_rounded),
         ),
-      _sousTotal(libelle: "CHIFFRE D'AFFAIRES NET", montant: r.chiffreAffaires, fmt: fmt),
+      _sousTotal(libelle: AppLocalizations.of(context).repNetSales, montant: r.chiffreAffaires, fmt: fmt),
       _ligne(
-        libelle: 'Coût des marchandises vendues',
+        libelle: AppLocalizations.of(context).repCogs,
         montant: -r.coutAchatStockVendu,
         fmt: fmt,
         onTap: () => _detailCout(context, r, fmt, currency),
       ),
       _sousTotal(
-        libelle: 'MARGE BRUTE',
+        libelle: AppLocalizations.of(context).repGrossMargin,
         complement: '${r.tauxMargeBrute.toStringAsFixed(1)} %',
         montant: r.margeBrute,
         fmt: fmt,
@@ -836,24 +837,24 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
       ),
       if (r.autresProduits > 0.005)
         _ligne(
-          libelle: 'Autres produits (acomptes conservés)',
+          libelle: AppLocalizations.of(context).repOtherIncome,
           montant: r.autresProduits,
           fmt: fmt,
-          onTap: () => _detailSimple(context, 'Acomptes conservés', r.detailsAutresProduitsList,
+          onTap: () => _detailSimple(context, AppLocalizations.of(context).repDepositsKept, r.detailsAutresProduitsList,
               fmt, currency, icone: Icons.savings_rounded),
         ),
       _ligne(
-        libelle: 'Charges et dépenses',
+        libelle: AppLocalizations.of(context).repCostsExpenses,
         montant: -r.totalDepenses,
         fmt: fmt,
         onTap: () => _detailDepenses(context, r, fmt, currency),
       ),
       if (r.pertes > 0.005)
         _ligne(
-          libelle: 'Pertes (articles abîmés)',
+          libelle: AppLocalizations.of(context).repLosses,
           montant: -r.pertes,
           fmt: fmt,
-          onTap: () => _detailSimple(context, 'Pertes : articles abîmés', r.detailsPertesList,
+          onTap: () => _detailSimple(context, AppLocalizations.of(context).repLossesTitle, r.detailsPertesList,
               fmt, currency, negatif: true, icone: Icons.broken_image_outlined),
         ),
       _total(r, fmt, currency),
@@ -974,7 +975,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
       child: Row(
         children: [
           Expanded(
-            child: Text('RÉSULTAT NET',
+            child: Text(AppLocalizations.of(context).repNet,
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: _encre, letterSpacing: 0.5)),
           ),
           Text(
@@ -1071,7 +1072,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
 
   Widget _aucun() => Padding(
         padding: const EdgeInsets.all(16),
-        child: Text('Aucune donnée sur cette période',
+        child: Text(AppLocalizations.of(context).repNoData,
             style: TextStyle(color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade600))),
       );
 
@@ -1122,12 +1123,12 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
             spacing: 12,
             runSpacing: 4,
             children: [
-              _petit('CA', fmt(x.chiffreAffaires)),
-              _petit('Ventes', '${x.nombreVentes}'),
-              _petit('Encaissé', fmt(x.encaisse)),
-              _petit('Crédits', fmt(x.creditsAccordes)),
-              _petit('Dépenses', fmt(x.totalDepenses)),
-              _petit('Stock (achat)', fmt(stock)),
+              _petit(AppLocalizations.of(context).repSalesShort, fmt(x.chiffreAffaires)),
+              _petit(AppLocalizations.of(context).repNbShort, '${x.nombreVentes}'),
+              _petit(AppLocalizations.of(context).accCashed, fmt(x.encaisse)),
+              _petit(AppLocalizations.of(context).repCreditsShort, fmt(x.creditsAccordes)),
+              _petit(AppLocalizations.of(context).accExpenses, fmt(x.totalDepenses)),
+              _petit(AppLocalizations.of(context).repStockShort, fmt(stock)),
             ],
           ),
         ],
@@ -1149,7 +1150,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
             onTap: () => _ouvrirBoutique(context, e.id, e.nom, fmt, currency)),
       _blocBoutique('TOTAL', total, _valeurStock(produits, null), fmt, currency,
           total: true,
-          onTap: () => _ouvrirBoutique(context, null, 'Toutes les boutiques', fmt, currency)),
+          onTap: () => _ouvrirBoutique(context, null, AppLocalizations.of(context).repAllShops, fmt, currency)),
     ]);
   }
 
@@ -1175,7 +1176,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(fontWeight: FontWeight.w600)),
                   ),
-                  Text('${r.nbVentesParVendeur[e.key] ?? 0} vente(s) • ',
+                  Text('${AppLocalizations.of(context).repNSales('${r.nbVentesParVendeur[e.key] ?? 0}')} • ',
                       style: TextStyle(fontSize: 12, color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade600))),
                   Text('${fmt(e.value)} $currency',
                       style: TextStyle(fontWeight: FontWeight.bold, color: _encre)),
@@ -1221,14 +1222,14 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
           ),
           title: Text(tri[i].key, overflow: TextOverflow.ellipsis),
           subtitle: Text(
-              '${tri[i].value[0].toStringAsFixed(tri[i].value[0] % 1 == 0 ? 0 : 1)} pièce(s)'),
+              AppLocalizations.of(context).repPieces(tri[i].value[0].toStringAsFixed(tri[i].value[0] % 1 == 0 ? 0 : 1))),
           trailing: Text('${fmt(tri[i].value[1])} $currency',
               style: TextStyle(fontWeight: FontWeight.bold, color: _encre)),
         ),
       if (tri.length > 15)
         Padding(
           padding: const EdgeInsets.all(10),
-          child: Text('… et ${tri.length - 15} autre(s)',
+          child: Text(AppLocalizations.of(context).repAndMore('${tri.length - 15}'),
               style: TextStyle(fontSize: 12, color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade600))),
         ),
     ]);
@@ -1258,7 +1259,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
       return _carteBlanche([
         Padding(
           padding: const EdgeInsets.all(16),
-          child: Text('Tous les produits en stock se sont vendus 👍',
+          child: Text(AppLocalizations.of(context).repAllSold,
               style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade700)),
         ),
       ]);
@@ -1268,7 +1269,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
       Padding(
         padding: const EdgeInsets.fromLTRB(14, 12, 14, 4),
         child: Text(
-          "${liste.length} produit(s) • ${fmt(valeurTotale)} $currency immobilisés (prix d'achat)",
+          AppLocalizations.of(context).repTiedUp('${liste.length}', '${fmt(valeurTotale)} $currency'),
           style: TextStyle(
               fontSize: 12, color: Colors.orange.shade900, fontWeight: FontWeight.w600),
         ),
@@ -1279,14 +1280,14 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
           leading: Icon(Icons.hourglass_bottom_rounded, color: Colors.orange.shade700),
           title: Text('${e.code.isEmpty ? '' : '${e.code} · '}${e.nom}',
               overflow: TextOverflow.ellipsis),
-          subtitle: Text('Stock : ${e.qte.toStringAsFixed(e.qte % 1 == 0 ? 0 : 1)}'),
+          subtitle: Text(AppLocalizations.of(context).repStockN(e.qte.toStringAsFixed(e.qte % 1 == 0 ? 0 : 1))),
           trailing: Text('${fmt(e.valeur)} $currency',
               style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange.shade900)),
         ),
       if (liste.length > 20)
         Padding(
           padding: const EdgeInsets.all(10),
-          child: Text('… et ${liste.length - 20} autre(s)',
+          child: Text(AppLocalizations.of(context).repAndMore('${liste.length - 20}'),
               style: TextStyle(fontSize: 12, color: (Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade600))),
         ),
     ]);
@@ -1300,7 +1301,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
     if (p == null) return;
     DetailsRapport.ventes(
       context,
-      titre: 'Encaissé',
+      titre: AppLocalizations.of(context).accCashed,
       ventes: DetailsRapport.ventesPeriode(_ventesAffichees, p,
           garder: (m) => DetailsRapport.encaisseDe(m) > 0.005),
       fmt: fmt,
@@ -1315,7 +1316,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
     if (p == null) return;
     DetailsRapport.ventes(
       context,
-      titre: 'Qui doit encore',
+      titre: AppLocalizations.of(context).repWhoOwes,
       ventes: DetailsRapport.ventesPeriode(_ventesAffichees, p,
           garder: (m) => _n(m['resteAPayer']) > 0.005),
       fmt: fmt,
@@ -1362,10 +1363,10 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
   static String _date(dynamic d) =>
       d is DateTime ? DateFormat('dd/MM/yyyy', 'fr_FR').format(d) : '';
 
-  Widget _vide() => const Padding(
-        padding: EdgeInsets.all(24),
+  Widget _vide() => Padding(
+        padding: const EdgeInsets.all(24),
         child: Center(
-          child: Text('Aucune donnée sur cette période', style: TextStyle(color: Colors.white70)),
+          child: Text(AppLocalizations.of(context).repNoData, style: const TextStyle(color: Colors.white70)),
         ),
       );
 
@@ -1373,7 +1374,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
       String Function(double) fmt, String currency) {
     DetailsBottomSheet.afficher(
       context: context,
-      titre: 'Ventes de la période',
+      titre: AppLocalizations.of(context).repPeriodSales,
       enfants: r.detailsVentesList.isEmpty
           ? [_vide()]
           : r.detailsVentesList
@@ -1394,7 +1395,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
       String Function(double) fmt, String currency) {
     DetailsBottomSheet.afficher(
       context: context,
-      titre: 'Coût des marchandises vendues',
+      titre: AppLocalizations.of(context).repCogs,
       enfants: r.detailsCoutAchatList.isEmpty
           ? [_vide()]
           : r.detailsCoutAchatList
@@ -1403,7 +1404,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                     leading: const Icon(Icons.inventory_2_outlined, color: Colors.orangeAccent),
                     title: Text('${item['nom']} (x${item['qte']})',
                         style: const TextStyle(color: Colors.white)),
-                    subtitle: Text('Prix d\'achat unitaire : ${fmt(item['prixAchatUnit'] as double)} $currency',
+                    subtitle: Text(AppLocalizations.of(context).repUnitCost('${fmt(item['prixAchatUnit'] as double)} $currency'),
                         style: TextStyle(color: Colors.grey.shade400)),
                     trailing: Text('− ${fmt(item['total'] as double)} $currency',
                         style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.redAccent)),
@@ -1416,7 +1417,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
       String Function(double) fmt, String currency) {
     DetailsBottomSheet.afficher(
       context: context,
-      titre: 'Marge par article',
+      titre: AppLocalizations.of(context).repMarginPerItem,
       enfants: r.detailsMargeList.isEmpty
           ? [_vide()]
           : r.detailsMargeList.map((item) {
@@ -1426,7 +1427,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                 leading: Icon(Icons.show_chart, color: m >= 0 ? Colors.tealAccent : Colors.redAccent),
                 title: Text('${item['nom']} (x${item['qte']})', style: const TextStyle(color: Colors.white)),
                 subtitle: Text(
-                  'Vente : ${fmt((item['totalVente'] as num).toDouble())} | Achat : ${fmt((item['totalAchat'] as num).toDouble())}',
+                  AppLocalizations.of(context).repSaleCost(fmt((item['totalVente'] as num).toDouble()), fmt((item['totalAchat'] as num).toDouble())),
                   style: TextStyle(color: Colors.grey.shade400),
                 ),
                 trailing: Text('${fmt(m)} $currency',
@@ -1443,7 +1444,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
       ..sort((a, b) => b.value.compareTo(a.value));
     DetailsBottomSheet.afficher(
       context: context,
-      titre: 'Charges et dépenses par catégorie',
+      titre: AppLocalizations.of(context).repExpByCat,
       enfants: entrees.isEmpty
           ? [_vide()]
           : entrees.map((e) {
@@ -1452,7 +1453,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                 dense: true,
                 leading: const Icon(Icons.money_off, color: Colors.redAccent),
                 title: Text(e.key, style: const TextStyle(color: Colors.white)),
-                subtitle: Text('${part.toStringAsFixed(0)} % des charges',
+                subtitle: Text(AppLocalizations.of(context).repPctOfCosts(part.toStringAsFixed(0)),
                     style: TextStyle(color: Colors.grey.shade400)),
                 trailing: Text('− ${fmt(e.value)} $currency',
                     style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.redAccent)),

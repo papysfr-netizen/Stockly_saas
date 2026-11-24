@@ -3686,4 +3686,284 @@ class AppLocalizationsLn extends AppLocalizations {
   @override
   String get pbPickShopInfo =>
       'Sima koma ntalo ya koteka ya eloko moko moko na butiki oyo.';
+
+  @override
+  String repColAmount(String devise) {
+    return 'Mbongo ($devise)';
+  }
+
+  @override
+  String get repToday => 'LELO';
+
+  @override
+  String get repYesterday => 'LOBI';
+
+  @override
+  String get rep7Days => 'MIKOLO 7';
+
+  @override
+  String get repThisMonth => 'SANZA OYO';
+
+  @override
+  String get repLastMonth => 'SANZA ELEKI';
+
+  @override
+  String get repThisYear => 'MBULA OYO';
+
+  @override
+  String get repDates => 'BA DATES…';
+
+  @override
+  String get repColItem => 'Eloko';
+
+  @override
+  String get repGross => 'Ba ventes nyonso';
+
+  @override
+  String get repReturns => 'Bozongisi mpe bolongoli';
+
+  @override
+  String get repNetSales => 'BA VENTES PETO';
+
+  @override
+  String get repCogs => 'Ntalo ya biloko oyo etekami';
+
+  @override
+  String get repGrossMargin => 'LITOMBA YA LIBOSO';
+
+  @override
+  String get repOtherIncome => 'Ba mbano mosusu (ba acomptes ebatelami)';
+
+  @override
+  String repOfWhich(String nom) {
+    return 'na kati $nom';
+  }
+
+  @override
+  String get repLosses => 'Ba bobungisi (biloko ebebi)';
+
+  @override
+  String get repNet => 'LITOMBA PETO';
+
+  @override
+  String get repNbSales => 'Motango ya ba ventes';
+
+  @override
+  String get repAvgBasket => 'Panier ya kati';
+
+  @override
+  String get repCashedLong => 'Mbongo ezwami (efutami na vente)';
+
+  @override
+  String get repCreditsLong => 'Ba crédits epesami (oyo etikali kofuta)';
+
+  @override
+  String get repByShopUp => 'NA BUTIKI';
+
+  @override
+  String get repShopSales => 'Ba ventes peto / motango ya ba ventes';
+
+  @override
+  String get repShopCash => 'Mbongo ezwami / ba crédits';
+
+  @override
+  String get repStockCost => 'Stock (ntalo ya kosomba)';
+
+  @override
+  String get repBySellerUp => 'NA MOTEKI';
+
+  @override
+  String repSellerLine(String nom, String n) {
+    return '$nom (ba ventes $n)';
+  }
+
+  @override
+  String get repTopUp => 'BILOKO OYO ETEKAMAKA MINGI';
+
+  @override
+  String get repDormantUp => 'EKOTEKAMA TE (ezali na stock, vente moko te)';
+
+  @override
+  String repFull(String periode) {
+    return 'Rapport mobimba $periode';
+  }
+
+  @override
+  String repFromTo(String debut, String fin) {
+    return 'banda $debut tii $fin';
+  }
+
+  @override
+  String get repAllShops => 'Ba butiki nyonso';
+
+  @override
+  String get repIncomeStatement => 'Compte ya litomba';
+
+  @override
+  String get repExportExcel => 'Bimisa na Excel';
+
+  @override
+  String get repPrintPdf => 'Bimisa / PDF';
+
+  @override
+  String repExpError(String erreur) {
+    return 'Libunga ya ba dépenses: $erreur';
+  }
+
+  @override
+  String repLoadError(String erreur) {
+    return 'Ekoki te kozwa ba données: $erreur';
+  }
+
+  @override
+  String get repSearchClient => 'Luka client';
+
+  @override
+  String repPaidAtSale(String devise) {
+    return '$devise • efutami na vente';
+  }
+
+  @override
+  String get repCreditsGiven => 'Ba crédits epesami';
+
+  @override
+  String repLeftToPay(String devise) {
+    return '$devise • etikali kofuta';
+  }
+
+  @override
+  String get repTapDetail => 'Simba molongo mpo na makambo mingi';
+
+  @override
+  String get repByShop => 'Na butiki';
+
+  @override
+  String get repTop => 'Biloko oyo etekamaka mingi';
+
+  @override
+  String get repDormant => 'Ekotekama te';
+
+  @override
+  String repAmountsNote(String devise) {
+    return 'Ba mbongo na $devise • Ekokanisami na tango eleki ya molai moko.';
+  }
+
+  @override
+  String get repVsPrevNone => '— na tango eleki';
+
+  @override
+  String repVsPrev(String pct) {
+    return '$pct % na tango eleki';
+  }
+
+  @override
+  String get repNoActivity => 'Mosala moko te na tango oyo';
+
+  @override
+  String get repNetMargin => 'Litomba peto';
+
+  @override
+  String get repNetSalesShort => 'Ba ventes peto';
+
+  @override
+  String get repGrossMarginShort => 'Litomba ya liboso';
+
+  @override
+  String repBasket(String montant) {
+    return 'Panier $montant';
+  }
+
+  @override
+  String get repDepositsKept => 'Ba acomptes ebatelami';
+
+  @override
+  String get repLossesTitle => 'Ba bobungisi: biloko ebebi';
+
+  @override
+  String get repNoData => 'Ba données ezali te na tango oyo';
+
+  @override
+  String get repSalesShort => 'Ba ventes';
+
+  @override
+  String get repNbShort => 'Ba ventes';
+
+  @override
+  String get repCreditsShort => 'Ba crédits';
+
+  @override
+  String get repStockShort => 'Stock (kosomba)';
+
+  @override
+  String repNSales(String n) {
+    return 'Ba ventes $n';
+  }
+
+  @override
+  String repPieces(String n) {
+    return 'Biteni $n';
+  }
+
+  @override
+  String repAndMore(String n) {
+    return '… mpe $n mosusu';
+  }
+
+  @override
+  String get repAllSold => 'Biloko nyonso ya stock etekami 👍';
+
+  @override
+  String repTiedUp(String n, String montant) {
+    return 'Biloko $n • $montant ekangami (ntalo ya kosomba)';
+  }
+
+  @override
+  String repStockN(String n) {
+    return 'Stock: $n';
+  }
+
+  @override
+  String get repWhoOwes => 'Nani azali kaka na niongo';
+
+  @override
+  String get repPeriodSales => 'Ba ventes ya tango';
+
+  @override
+  String repUnitCost(String montant) {
+    return 'Ntalo ya kosomba ya moko: $montant';
+  }
+
+  @override
+  String get repMarginPerItem => 'Litomba na eloko moko moko';
+
+  @override
+  String repSaleCost(String vente, String achat) {
+    return 'Vente: $vente | Kosomba: $achat';
+  }
+
+  @override
+  String get repExpByCat => 'Ba charges mpe ba dépenses na lolenge';
+
+  @override
+  String repPctOfCosts(String pct) {
+    return '$pct % ya ba charges';
+  }
+
+  @override
+  String get repNetResult => 'Litomba peto';
+
+  @override
+  String get repSold => 'Etekami';
+
+  @override
+  String get repAmount => 'Mbongo';
+
+  @override
+  String get repStockValue => 'Stock / motuya ya kosomba';
+
+  @override
+  String get repDormantInfo => 'Ezali na stock, vente moko te';
+
+  @override
+  String get repCostsExpenses => 'Ba charges mpe ba dépenses';
 }

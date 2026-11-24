@@ -3679,4 +3679,284 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get pbPickShopInfo =>
       'Then enter the selling price of each product in this shop.';
+
+  @override
+  String repColAmount(String devise) {
+    return 'Amount ($devise)';
+  }
+
+  @override
+  String get repToday => 'TODAY';
+
+  @override
+  String get repYesterday => 'YESTERDAY';
+
+  @override
+  String get rep7Days => '7 DAYS';
+
+  @override
+  String get repThisMonth => 'THIS MONTH';
+
+  @override
+  String get repLastMonth => 'LAST MONTH';
+
+  @override
+  String get repThisYear => 'THIS YEAR';
+
+  @override
+  String get repDates => 'DATES…';
+
+  @override
+  String get repColItem => 'Item';
+
+  @override
+  String get repGross => 'Gross sales';
+
+  @override
+  String get repReturns => 'Returns and cancellations';
+
+  @override
+  String get repNetSales => 'NET SALES';
+
+  @override
+  String get repCogs => 'Cost of goods sold';
+
+  @override
+  String get repGrossMargin => 'GROSS MARGIN';
+
+  @override
+  String get repOtherIncome => 'Other income (deposits kept)';
+
+  @override
+  String repOfWhich(String nom) {
+    return 'of which $nom';
+  }
+
+  @override
+  String get repLosses => 'Losses (damaged items)';
+
+  @override
+  String get repNet => 'NET RESULT';
+
+  @override
+  String get repNbSales => 'Number of sales';
+
+  @override
+  String get repAvgBasket => 'Average basket';
+
+  @override
+  String get repCashedLong => 'Collected (paid at sale)';
+
+  @override
+  String get repCreditsLong => 'Credit given (left to pay)';
+
+  @override
+  String get repByShopUp => 'BY SHOP';
+
+  @override
+  String get repShopSales => 'Net sales / number of sales';
+
+  @override
+  String get repShopCash => 'Collected / credit';
+
+  @override
+  String get repStockCost => 'Stock (cost price)';
+
+  @override
+  String get repBySellerUp => 'BY SELLER';
+
+  @override
+  String repSellerLine(String nom, String n) {
+    return '$nom ($n sale(s))';
+  }
+
+  @override
+  String get repTopUp => 'BEST-SELLING PRODUCTS';
+
+  @override
+  String get repDormantUp => 'NOT MOVING (in stock, no sale)';
+
+  @override
+  String repFull(String periode) {
+    return 'Full report $periode';
+  }
+
+  @override
+  String repFromTo(String debut, String fin) {
+    return 'from $debut to $fin';
+  }
+
+  @override
+  String get repAllShops => 'All shops';
+
+  @override
+  String get repIncomeStatement => 'Income statement';
+
+  @override
+  String get repExportExcel => 'Export to Excel';
+
+  @override
+  String get repPrintPdf => 'Print / PDF';
+
+  @override
+  String repExpError(String erreur) {
+    return 'Expenses error: $erreur';
+  }
+
+  @override
+  String repLoadError(String erreur) {
+    return 'Could not load the data: $erreur';
+  }
+
+  @override
+  String get repSearchClient => 'Search a customer';
+
+  @override
+  String repPaidAtSale(String devise) {
+    return '$devise • paid at sale';
+  }
+
+  @override
+  String get repCreditsGiven => 'Credit given';
+
+  @override
+  String repLeftToPay(String devise) {
+    return '$devise • left to pay';
+  }
+
+  @override
+  String get repTapDetail => 'Tap a line for details';
+
+  @override
+  String get repByShop => 'By shop';
+
+  @override
+  String get repTop => 'Best-selling products';
+
+  @override
+  String get repDormant => 'Not moving';
+
+  @override
+  String repAmountsNote(String devise) {
+    return 'Amounts in $devise • Compared with the previous period of the same length.';
+  }
+
+  @override
+  String get repVsPrevNone => '— vs prev. period';
+
+  @override
+  String repVsPrev(String pct) {
+    return '$pct % vs prev. period';
+  }
+
+  @override
+  String get repNoActivity => 'No activity in this period';
+
+  @override
+  String get repNetMargin => 'Net margin';
+
+  @override
+  String get repNetSalesShort => 'Net sales';
+
+  @override
+  String get repGrossMarginShort => 'Gross margin';
+
+  @override
+  String repBasket(String montant) {
+    return 'Basket $montant';
+  }
+
+  @override
+  String get repDepositsKept => 'Deposits kept';
+
+  @override
+  String get repLossesTitle => 'Losses: damaged items';
+
+  @override
+  String get repNoData => 'No data in this period';
+
+  @override
+  String get repSalesShort => 'Sales';
+
+  @override
+  String get repNbShort => 'Sales';
+
+  @override
+  String get repCreditsShort => 'Credit';
+
+  @override
+  String get repStockShort => 'Stock (cost)';
+
+  @override
+  String repNSales(String n) {
+    return '$n sale(s)';
+  }
+
+  @override
+  String repPieces(String n) {
+    return '$n piece(s)';
+  }
+
+  @override
+  String repAndMore(String n) {
+    return '… and $n more';
+  }
+
+  @override
+  String get repAllSold => 'All products in stock have sold 👍';
+
+  @override
+  String repTiedUp(String n, String montant) {
+    return '$n product(s) • $montant tied up (cost price)';
+  }
+
+  @override
+  String repStockN(String n) {
+    return 'Stock: $n';
+  }
+
+  @override
+  String get repWhoOwes => 'Who still owes';
+
+  @override
+  String get repPeriodSales => 'Sales of the period';
+
+  @override
+  String repUnitCost(String montant) {
+    return 'Unit cost price: $montant';
+  }
+
+  @override
+  String get repMarginPerItem => 'Margin per item';
+
+  @override
+  String repSaleCost(String vente, String achat) {
+    return 'Sale: $vente | Cost: $achat';
+  }
+
+  @override
+  String get repExpByCat => 'Costs and expenses by category';
+
+  @override
+  String repPctOfCosts(String pct) {
+    return '$pct % of costs';
+  }
+
+  @override
+  String get repNetResult => 'Net result';
+
+  @override
+  String get repSold => 'Sold';
+
+  @override
+  String get repAmount => 'Amount';
+
+  @override
+  String get repStockValue => 'Stock / cost value';
+
+  @override
+  String get repDormantInfo => 'In stock, no sale';
+
+  @override
+  String get repCostsExpenses => 'Costs and expenses';
 }
