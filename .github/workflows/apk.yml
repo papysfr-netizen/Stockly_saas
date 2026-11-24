@@ -129,16 +129,19 @@ jobs:
           NGULI_KEY_ALIAS: ${{ secrets.NGULI_KEY_ALIAS }}
           NGULI_KEY_PASSWORD: ${{ secrets.NGULI_KEY_PASSWORD }}
         run: |
+          # Numéro de version toujours plus grand que le précédent : Android
+          # accepte toujours la mise à jour (et le Play Store l'exige)
+          NUMERO=$((1000 + GITHUB_RUN_NUMBER))
           flutter pub get
-          flutter build apk --release
+          flutter build apk --release --build-number=$NUMERO
           cp build/app/outputs/flutter-apk/app-release.apk universel.apk
-          flutter build apk --release --split-per-abi
+          flutter build apk --release --split-per-abi --build-number=$NUMERO
 
       - name: Publier l'APK dans « Releases »
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          VERSION=$(grep '^version:' pubspec.yaml | cut -d' ' -f2)
+          VERSION="$(grep '^version:' pubspec.yaml | cut -d' ' -f2 | cut -d'+' -f1)+$((1000 + GITHUB_RUN_NUMBER))"
           BRANCHE=$(echo "${GITHUB_REF_NAME}" | tr '/' '-')
           TAG="apk-${BRANCHE}"
           NOM="nguli-${VERSION}-${BRANCHE}.apk"
