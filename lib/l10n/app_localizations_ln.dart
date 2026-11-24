@@ -3555,4 +3555,135 @@ class AppLocalizationsLn extends AppLocalizations {
   String arrCancelDeleted(String n) {
     return 'Biloko $n elongwamaki uta wana: etikami.';
   }
+
+  @override
+  String trfOnly(String nom, String dispo, String boutique) {
+    return '« $nom »: kaka $dispo ezali na $boutique.';
+  }
+
+  @override
+  String get trfConfirm => 'Ndimisa transfert';
+
+  @override
+  String trfTotal(String n) {
+    return 'Nyonso: biloko $n';
+  }
+
+  @override
+  String get trfDo => 'Tinda';
+
+  @override
+  String get trfOffline =>
+      'Transfert ebombami sans réseau: ekotindama soki réseau ezongi.';
+
+  @override
+  String trfDone(String de, String vers) {
+    return 'Transfert esalemi: $de → $vers';
+  }
+
+  @override
+  String get trfTitle => 'Ba transferts ya stock';
+
+  @override
+  String get accessRestricted => 'Nzela ekangami';
+
+  @override
+  String get oneShopOnly => 'Butiki moko kaka';
+
+  @override
+  String get searchProduct => 'Luka eloko…';
+
+  @override
+  String get trfAll => 'Tinda nyonso';
+
+  @override
+  String get trfNoProduct => 'Eloko moko te ezali';
+
+  @override
+  String get trfChooseQty => 'Pona ba motango';
+
+  @override
+  String trfSummary(String articles, String produits) {
+    return 'Biloko $articles • ba produits $produits';
+  }
+
+  @override
+  String trfAvailable(String n) {
+    return 'Ezali: $n';
+  }
+
+  @override
+  String trfQtyMax(String n) {
+    return 'Motango (koleka te $n)';
+  }
+
+  @override
+  String get trfNone => 'Transfert moko te';
+
+  @override
+  String get trfTabNew => 'Ya sika';
+
+  @override
+  String get trfTabHistory => 'Lisolo';
+
+  @override
+  String pbSavedOffline(String n) {
+    return 'Ba ntalo $n ebombami sans réseau (ekotindama soki réseau ezongi)';
+  }
+
+  @override
+  String pbSaved(String n) {
+    return 'Ba ntalo $n ebombami';
+  }
+
+  @override
+  String get pbChooseShop => 'Pona butiki…';
+
+  @override
+  String get pbPickShop => 'Pona butiki';
+
+  @override
+  String get pbEmptyNormal => 'Esika ya pamba = ntalo ya momesano';
+
+  @override
+  String pbChanged(String n) {
+    return 'Ba ntalo $n ebongolami';
+  }
+
+  @override
+  String get pbTitle => 'Ntalo na butiki moko moko';
+
+  @override
+  String pbNormal(String prix) {
+    return 'Ntalo ya momesano: $prix';
+  }
+
+  @override
+  String get trfNeedStock =>
+      'Esengeli ndingisa « Kamba stock » mpo na kosala ba transferts.';
+
+  @override
+  String get trfNeedTwoShops =>
+      'Kela ba butiki 2 to koleka (Paramètres → Ba butiki na ngai) mpo na kotinda stock.';
+
+  @override
+  String get trfAllSearch => 'Nyonso (bolukiluki)';
+
+  @override
+  String get trfNoStock => 'Butiki oyo ezali na stock ya kotinda te.';
+
+  @override
+  String get trfNoneInfo => 'Ba transferts oyo esalemi ekomonana awa.';
+
+  @override
+  String get pbNeedStock =>
+      'Esengeli ndingisa « Kamba stock » mpo na kobongola ba ntalo.';
+
+  @override
+  String get pbNeedTwoShops =>
+      'Kela ba butiki 2 to koleka mpo na kotia ba ntalo ekeseni.';
+
+  @override
+  String get pbPickShopInfo =>
+      'Sima koma ntalo ya koteka ya eloko moko moko na butiki oyo.';
 }

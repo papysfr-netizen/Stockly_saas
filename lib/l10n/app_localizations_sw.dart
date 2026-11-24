@@ -3547,4 +3547,134 @@ class AppLocalizationsSw extends AppLocalizations {
   String arrCancelDeleted(String n) {
     return 'Bidhaa $n zimefutwa tangu hapo: zinarukwa.';
   }
+
+  @override
+  String trfOnly(String nom, String dispo, String boutique) {
+    return '« $nom »: $dispo tu zinapatikana kwa $boutique.';
+  }
+
+  @override
+  String get trfConfirm => 'Thibitisha uhamisho';
+
+  @override
+  String trfTotal(String n) {
+    return 'Jumla: vitu $n';
+  }
+
+  @override
+  String get trfDo => 'Hamisha';
+
+  @override
+  String get trfOffline =>
+      'Uhamisho umehifadhiwa bila mtandao: utatumwa mtandao ukirudi.';
+
+  @override
+  String trfDone(String de, String vers) {
+    return 'Uhamisho umefanyika: $de → $vers';
+  }
+
+  @override
+  String get trfTitle => 'Uhamisho wa hisa';
+
+  @override
+  String get accessRestricted => 'Ufikiaji umezuiliwa';
+
+  @override
+  String get oneShopOnly => 'Duka moja tu';
+
+  @override
+  String get searchProduct => 'Tafuta bidhaa…';
+
+  @override
+  String get trfAll => 'Hamisha zote';
+
+  @override
+  String get trfNoProduct => 'Hakuna bidhaa inayopatikana';
+
+  @override
+  String get trfChooseQty => 'Chagua idadi';
+
+  @override
+  String trfSummary(String articles, String produits) {
+    return 'Vitu $articles • bidhaa $produits';
+  }
+
+  @override
+  String trfAvailable(String n) {
+    return 'Inapatikana: $n';
+  }
+
+  @override
+  String trfQtyMax(String n) {
+    return 'Idadi (hadi $n)';
+  }
+
+  @override
+  String get trfNone => 'Hakuna uhamisho';
+
+  @override
+  String get trfTabNew => 'Mpya';
+
+  @override
+  String get trfTabHistory => 'Historia';
+
+  @override
+  String pbSavedOffline(String n) {
+    return 'Bei $n zimehifadhiwa bila mtandao (zitatumwa mtandao ukirudi)';
+  }
+
+  @override
+  String pbSaved(String n) {
+    return 'Bei $n zimehifadhiwa';
+  }
+
+  @override
+  String get pbChooseShop => 'Chagua duka…';
+
+  @override
+  String get pbPickShop => 'Chagua duka';
+
+  @override
+  String get pbEmptyNormal => 'Sehemu tupu = bei ya kawaida';
+
+  @override
+  String pbChanged(String n) {
+    return 'Bei $n zimebadilishwa';
+  }
+
+  @override
+  String get pbTitle => 'Bei kwa kila duka';
+
+  @override
+  String pbNormal(String prix) {
+    return 'Bei ya kawaida: $prix';
+  }
+
+  @override
+  String get trfNeedStock =>
+      'Unahitaji ruhusa ya « Simamia hisa » ili kuhamisha.';
+
+  @override
+  String get trfNeedTwoShops =>
+      'Unda angalau maduka 2 (Mipangilio → Maduka yangu) ili kuhamisha hisa.';
+
+  @override
+  String get trfAllSearch => 'Zote (utafutaji)';
+
+  @override
+  String get trfNoStock => 'Duka hili halina hisa ya kuhamisha.';
+
+  @override
+  String get trfNoneInfo => 'Uhamisho uliofanyika utaonekana hapa.';
+
+  @override
+  String get pbNeedStock =>
+      'Unahitaji ruhusa ya « Simamia hisa » ili kubadilisha bei.';
+
+  @override
+  String get pbNeedTwoShops => 'Unda angalau maduka 2 ili kuweka bei tofauti.';
+
+  @override
+  String get pbPickShopInfo =>
+      'Kisha weka bei ya kuuza ya kila bidhaa katika duka hili.';
 }

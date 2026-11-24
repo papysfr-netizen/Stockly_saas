@@ -5942,6 +5942,216 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{n} produit(s) ont été supprimés depuis : ils sont ignorés.'**
   String arrCancelDeleted(String n);
+
+  /// No description provided for @trfOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {nom} » : seulement {dispo} disponible(s) à {boutique}.'**
+  String trfOnly(String nom, String dispo, String boutique);
+
+  /// No description provided for @trfConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer le transfert'**
+  String get trfConfirm;
+
+  /// No description provided for @trfTotal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total : {n} article(s)'**
+  String trfTotal(String n);
+
+  /// No description provided for @trfDo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transférer'**
+  String get trfDo;
+
+  /// No description provided for @trfOffline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transfert enregistré hors ligne : il sera envoyé au retour du réseau.'**
+  String get trfOffline;
+
+  /// No description provided for @trfDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transfert effectué : {de} → {vers}'**
+  String trfDone(String de, String vers);
+
+  /// No description provided for @trfTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transferts de stock'**
+  String get trfTitle;
+
+  /// No description provided for @accessRestricted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accès réservé'**
+  String get accessRestricted;
+
+  /// No description provided for @oneShopOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une seule boutique'**
+  String get oneShopOnly;
+
+  /// No description provided for @searchProduct.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher un produit…'**
+  String get searchProduct;
+
+  /// No description provided for @trfAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout transférer'**
+  String get trfAll;
+
+  /// No description provided for @trfNoProduct.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun produit disponible'**
+  String get trfNoProduct;
+
+  /// No description provided for @trfChooseQty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez les quantités'**
+  String get trfChooseQty;
+
+  /// No description provided for @trfSummary.
+  ///
+  /// In fr, this message translates to:
+  /// **'{articles} article(s) • {produits} produit(s)'**
+  String trfSummary(String articles, String produits);
+
+  /// No description provided for @trfAvailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Disponible : {n}'**
+  String trfAvailable(String n);
+
+  /// No description provided for @trfQtyMax.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quantité (max {n})'**
+  String trfQtyMax(String n);
+
+  /// No description provided for @trfNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun transfert'**
+  String get trfNone;
+
+  /// No description provided for @trfTabNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau'**
+  String get trfTabNew;
+
+  /// No description provided for @trfTabHistory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Historique'**
+  String get trfTabHistory;
+
+  /// No description provided for @pbSavedOffline.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} prix enregistrés hors ligne (envoyés au retour du réseau)'**
+  String pbSavedOffline(String n);
+
+  /// No description provided for @pbSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} prix enregistrés'**
+  String pbSaved(String n);
+
+  /// No description provided for @pbChooseShop.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir la boutique…'**
+  String get pbChooseShop;
+
+  /// No description provided for @pbPickShop.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez une boutique'**
+  String get pbPickShop;
+
+  /// No description provided for @pbEmptyNormal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Champ vide = prix normal'**
+  String get pbEmptyNormal;
+
+  /// No description provided for @pbChanged.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} prix modifié(s)'**
+  String pbChanged(String n);
+
+  /// No description provided for @pbTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix par boutique'**
+  String get pbTitle;
+
+  /// No description provided for @pbNormal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix normal : {prix}'**
+  String pbNormal(String prix);
+
+  /// No description provided for @trfNeedStock.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il faut l\'autorisation « Gérer le stock » pour faire des transferts.'**
+  String get trfNeedStock;
+
+  /// No description provided for @trfNeedTwoShops.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créez au moins 2 boutiques (Paramètres → Mes boutiques) pour transférer du stock.'**
+  String get trfNeedTwoShops;
+
+  /// No description provided for @trfAllSearch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout (recherche)'**
+  String get trfAllSearch;
+
+  /// No description provided for @trfNoStock.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette boutique n\'a pas de stock à transférer.'**
+  String get trfNoStock;
+
+  /// No description provided for @trfNoneInfo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les transferts effectués apparaîtront ici.'**
+  String get trfNoneInfo;
+
+  /// No description provided for @pbNeedStock.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il faut l\'autorisation « Gérer le stock » pour modifier les prix.'**
+  String get pbNeedStock;
+
+  /// No description provided for @pbNeedTwoShops.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créez au moins 2 boutiques pour définir des prix différents.'**
+  String get pbNeedTwoShops;
+
+  /// No description provided for @pbPickShopInfo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Puis saisissez le prix de vente de chaque produit dans cette boutique.'**
+  String get pbPickShopInfo;
 }
 
 class _AppLocalizationsDelegate

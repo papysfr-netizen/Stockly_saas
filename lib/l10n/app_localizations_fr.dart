@@ -3565,4 +3565,135 @@ class AppLocalizationsFr extends AppLocalizations {
   String arrCancelDeleted(String n) {
     return '$n produit(s) ont été supprimés depuis : ils sont ignorés.';
   }
+
+  @override
+  String trfOnly(String nom, String dispo, String boutique) {
+    return '« $nom » : seulement $dispo disponible(s) à $boutique.';
+  }
+
+  @override
+  String get trfConfirm => 'Confirmer le transfert';
+
+  @override
+  String trfTotal(String n) {
+    return 'Total : $n article(s)';
+  }
+
+  @override
+  String get trfDo => 'Transférer';
+
+  @override
+  String get trfOffline =>
+      'Transfert enregistré hors ligne : il sera envoyé au retour du réseau.';
+
+  @override
+  String trfDone(String de, String vers) {
+    return 'Transfert effectué : $de → $vers';
+  }
+
+  @override
+  String get trfTitle => 'Transferts de stock';
+
+  @override
+  String get accessRestricted => 'Accès réservé';
+
+  @override
+  String get oneShopOnly => 'Une seule boutique';
+
+  @override
+  String get searchProduct => 'Rechercher un produit…';
+
+  @override
+  String get trfAll => 'Tout transférer';
+
+  @override
+  String get trfNoProduct => 'Aucun produit disponible';
+
+  @override
+  String get trfChooseQty => 'Choisissez les quantités';
+
+  @override
+  String trfSummary(String articles, String produits) {
+    return '$articles article(s) • $produits produit(s)';
+  }
+
+  @override
+  String trfAvailable(String n) {
+    return 'Disponible : $n';
+  }
+
+  @override
+  String trfQtyMax(String n) {
+    return 'Quantité (max $n)';
+  }
+
+  @override
+  String get trfNone => 'Aucun transfert';
+
+  @override
+  String get trfTabNew => 'Nouveau';
+
+  @override
+  String get trfTabHistory => 'Historique';
+
+  @override
+  String pbSavedOffline(String n) {
+    return '$n prix enregistrés hors ligne (envoyés au retour du réseau)';
+  }
+
+  @override
+  String pbSaved(String n) {
+    return '$n prix enregistrés';
+  }
+
+  @override
+  String get pbChooseShop => 'Choisir la boutique…';
+
+  @override
+  String get pbPickShop => 'Choisissez une boutique';
+
+  @override
+  String get pbEmptyNormal => 'Champ vide = prix normal';
+
+  @override
+  String pbChanged(String n) {
+    return '$n prix modifié(s)';
+  }
+
+  @override
+  String get pbTitle => 'Prix par boutique';
+
+  @override
+  String pbNormal(String prix) {
+    return 'Prix normal : $prix';
+  }
+
+  @override
+  String get trfNeedStock =>
+      'Il faut l\'autorisation « Gérer le stock » pour faire des transferts.';
+
+  @override
+  String get trfNeedTwoShops =>
+      'Créez au moins 2 boutiques (Paramètres → Mes boutiques) pour transférer du stock.';
+
+  @override
+  String get trfAllSearch => 'Tout (recherche)';
+
+  @override
+  String get trfNoStock => 'Cette boutique n\'a pas de stock à transférer.';
+
+  @override
+  String get trfNoneInfo => 'Les transferts effectués apparaîtront ici.';
+
+  @override
+  String get pbNeedStock =>
+      'Il faut l\'autorisation « Gérer le stock » pour modifier les prix.';
+
+  @override
+  String get pbNeedTwoShops =>
+      'Créez au moins 2 boutiques pour définir des prix différents.';
+
+  @override
+  String get pbPickShopInfo =>
+      'Puis saisissez le prix de vente de chaque produit dans cette boutique.';
 }

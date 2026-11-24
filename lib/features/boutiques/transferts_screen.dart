@@ -8,6 +8,7 @@
 //   B -> C          : stocks.B -= q ; stocks.C += q
 // Chaque transfert est enregistré dans entreprises/{id}/transferts (historique).
 
+import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -80,7 +81,7 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
       final dispo = p.stockBoutique(_de);
       if (e.value > dispo) {
         messenger.showSnackBar(SnackBar(
-          content: Text('« ${p.nom} » : seulement $dispo disponible(s) à ${_nomBoutique(boutiques, _de)}.'),
+          content: Text(AppLocalizations.of(context).trfOnly(p.nom, '$dispo', _nomBoutique(boutiques, _de))),
           backgroundColor: Colors.red,
         ));
         return;
@@ -95,7 +96,7 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Confirmer le transfert'),
+        title: Text(AppLocalizations.of(context).trfConfirm),
         content: SizedBox(
           width: double.maxFinite,
           child: Column(
@@ -122,13 +123,13 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
                 ),
               ),
               const Divider(),
-              Text('Total : $_totalArticles article(s)'),
+              Text(AppLocalizations.of(context).trfTotal('$_totalArticles')),
             ],
           ),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Transférer')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(AppLocalizations.of(context).trfDo)),
         ],
       ),
     );
@@ -194,12 +195,12 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
       setState(() => _qte.clear());
       messenger.showSnackBar(SnackBar(
         content: Text(horsLigne
-            ? 'Transfert enregistré hors ligne : il sera envoyé au retour du réseau.'
-            : 'Transfert effectué : $deNom → $versNom'),
+            ? AppLocalizations.of(context).trfOffline
+            : AppLocalizations.of(context).trfDone(deNom, versNom)),
         backgroundColor: Colors.green,
       ));
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Erreur : $e'), backgroundColor: Colors.red));
+      messenger.showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).errorWith('$e')), backgroundColor: Colors.red));
     } finally {
       if (mounted) setState(() => _enCours = false);
     }
@@ -218,26 +219,26 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
       child: Scaffold(
         backgroundColor: _fondPage,
         appBar: AppBar(
-          title: const Text('Transferts de stock', style: TextStyle(fontWeight: FontWeight.bold)),
+          title: Text(AppLocalizations.of(context).trfTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
           backgroundColor: _bleuNuit,
           foregroundColor: Colors.white,
           elevation: 0,
-          bottom: const TabBar(
+          bottom: TabBar(
             indicatorColor: Colors.amber,
             labelColor: Colors.white,
             unselectedLabelColor: Colors.white60,
             tabs: [
-              Tab(icon: Icon(Icons.swap_horiz_rounded), text: 'Nouveau'),
-              Tab(icon: Icon(Icons.history_rounded), text: 'Historique'),
+              Tab(icon: const Icon(Icons.swap_horiz_rounded), text: AppLocalizations.of(context).trfTabNew),
+              Tab(icon: const Icon(Icons.history_rounded), text: AppLocalizations.of(context).trfTabHistory),
             ],
           ),
         ),
         body: (profil != null && !profil.peutGererStock)
-            ? _message(Icons.lock_outline, 'Accès réservé',
-                'Il faut l\'autorisation « Gérer le stock » pour faire des transferts.')
+            ? _message(Icons.lock_outline, AppLocalizations.of(context).accessRestricted,
+                AppLocalizations.of(context).trfNeedStock)
             : boutiques.length < 2
-                ? _message(Icons.storefront_outlined, 'Une seule boutique',
-                    'Créez au moins 2 boutiques (Paramètres → Mes boutiques) pour transférer du stock.')
+                ? _message(Icons.storefront_outlined, AppLocalizations.of(context).oneShopOnly,
+                    AppLocalizations.of(context).trfNeedTwoShops)
                 : TabBarView(
                     children: [
                       _ongletNouveau(boutiques),
@@ -335,7 +336,7 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
                 controller: _rechercheCtrl,
                 onChanged: (v) => setState(() => _recherche = v.trim().toLowerCase()),
                 decoration: InputDecoration(
-                  hintText: 'Rechercher un produit…',
+                  hintText: AppLocalizations.of(context).searchProduct,
                   prefixIcon: const Icon(Icons.search_rounded),
                   filled: true,
                   fillColor: _fondChamp,
@@ -362,7 +363,7 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
                               }
                             }),
                     icon: const Icon(Icons.select_all_rounded),
-                    label: Text(_recherche.isEmpty ? 'Tout transférer' : 'Tout (recherche)'),
+                    label: Text(_recherche.isEmpty ? AppLocalizations.of(context).trfAll : AppLocalizations.of(context).trfAllSearch),
                   ),
                   const Spacer(),
                   if (_totalArticles > 0)
@@ -377,8 +378,8 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
             // Produits
             Expanded(
               child: visibles.isEmpty
-                  ? _message(Icons.inventory_2_outlined, 'Aucun produit disponible',
-                      'Cette boutique n\'a pas de stock à transférer.')
+                  ? _message(Icons.inventory_2_outlined, AppLocalizations.of(context).trfNoProduct,
+                      AppLocalizations.of(context).trfNoStock)
                   : ListView.builder(
                       padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
                       itemCount: visibles.length,
@@ -401,8 +402,8 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
                     Expanded(
                       child: Text(
                         _totalArticles == 0
-                            ? 'Choisissez les quantités'
-                            : '$_totalArticles article(s) • ${_qte.values.where((v) => v > 0).length} produit(s)',
+                            ? AppLocalizations.of(context).trfChooseQty
+                            : AppLocalizations.of(context).trfSummary('$_totalArticles', '${_qte.values.where((v) => v > 0).length}'),
                         style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ),
@@ -416,7 +417,7 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
                               width: 16, height: 16,
                               child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                           : const Icon(Icons.local_shipping_rounded),
-                      label: const Text('Transférer'),
+                      label: Text(AppLocalizations.of(context).trfDo),
                     ),
                   ],
                 ),
@@ -480,7 +481,7 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontWeight: FontWeight.bold, color: _encre)),
-                Text('Disponible : $dispo', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                Text(AppLocalizations.of(context).trfAvailable('$dispo'), style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
               ],
             ),
           ),
@@ -520,7 +521,7 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
           controller: ctrl,
           autofocus: true,
           keyboardType: TextInputType.number,
-          decoration: InputDecoration(labelText: 'Quantité (max $dispo)'),
+          decoration: InputDecoration(labelText: AppLocalizations.of(context).trfQtyMax('$dispo')),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuler')),
@@ -550,7 +551,7 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
         if (!snap.hasData) return const Center(child: CircularProgressIndicator());
         final docs = snap.data!.docs;
         if (docs.isEmpty) {
-          return _message(Icons.history_rounded, 'Aucun transfert', 'Les transferts effectués apparaîtront ici.');
+          return _message(Icons.history_rounded, AppLocalizations.of(context).trfNone, AppLocalizations.of(context).trfNoneInfo);
         }
         return ListView.builder(
           padding: const EdgeInsets.all(16),

@@ -3548,4 +3548,135 @@ class AppLocalizationsEn extends AppLocalizations {
   String arrCancelDeleted(String n) {
     return '$n product(s) were deleted since then: they are skipped.';
   }
+
+  @override
+  String trfOnly(String nom, String dispo, String boutique) {
+    return '« $nom »: only $dispo available at $boutique.';
+  }
+
+  @override
+  String get trfConfirm => 'Confirm the transfer';
+
+  @override
+  String trfTotal(String n) {
+    return 'Total: $n item(s)';
+  }
+
+  @override
+  String get trfDo => 'Transfer';
+
+  @override
+  String get trfOffline =>
+      'Transfer saved offline: it will be sent when the network returns.';
+
+  @override
+  String trfDone(String de, String vers) {
+    return 'Transfer done: $de → $vers';
+  }
+
+  @override
+  String get trfTitle => 'Stock transfers';
+
+  @override
+  String get accessRestricted => 'Restricted access';
+
+  @override
+  String get oneShopOnly => 'Only one shop';
+
+  @override
+  String get searchProduct => 'Search a product…';
+
+  @override
+  String get trfAll => 'Transfer all';
+
+  @override
+  String get trfNoProduct => 'No product available';
+
+  @override
+  String get trfChooseQty => 'Choose the quantities';
+
+  @override
+  String trfSummary(String articles, String produits) {
+    return '$articles item(s) • $produits product(s)';
+  }
+
+  @override
+  String trfAvailable(String n) {
+    return 'Available: $n';
+  }
+
+  @override
+  String trfQtyMax(String n) {
+    return 'Quantity (max $n)';
+  }
+
+  @override
+  String get trfNone => 'No transfer';
+
+  @override
+  String get trfTabNew => 'New';
+
+  @override
+  String get trfTabHistory => 'History';
+
+  @override
+  String pbSavedOffline(String n) {
+    return '$n prices saved offline (sent when the network returns)';
+  }
+
+  @override
+  String pbSaved(String n) {
+    return '$n prices saved';
+  }
+
+  @override
+  String get pbChooseShop => 'Choose the shop…';
+
+  @override
+  String get pbPickShop => 'Choose a shop';
+
+  @override
+  String get pbEmptyNormal => 'Empty field = normal price';
+
+  @override
+  String pbChanged(String n) {
+    return '$n price(s) changed';
+  }
+
+  @override
+  String get pbTitle => 'Price per shop';
+
+  @override
+  String pbNormal(String prix) {
+    return 'Normal price: $prix';
+  }
+
+  @override
+  String get trfNeedStock =>
+      'You need the « Manage stock » permission to make transfers.';
+
+  @override
+  String get trfNeedTwoShops =>
+      'Create at least 2 shops (Settings → My shops) to transfer stock.';
+
+  @override
+  String get trfAllSearch => 'All (search)';
+
+  @override
+  String get trfNoStock => 'This shop has no stock to transfer.';
+
+  @override
+  String get trfNoneInfo => 'Completed transfers will appear here.';
+
+  @override
+  String get pbNeedStock =>
+      'You need the « Manage stock » permission to change prices.';
+
+  @override
+  String get pbNeedTwoShops =>
+      'Create at least 2 shops to set different prices.';
+
+  @override
+  String get pbPickShopInfo =>
+      'Then enter the selling price of each product in this shop.';
 }

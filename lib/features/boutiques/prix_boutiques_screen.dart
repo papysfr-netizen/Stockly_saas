@@ -5,6 +5,7 @@
 // produits/{id}.prixParBoutique = {idBoutique: prix (en USD, comme prixVente)}
 // Champ vide (ou égal au prix normal) = la boutique vend au prix normal.
 
+import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -110,12 +111,12 @@ class _PrixBoutiquesScreenState extends ConsumerState<PrixBoutiquesScreen> {
       setState(() => _modifies.clear());
       messenger.showSnackBar(SnackBar(
         content: Text(horsLigne
-            ? '$n prix enregistrés hors ligne (envoyés au retour du réseau)'
-            : '$n prix enregistrés'),
+            ? AppLocalizations.of(context).pbSavedOffline('$n')
+            : AppLocalizations.of(context).pbSaved('$n')),
         backgroundColor: Colors.green,
       ));
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Erreur : $e'), backgroundColor: Colors.red));
+      messenger.showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).errorWith('$e')), backgroundColor: Colors.red));
     } finally {
       if (mounted) setState(() => _enCours = false);
     }
@@ -134,11 +135,11 @@ class _PrixBoutiquesScreenState extends ConsumerState<PrixBoutiquesScreen> {
 
     Widget corps;
     if (profil != null && !profil.peutGererStock) {
-      corps = _message(Icons.lock_outline, 'Accès réservé',
-          'Il faut l\'autorisation « Gérer le stock » pour modifier les prix.');
+      corps = _message(Icons.lock_outline, AppLocalizations.of(context).accessRestricted,
+          AppLocalizations.of(context).pbNeedStock);
     } else if (boutiques.length < 2) {
-      corps = _message(Icons.storefront_outlined, 'Une seule boutique',
-          'Créez au moins 2 boutiques pour définir des prix différents.');
+      corps = _message(Icons.storefront_outlined, AppLocalizations.of(context).oneShopOnly,
+          AppLocalizations.of(context).pbNeedTwoShops);
     } else {
       corps = Column(
         children: [
@@ -157,7 +158,7 @@ class _PrixBoutiquesScreenState extends ConsumerState<PrixBoutiquesScreen> {
                     border: OutlineInputBorder(),
                     isDense: true,
                   ),
-                  hint: const Text('Choisir la boutique…'),
+                  hint: Text(AppLocalizations.of(context).pbChooseShop),
                   items: [
                     for (final b in boutiques)
                       DropdownMenuItem(value: b.id, child: Text(b.nom, overflow: TextOverflow.ellipsis)),
@@ -168,7 +169,7 @@ class _PrixBoutiquesScreenState extends ConsumerState<PrixBoutiquesScreen> {
                 TextField(
                   onChanged: (v) => setState(() => _recherche = v.trim().toLowerCase()),
                   decoration: InputDecoration(
-                    hintText: 'Rechercher un produit…',
+                    hintText: AppLocalizations.of(context).searchProduct,
                     prefixIcon: const Icon(Icons.search_rounded),
                     isDense: true,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -179,8 +180,8 @@ class _PrixBoutiquesScreenState extends ConsumerState<PrixBoutiquesScreen> {
           ),
           Expanded(
             child: _boutique == null
-                ? _message(Icons.touch_app_outlined, 'Choisissez une boutique',
-                    'Puis saisissez le prix de vente de chaque produit dans cette boutique.')
+                ? _message(Icons.touch_app_outlined, AppLocalizations.of(context).pbPickShop,
+                    AppLocalizations.of(context).pbPickShopInfo)
                 : StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                     stream: _produits.snapshots(),
                     builder: (context, snap) {
@@ -214,8 +215,8 @@ class _PrixBoutiquesScreenState extends ConsumerState<PrixBoutiquesScreen> {
                                   Expanded(
                                     child: Text(
                                       _modifies.isEmpty
-                                          ? 'Champ vide = prix normal'
-                                          : '${_modifies.length} prix modifié(s)',
+                                          ? AppLocalizations.of(context).pbEmptyNormal
+                                          : AppLocalizations.of(context).pbChanged('${_modifies.length}'),
                                       style: const TextStyle(fontWeight: FontWeight.w600),
                                     ),
                                   ),
@@ -243,7 +244,7 @@ class _PrixBoutiquesScreenState extends ConsumerState<PrixBoutiquesScreen> {
     return Scaffold(
       backgroundColor: _fondPage,
       appBar: AppBar(
-        title: const Text('Prix par boutique', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(AppLocalizations.of(context).pbTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: _bleuNuit,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -273,7 +274,7 @@ class _PrixBoutiquesScreenState extends ConsumerState<PrixBoutiquesScreen> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontWeight: FontWeight.bold, color: _encre)),
-                Text('Prix normal : ${_fmt(p.prixVente, taux)} $currency',
+                Text(AppLocalizations.of(context).pbNormal('${_fmt(p.prixVente, taux)} $currency'),
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
               ],
             ),
