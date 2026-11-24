@@ -3215,4 +3215,198 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accMvtWithdrawal => 'Retrait';
+
+  @override
+  String get impConfirm => 'Confirmer l\'import';
+
+  @override
+  String impConfirmBody(String nouveaux, String maj, String ignores) {
+    return '$nouveaux nouveau(x) produit(s)\n$maj produit(s) mis à jour\n$ignores ligne(s) ignorée(s)\n\n';
+  }
+
+  @override
+  String get impImport => 'Importer';
+
+  @override
+  String get impSaving => 'Enregistrement…';
+
+  @override
+  String impSavingProgress(String fait, String total) {
+    return 'Enregistrement : $fait / $total';
+  }
+
+  @override
+  String get impDone => 'Import terminé';
+
+  @override
+  String impDoneBody(String nouveaux, String maj, String ignores) {
+    return '🟢 $nouveaux nouveau(x) produit(s)\n🔵 $maj produit(s) mis à jour\n⚪ $ignores ligne(s) ignorée(s)';
+  }
+
+  @override
+  String get impColMissing => 'non trouvée';
+
+  @override
+  String impCheck(String doute) {
+    return 'À vérifier : $doute';
+  }
+
+  @override
+  String impFileLine(String nom) {
+    return '📄 Fichier : $nom';
+  }
+
+  @override
+  String impCodeQty(String code, String qte) {
+    return 'Code : $code • Qté : $qte';
+  }
+
+  @override
+  String impAlready(String nom) {
+    return '📦 Déjà en stock : $nom';
+  }
+
+  @override
+  String impCodeStock(String code, String stock) {
+    return 'Code : $code • Stock : $stock';
+  }
+
+  @override
+  String get impSame => 'Même produit';
+
+  @override
+  String get impNew => 'Nouveau produit';
+
+  @override
+  String impStockChange(String avant, String apres) {
+    return 'Stock : $avant → $apres';
+  }
+
+  @override
+  String impWillCreate(String qte) {
+    return 'Un nouveau produit sera créé ($qte pièce(s)).';
+  }
+
+  @override
+  String impNewLine(String qte, String code, String achat, String vente) {
+    return 'Nouveau produit • Qté : $qte$code\nPrix achat : $achat • Prix vente : $vente';
+  }
+
+  @override
+  String impExistsLine(
+      String nom, String avant, String apres, String achat, String vente) {
+    return 'Existe déjà$nom • Stock : $avant → $apres\nPrix achat : $achat • Prix vente : $vente';
+  }
+
+  @override
+  String impSkipped(String n, String raison) {
+    return 'Ligne $n ignorée : $raison';
+  }
+
+  @override
+  String get impPreview => 'Aperçu de l\'import';
+
+  @override
+  String get impColumns => 'Colonnes reconnues :';
+
+  @override
+  String get impColCode => 'Code-barres';
+
+  @override
+  String get impColName => 'Nom';
+
+  @override
+  String get impColQty => 'Quantité';
+
+  @override
+  String get impColCost => 'Prix d\'achat';
+
+  @override
+  String get impColPrice => 'Prix de vente';
+
+  @override
+  String get impNoHeader =>
+      'Pas de ligne de titres : l\'ordre A=Code, B=Nom, C=Qté, D=Prix achat, E=Prix vente est utilisé.';
+
+  @override
+  String get impType => 'Type d\'import :';
+
+  @override
+  String get impModeArrivalInfo =>
+      'Les quantités du fichier sont AJOUTÉES au stock actuel (nouvelle marchandise reçue).';
+
+  @override
+  String get impModeInventoryInfo =>
+      'Le stock est REMPLACÉ par les quantités du fichier (après un comptage physique).';
+
+  @override
+  String get impSupplier => 'Fournisseur';
+
+  @override
+  String get impListNo => 'N° de la liste';
+
+  @override
+  String impChipNew(String n) {
+    return '$n nouveau(x)';
+  }
+
+  @override
+  String impChipUpd(String n) {
+    return '$n mis à jour';
+  }
+
+  @override
+  String impChipSkip(String n) {
+    return '$n ignoré(s)';
+  }
+
+  @override
+  String impChipCheck(String n) {
+    return '$n à vérifier';
+  }
+
+  @override
+  String impToCheck(String n) {
+    return '$n produit(s) à vérifier (en orange) : choisissez pour chacun.';
+  }
+
+  @override
+  String get impChecked => 'Produits vérifiés ✔ (vous pouvez encore changer)';
+
+  @override
+  String get impAllSame => 'Tous : même produit';
+
+  @override
+  String get impAllNew => 'Tous : nouveau produit';
+
+  @override
+  String get impEmpty => 'Aucun produit trouvé dans ce fichier.';
+
+  @override
+  String impChooseFirst(String n) {
+    return 'Choisissez d\'abord : $n à vérifier';
+  }
+
+  @override
+  String impImportN(String n) {
+    return 'Importer $n produit(s)';
+  }
+
+  @override
+  String get impModeArrivalWarn =>
+      'Mode ARRIVAGE : les quantités seront AJOUTÉES au stock.';
+
+  @override
+  String get impModeInventoryWarn =>
+      'Mode INVENTAIRE : le stock sera REMPLACÉ par les quantités du fichier.';
+
+  @override
+  String get impOffline =>
+      'Pas d\'internet : les changements seront envoyés au retour du réseau.';
+
+  @override
+  String get impUnchanged => 'inchangé';
+
+  @override
+  String get impInventory => 'Inventaire';
 }

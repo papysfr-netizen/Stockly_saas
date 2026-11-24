@@ -1,3 +1,4 @@
+import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/services/packing_list_service.dart';
@@ -44,16 +45,13 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("Confirmer l'import"),
+        title: Text(AppLocalizations.of(context).impConfirm),
         content: Text(
-          '${a.nbNouveaux} nouveau(x) produit(s)\n'
-          '${a.nbExistants} produit(s) mis à jour\n'
-          '${a.nbIgnores} ligne(s) ignorée(s)\n\n'
-          '${_mode == ModeImport.arrivage ? 'Mode ARRIVAGE : les quantités seront AJOUTÉES au stock.' : 'Mode INVENTAIRE : le stock sera REMPLACÉ par les quantités du fichier.'}',
+          AppLocalizations.of(context).impConfirmBody('${a.nbNouveaux}', '${a.nbExistants}', '${a.nbIgnores}') + (_mode == ModeImport.arrivage ? AppLocalizations.of(context).impModeArrivalWarn : AppLocalizations.of(context).impModeInventoryWarn),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
-          ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Importer')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(AppLocalizations.of(context).cancel)),
+          ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: Text(AppLocalizations.of(context).impImport)),
         ],
       ),
     );
@@ -61,7 +59,7 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
 
     setState(() {
       _enCours = true;
-      _progression = 'Enregistrement…';
+      _progression = AppLocalizations.of(context).impSaving;
     });
 
     final navigator = Navigator.of(context);
@@ -72,7 +70,7 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
         a,
         _mode,
         onProgress: (faits, total) {
-          if (mounted) setState(() => _progression = 'Enregistrement : $faits / $total');
+          if (mounted) setState(() => _progression = AppLocalizations.of(context).impSavingProgress('$faits', '$total'));
         },
       );
       if (!mounted) return;
@@ -80,18 +78,15 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
       await showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.check_circle, color: Colors.green),
-              SizedBox(width: 8),
-              Text('Import terminé'),
+              const Icon(Icons.check_circle, color: Colors.green),
+              const SizedBox(width: 8),
+              Text(AppLocalizations.of(context).impDone),
             ],
           ),
           content: Text(
-            '🟢 ${resultat.nouveaux} nouveau(x) produit(s)\n'
-            '🔵 ${resultat.misAJour} produit(s) mis à jour\n'
-            '⚪ ${resultat.ignores} ligne(s) ignorée(s)'
-            '${resultat.horsLigne ? '\n\nPas d\'internet : les changements seront envoyés au retour du réseau.' : ''}',
+            AppLocalizations.of(context).impDoneBody('${resultat.nouveaux}', '${resultat.misAJour}', '${resultat.ignores}') + (resultat.horsLigne ? '\n\n${AppLocalizations.of(context).impOffline}' : ''),
           ),
           actions: [
             ElevatedButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK')),
@@ -103,7 +98,7 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
       if (!mounted) return;
       setState(() => _enCours = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur : $e'), backgroundColor: Colors.red),
+        SnackBar(content: Text(AppLocalizations.of(context).errorWith('$e')), backgroundColor: Colors.red),
       );
     }
   }
@@ -119,7 +114,7 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
           const SizedBox(width: 6),
           Expanded(child: Text(titre)),
           Text(
-            trouvee != null ? '« $trouvee »' : 'non trouvée',
+            trouvee != null ? '« $trouvee »' : AppLocalizations.of(context).impColMissing,
             style: TextStyle(
               color: trouvee != null ? (_sombre ? Colors.white : Colors.black87) : Colors.orange.shade800,
               fontWeight: FontWeight.w600,
@@ -152,40 +147,40 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
                 Icon(Icons.help_rounded, color: Colors.orange.shade800, size: 20),
                 const SizedBox(width: 6),
                 Expanded(
-                  child: Text('À vérifier : ${l.doute}',
+                  child: Text(AppLocalizations.of(context).impCheck(l.doute),
                       style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange.shade900)),
                 ),
               ],
             ),
             const SizedBox(height: 8),
-            Text('📄 Fichier : ${l.nom}', style: const TextStyle(fontWeight: FontWeight.w600)),
-            Text('Code : ${l.codeBarre.isEmpty ? '—' : l.codeBarre} • Qté : ${l.quantite}',
+            Text(AppLocalizations.of(context).impFileLine(l.nom), style: const TextStyle(fontWeight: FontWeight.w600)),
+            Text(AppLocalizations.of(context).impCodeQty(l.codeBarre.isEmpty ? '—' : l.codeBarre, '${l.quantite}'),
                 style: TextStyle(fontSize: 12, color: Colors.grey.shade700)),
             const SizedBox(height: 6),
-            Text('📦 Déjà en stock : ${l.nomCandidat}', style: const TextStyle(fontWeight: FontWeight.w600)),
-            Text('Code : ${l.codeCandidat.isEmpty ? '—' : l.codeCandidat} • Stock : ${l.stockCandidat}',
+            Text(AppLocalizations.of(context).impAlready(l.nomCandidat), style: const TextStyle(fontWeight: FontWeight.w600)),
+            Text(AppLocalizations.of(context).impCodeStock(l.codeCandidat.isEmpty ? '—' : l.codeCandidat, '${l.stockCandidat}'),
                 style: TextStyle(fontSize: 12, color: Colors.grey.shade700)),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
               children: [
                 ChoiceChip(
-                  label: const Text('Même produit'),
+                  label: Text(AppLocalizations.of(context).impSame),
                   selected: choisi == true,
                   onSelected: _enCours ? null : (_) => setState(() => l.choisir(true)),
                 ),
                 ChoiceChip(
-                  label: const Text('Nouveau produit'),
+                  label: Text(AppLocalizations.of(context).impNew),
                   selected: choisi == false,
                   onSelected: _enCours ? null : (_) => setState(() => l.choisir(false)),
                 ),
               ],
             ),
             if (choisi == true)
-              Text('Stock : ${l.stockActuel} → ${l.nouveauStock(_mode)}',
+              Text(AppLocalizations.of(context).impStockChange('${l.stockActuel}', '${l.nouveauStock(_mode)}'),
                   style: TextStyle(fontSize: 12, color: Colors.blue.shade700)),
             if (choisi == false)
-              Text('Un nouveau produit sera créé (${l.quantite} pièce(s)).',
+              Text(AppLocalizations.of(context).impWillCreate('${l.quantite}'),
                   style: TextStyle(fontSize: 12, color: Colors.green.shade700)),
           ],
         ),
@@ -202,9 +197,7 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
           leading: const Icon(Icons.add_circle, color: Colors.green),
           title: Text(l.nom, style: const TextStyle(fontWeight: FontWeight.w600)),
           subtitle: Text(
-            'Nouveau produit • Qté : ${l.quantite}'
-            '${l.codeBarre.isNotEmpty ? ' • Code : ${l.codeBarre}' : ''}\n'
-            'Prix achat : ${_prix(l.prixAchat)} • Prix vente : ${_prix(l.prixVente)}',
+            AppLocalizations.of(context).impNewLine('${l.quantite}', l.codeBarre.isNotEmpty ? ' • ${l.codeBarre}' : '', _prix(l.prixAchat), _prix(l.prixVente)),
           ),
           isThreeLine: true,
         );
@@ -214,10 +207,7 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
           leading: Icon(Icons.sync, color: Colors.blue.shade700),
           title: Text(l.nom, style: const TextStyle(fontWeight: FontWeight.w600)),
           subtitle: Text(
-            'Existe déjà${l.nomExistant.isNotEmpty && l.nomExistant != l.nom ? ' (« ${l.nomExistant} »)' : ''} • '
-            'Stock : ${l.stockActuel} → ${l.nouveauStock(_mode)}\n'
-            'Prix achat : ${l.prixAchat > 0 ? _prix(l.prixAchat) : 'inchangé'} • '
-            'Prix vente : ${l.prixVente > 0 ? _prix(l.prixVente) : 'inchangé'}',
+            AppLocalizations.of(context).impExistsLine(l.nomExistant.isNotEmpty && l.nomExistant != l.nom ? ' (« ${l.nomExistant} »)' : '', '${l.stockActuel}', '${l.nouveauStock(_mode)}', l.prixAchat > 0 ? _prix(l.prixAchat) : AppLocalizations.of(context).impUnchanged, l.prixVente > 0 ? _prix(l.prixVente) : AppLocalizations.of(context).impUnchanged),
           ),
           isThreeLine: true,
         );
@@ -226,7 +216,7 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
           dense: true,
           leading: const Icon(Icons.block, color: Colors.grey),
           title: Text(l.nom, style: const TextStyle(color: Colors.grey)),
-          subtitle: Text('Ligne ${l.numeroLigne} ignorée : ${l.raison}'),
+          subtitle: Text(AppLocalizations.of(context).impSkipped('${l.numeroLigne}', l.raison)),
         );
     }
   }
@@ -243,11 +233,11 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
       canPop: !_enCours,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("Aperçu de l'import"),
+          title: Text(AppLocalizations.of(context).impPreview),
           // ✖ Toujours un moyen d'annuler (rien n'est importé)
           leading: IconButton(
             icon: const Icon(Icons.close),
-            tooltip: 'Annuler',
+            tooltip: AppLocalizations.of(context).cancel,
             onPressed: _enCours ? null : () => Navigator.of(context).pop(),
           ),
           backgroundColor: Colors.teal.shade700,
@@ -278,18 +268,18 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
                             ],
                           ),
                           const SizedBox(height: 8),
-                          const Text('Colonnes reconnues :',
+                          Text(AppLocalizations.of(context).impColumns,
                               style: TextStyle(fontWeight: FontWeight.w600)),
-                          _colonne('Code-barres', 'code'),
-                          _colonne('Nom', 'nom'),
-                          _colonne('Quantité', 'quantite'),
-                          _colonne("Prix d'achat", 'prixAchat'),
-                          _colonne('Prix de vente', 'prixVente'),
+                          _colonne(AppLocalizations.of(context).impColCode, 'code'),
+                          _colonne(AppLocalizations.of(context).impColName, 'nom'),
+                          _colonne(AppLocalizations.of(context).impColQty, 'quantite'),
+                          _colonne(AppLocalizations.of(context).impColCost, 'prixAchat'),
+                          _colonne(AppLocalizations.of(context).impColPrice, 'prixVente'),
                           if (!a.avecEntete)
                             Padding(
                               padding: const EdgeInsets.only(top: 6),
                               child: Text(
-                                "Pas de ligne de titres : l'ordre A=Code, B=Nom, C=Qté, D=Prix achat, E=Prix vente est utilisé.",
+                                AppLocalizations.of(context).impNoHeader,
                                 style: TextStyle(color: Colors.orange.shade800, fontSize: 12),
                               ),
                             ),
@@ -300,19 +290,19 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
                   const SizedBox(height: 8),
 
                   // Choix du mode
-                  const Text('Type d\'import :', style: TextStyle(fontWeight: FontWeight.w600)),
+                  Text(AppLocalizations.of(context).impType, style: const TextStyle(fontWeight: FontWeight.w600)),
                   const SizedBox(height: 6),
                   SegmentedButton<ModeImport>(
-                    segments: const [
+                    segments: [
                       ButtonSegment(
                         value: ModeImport.arrivage,
-                        icon: Icon(Icons.add_box),
-                        label: Text('Arrivage'),
+                        icon: const Icon(Icons.add_box),
+                        label: Text(AppLocalizations.of(context).lotArrival),
                       ),
                       ButtonSegment(
                         value: ModeImport.inventaire,
-                        icon: Icon(Icons.fact_check),
-                        label: Text('Inventaire'),
+                        icon: const Icon(Icons.fact_check),
+                        label: Text(AppLocalizations.of(context).impInventory),
                       ),
                     ],
                     selected: {_mode},
@@ -321,8 +311,8 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
                   const SizedBox(height: 6),
                   Text(
                     _mode == ModeImport.arrivage
-                        ? 'Les quantités du fichier sont AJOUTÉES au stock actuel (nouvelle marchandise reçue).'
-                        : 'Le stock est REMPLACÉ par les quantités du fichier (après un comptage physique).',
+                        ? AppLocalizations.of(context).impModeArrivalInfo
+                        : AppLocalizations.of(context).impModeInventoryInfo,
                     style: TextStyle(
                       fontSize: 12,
                       color: _mode == ModeImport.arrivage ? Colors.teal.shade800 : Colors.red.shade700,
@@ -338,8 +328,8 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
                             controller: _fournisseur,
                             enabled: !_enCours,
                             textCapitalization: TextCapitalization.words,
-                            decoration: const InputDecoration(
-                              labelText: 'Fournisseur',
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(context).impSupplier,
                               isDense: true,
                               border: OutlineInputBorder(),
                             ),
@@ -350,8 +340,8 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
                           child: TextField(
                             controller: _numero,
                             enabled: !_enCours,
-                            decoration: const InputDecoration(
-                              labelText: 'N° de la liste',
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(context).impListNo,
                               isDense: true,
                               border: OutlineInputBorder(),
                             ),
@@ -369,21 +359,21 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
                     children: [
                       Chip(
                         avatar: const Icon(Icons.add_circle, color: Colors.green, size: 18),
-                        label: Text('${a.nbNouveaux} nouveau(x)'),
+                        label: Text(AppLocalizations.of(context).impChipNew('${a.nbNouveaux}')),
                       ),
                       Chip(
                         avatar: Icon(Icons.sync, color: Colors.blue.shade700, size: 18),
-                        label: Text('${a.nbExistants} mis à jour'),
+                        label: Text(AppLocalizations.of(context).impChipUpd('${a.nbExistants}')),
                       ),
                       Chip(
                         avatar: const Icon(Icons.block, color: Colors.grey, size: 18),
-                        label: Text('${a.nbIgnores} ignoré(s)'),
+                        label: Text(AppLocalizations.of(context).impChipSkip('${a.nbIgnores}')),
                       ),
                       if (a.nbAChoisir > 0)
                         Chip(
                           backgroundColor: _pastel(Colors.orange.shade100, Colors.orange),
                           avatar: Icon(Icons.help_rounded, color: Colors.orange.shade800, size: 18),
-                          label: Text('${a.nbAChoisir} à vérifier'),
+                          label: Text(AppLocalizations.of(context).impChipCheck('${a.nbAChoisir}')),
                         ),
                     ],
                   ),
@@ -393,8 +383,8 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
                   if (douteux.isNotEmpty) ...[
                     Text(
                       a.nbAChoisir > 0
-                          ? '${a.nbAChoisir} produit(s) à vérifier (en orange) : choisissez pour chacun.'
-                          : 'Produits vérifiés ✔ (vous pouvez encore changer)',
+                          ? AppLocalizations.of(context).impToCheck('${a.nbAChoisir}')
+                          : AppLocalizations.of(context).impChecked,
                       style: TextStyle(color: Colors.orange.shade900, fontWeight: FontWeight.w600),
                     ),
                     Wrap(
@@ -408,7 +398,7 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
                                       l.choisir(true);
                                     }
                                   }),
-                          child: const Text('Tous : même produit'),
+                          child: Text(AppLocalizations.of(context).impAllSame),
                         ),
                         TextButton(
                           onPressed: _enCours
@@ -418,7 +408,7 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
                                       l.choisir(false);
                                     }
                                   }),
-                          child: const Text('Tous : nouveau produit'),
+                          child: Text(AppLocalizations.of(context).impAllNew),
                         ),
                       ],
                     ),
@@ -426,9 +416,9 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
                   ],
 
                   if (a.lignes.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.all(24),
-                      child: Center(child: Text('Aucun produit trouvé dans ce fichier.')),
+                    Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Center(child: Text(AppLocalizations.of(context).impEmpty)),
                     )
                   else
                     ...[...douteux, ...autres].map(_tuile),
@@ -461,8 +451,8 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
                       _enCours
                           ? _progression
                           : a.nbAChoisir > 0
-                              ? 'Choisissez d\'abord : ${a.nbAChoisir} à vérifier'
-                              : 'Importer $aEcrire produit(s)',
+                              ? AppLocalizations.of(context).impChooseFirst('${a.nbAChoisir}')
+                              : AppLocalizations.of(context).impImportN('$aEcrire'),
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),

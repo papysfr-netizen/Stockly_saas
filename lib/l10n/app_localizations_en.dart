@@ -3198,4 +3198,198 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accMvtWithdrawal => 'Withdrawal';
+
+  @override
+  String get impConfirm => 'Confirm the import';
+
+  @override
+  String impConfirmBody(String nouveaux, String maj, String ignores) {
+    return '$nouveaux new product(s)\n$maj product(s) updated\n$ignores line(s) skipped\n\n';
+  }
+
+  @override
+  String get impImport => 'Import';
+
+  @override
+  String get impSaving => 'Saving…';
+
+  @override
+  String impSavingProgress(String fait, String total) {
+    return 'Saving: $fait / $total';
+  }
+
+  @override
+  String get impDone => 'Import finished';
+
+  @override
+  String impDoneBody(String nouveaux, String maj, String ignores) {
+    return '🟢 $nouveaux new product(s)\n🔵 $maj product(s) updated\n⚪ $ignores line(s) skipped';
+  }
+
+  @override
+  String get impColMissing => 'not found';
+
+  @override
+  String impCheck(String doute) {
+    return 'To check: $doute';
+  }
+
+  @override
+  String impFileLine(String nom) {
+    return '📄 File: $nom';
+  }
+
+  @override
+  String impCodeQty(String code, String qte) {
+    return 'Code: $code • Qty: $qte';
+  }
+
+  @override
+  String impAlready(String nom) {
+    return '📦 Already in stock: $nom';
+  }
+
+  @override
+  String impCodeStock(String code, String stock) {
+    return 'Code: $code • Stock: $stock';
+  }
+
+  @override
+  String get impSame => 'Same product';
+
+  @override
+  String get impNew => 'New product';
+
+  @override
+  String impStockChange(String avant, String apres) {
+    return 'Stock: $avant → $apres';
+  }
+
+  @override
+  String impWillCreate(String qte) {
+    return 'A new product will be created ($qte piece(s)).';
+  }
+
+  @override
+  String impNewLine(String qte, String code, String achat, String vente) {
+    return 'New product • Qty: $qte$code\nCost: $achat • Price: $vente';
+  }
+
+  @override
+  String impExistsLine(
+      String nom, String avant, String apres, String achat, String vente) {
+    return 'Already exists$nom • Stock: $avant → $apres\nCost: $achat • Price: $vente';
+  }
+
+  @override
+  String impSkipped(String n, String raison) {
+    return 'Line $n skipped: $raison';
+  }
+
+  @override
+  String get impPreview => 'Import preview';
+
+  @override
+  String get impColumns => 'Columns found:';
+
+  @override
+  String get impColCode => 'Barcode';
+
+  @override
+  String get impColName => 'Name';
+
+  @override
+  String get impColQty => 'Quantity';
+
+  @override
+  String get impColCost => 'Cost price';
+
+  @override
+  String get impColPrice => 'Selling price';
+
+  @override
+  String get impNoHeader =>
+      'No title row: the order A=Code, B=Name, C=Qty, D=Cost, E=Price is used.';
+
+  @override
+  String get impType => 'Import type:';
+
+  @override
+  String get impModeArrivalInfo =>
+      'The file quantities are ADDED to the current stock (new goods received).';
+
+  @override
+  String get impModeInventoryInfo =>
+      'The stock is REPLACED by the file quantities (after a physical count).';
+
+  @override
+  String get impSupplier => 'Supplier';
+
+  @override
+  String get impListNo => 'List no.';
+
+  @override
+  String impChipNew(String n) {
+    return '$n new';
+  }
+
+  @override
+  String impChipUpd(String n) {
+    return '$n updated';
+  }
+
+  @override
+  String impChipSkip(String n) {
+    return '$n skipped';
+  }
+
+  @override
+  String impChipCheck(String n) {
+    return '$n to check';
+  }
+
+  @override
+  String impToCheck(String n) {
+    return '$n product(s) to check (in orange): choose for each one.';
+  }
+
+  @override
+  String get impChecked => 'Products checked ✔ (you can still change)';
+
+  @override
+  String get impAllSame => 'All: same product';
+
+  @override
+  String get impAllNew => 'All: new product';
+
+  @override
+  String get impEmpty => 'No product found in this file.';
+
+  @override
+  String impChooseFirst(String n) {
+    return 'Choose first: $n to check';
+  }
+
+  @override
+  String impImportN(String n) {
+    return 'Import $n product(s)';
+  }
+
+  @override
+  String get impModeArrivalWarn =>
+      'ARRIVAL mode: quantities will be ADDED to the stock.';
+
+  @override
+  String get impModeInventoryWarn =>
+      'INVENTORY mode: the stock will be REPLACED by the file quantities.';
+
+  @override
+  String get impOffline =>
+      'No internet: changes will be sent when the network returns.';
+
+  @override
+  String get impUnchanged => 'unchanged';
+
+  @override
+  String get impInventory => 'Inventory';
 }

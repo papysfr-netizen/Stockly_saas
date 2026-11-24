@@ -3197,4 +3197,198 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get accMvtWithdrawal => 'Utoaji';
+
+  @override
+  String get impConfirm => 'Thibitisha kuingiza';
+
+  @override
+  String impConfirmBody(String nouveaux, String maj, String ignores) {
+    return 'Bidhaa mpya $nouveaux\nBidhaa $maj zimesasishwa\nMistari $ignores imerukwa\n\n';
+  }
+
+  @override
+  String get impImport => 'Ingiza';
+
+  @override
+  String get impSaving => 'Inahifadhi…';
+
+  @override
+  String impSavingProgress(String fait, String total) {
+    return 'Inahifadhi: $fait / $total';
+  }
+
+  @override
+  String get impDone => 'Uingizaji umekamilika';
+
+  @override
+  String impDoneBody(String nouveaux, String maj, String ignores) {
+    return '🟢 Bidhaa mpya $nouveaux\n🔵 Bidhaa $maj zimesasishwa\n⚪ Mistari $ignores imerukwa';
+  }
+
+  @override
+  String get impColMissing => 'haipatikani';
+
+  @override
+  String impCheck(String doute) {
+    return 'Ya kukagua: $doute';
+  }
+
+  @override
+  String impFileLine(String nom) {
+    return '📄 Faili: $nom';
+  }
+
+  @override
+  String impCodeQty(String code, String qte) {
+    return 'Msimbo: $code • Idadi: $qte';
+  }
+
+  @override
+  String impAlready(String nom) {
+    return '📦 Tayari kwenye hisa: $nom';
+  }
+
+  @override
+  String impCodeStock(String code, String stock) {
+    return 'Msimbo: $code • Hisa: $stock';
+  }
+
+  @override
+  String get impSame => 'Bidhaa ile ile';
+
+  @override
+  String get impNew => 'Bidhaa mpya';
+
+  @override
+  String impStockChange(String avant, String apres) {
+    return 'Hisa: $avant → $apres';
+  }
+
+  @override
+  String impWillCreate(String qte) {
+    return 'Bidhaa mpya itaundwa (vipande $qte).';
+  }
+
+  @override
+  String impNewLine(String qte, String code, String achat, String vente) {
+    return 'Bidhaa mpya • Idadi: $qte$code\nBei ya kununua: $achat • Bei ya kuuza: $vente';
+  }
+
+  @override
+  String impExistsLine(
+      String nom, String avant, String apres, String achat, String vente) {
+    return 'Ipo tayari$nom • Hisa: $avant → $apres\nBei ya kununua: $achat • Bei ya kuuza: $vente';
+  }
+
+  @override
+  String impSkipped(String n, String raison) {
+    return 'Mstari $n umerukwa: $raison';
+  }
+
+  @override
+  String get impPreview => 'Muhtasari wa kuingiza';
+
+  @override
+  String get impColumns => 'Safu zilizotambuliwa:';
+
+  @override
+  String get impColCode => 'Msimbopau';
+
+  @override
+  String get impColName => 'Jina';
+
+  @override
+  String get impColQty => 'Idadi';
+
+  @override
+  String get impColCost => 'Bei ya kununua';
+
+  @override
+  String get impColPrice => 'Bei ya kuuza';
+
+  @override
+  String get impNoHeader =>
+      'Hakuna mstari wa vichwa: mpangilio A=Msimbo, B=Jina, C=Idadi, D=Bei ya kununua, E=Bei ya kuuza unatumika.';
+
+  @override
+  String get impType => 'Aina ya kuingiza:';
+
+  @override
+  String get impModeArrivalInfo =>
+      'Idadi za faili ZINAONGEZWA kwenye hisa (mzigo mpya umepokelewa).';
+
+  @override
+  String get impModeInventoryInfo =>
+      'Hisa INABADILISHWA na idadi za faili (baada ya kuhesabu).';
+
+  @override
+  String get impSupplier => 'Msambazaji';
+
+  @override
+  String get impListNo => 'Nambari ya orodha';
+
+  @override
+  String impChipNew(String n) {
+    return '$n mpya';
+  }
+
+  @override
+  String impChipUpd(String n) {
+    return '$n zimesasishwa';
+  }
+
+  @override
+  String impChipSkip(String n) {
+    return '$n zimerukwa';
+  }
+
+  @override
+  String impChipCheck(String n) {
+    return '$n za kukagua';
+  }
+
+  @override
+  String impToCheck(String n) {
+    return 'Bidhaa $n za kukagua (rangi ya machungwa): chagua kwa kila moja.';
+  }
+
+  @override
+  String get impChecked => 'Bidhaa zimekaguliwa ✔ (bado unaweza kubadilisha)';
+
+  @override
+  String get impAllSame => 'Zote: bidhaa ile ile';
+
+  @override
+  String get impAllNew => 'Zote: bidhaa mpya';
+
+  @override
+  String get impEmpty => 'Hakuna bidhaa iliyopatikana kwenye faili hii.';
+
+  @override
+  String impChooseFirst(String n) {
+    return 'Chagua kwanza: $n za kukagua';
+  }
+
+  @override
+  String impImportN(String n) {
+    return 'Ingiza bidhaa $n';
+  }
+
+  @override
+  String get impModeArrivalWarn =>
+      'Hali ya MZIGO: idadi ZITAONGEZWA kwenye hisa.';
+
+  @override
+  String get impModeInventoryWarn =>
+      'Hali ya HESABU: hisa ITABADILISHWA na idadi za faili.';
+
+  @override
+  String get impOffline =>
+      'Hakuna intaneti: mabadiliko yatatumwa mtandao ukirudi.';
+
+  @override
+  String get impUnchanged => 'haijabadilika';
+
+  @override
+  String get impInventory => 'Hesabu ya hisa';
 }

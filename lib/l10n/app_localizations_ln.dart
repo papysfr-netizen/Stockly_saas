@@ -3205,4 +3205,198 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get accMvtWithdrawal => 'Retrait';
+
+  @override
+  String get impConfirm => 'Ndimisa import';
+
+  @override
+  String impConfirmBody(String nouveaux, String maj, String ignores) {
+    return 'Biloko ya sika $nouveaux\nBiloko $maj ebongolami\nMilongo $ignores etikami\n\n';
+  }
+
+  @override
+  String get impImport => 'Kotisa';
+
+  @override
+  String get impSaving => 'Ezali kobomba…';
+
+  @override
+  String impSavingProgress(String fait, String total) {
+    return 'Ezali kobomba: $fait / $total';
+  }
+
+  @override
+  String get impDone => 'Import esili';
+
+  @override
+  String impDoneBody(String nouveaux, String maj, String ignores) {
+    return '🟢 Biloko ya sika $nouveaux\n🔵 Biloko $maj ebongolami\n⚪ Milongo $ignores etikami';
+  }
+
+  @override
+  String get impColMissing => 'ezwami te';
+
+  @override
+  String impCheck(String doute) {
+    return 'Ya kotala: $doute';
+  }
+
+  @override
+  String impFileLine(String nom) {
+    return '📄 Fichier: $nom';
+  }
+
+  @override
+  String impCodeQty(String code, String qte) {
+    return 'Code: $code • Motango: $qte';
+  }
+
+  @override
+  String impAlready(String nom) {
+    return '📦 Ezali kala na stock: $nom';
+  }
+
+  @override
+  String impCodeStock(String code, String stock) {
+    return 'Code: $code • Stock: $stock';
+  }
+
+  @override
+  String get impSame => 'Eloko moko';
+
+  @override
+  String get impNew => 'Eloko ya sika';
+
+  @override
+  String impStockChange(String avant, String apres) {
+    return 'Stock: $avant → $apres';
+  }
+
+  @override
+  String impWillCreate(String qte) {
+    return 'Eloko ya sika ekosalema (biteni $qte).';
+  }
+
+  @override
+  String impNewLine(String qte, String code, String achat, String vente) {
+    return 'Eloko ya sika • Motango: $qte$code\nNtalo ya kosomba: $achat • Ntalo ya koteka: $vente';
+  }
+
+  @override
+  String impExistsLine(
+      String nom, String avant, String apres, String achat, String vente) {
+    return 'Ezali kala$nom • Stock: $avant → $apres\nNtalo ya kosomba: $achat • Ntalo ya koteka: $vente';
+  }
+
+  @override
+  String impSkipped(String n, String raison) {
+    return 'Molongo $n etikami: $raison';
+  }
+
+  @override
+  String get impPreview => 'Botali ya import';
+
+  @override
+  String get impColumns => 'Ba colonnes oyo eyebani:';
+
+  @override
+  String get impColCode => 'Code-barres';
+
+  @override
+  String get impColName => 'Nkombo';
+
+  @override
+  String get impColQty => 'Motango';
+
+  @override
+  String get impColCost => 'Ntalo ya kosomba';
+
+  @override
+  String get impColPrice => 'Ntalo ya koteka';
+
+  @override
+  String get impNoHeader =>
+      'Molongo ya ba titres ezali te: bolandi A=Code, B=Nkombo, C=Motango, D=Ntalo ya kosomba, E=Ntalo ya koteka esalelami.';
+
+  @override
+  String get impType => 'Lolenge ya import:';
+
+  @override
+  String get impModeArrivalInfo =>
+      'Ba motango ya fichier EBAKISAMI na stock (biloko ya sika eyei).';
+
+  @override
+  String get impModeInventoryInfo =>
+      'Stock EBONGOLAMI na ba motango ya fichier (sima ya kotanga).';
+
+  @override
+  String get impSupplier => 'Mopesi biloko';
+
+  @override
+  String get impListNo => 'Nimero ya liste';
+
+  @override
+  String impChipNew(String n) {
+    return '$n ya sika';
+  }
+
+  @override
+  String impChipUpd(String n) {
+    return '$n ebongolami';
+  }
+
+  @override
+  String impChipSkip(String n) {
+    return '$n etikami';
+  }
+
+  @override
+  String impChipCheck(String n) {
+    return '$n ya kotala';
+  }
+
+  @override
+  String impToCheck(String n) {
+    return 'Biloko $n ya kotala (na orange): pona mpo na moko na moko.';
+  }
+
+  @override
+  String get impChecked => 'Biloko etalami ✔ (okoki kaka kobongola)';
+
+  @override
+  String get impAllSame => 'Nyonso: eloko moko';
+
+  @override
+  String get impAllNew => 'Nyonso: eloko ya sika';
+
+  @override
+  String get impEmpty => 'Eloko moko te ezwami na fichier oyo.';
+
+  @override
+  String impChooseFirst(String n) {
+    return 'Pona liboso: $n ya kotala';
+  }
+
+  @override
+  String impImportN(String n) {
+    return 'Kotisa biloko $n';
+  }
+
+  @override
+  String get impModeArrivalWarn =>
+      'Mode ARRIVAGE: ba motango EKOBAKISAMA na stock.';
+
+  @override
+  String get impModeInventoryWarn =>
+      'Mode INVENTAIRE: stock EKOBONGOLAMA na ba motango ya fichier.';
+
+  @override
+  String get impOffline =>
+      'Internet ezali te: ba mbongwana ekotindama soki réseau ezongi.';
+
+  @override
+  String get impUnchanged => 'ebongwani te';
+
+  @override
+  String get impInventory => 'Inventaire';
 }

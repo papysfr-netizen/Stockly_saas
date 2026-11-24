@@ -5418,6 +5418,301 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Retrait'**
   String get accMvtWithdrawal;
+
+  /// No description provided for @impConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer l\'import'**
+  String get impConfirm;
+
+  /// No description provided for @impConfirmBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'{nouveaux} nouveau(x) produit(s)\n{maj} produit(s) mis à jour\n{ignores} ligne(s) ignorée(s)\n\n'**
+  String impConfirmBody(String nouveaux, String maj, String ignores);
+
+  /// No description provided for @impImport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer'**
+  String get impImport;
+
+  /// No description provided for @impSaving.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrement…'**
+  String get impSaving;
+
+  /// No description provided for @impSavingProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrement : {fait} / {total}'**
+  String impSavingProgress(String fait, String total);
+
+  /// No description provided for @impDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Import terminé'**
+  String get impDone;
+
+  /// No description provided for @impDoneBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'🟢 {nouveaux} nouveau(x) produit(s)\n🔵 {maj} produit(s) mis à jour\n⚪ {ignores} ligne(s) ignorée(s)'**
+  String impDoneBody(String nouveaux, String maj, String ignores);
+
+  /// No description provided for @impColMissing.
+  ///
+  /// In fr, this message translates to:
+  /// **'non trouvée'**
+  String get impColMissing;
+
+  /// No description provided for @impCheck.
+  ///
+  /// In fr, this message translates to:
+  /// **'À vérifier : {doute}'**
+  String impCheck(String doute);
+
+  /// No description provided for @impFileLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'📄 Fichier : {nom}'**
+  String impFileLine(String nom);
+
+  /// No description provided for @impCodeQty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code : {code} • Qté : {qte}'**
+  String impCodeQty(String code, String qte);
+
+  /// No description provided for @impAlready.
+  ///
+  /// In fr, this message translates to:
+  /// **'📦 Déjà en stock : {nom}'**
+  String impAlready(String nom);
+
+  /// No description provided for @impCodeStock.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code : {code} • Stock : {stock}'**
+  String impCodeStock(String code, String stock);
+
+  /// No description provided for @impSame.
+  ///
+  /// In fr, this message translates to:
+  /// **'Même produit'**
+  String get impSame;
+
+  /// No description provided for @impNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau produit'**
+  String get impNew;
+
+  /// No description provided for @impStockChange.
+  ///
+  /// In fr, this message translates to:
+  /// **'Stock : {avant} → {apres}'**
+  String impStockChange(String avant, String apres);
+
+  /// No description provided for @impWillCreate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un nouveau produit sera créé ({qte} pièce(s)).'**
+  String impWillCreate(String qte);
+
+  /// No description provided for @impNewLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau produit • Qté : {qte}{code}\nPrix achat : {achat} • Prix vente : {vente}'**
+  String impNewLine(String qte, String code, String achat, String vente);
+
+  /// No description provided for @impExistsLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Existe déjà{nom} • Stock : {avant} → {apres}\nPrix achat : {achat} • Prix vente : {vente}'**
+  String impExistsLine(
+      String nom, String avant, String apres, String achat, String vente);
+
+  /// No description provided for @impSkipped.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ligne {n} ignorée : {raison}'**
+  String impSkipped(String n, String raison);
+
+  /// No description provided for @impPreview.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aperçu de l\'import'**
+  String get impPreview;
+
+  /// No description provided for @impColumns.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colonnes reconnues :'**
+  String get impColumns;
+
+  /// No description provided for @impColCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code-barres'**
+  String get impColCode;
+
+  /// No description provided for @impColName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom'**
+  String get impColName;
+
+  /// No description provided for @impColQty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quantité'**
+  String get impColQty;
+
+  /// No description provided for @impColCost.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix d\'achat'**
+  String get impColCost;
+
+  /// No description provided for @impColPrice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix de vente'**
+  String get impColPrice;
+
+  /// No description provided for @impNoHeader.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de ligne de titres : l\'ordre A=Code, B=Nom, C=Qté, D=Prix achat, E=Prix vente est utilisé.'**
+  String get impNoHeader;
+
+  /// No description provided for @impType.
+  ///
+  /// In fr, this message translates to:
+  /// **'Type d\'import :'**
+  String get impType;
+
+  /// No description provided for @impModeArrivalInfo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les quantités du fichier sont AJOUTÉES au stock actuel (nouvelle marchandise reçue).'**
+  String get impModeArrivalInfo;
+
+  /// No description provided for @impModeInventoryInfo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le stock est REMPLACÉ par les quantités du fichier (après un comptage physique).'**
+  String get impModeInventoryInfo;
+
+  /// No description provided for @impSupplier.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fournisseur'**
+  String get impSupplier;
+
+  /// No description provided for @impListNo.
+  ///
+  /// In fr, this message translates to:
+  /// **'N° de la liste'**
+  String get impListNo;
+
+  /// No description provided for @impChipNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} nouveau(x)'**
+  String impChipNew(String n);
+
+  /// No description provided for @impChipUpd.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} mis à jour'**
+  String impChipUpd(String n);
+
+  /// No description provided for @impChipSkip.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} ignoré(s)'**
+  String impChipSkip(String n);
+
+  /// No description provided for @impChipCheck.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} à vérifier'**
+  String impChipCheck(String n);
+
+  /// No description provided for @impToCheck.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} produit(s) à vérifier (en orange) : choisissez pour chacun.'**
+  String impToCheck(String n);
+
+  /// No description provided for @impChecked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Produits vérifiés ✔ (vous pouvez encore changer)'**
+  String get impChecked;
+
+  /// No description provided for @impAllSame.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous : même produit'**
+  String get impAllSame;
+
+  /// No description provided for @impAllNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous : nouveau produit'**
+  String get impAllNew;
+
+  /// No description provided for @impEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun produit trouvé dans ce fichier.'**
+  String get impEmpty;
+
+  /// No description provided for @impChooseFirst.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez d\'abord : {n} à vérifier'**
+  String impChooseFirst(String n);
+
+  /// No description provided for @impImportN.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer {n} produit(s)'**
+  String impImportN(String n);
+
+  /// No description provided for @impModeArrivalWarn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mode ARRIVAGE : les quantités seront AJOUTÉES au stock.'**
+  String get impModeArrivalWarn;
+
+  /// No description provided for @impModeInventoryWarn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mode INVENTAIRE : le stock sera REMPLACÉ par les quantités du fichier.'**
+  String get impModeInventoryWarn;
+
+  /// No description provided for @impOffline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas d\'internet : les changements seront envoyés au retour du réseau.'**
+  String get impOffline;
+
+  /// No description provided for @impUnchanged.
+  ///
+  /// In fr, this message translates to:
+  /// **'inchangé'**
+  String get impUnchanged;
+
+  /// No description provided for @impInventory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inventaire'**
+  String get impInventory;
 }
 
 class _AppLocalizationsDelegate
