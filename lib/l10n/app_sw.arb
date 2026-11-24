@@ -1087,5 +1087,22 @@
   "repAmount": "Kiasi",
   "repStockValue": "Hisa / thamani ya kununua",
   "repDormantInfo": "Zipo kwenye hisa, hakuna mauzo",
-  "repCostsExpenses": "Gharama na matumizi"
+  "repCostsExpenses": "Gharama na matumizi",
+  "rateAdjustTip": "Rekebisha kiwango cha {devise}",
+  "rateTitle": "Kiwango cha ubadilishaji (USD → {code})",
+  "rateAdjustInfo": "Rekebisha kiwango rasmi / cha soko cha {devise}:",
+  "rateUpdate": "Sasisha",
+  "bakTitle": "💾 Nakala kamili",
+  "bakInfo": "Data zote katika faili moja la kuhifadhi (WhatsApp, Drive). Ushauri: kila wiki na kabla ya kazi kubwa.",
+  "bakReady": "💾 Nakala iko tayari",
+  "bakError": "Nakala imeshindikana (intaneti inahitajika): {erreur}",
+  "shopLabel": "Duka:",
+  "shopDisabled": "{nom} (imezimwa)",
+  "shopMemberMoved": "{membre} sasa anafanya kazi « {boutique} »",
+  "shopChoose": "Chagua duka",
+  "jrnCardTitle": "📒 Kumbukumbu: nani alifanya nini",
+  "jrnCardInfo": "Kazi za timu siku kwa siku: mauzo, marejesho, hisa, madeni…",
+  "jrnError": "Kumbukumbu haisomeki: {erreur}",
+  "jrnEmpty": "Hakuna kazi iliyorekodiwa siku hiyo.",
+  "jrnEveryone": "Kila mtu"
 }

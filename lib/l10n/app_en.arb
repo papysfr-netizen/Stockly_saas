@@ -1087,5 +1087,22 @@
   "repAmount": "Amount",
   "repStockValue": "Stock / cost value",
   "repDormantInfo": "In stock, no sale",
-  "repCostsExpenses": "Costs and expenses"
+  "repCostsExpenses": "Costs and expenses",
+  "rateAdjustTip": "Adjust the {devise} rate",
+  "rateTitle": "Exchange rate (USD → {code})",
+  "rateAdjustInfo": "Adjust the official / market rate for {devise}:",
+  "rateUpdate": "Update",
+  "bakTitle": "💾 Full backup",
+  "bakInfo": "All the data in one file to keep (WhatsApp, Drive). Tip: every week and before a big operation.",
+  "bakReady": "💾 Backup ready",
+  "bakError": "Backup failed (internet needed): {erreur}",
+  "shopLabel": "Shop:",
+  "shopDisabled": "{nom} (disabled)",
+  "shopMemberMoved": "{membre} now works at « {boutique} »",
+  "shopChoose": "Choose the shop",
+  "jrnCardTitle": "📒 Log: who did what",
+  "jrnCardInfo": "The team's actions day by day: sales, returns, stock, debts…",
+  "jrnError": "Log unreadable: {erreur}",
+  "jrnEmpty": "No action recorded that day.",
+  "jrnEveryone": "Everyone"
 }

@@ -1,3 +1,4 @@
+import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,10 +16,10 @@ class JournalCard extends StatelessWidget {
     return Card(
       child: ListTile(
         leading: const Icon(Icons.history_edu_rounded, color: Color(0xFF0052FF)),
-        title: const Text('📒 Journal : qui a fait quoi',
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: const Text(
-            "Les actions de l'équipe jour par jour : ventes, retours, stock, dettes…"),
+        title: Text(AppLocalizations.of(context).jrnCardTitle,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(
+            AppLocalizations.of(context).jrnCardInfo),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => Navigator.of(context).push(
           MaterialPageRoute<void>(
@@ -250,7 +251,7 @@ class _JournalScreenState extends State<JournalScreen> {
                   return Center(
                     child: Padding(
                       padding: const EdgeInsets.all(24),
-                      child: Text('Journal illisible : ${snap.error}',
+                      child: Text(AppLocalizations.of(context).jrnError('${snap.error}'),
                           textAlign: TextAlign.center),
                     ),
                   );
@@ -269,10 +270,10 @@ class _JournalScreenState extends State<JournalScreen> {
                     : toutes.where((l) => l['userNom'] == choix).toList();
 
                 if (toutes.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Padding(
-                      padding: EdgeInsets.all(24),
-                      child: Text('Aucune action notée ce jour-là.',
+                      padding: const EdgeInsets.all(24),
+                      child: Text(AppLocalizations.of(context).jrnEmpty,
                           textAlign: TextAlign.center),
                     ),
                   );
@@ -301,7 +302,7 @@ class _JournalScreenState extends State<JournalScreen> {
                             Padding(
                               padding: const EdgeInsets.only(right: 8),
                               child: ChoiceChip(
-                                label: Text(p.isEmpty ? 'Tout le monde' : p),
+                                label: Text(p.isEmpty ? AppLocalizations.of(context).jrnEveryone : p),
                                 selected: choix == p,
                                 onSelected: (_) => setState(() => _personne = p),
                               ),

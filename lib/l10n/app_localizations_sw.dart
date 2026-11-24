@@ -3957,4 +3957,71 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get repCostsExpenses => 'Gharama na matumizi';
+
+  @override
+  String rateAdjustTip(String devise) {
+    return 'Rekebisha kiwango cha $devise';
+  }
+
+  @override
+  String rateTitle(String code) {
+    return 'Kiwango cha ubadilishaji (USD → $code)';
+  }
+
+  @override
+  String rateAdjustInfo(String devise) {
+    return 'Rekebisha kiwango rasmi / cha soko cha $devise:';
+  }
+
+  @override
+  String get rateUpdate => 'Sasisha';
+
+  @override
+  String get bakTitle => '💾 Nakala kamili';
+
+  @override
+  String get bakInfo =>
+      'Data zote katika faili moja la kuhifadhi (WhatsApp, Drive). Ushauri: kila wiki na kabla ya kazi kubwa.';
+
+  @override
+  String get bakReady => '💾 Nakala iko tayari';
+
+  @override
+  String bakError(String erreur) {
+    return 'Nakala imeshindikana (intaneti inahitajika): $erreur';
+  }
+
+  @override
+  String get shopLabel => 'Duka:';
+
+  @override
+  String shopDisabled(String nom) {
+    return '$nom (imezimwa)';
+  }
+
+  @override
+  String shopMemberMoved(String membre, String boutique) {
+    return '$membre sasa anafanya kazi « $boutique »';
+  }
+
+  @override
+  String get shopChoose => 'Chagua duka';
+
+  @override
+  String get jrnCardTitle => '📒 Kumbukumbu: nani alifanya nini';
+
+  @override
+  String get jrnCardInfo =>
+      'Kazi za timu siku kwa siku: mauzo, marejesho, hisa, madeni…';
+
+  @override
+  String jrnError(String erreur) {
+    return 'Kumbukumbu haisomeki: $erreur';
+  }
+
+  @override
+  String get jrnEmpty => 'Hakuna kazi iliyorekodiwa siku hiyo.';
+
+  @override
+  String get jrnEveryone => 'Kila mtu';
 }

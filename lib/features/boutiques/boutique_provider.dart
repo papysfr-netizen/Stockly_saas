@@ -6,6 +6,7 @@
 //    vide = boutique principale).
 //  - Le patron choisit la boutique à afficher (null = toutes les boutiques).
 
+import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -96,7 +97,7 @@ class ChoixBoutiqueMembre extends ConsumerWidget {
       children: [
         Icon(Icons.storefront_rounded, size: 20, color: Colors.indigo.shade400),
         const SizedBox(width: 8),
-        const Text('Boutique :'),
+        Text(AppLocalizations.of(context).shopLabel),
         const SizedBox(width: 12),
         Expanded(
           child: DropdownButton<String>(
@@ -108,7 +109,7 @@ class ChoixBoutiqueMembre extends ConsumerWidget {
                 DropdownMenuItem(
                   value: b.id,
                   child: Text(
-                    b.actif ? b.nom : '${b.nom} (désactivée)',
+                    b.actif ? b.nom : AppLocalizations.of(context).shopDisabled(b.nom),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -123,12 +124,12 @@ class ChoixBoutiqueMembre extends ConsumerWidget {
                     .doc(uid)
                     .update({'boutiqueId': id});
                 messenger.showSnackBar(SnackBar(
-                  content: Text('$nomMembre travaille maintenant à « $nomBoutique »'),
+                  content: Text(AppLocalizations.of(context).shopMemberMoved(nomMembre, nomBoutique)),
                   backgroundColor: Colors.green,
                 ));
               } catch (e) {
                 messenger.showSnackBar(
-                  SnackBar(content: Text('Erreur : $e'), backgroundColor: Colors.red),
+                  SnackBar(content: Text(AppLocalizations.of(context).errorWith('$e')), backgroundColor: Colors.red),
                 );
               }
             },
@@ -163,21 +164,21 @@ class SelecteurBoutique extends ConsumerWidget {
 
     final choisie = ref.watch(boutiqueChoisieProvider);
     final nom = choisie == null
-        ? 'Toutes les boutiques'
+        ? AppLocalizations.of(context).repAllShops
         : actives.firstWhere(
             (b) => b.id == choisie,
             orElse: () => const Boutique(id: '', nom: 'Toutes les boutiques', actif: true),
           ).nom;
 
     return PopupMenuButton<String>(
-      tooltip: 'Choisir la boutique',
+      tooltip: AppLocalizations.of(context).shopChoose,
       onSelected: (v) =>
           ref.read(boutiqueChoisieProvider.notifier).state = v == '*' ? null : v,
       itemBuilder: (_) => [
         CheckedPopupMenuItem(
           value: '*',
           checked: choisie == null,
-          child: const Text('Toutes les boutiques'),
+          child: Text(AppLocalizations.of(context).repAllShops),
         ),
         const PopupMenuDivider(),
         for (final b in actives)

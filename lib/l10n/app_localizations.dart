@@ -6632,6 +6632,108 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Charges et dépenses'**
   String get repCostsExpenses;
+
+  /// No description provided for @rateAdjustTip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajuster le taux du {devise}'**
+  String rateAdjustTip(String devise);
+
+  /// No description provided for @rateTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taux de change (USD → {code})'**
+  String rateTitle(String code);
+
+  /// No description provided for @rateAdjustInfo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajuster le taux officiel / marché pour {devise} :'**
+  String rateAdjustInfo(String devise);
+
+  /// No description provided for @rateUpdate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mettre à jour'**
+  String get rateUpdate;
+
+  /// No description provided for @bakTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'💾 Sauvegarde complète'**
+  String get bakTitle;
+
+  /// No description provided for @bakInfo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes les données dans un fichier à garder (WhatsApp, Drive). Conseil : chaque semaine et avant une grosse opération.'**
+  String get bakInfo;
+
+  /// No description provided for @bakReady.
+  ///
+  /// In fr, this message translates to:
+  /// **'💾 Sauvegarde prête'**
+  String get bakReady;
+
+  /// No description provided for @bakError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sauvegarde impossible (internet nécessaire) : {erreur}'**
+  String bakError(String erreur);
+
+  /// No description provided for @shopLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Boutique :'**
+  String get shopLabel;
+
+  /// No description provided for @shopDisabled.
+  ///
+  /// In fr, this message translates to:
+  /// **'{nom} (désactivée)'**
+  String shopDisabled(String nom);
+
+  /// No description provided for @shopMemberMoved.
+  ///
+  /// In fr, this message translates to:
+  /// **'{membre} travaille maintenant à « {boutique} »'**
+  String shopMemberMoved(String membre, String boutique);
+
+  /// No description provided for @shopChoose.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir la boutique'**
+  String get shopChoose;
+
+  /// No description provided for @jrnCardTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'📒 Journal : qui a fait quoi'**
+  String get jrnCardTitle;
+
+  /// No description provided for @jrnCardInfo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les actions de l\'équipe jour par jour : ventes, retours, stock, dettes…'**
+  String get jrnCardInfo;
+
+  /// No description provided for @jrnError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Journal illisible : {erreur}'**
+  String jrnError(String erreur);
+
+  /// No description provided for @jrnEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune action notée ce jour-là.'**
+  String get jrnEmpty;
+
+  /// No description provided for @jrnEveryone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout le monde'**
+  String get jrnEveryone;
 }
 
 class _AppLocalizationsDelegate

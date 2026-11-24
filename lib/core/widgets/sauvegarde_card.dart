@@ -5,6 +5,7 @@
 // un seul fichier .json à garder hors du téléphone (WhatsApp, Drive…).
 // Ne modifie RIEN dans la base.
 
+import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -144,7 +145,7 @@ class _SauvegardeCardState extends State<SauvegardeCard> {
       await showDialog<void>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('💾 Sauvegarde prête'),
+          title: Text(AppLocalizations.of(context).bakReady),
           content: SingleChildScrollView(
             child: Text(
               '$total documents sauvegardés :\n'
@@ -170,7 +171,7 @@ class _SauvegardeCardState extends State<SauvegardeCard> {
       if (mounted) setState(() => _enCours = false);
       messenger.showSnackBar(
         SnackBar(
-          content: Text('Sauvegarde impossible (internet nécessaire) : $e'),
+          content: Text(AppLocalizations.of(context).bakError('$e')),
           backgroundColor: Colors.red.shade700,
         ),
       );
@@ -182,12 +183,11 @@ class _SauvegardeCardState extends State<SauvegardeCard> {
     return Card(
       child: ListTile(
         leading: const Icon(Icons.backup_rounded, color: Color(0xFF0052FF)),
-        title: const Text('💾 Sauvegarde complète',
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(AppLocalizations.of(context).bakTitle,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(_enCours
             ? _etape
-            : 'Toutes les données dans un fichier à garder (WhatsApp, Drive). '
-                'Conseil : chaque semaine et avant une grosse opération.'),
+            : AppLocalizations.of(context).bakInfo),
         trailing: _enCours
             ? const SizedBox(
                 width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2))

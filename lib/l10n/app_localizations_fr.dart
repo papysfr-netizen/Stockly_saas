@@ -3976,4 +3976,71 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get repCostsExpenses => 'Charges et dépenses';
+
+  @override
+  String rateAdjustTip(String devise) {
+    return 'Ajuster le taux du $devise';
+  }
+
+  @override
+  String rateTitle(String code) {
+    return 'Taux de change (USD → $code)';
+  }
+
+  @override
+  String rateAdjustInfo(String devise) {
+    return 'Ajuster le taux officiel / marché pour $devise :';
+  }
+
+  @override
+  String get rateUpdate => 'Mettre à jour';
+
+  @override
+  String get bakTitle => '💾 Sauvegarde complète';
+
+  @override
+  String get bakInfo =>
+      'Toutes les données dans un fichier à garder (WhatsApp, Drive). Conseil : chaque semaine et avant une grosse opération.';
+
+  @override
+  String get bakReady => '💾 Sauvegarde prête';
+
+  @override
+  String bakError(String erreur) {
+    return 'Sauvegarde impossible (internet nécessaire) : $erreur';
+  }
+
+  @override
+  String get shopLabel => 'Boutique :';
+
+  @override
+  String shopDisabled(String nom) {
+    return '$nom (désactivée)';
+  }
+
+  @override
+  String shopMemberMoved(String membre, String boutique) {
+    return '$membre travaille maintenant à « $boutique »';
+  }
+
+  @override
+  String get shopChoose => 'Choisir la boutique';
+
+  @override
+  String get jrnCardTitle => '📒 Journal : qui a fait quoi';
+
+  @override
+  String get jrnCardInfo =>
+      'Les actions de l\'équipe jour par jour : ventes, retours, stock, dettes…';
+
+  @override
+  String jrnError(String erreur) {
+    return 'Journal illisible : $erreur';
+  }
+
+  @override
+  String get jrnEmpty => 'Aucune action notée ce jour-là.';
+
+  @override
+  String get jrnEveryone => 'Tout le monde';
 }

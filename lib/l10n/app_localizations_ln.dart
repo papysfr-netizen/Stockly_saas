@@ -3966,4 +3966,71 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get repCostsExpenses => 'Ba charges mpe ba dépenses';
+
+  @override
+  String rateAdjustTip(String devise) {
+    return 'Bongisa taux ya $devise';
+  }
+
+  @override
+  String rateTitle(String code) {
+    return 'Taux ya mbongo (USD → $code)';
+  }
+
+  @override
+  String rateAdjustInfo(String devise) {
+    return 'Bongisa taux ya leta / ya zando mpo na $devise:';
+  }
+
+  @override
+  String get rateUpdate => 'Bongisa';
+
+  @override
+  String get bakTitle => '💾 Sauvegarde mobimba';
+
+  @override
+  String get bakInfo =>
+      'Ba données nyonso na fichier moko ya kobomba (WhatsApp, Drive). Toli: poso nyonso mpe liboso ya mosala monene.';
+
+  @override
+  String get bakReady => '💾 Sauvegarde ezali prêt';
+
+  @override
+  String bakError(String erreur) {
+    return 'Sauvegarde ekoki te (internet esengeli): $erreur';
+  }
+
+  @override
+  String get shopLabel => 'Butiki:';
+
+  @override
+  String shopDisabled(String nom) {
+    return '$nom (ekangami)';
+  }
+
+  @override
+  String shopMemberMoved(String membre, String boutique) {
+    return '$membre azali sikoyo kosala na « $boutique »';
+  }
+
+  @override
+  String get shopChoose => 'Pona butiki';
+
+  @override
+  String get jrnCardTitle => '📒 Journal: nani asalaki nini';
+
+  @override
+  String get jrnCardInfo =>
+      'Misala ya équipe mokolo na mokolo: ba ventes, bozongisi, stock, ba niongo…';
+
+  @override
+  String jrnError(String erreur) {
+    return 'Journal etangami te: $erreur';
+  }
+
+  @override
+  String get jrnEmpty => 'Mosala moko te ekomami mokolo wana.';
+
+  @override
+  String get jrnEveryone => 'Bato nyonso';
 }

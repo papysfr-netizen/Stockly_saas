@@ -1087,5 +1087,22 @@
   "repAmount": "Mbongo",
   "repStockValue": "Stock / motuya ya kosomba",
   "repDormantInfo": "Ezali na stock, vente moko te",
-  "repCostsExpenses": "Ba charges mpe ba dépenses"
+  "repCostsExpenses": "Ba charges mpe ba dépenses",
+  "rateAdjustTip": "Bongisa taux ya {devise}",
+  "rateTitle": "Taux ya mbongo (USD → {code})",
+  "rateAdjustInfo": "Bongisa taux ya leta / ya zando mpo na {devise}:",
+  "rateUpdate": "Bongisa",
+  "bakTitle": "💾 Sauvegarde mobimba",
+  "bakInfo": "Ba données nyonso na fichier moko ya kobomba (WhatsApp, Drive). Toli: poso nyonso mpe liboso ya mosala monene.",
+  "bakReady": "💾 Sauvegarde ezali prêt",
+  "bakError": "Sauvegarde ekoki te (internet esengeli): {erreur}",
+  "shopLabel": "Butiki:",
+  "shopDisabled": "{nom} (ekangami)",
+  "shopMemberMoved": "{membre} azali sikoyo kosala na « {boutique} »",
+  "shopChoose": "Pona butiki",
+  "jrnCardTitle": "📒 Journal: nani asalaki nini",
+  "jrnCardInfo": "Misala ya équipe mokolo na mokolo: ba ventes, bozongisi, stock, ba niongo…",
+  "jrnError": "Journal etangami te: {erreur}",
+  "jrnEmpty": "Mosala moko te ekomami mokolo wana.",
+  "jrnEveryone": "Bato nyonso"
 }

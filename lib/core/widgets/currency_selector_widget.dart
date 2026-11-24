@@ -1,3 +1,4 @@
+import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/currency_provider.dart';
@@ -51,7 +52,7 @@ class CurrencySelectorWidget extends ConsumerWidget {
           const SizedBox(width: 4),
           IconButton(
             icon: const Icon(Icons.edit, size: 18, color: Colors.teal),
-            tooltip: 'Ajuster le taux du ${activeInfo.name}',
+            tooltip: AppLocalizations.of(context).rateAdjustTip(activeInfo.name),
             onPressed: () => _showUpdateRateDialog(context, ref, activeInfo),
           ),
         ],
@@ -74,13 +75,13 @@ class CurrencySelectorWidget extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Taux de change (USD → ${activeInfo.code})'),
+        title: Text(AppLocalizations.of(context).rateTitle(activeInfo.code)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Ajuster le taux officiel / marché pour ${activeInfo.name} :',
+              AppLocalizations.of(context).rateAdjustInfo(activeInfo.name),
               style: const TextStyle(fontSize: 13, color: Colors.grey),
             ),
             const SizedBox(height: 12),
@@ -111,7 +112,7 @@ class CurrencySelectorWidget extends ConsumerWidget {
                 Navigator.pop(ctx);
               }
             },
-            child: const Text('Mettre à jour'),
+            child: Text(AppLocalizations.of(context).rateUpdate),
           ),
         ],
       ),

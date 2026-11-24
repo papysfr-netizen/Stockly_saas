@@ -3959,4 +3959,71 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get repCostsExpenses => 'Costs and expenses';
+
+  @override
+  String rateAdjustTip(String devise) {
+    return 'Adjust the $devise rate';
+  }
+
+  @override
+  String rateTitle(String code) {
+    return 'Exchange rate (USD → $code)';
+  }
+
+  @override
+  String rateAdjustInfo(String devise) {
+    return 'Adjust the official / market rate for $devise:';
+  }
+
+  @override
+  String get rateUpdate => 'Update';
+
+  @override
+  String get bakTitle => '💾 Full backup';
+
+  @override
+  String get bakInfo =>
+      'All the data in one file to keep (WhatsApp, Drive). Tip: every week and before a big operation.';
+
+  @override
+  String get bakReady => '💾 Backup ready';
+
+  @override
+  String bakError(String erreur) {
+    return 'Backup failed (internet needed): $erreur';
+  }
+
+  @override
+  String get shopLabel => 'Shop:';
+
+  @override
+  String shopDisabled(String nom) {
+    return '$nom (disabled)';
+  }
+
+  @override
+  String shopMemberMoved(String membre, String boutique) {
+    return '$membre now works at « $boutique »';
+  }
+
+  @override
+  String get shopChoose => 'Choose the shop';
+
+  @override
+  String get jrnCardTitle => '📒 Log: who did what';
+
+  @override
+  String get jrnCardInfo =>
+      'The team\'s actions day by day: sales, returns, stock, debts…';
+
+  @override
+  String jrnError(String erreur) {
+    return 'Log unreadable: $erreur';
+  }
+
+  @override
+  String get jrnEmpty => 'No action recorded that day.';
+
+  @override
+  String get jrnEveryone => 'Everyone';
 }
