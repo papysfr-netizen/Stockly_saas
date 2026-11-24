@@ -29,7 +29,7 @@ Uniquement pour faire fonctionner l'application : vous connecter, enregistrer vo
 ## 3. Avec qui elles sont partagées
 
 - **Google Firebase** (Google LLC) héberge les comptes et les données de façon sécurisée. Les serveurs peuvent se trouver hors de la RDC.
-- **Google Gemini** (Google LLC) lit la photo d'une liste de produits **seulement quand vous utilisez l'import par photo**, pour en extraire les noms, quantités et prix.
+- **Google Gemini** (Google LLC) lit la photo d'une liste de produits **seulement quand vous utilisez l'import par photo**, pour en extraire les produits (noms, quantités, prix) et l'en-tête de la facture (fournisseur, numéro, date, frais).
 - **WhatsApp ou SMS** : quand vous envoyez un reçu ou un rappel à un client, le message part depuis **votre** téléphone, avec votre application WhatsApp ou SMS.
 
 Les données d'une boutique ne sont visibles que par le propriétaire et les employés qu'il a ajoutés, selon les autorisations qu'il leur donne.
@@ -94,7 +94,7 @@ Only to run the app: sign you in, record your sales and stock, compute your prof
 ## 3. Who it is shared with
 
 - **Google Firebase** (Google LLC) securely hosts accounts and data. Servers may be located outside the DRC.
-- **Google Gemini** (Google LLC) reads a product-list photo **only when you use photo import**, to extract names, quantities and prices.
+- **Google Gemini** (Google LLC) reads a product-list photo **only when you use photo import**, to extract the products (names, quantities, prices) and the invoice header (supplier, number, date, costs).
 - **WhatsApp or SMS**: receipts and reminders are sent from **your** phone, through your own WhatsApp or SMS app.
 
 A shop's data is visible only to its owner and the employees the owner added, according to the permissions given.

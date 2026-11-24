@@ -1202,5 +1202,11 @@
   "plContinue": "Endelea",
   "plImported": "Bidhaa {n} zimeingizwa au kusasishwa.",
   "plImportError": "Hitilafu ya kuingiza: {erreur}",
-  "plImportFile": "Ingiza faili"
+  "plImportFile": "Ingiza faili",
+  "impFees": "Gharama (usafirishaji, ushuru…)",
+  "impReadByAi": "🤖 Imesomwa na AI kwenye ankara: kagua kabla ya kuingiza",
+  "impInvoiceDate": "ankara ya {date}",
+  "arrFees": "Gharama (usafirishaji…): {montant}",
+  "arrProfitAfterFees": "Faida baada ya gharama: {montant}",
+  "arrInvoiceDate": "Ankara ya {date}"
 }

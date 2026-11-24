@@ -1202,5 +1202,11 @@
   "plContinue": "Continue",
   "plImported": "{n} product(s) imported or updated.",
   "plImportError": "Import error: {erreur}",
-  "plImportFile": "Import a file"
+  "plImportFile": "Import a file",
+  "impFees": "Costs (freight, transport, customs…)",
+  "impReadByAi": "🤖 Read by the AI on the invoice: check before importing",
+  "impInvoiceDate": "invoice of {date}",
+  "arrFees": "Costs (freight, transport…): {montant}",
+  "arrProfitAfterFees": "Profit after costs: {montant}",
+  "arrInvoiceDate": "Invoice of {date}"
 }

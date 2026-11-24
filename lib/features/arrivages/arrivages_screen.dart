@@ -284,6 +284,10 @@ class _ArrivageDetailScreenState extends ConsumerState<ArrivageDetailScreen> {
                       Text(AppLocalizations.of(context).arrReceived(_date(d['date'])) + ((d['parNom'] ?? '').toString().isEmpty ? '' : ' · ${d['parNom']}')),
                       Text(AppLocalizations.of(context).arrShop((d['nomBoutique'] ?? '').toString().isEmpty ? AppLocalizations.of(context).arrMainShop : d['nomBoutique'].toString())),
                       if ((d['nomFichier'] ?? '').toString().isNotEmpty) Text(AppLocalizations.of(context).arrFile('${d['nomFichier']}')),
+                      if ((d['dateFacture'] ?? '').toString().isNotEmpty)
+                        Text(AppLocalizations.of(context).arrInvoiceDate('${d['dateFacture']}')),
+                      if (_n(d['frais']) > 0)
+                        Text(AppLocalizations.of(context).arrFees(devise.formatPrice(_n(d['frais'])))),
                       const Divider(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -353,6 +357,18 @@ class _ArrivageDetailScreenState extends ConsumerState<ArrivageDetailScreen> {
                                           color: ca - cout >= 0 ? Colors.green.shade700 : Colors.red,
                                         ),
                                       ),
+                                      // Frais de l'arrivage (fret…) : déduits du bénéfice du lot
+                                      if (_n(d['frais']) > 0) ...[
+                                        Text(AppLocalizations.of(context).arrFees(devise.formatPrice(_n(d['frais'])))),
+                                        Text(
+                                          AppLocalizations.of(context).arrProfitAfterFees(
+                                              devise.formatPrice(ca - cout - _n(d['frais']))),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: ca - cout - _n(d['frais']) >= 0 ? Colors.green.shade700 : Colors.red,
+                                          ),
+                                        ),
+                                      ],
                                       const SizedBox(height: 4),
                                       Text(
                                         AppLocalizations.of(context).arrOldestFirst,

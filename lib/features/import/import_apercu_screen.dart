@@ -1,5 +1,6 @@
 import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:stockly_saas/core/utils/payment_calculator.dart';
 
 import '../../core/services/packing_list_service.dart';
 
@@ -24,13 +25,17 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
   ModeImport _mode = ModeImport.arrivage;
   bool _enCours = false;
   // 📦 Fiche de l'arrivage
-  final _fournisseur = TextEditingController();
-  final _numero = TextEditingController();
+  late final _fournisseur = TextEditingController(text: widget.analyse.fournisseur);
+  late final _numero = TextEditingController(text: widget.analyse.numero);
+  // Frais de l'arrivage (fret, transport…), en dollars — lus par l'IA ou saisis
+  late final _frais = TextEditingController(
+      text: widget.analyse.frais > 0 ? widget.analyse.frais.toStringAsFixed(2) : '');
 
   @override
   void dispose() {
     _fournisseur.dispose();
     _numero.dispose();
+    _frais.dispose();
     super.dispose();
   }
   String _progression = '';
@@ -65,6 +70,7 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
     final navigator = Navigator.of(context);
     a.fournisseur = _fournisseur.text;
     a.numero = _numero.text;
+    a.frais = parseAmount(_frais.text);
     try {
       final resultat = await widget.service.appliquer(
         a,
@@ -349,6 +355,28 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _frais,
+                      enabled: !_enCours,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context).impFees,
+                        prefixText: '\$ ',
+                        isDense: true,
+                        border: const OutlineInputBorder(),
+                      ),
+                    ),
+                    // 🤖 Lu par l'IA : on le dit, pour que la personne vérifie
+                    if (a.fournisseur.isNotEmpty || a.numero.isNotEmpty || a.dateFacture.isNotEmpty || a.frais > 0)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Text(
+                          AppLocalizations.of(context).impReadByAi +
+                              (a.dateFacture.isEmpty ? '' : ' · ${AppLocalizations.of(context).impInvoiceDate(a.dateFacture)}'),
+                          style: TextStyle(fontSize: 12, color: Colors.teal.shade700, fontStyle: FontStyle.italic),
+                        ),
+                      ),
                   ],
                   const SizedBox(height: 12),
 

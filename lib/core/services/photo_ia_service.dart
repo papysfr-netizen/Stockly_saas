@@ -17,12 +17,21 @@ class PhotoIaService {
   static String derniereDevise = 'USD';
   static double derniersFrais = 0;
 
+  /// 📦 En-tête de la facture : fournisseur, numéro, date (AAAA-MM-JJ) — vides si illisibles
+  static String dernierFournisseur = '';
+  static String dernierNumero = '';
+  static String derniereDate = '';
+
   static const String _consigne = '''
 Tu lis la PHOTO (ou la capture d'écran) d'une packing list, d'une facture ou d'un bon de livraison
 de fournisseur, pour une boutique en RD Congo (balles de vêtements, articles divers).
 Le document peut être en chinois, en anglais ou en français.
 
 Rends :
+- fournisseur : le nom de l'entreprise qui VEND / expédie (en-tête, tampon, « From », « Seller », 卖方).
+  Pas le client ni la boutique qui reçoit. Vide si absent.
+- numero : le numéro du document (facture, invoice no., packing list no., N°, 编号). Vide si absent.
+- date : la date du document au format AAAA-MM-JJ. Vide si absente.
 - devise : la monnaie des prix, en code ISO (USD, CNY, EUR, CDF…). Indices : \$ ou USD = USD ; 元, ¥, RMB = CNY.
 - frais : le total des frais écrits à part (fret maritime 海运费, transport, douane…), sinon 0.
 - produits : une entrée par ligne de produit :
@@ -52,6 +61,9 @@ Règles :
   static Future<List<Map<String, dynamic>>?> lirePhoto(BuildContext context) async {
     derniereDevise = 'USD';
     derniersFrais = 0;
+    dernierFournisseur = '';
+    dernierNumero = '';
+    derniereDate = '';
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       showDragHandle: true,
@@ -155,6 +167,9 @@ Règles :
   static Future<List<Map<String, dynamic>>> analyser(Uint8List bytes, String mimeType) async {
     final schema = Schema.object(
       properties: {
+        'fournisseur': Schema.string(),
+        'numero': Schema.string(),
+        'date': Schema.string(),
         'devise': Schema.string(),
         'frais': Schema.number(),
         'produits': Schema.array(
@@ -170,7 +185,7 @@ Règles :
           ),
         ),
       },
-      optionalProperties: ['devise', 'frais'],
+      optionalProperties: ['fournisseur', 'numero', 'date', 'devise', 'frais'],
     );
 
     final model = FirebaseAI.googleAI().generativeModel(
@@ -194,6 +209,10 @@ Règles :
     double nombre(dynamic v) => v is num ? v.toDouble() : double.tryParse('${v ?? ''}'.replaceAll(',', '.')) ?? 0.0;
 
     derniereDevise = (donnees['devise'] ?? 'USD').toString();
+    dernierFournisseur = (donnees['fournisseur'] ?? '').toString().trim();
+    dernierNumero = (donnees['numero'] ?? '').toString().trim();
+    final d = (donnees['date'] ?? '').toString().trim();
+    derniereDate = RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(d) ? d : '';
     derniersFrais = nombre(donnees['frais']);
 
     final liste = donnees['produits'] as List? ?? const [];

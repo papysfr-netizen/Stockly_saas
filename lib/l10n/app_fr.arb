@@ -2692,5 +2692,15 @@
   "@plImported": {"placeholders": {"n": {"type": "String"}}},
   "plImportError": "Erreur d'importation : {erreur}",
   "@plImportError": {"placeholders": {"erreur": {"type": "String"}}},
-  "plImportFile": "Importer un fichier"
+  "plImportFile": "Importer un fichier",
+  "impFees": "Frais (fret, transport, douane…)",
+  "impReadByAi": "🤖 Lu par l'IA sur la facture : vérifiez avant d'importer",
+  "impInvoiceDate": "facture du {date}",
+  "@impInvoiceDate": {"placeholders": {"date": {"type": "String"}}},
+  "arrFees": "Frais (fret, transport…) : {montant}",
+  "@arrFees": {"placeholders": {"montant": {"type": "String"}}},
+  "arrProfitAfterFees": "Bénéfice après frais : {montant}",
+  "@arrProfitAfterFees": {"placeholders": {"montant": {"type": "String"}}},
+  "arrInvoiceDate": "Facture du {date}",
+  "@arrInvoiceDate": {"placeholders": {"date": {"type": "String"}}}
 }

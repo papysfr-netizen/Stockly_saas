@@ -4367,4 +4367,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get plImportFile => 'Import a file';
+
+  @override
+  String get impFees => 'Costs (freight, transport, customs…)';
+
+  @override
+  String get impReadByAi =>
+      '🤖 Read by the AI on the invoice: check before importing';
+
+  @override
+  String impInvoiceDate(String date) {
+    return 'invoice of $date';
+  }
+
+  @override
+  String arrFees(String montant) {
+    return 'Costs (freight, transport…): $montant';
+  }
+
+  @override
+  String arrProfitAfterFees(String montant) {
+    return 'Profit after costs: $montant';
+  }
+
+  @override
+  String arrInvoiceDate(String date) {
+    return 'Invoice of $date';
+  }
 }

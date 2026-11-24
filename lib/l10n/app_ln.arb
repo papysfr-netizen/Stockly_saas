@@ -1202,5 +1202,11 @@
   "plContinue": "Kokoba",
   "plImported": "Biloko {n} ekotisami to ebongolami.",
   "plImportError": "Libunga ya import: {erreur}",
-  "plImportFile": "Kotisa fichier"
+  "plImportFile": "Kotisa fichier",
+  "impFees": "Ba frais (fret, transport, douane…)",
+  "impReadByAi": "🤖 IA etangi yango na facture: tala liboso ya kokotisa",
+  "impInvoiceDate": "facture ya {date}",
+  "arrFees": "Ba frais (fret, transport…): {montant}",
+  "arrProfitAfterFees": "Litomba sima ya ba frais: {montant}",
+  "arrInvoiceDate": "Facture ya {date}"
 }

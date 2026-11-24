@@ -7322,6 +7322,42 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Importer un fichier'**
   String get plImportFile;
+
+  /// No description provided for @impFees.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frais (fret, transport, douane…)'**
+  String get impFees;
+
+  /// No description provided for @impReadByAi.
+  ///
+  /// In fr, this message translates to:
+  /// **'🤖 Lu par l\'IA sur la facture : vérifiez avant d\'importer'**
+  String get impReadByAi;
+
+  /// No description provided for @impInvoiceDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'facture du {date}'**
+  String impInvoiceDate(String date);
+
+  /// No description provided for @arrFees.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frais (fret, transport…) : {montant}'**
+  String arrFees(String montant);
+
+  /// No description provided for @arrProfitAfterFees.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bénéfice après frais : {montant}'**
+  String arrProfitAfterFees(String montant);
+
+  /// No description provided for @arrInvoiceDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Facture du {date}'**
+  String arrInvoiceDate(String date);
 }
 
 class _AppLocalizationsDelegate

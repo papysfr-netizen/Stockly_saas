@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:stockly_saas/core/services/photo_ia_service.dart';
 import 'package:stockly_saas/core/services/utilisateur_service.dart';
 import 'package:stockly_saas/core/services/journal_service.dart';
 import 'package:csv/csv.dart';
@@ -364,9 +365,13 @@ class AnalyseImport {
   final String boutiqueId;
   final String nomBoutique;
 
-  /// 📦 Fiche de l'arrivage (saisis sur l'écran d'aperçu)
+  /// 📦 Fiche de l'arrivage (saisis sur l'écran d'aperçu, ou lus par l'IA sur la photo)
   String fournisseur = '';
   String numero = '';
+
+  /// Frais de l'arrivage (fret, transport, douane…) en dollars, et date de la facture (AAAA-MM-JJ)
+  double frais = 0;
+  String dateFacture = '';
 
   int get nbNouveaux => lignes.where((l) => l.statut == StatutLigne.nouveau).length;
   int get nbExistants => lignes.where((l) => l.statut == StatutLigne.existant).length;
@@ -441,6 +446,14 @@ class PackingListService {
         entrepriseId: entrepriseId, boutiqueId: boutiqueId, nomBoutique: nomBoutique,
         produitsFournis: lus);
     if (analyse == null || !context.mounted) return 0;
+
+    // 🤖 Photo : l'en-tête lu par l'IA pré-remplit la fiche d'arrivage
+    if (lirePhoto != null) {
+      analyse.fournisseur = PhotoIaService.dernierFournisseur;
+      analyse.numero = PhotoIaService.dernierNumero;
+      analyse.frais = PhotoIaService.derniersFrais;
+      analyse.dateFacture = PhotoIaService.derniereDate;
+    }
 
     // Au premier plan : le geste « retour » du téléphone ferme bien l'aperçu
     final resultat = await Navigator.of(context, rootNavigator: true).push<ResultatImport>(
@@ -708,6 +721,9 @@ class PackingListService {
         'nbProduits': lignesFiche.length,
         'totalPieces': aEcrire.fold<int>(0, (s, l) => s + l.quantite),
         'coutTotal': aEcrire.fold<double>(0, (s, l) => s + l.quantite * l.prixAchat),
+        // Frais (fret, transport…) et date de la facture
+        if (analyse.frais > 0) 'frais': analyse.frais,
+        if (analyse.dateFacture.isNotEmpty) 'dateFacture': analyse.dateFacture,
         'parUid': FirebaseAuth.instance.currentUser?.uid,
         'parNom': parNom,
       };

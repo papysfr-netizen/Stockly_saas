@@ -4373,4 +4373,31 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get plImportFile => 'Kotisa fichier';
+
+  @override
+  String get impFees => 'Ba frais (fret, transport, douane…)';
+
+  @override
+  String get impReadByAi =>
+      '🤖 IA etangi yango na facture: tala liboso ya kokotisa';
+
+  @override
+  String impInvoiceDate(String date) {
+    return 'facture ya $date';
+  }
+
+  @override
+  String arrFees(String montant) {
+    return 'Ba frais (fret, transport…): $montant';
+  }
+
+  @override
+  String arrProfitAfterFees(String montant) {
+    return 'Litomba sima ya ba frais: $montant';
+  }
+
+  @override
+  String arrInvoiceDate(String date) {
+    return 'Facture ya $date';
+  }
 }

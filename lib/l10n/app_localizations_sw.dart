@@ -4364,4 +4364,31 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get plImportFile => 'Ingiza faili';
+
+  @override
+  String get impFees => 'Gharama (usafirishaji, ushuru…)';
+
+  @override
+  String get impReadByAi =>
+      '🤖 Imesomwa na AI kwenye ankara: kagua kabla ya kuingiza';
+
+  @override
+  String impInvoiceDate(String date) {
+    return 'ankara ya $date';
+  }
+
+  @override
+  String arrFees(String montant) {
+    return 'Gharama (usafirishaji…): $montant';
+  }
+
+  @override
+  String arrProfitAfterFees(String montant) {
+    return 'Faida baada ya gharama: $montant';
+  }
+
+  @override
+  String arrInvoiceDate(String date) {
+    return 'Ankara ya $date';
+  }
 }
