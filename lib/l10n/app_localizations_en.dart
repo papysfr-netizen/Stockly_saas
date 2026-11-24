@@ -3014,4 +3014,188 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lotProposed => 'suggested';
+
+  @override
+  String get cloByCurrency => 'By currency (float + cash sales)';
+
+  @override
+  String get cloDollars => 'Dollars';
+
+  @override
+  String get cloFrancs => 'Francs';
+
+  @override
+  String cloExpCounted(String attendu, String compte) {
+    return 'expected $attendu · counted $compte';
+  }
+
+  @override
+  String get cloByCurrencyNote =>
+      'Debts, expenses and deposits are not split by currency: this comparison is right when the day has mostly sales.';
+
+  @override
+  String accMsgBalance(String nom, String boutique, String solde) {
+    return 'Hello $nom, your balance at $boutique is $solde.';
+  }
+
+  @override
+  String get accMsgLast => 'Latest movements:';
+
+  @override
+  String get accMsgThanks => 'Thank you for your trust!';
+
+  @override
+  String get accMvtDeposit => 'Deposit';
+
+  @override
+  String get logWrong => 'Wrong username (or e-mail) or password.';
+
+  @override
+  String get logDisabled => 'This account is suspended. Contact the owner.';
+
+  @override
+  String get logNoInternet => 'No internet connection. Check your network.';
+
+  @override
+  String get logError => 'Sign-in error.';
+
+  @override
+  String get logNoProfile => 'No profile found for this account.';
+
+  @override
+  String get logOk => 'Signed in!';
+
+  @override
+  String logWelcome(String nom) {
+    return 'Welcome $nom!';
+  }
+
+  @override
+  String logDbError(String erreur) {
+    return 'Data access error: $erreur';
+  }
+
+  @override
+  String get fillAll => 'Fill in all the fields.';
+
+  @override
+  String get logEnterPhone => 'Enter a phone number.';
+
+  @override
+  String logSmsError(String erreur) {
+    return 'SMS error: $erreur';
+  }
+
+  @override
+  String get logSmsSent => 'SMS code sent!';
+
+  @override
+  String get logEnterCode => 'Enter the code you received.';
+
+  @override
+  String get logBadCode => 'Invalid SMS code.';
+
+  @override
+  String get logWithPhone => 'Sign in with a phone number';
+
+  @override
+  String get logWithId => 'Sign in with username or e-mail';
+
+  @override
+  String get logIdLabel => 'E-mail or username';
+
+  @override
+  String get logIdHelp => 'Employee: type the username from the owner';
+
+  @override
+  String get logPassword => 'Password';
+
+  @override
+  String get logSignIn => 'Sign in';
+
+  @override
+  String get logPhoneLabel => 'Phone (e.g. +243970000000)';
+
+  @override
+  String get logSendSms => 'Send the SMS code';
+
+  @override
+  String get logCodeLabel => '6-digit code received by SMS';
+
+  @override
+  String get logValidateCode => 'Confirm the code';
+
+  @override
+  String get logNew => 'New to Nguli?';
+
+  @override
+  String get logCreateBusiness => 'Create a business';
+
+  @override
+  String get regDone => 'Business and account created!';
+
+  @override
+  String regError(String erreur) {
+    return 'Sign-up error: $erreur';
+  }
+
+  @override
+  String get regCreate => 'Create my business';
+
+  @override
+  String get regJoin => 'Join Nguli';
+
+  @override
+  String get regIntro => 'Set up your business and manage your stock easily.';
+
+  @override
+  String get regBusinessName => 'Business name *';
+
+  @override
+  String get regBusinessHint => 'e.g. La Grâce Store';
+
+  @override
+  String get regBusinessNeeded => 'Enter your business name';
+
+  @override
+  String get regManagerName => 'Your full name *';
+
+  @override
+  String get regNameNeeded => 'Enter your name';
+
+  @override
+  String get regPhone => 'Phone (optional)';
+
+  @override
+  String get regEmail => 'E-mail address *';
+
+  @override
+  String get regEmailNeeded => 'Enter an e-mail address';
+
+  @override
+  String get regEmailInvalid => 'Enter a valid e-mail address';
+
+  @override
+  String get regPassword => 'Password *';
+
+  @override
+  String get regConfirm => 'Confirm the password *';
+
+  @override
+  String get regCreating => 'Creating the account…';
+
+  @override
+  String get regHaveAccount => 'Already have an account?';
+
+  @override
+  String get cloOldSalesFc => 'Older sales: change assumed given in francs.';
+
+  @override
+  String get accMvtCredit => 'Credit (return)';
+
+  @override
+  String get accMvtPurchase => 'Purchase';
+
+  @override
+  String get accMvtWithdrawal => 'Withdrawal';
 }

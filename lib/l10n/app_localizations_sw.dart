@@ -3011,4 +3011,190 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get lotProposed => 'inapendekezwa';
+
+  @override
+  String get cloByCurrency => 'Kwa sarafu (akiba + mauzo ya pesa taslimu)';
+
+  @override
+  String get cloDollars => 'Dola';
+
+  @override
+  String get cloFrancs => 'Faranga';
+
+  @override
+  String cloExpCounted(String attendu, String compte) {
+    return 'inatarajiwa $attendu · imehesabiwa $compte';
+  }
+
+  @override
+  String get cloByCurrencyNote =>
+      'Madeni, matumizi na amana hazitenganishwi kwa sarafu: ulinganisho huu ni sahihi siku yenye mauzo zaidi.';
+
+  @override
+  String accMsgBalance(String nom, String boutique, String solde) {
+    return 'Habari $nom, salio lako kwa $boutique ni $solde.';
+  }
+
+  @override
+  String get accMsgLast => 'Miamala ya mwisho:';
+
+  @override
+  String get accMsgThanks => 'Asante kwa kutuamini!';
+
+  @override
+  String get accMvtDeposit => 'Amana';
+
+  @override
+  String get logWrong =>
+      'Jina la mtumiaji (au barua pepe) au nenosiri si sahihi.';
+
+  @override
+  String get logDisabled => 'Akaunti hii imesimamishwa. Wasiliana na mmiliki.';
+
+  @override
+  String get logNoInternet => 'Hakuna intaneti. Angalia mtandao wako.';
+
+  @override
+  String get logError => 'Hitilafu ya kuingia.';
+
+  @override
+  String get logNoProfile => 'Hakuna wasifu wa akaunti hii.';
+
+  @override
+  String get logOk => 'Umeingia!';
+
+  @override
+  String logWelcome(String nom) {
+    return 'Karibu $nom!';
+  }
+
+  @override
+  String logDbError(String erreur) {
+    return 'Hitilafu ya kufikia data: $erreur';
+  }
+
+  @override
+  String get fillAll => 'Jaza sehemu zote.';
+
+  @override
+  String get logEnterPhone => 'Weka namba ya simu.';
+
+  @override
+  String logSmsError(String erreur) {
+    return 'Hitilafu ya SMS: $erreur';
+  }
+
+  @override
+  String get logSmsSent => 'Msimbo wa SMS umetumwa!';
+
+  @override
+  String get logEnterCode => 'Weka msimbo uliopokea.';
+
+  @override
+  String get logBadCode => 'Msimbo wa SMS si sahihi.';
+
+  @override
+  String get logWithPhone => 'Ingia kwa namba ya simu';
+
+  @override
+  String get logWithId => 'Ingia kwa jina au barua pepe';
+
+  @override
+  String get logIdLabel => 'Barua pepe au jina la mtumiaji';
+
+  @override
+  String get logIdHelp => 'Mfanyakazi: andika jina ulilopewa na mmiliki';
+
+  @override
+  String get logPassword => 'Nenosiri';
+
+  @override
+  String get logSignIn => 'Ingia';
+
+  @override
+  String get logPhoneLabel => 'Simu (mfano: +243970000000)';
+
+  @override
+  String get logSendSms => 'Tuma msimbo wa SMS';
+
+  @override
+  String get logCodeLabel => 'Msimbo wa tarakimu 6 uliopokewa kwa SMS';
+
+  @override
+  String get logValidateCode => 'Thibitisha msimbo';
+
+  @override
+  String get logNew => 'Mgeni kwenye Nguli?';
+
+  @override
+  String get logCreateBusiness => 'Unda biashara';
+
+  @override
+  String get regDone => 'Biashara na akaunti zimeundwa!';
+
+  @override
+  String regError(String erreur) {
+    return 'Hitilafu ya kujisajili: $erreur';
+  }
+
+  @override
+  String get regCreate => 'Unda biashara yangu';
+
+  @override
+  String get regJoin => 'Jiunge na Nguli';
+
+  @override
+  String get regIntro => 'Andaa biashara yako na usimamie hisa kwa urahisi.';
+
+  @override
+  String get regBusinessName => 'Jina la biashara *';
+
+  @override
+  String get regBusinessHint => 'mfano: Duka La Grâce';
+
+  @override
+  String get regBusinessNeeded => 'Weka jina la biashara yako';
+
+  @override
+  String get regManagerName => 'Jina lako kamili *';
+
+  @override
+  String get regNameNeeded => 'Weka jina lako';
+
+  @override
+  String get regPhone => 'Simu (si lazima)';
+
+  @override
+  String get regEmail => 'Barua pepe *';
+
+  @override
+  String get regEmailNeeded => 'Weka barua pepe';
+
+  @override
+  String get regEmailInvalid => 'Weka barua pepe sahihi';
+
+  @override
+  String get regPassword => 'Nenosiri *';
+
+  @override
+  String get regConfirm => 'Thibitisha nenosiri *';
+
+  @override
+  String get regCreating => 'Inaunda akaunti…';
+
+  @override
+  String get regHaveAccount => 'Tayari una akaunti?';
+
+  @override
+  String get cloOldSalesFc =>
+      'Mauzo ya zamani: chenji inadhaniwa ilitolewa kwa faranga.';
+
+  @override
+  String get accMvtCredit => 'Salio (kurudisha)';
+
+  @override
+  String get accMvtPurchase => 'Ununuzi';
+
+  @override
+  String get accMvtWithdrawal => 'Utoaji';
 }

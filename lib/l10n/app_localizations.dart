@@ -5076,6 +5076,348 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'proposé'**
   String get lotProposed;
+
+  /// No description provided for @cloByCurrency.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par devise (fond + ventes en espèces)'**
+  String get cloByCurrency;
+
+  /// No description provided for @cloDollars.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dollars'**
+  String get cloDollars;
+
+  /// No description provided for @cloFrancs.
+  ///
+  /// In fr, this message translates to:
+  /// **'Francs'**
+  String get cloFrancs;
+
+  /// No description provided for @cloExpCounted.
+  ///
+  /// In fr, this message translates to:
+  /// **'attendu {attendu} · compté {compte}'**
+  String cloExpCounted(String attendu, String compte);
+
+  /// No description provided for @cloByCurrencyNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les dettes, dépenses et dépôts ne sont pas séparés par devise : cette comparaison est juste quand la journée n\'a surtout que des ventes.'**
+  String get cloByCurrencyNote;
+
+  /// No description provided for @accMsgBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour {nom}, votre solde chez {boutique} est de {solde}.'**
+  String accMsgBalance(String nom, String boutique, String solde);
+
+  /// No description provided for @accMsgLast.
+  ///
+  /// In fr, this message translates to:
+  /// **'Derniers mouvements :'**
+  String get accMsgLast;
+
+  /// No description provided for @accMsgThanks.
+  ///
+  /// In fr, this message translates to:
+  /// **'Merci de votre confiance !'**
+  String get accMsgThanks;
+
+  /// No description provided for @accMvtDeposit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépôt'**
+  String get accMvtDeposit;
+
+  /// No description provided for @logWrong.
+  ///
+  /// In fr, this message translates to:
+  /// **'Identifiant (ou e-mail) ou mot de passe incorrect.'**
+  String get logWrong;
+
+  /// No description provided for @logDisabled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce compte est suspendu. Contactez le patron.'**
+  String get logDisabled;
+
+  /// No description provided for @logNoInternet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de connexion internet. Vérifiez votre réseau.'**
+  String get logNoInternet;
+
+  /// No description provided for @logError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur de connexion.'**
+  String get logError;
+
+  /// No description provided for @logNoProfile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun profil trouvé pour ce compte.'**
+  String get logNoProfile;
+
+  /// No description provided for @logOk.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connexion réussie !'**
+  String get logOk;
+
+  /// No description provided for @logWelcome.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bienvenue {nom} !'**
+  String logWelcome(String nom);
+
+  /// No description provided for @logDbError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur d\'accès aux données : {erreur}'**
+  String logDbError(String erreur);
+
+  /// No description provided for @fillAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remplissez tous les champs.'**
+  String get fillAll;
+
+  /// No description provided for @logEnterPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Entrez un numéro de téléphone.'**
+  String get logEnterPhone;
+
+  /// No description provided for @logSmsError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur SMS : {erreur}'**
+  String logSmsError(String erreur);
+
+  /// No description provided for @logSmsSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code SMS envoyé !'**
+  String get logSmsSent;
+
+  /// No description provided for @logEnterCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez le code reçu.'**
+  String get logEnterCode;
+
+  /// No description provided for @logBadCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code SMS invalide.'**
+  String get logBadCode;
+
+  /// No description provided for @logWithPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se connecter avec un numéro'**
+  String get logWithPhone;
+
+  /// No description provided for @logWithId.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se connecter par identifiant ou e-mail'**
+  String get logWithId;
+
+  /// No description provided for @logIdLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'E-mail ou identifiant'**
+  String get logIdLabel;
+
+  /// No description provided for @logIdHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Employé : tapez l\'identifiant reçu du patron'**
+  String get logIdHelp;
+
+  /// No description provided for @logPassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe'**
+  String get logPassword;
+
+  /// No description provided for @logSignIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se connecter'**
+  String get logSignIn;
+
+  /// No description provided for @logPhoneLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléphone (ex : +243970000000)'**
+  String get logPhoneLabel;
+
+  /// No description provided for @logSendSms.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer le code SMS'**
+  String get logSendSms;
+
+  /// No description provided for @logCodeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code à 6 chiffres reçu par SMS'**
+  String get logCodeLabel;
+
+  /// No description provided for @logValidateCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider le code'**
+  String get logValidateCode;
+
+  /// No description provided for @logNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau sur Nguli ?'**
+  String get logNew;
+
+  /// No description provided for @logCreateBusiness.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer une entreprise'**
+  String get logCreateBusiness;
+
+  /// No description provided for @regDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Entreprise et compte créés avec succès !'**
+  String get regDone;
+
+  /// No description provided for @regError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de l\'inscription : {erreur}'**
+  String regError(String erreur);
+
+  /// No description provided for @regCreate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer mon entreprise'**
+  String get regCreate;
+
+  /// No description provided for @regJoin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rejoignez Nguli'**
+  String get regJoin;
+
+  /// No description provided for @regIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Configurez votre entreprise et gérez votre stock en toute simplicité.'**
+  String get regIntro;
+
+  /// No description provided for @regBusinessName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom de l\'entreprise *'**
+  String get regBusinessName;
+
+  /// No description provided for @regBusinessHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'ex : Établissement La Grâce'**
+  String get regBusinessHint;
+
+  /// No description provided for @regBusinessNeeded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez le nom de votre entreprise'**
+  String get regBusinessNeeded;
+
+  /// No description provided for @regManagerName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre nom complet *'**
+  String get regManagerName;
+
+  /// No description provided for @regNameNeeded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez votre nom'**
+  String get regNameNeeded;
+
+  /// No description provided for @regPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléphone (facultatif)'**
+  String get regPhone;
+
+  /// No description provided for @regEmail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse e-mail *'**
+  String get regEmail;
+
+  /// No description provided for @regEmailNeeded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez une adresse e-mail'**
+  String get regEmailNeeded;
+
+  /// No description provided for @regEmailInvalid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez une adresse e-mail valide'**
+  String get regEmailInvalid;
+
+  /// No description provided for @regPassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe *'**
+  String get regPassword;
+
+  /// No description provided for @regConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer le mot de passe *'**
+  String get regConfirm;
+
+  /// No description provided for @regCreating.
+  ///
+  /// In fr, this message translates to:
+  /// **'Création du compte…'**
+  String get regCreating;
+
+  /// No description provided for @regHaveAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous avez déjà un compte ?'**
+  String get regHaveAccount;
+
+  /// No description provided for @cloOldSalesFc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Anciennes ventes : monnaie supposée rendue en francs.'**
+  String get cloOldSalesFc;
+
+  /// No description provided for @accMvtCredit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avoir (retour)'**
+  String get accMvtCredit;
+
+  /// No description provided for @accMvtPurchase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Achat'**
+  String get accMvtPurchase;
+
+  /// No description provided for @accMvtWithdrawal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrait'**
+  String get accMvtWithdrawal;
 }
 
 class _AppLocalizationsDelegate

@@ -403,12 +403,6 @@ class CompteClientDetailScreen extends ConsumerWidget {
       .collection('comptes_clients')
       .doc(compteId);
 
-  static const Map<String, String> _libelles = {
-    'depot': 'Dépôt',
-    'avoir': 'Avoir (retour)',
-    'achat': 'Achat',
-    'retrait': 'Retrait',
-  };
 
   Future<void> _envoyerReleve(
     BuildContext context,
@@ -421,18 +415,18 @@ class CompteClientDetailScreen extends ConsumerWidget {
     final t = AppLocalizations.of(context);
     final boutique = ref.read(entrepriseProvider).nom;
     final buffer = StringBuffer(
-        'Bonjour ${nom.isEmpty ? '' : nom}, votre solde chez $boutique est de ${ref.formatPrice(solde)}.');
+        t.accMsgBalance(nom, boutique, ref.formatPrice(solde)));
     if (mouvements.isNotEmpty) {
-      buffer.write('\nDerniers mouvements :');
+      buffer.write('\n${t.accMsgLast}');
       for (final m in mouvements.take(5)) {
         final d = m['date'];
         final quand = d is Timestamp ? _formatJour(d.toDate()) : '';
         final signe = _num(m['sens']) < 0 ? '-' : '+';
-        final type = _libelles[m['type']] ?? '';
+        final type = {'depot': t.accMvtDeposit, 'avoir': t.accMvtCredit, 'achat': t.accMvtPurchase, 'retrait': t.accMvtWithdrawal}[m['type']] ?? '';
         buffer.write('\n• $quand $type $signe${ref.formatPrice(_num(m['montant']))}');
       }
     }
-    buffer.write('\nMerci de votre confiance !');
+    buffer.write('\n${t.accMsgThanks}');
 
     final uri = Uri.parse(
         'https://wa.me/$compteId?text=${Uri.encodeComponent(buffer.toString())}');

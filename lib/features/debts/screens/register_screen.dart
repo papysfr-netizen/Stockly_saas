@@ -1,5 +1,6 @@
 // lib/features/auth/screens/register_screen.dart
 
+import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:stockly_saas/features/auth/services/auth_service.dart';
 
@@ -56,12 +57,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Row(
+            content: Row(
               children: [
-                Icon(Icons.check_circle_outline, color: Colors.white),
-                SizedBox(width: 10),
+                const Icon(Icons.check_circle_outline, color: Colors.white),
+                const SizedBox(width: 10),
                 Expanded(
-                  child: Text('Entreprise et compte créés avec succès !'),
+                  child: Text(AppLocalizations.of(context).regDone),
                 ),
               ],
             ),
@@ -78,7 +79,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors de l\'inscription : $e'),
+            content: Text(AppLocalizations.of(context).regError('$e')),
             backgroundColor: Colors.red.shade700,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -96,7 +97,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Créer mon entreprise'),
+        title: Text(AppLocalizations.of(context).regCreate),
         centerTitle: true,
         elevation: 0,
       ),
@@ -119,7 +120,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   // Titre principal
                   Text(
-                    'Rejoignez Nguli',
+                    AppLocalizations.of(context).regJoin,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
@@ -128,7 +129,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Configurez votre entreprise et gérez votre stock en toute simplicité.',
+                    AppLocalizations.of(context).regIntro,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
@@ -140,13 +141,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextFormField(
                     controller: _nomEntrepriseController,
                     decoration: _buildInputDecoration(
-                      label: 'Nom de l\'entreprise *',
-                      hint: 'ex: Établissement La Grâce',
+                      label: AppLocalizations.of(context).regBusinessName,
+                      hint: AppLocalizations.of(context).regBusinessHint,
                       icon: Icons.business_rounded,
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Veuillez saisir le nom de votre entreprise';
+                        return AppLocalizations.of(context).regBusinessNeeded;
                       }
                       return null;
                     },
@@ -157,13 +158,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextFormField(
                     controller: _nomGerantController,
                     decoration: _buildInputDecoration(
-                      label: 'Nom complet du gérant *',
+                      label: AppLocalizations.of(context).regManagerName,
                       hint: 'ex: Jean Paul',
                       icon: Icons.person_outline_rounded,
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Veuillez saisir votre nom';
+                        return AppLocalizations.of(context).regNameNeeded;
                       }
                       return null;
                     },
@@ -175,7 +176,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _telephoneController,
                     keyboardType: TextInputType.phone,
                     decoration: _buildInputDecoration(
-                      label: 'Téléphone (optionnel)',
+                      label: AppLocalizations.of(context).regPhone,
                       hint: 'ex: +243 990 000 000',
                       icon: Icons.phone_outlined,
                     ),
@@ -187,16 +188,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: _buildInputDecoration(
-                      label: 'Adresse email *',
+                      label: AppLocalizations.of(context).regEmail,
                       hint: 'gerant@entreprise.com',
                       icon: Icons.email_outlined,
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Veuillez saisir une adresse email';
+                        return AppLocalizations.of(context).regEmailNeeded;
                       }
                       if (!value.contains('@') || !value.contains('.')) {
-                        return 'Veuillez saisir une adresse email valide';
+                        return AppLocalizations.of(context).regEmailInvalid;
                       }
                       return null;
                     },
@@ -208,7 +209,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     decoration: _buildInputDecoration(
-                      label: 'Mot de passe *',
+                      label: AppLocalizations.of(context).regPassword,
                       hint: '••••••••',
                       icon: Icons.lock_outline_rounded,
                       suffixIcon: IconButton(
@@ -224,7 +225,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.length < 6) {
-                        return 'Le mot de passe doit contenir au moins 6 caractères';
+                        return AppLocalizations.of(context).pwdMin6;
                       }
                       return null;
                     },
@@ -236,7 +237,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _confirmPasswordController,
                     obscureText: _obscureConfirmPassword,
                     decoration: _buildInputDecoration(
-                      label: 'Confirmer le mot de passe *',
+                      label: AppLocalizations.of(context).regConfirm,
                       hint: '••••••••',
                       icon: Icons.lock_reset_rounded,
                       suffixIcon: IconButton(
@@ -253,7 +254,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     validator: (value) {
                       if (value != _passwordController.text) {
-                        return 'Les mots de passe ne correspondent pas';
+                        return AppLocalizations.of(context).pwdMismatch;
                       }
                       return null;
                     },
@@ -282,8 +283,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           : const Icon(Icons.arrow_forward_rounded),
                       label: Text(
                         _isLoading
-                            ? 'Création du compte...'
-                            : 'Créer mon entreprise',
+                            ? AppLocalizations.of(context).regCreating
+                            : AppLocalizations.of(context).regCreate,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -297,11 +298,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('Vous avez déjà un compte ?'),
+                      Text(AppLocalizations.of(context).regHaveAccount),
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text(
-                          'Se connecter',
+                        child: Text(
+                          AppLocalizations.of(context).logSignIn,
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),

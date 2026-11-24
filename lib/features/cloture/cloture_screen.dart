@@ -470,21 +470,19 @@ class _ParDevise extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Par devise (fond + ventes en espèces)', style: TextStyle(fontWeight: FontWeight.w600)),
+          Text(AppLocalizations.of(context).cloByCurrency, style: TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(height: 4),
           Row(children: [
-            const Expanded(child: Text('Dollars')),
-            Text('attendu ${_dollars(dollars)} · compté ${_dollars(n(cloture['compteUSD']))}'),
+            Expanded(child: Text(AppLocalizations.of(context).cloDollars)),
+            Text(AppLocalizations.of(context).cloExpCounted(_dollars(dollars), _dollars(n(cloture['compteUSD'])))),
           ]),
           Row(children: [
-            const Expanded(child: Text('Francs')),
-            Text('attendu ${_fc(francs)} · compté ${_fc(n(cloture['compteCDF']))}'),
+            Expanded(child: Text(AppLocalizations.of(context).cloFrancs)),
+            Text(AppLocalizations.of(context).cloExpCounted(_fc(francs), _fc(n(cloture['compteCDF'])))),
           ]),
           const SizedBox(height: 4),
           Text(
-            'Les dettes, dépenses et dépôts ne sont pas séparés par devise : '
-            'cette comparaison est juste quand la journée n\'a surtout que des ventes.'
-            '${attendu.monnaieSupposee ? ' Anciennes ventes : monnaie supposée rendue en francs.' : ''}',
+            AppLocalizations.of(context).cloByCurrencyNote + (attendu.monnaieSupposee ? ' ${AppLocalizations.of(context).cloOldSalesFc}' : ''),
             style: petit,
           ),
         ],

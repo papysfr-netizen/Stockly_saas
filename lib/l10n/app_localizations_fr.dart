@@ -3028,4 +3028,191 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get lotProposed => 'proposé';
+
+  @override
+  String get cloByCurrency => 'Par devise (fond + ventes en espèces)';
+
+  @override
+  String get cloDollars => 'Dollars';
+
+  @override
+  String get cloFrancs => 'Francs';
+
+  @override
+  String cloExpCounted(String attendu, String compte) {
+    return 'attendu $attendu · compté $compte';
+  }
+
+  @override
+  String get cloByCurrencyNote =>
+      'Les dettes, dépenses et dépôts ne sont pas séparés par devise : cette comparaison est juste quand la journée n\'a surtout que des ventes.';
+
+  @override
+  String accMsgBalance(String nom, String boutique, String solde) {
+    return 'Bonjour $nom, votre solde chez $boutique est de $solde.';
+  }
+
+  @override
+  String get accMsgLast => 'Derniers mouvements :';
+
+  @override
+  String get accMsgThanks => 'Merci de votre confiance !';
+
+  @override
+  String get accMvtDeposit => 'Dépôt';
+
+  @override
+  String get logWrong => 'Identifiant (ou e-mail) ou mot de passe incorrect.';
+
+  @override
+  String get logDisabled => 'Ce compte est suspendu. Contactez le patron.';
+
+  @override
+  String get logNoInternet =>
+      'Pas de connexion internet. Vérifiez votre réseau.';
+
+  @override
+  String get logError => 'Erreur de connexion.';
+
+  @override
+  String get logNoProfile => 'Aucun profil trouvé pour ce compte.';
+
+  @override
+  String get logOk => 'Connexion réussie !';
+
+  @override
+  String logWelcome(String nom) {
+    return 'Bienvenue $nom !';
+  }
+
+  @override
+  String logDbError(String erreur) {
+    return 'Erreur d\'accès aux données : $erreur';
+  }
+
+  @override
+  String get fillAll => 'Remplissez tous les champs.';
+
+  @override
+  String get logEnterPhone => 'Entrez un numéro de téléphone.';
+
+  @override
+  String logSmsError(String erreur) {
+    return 'Erreur SMS : $erreur';
+  }
+
+  @override
+  String get logSmsSent => 'Code SMS envoyé !';
+
+  @override
+  String get logEnterCode => 'Saisissez le code reçu.';
+
+  @override
+  String get logBadCode => 'Code SMS invalide.';
+
+  @override
+  String get logWithPhone => 'Se connecter avec un numéro';
+
+  @override
+  String get logWithId => 'Se connecter par identifiant ou e-mail';
+
+  @override
+  String get logIdLabel => 'E-mail ou identifiant';
+
+  @override
+  String get logIdHelp => 'Employé : tapez l\'identifiant reçu du patron';
+
+  @override
+  String get logPassword => 'Mot de passe';
+
+  @override
+  String get logSignIn => 'Se connecter';
+
+  @override
+  String get logPhoneLabel => 'Téléphone (ex : +243970000000)';
+
+  @override
+  String get logSendSms => 'Envoyer le code SMS';
+
+  @override
+  String get logCodeLabel => 'Code à 6 chiffres reçu par SMS';
+
+  @override
+  String get logValidateCode => 'Valider le code';
+
+  @override
+  String get logNew => 'Nouveau sur Nguli ?';
+
+  @override
+  String get logCreateBusiness => 'Créer une entreprise';
+
+  @override
+  String get regDone => 'Entreprise et compte créés avec succès !';
+
+  @override
+  String regError(String erreur) {
+    return 'Erreur lors de l\'inscription : $erreur';
+  }
+
+  @override
+  String get regCreate => 'Créer mon entreprise';
+
+  @override
+  String get regJoin => 'Rejoignez Nguli';
+
+  @override
+  String get regIntro =>
+      'Configurez votre entreprise et gérez votre stock en toute simplicité.';
+
+  @override
+  String get regBusinessName => 'Nom de l\'entreprise *';
+
+  @override
+  String get regBusinessHint => 'ex : Établissement La Grâce';
+
+  @override
+  String get regBusinessNeeded => 'Saisissez le nom de votre entreprise';
+
+  @override
+  String get regManagerName => 'Votre nom complet *';
+
+  @override
+  String get regNameNeeded => 'Saisissez votre nom';
+
+  @override
+  String get regPhone => 'Téléphone (facultatif)';
+
+  @override
+  String get regEmail => 'Adresse e-mail *';
+
+  @override
+  String get regEmailNeeded => 'Saisissez une adresse e-mail';
+
+  @override
+  String get regEmailInvalid => 'Saisissez une adresse e-mail valide';
+
+  @override
+  String get regPassword => 'Mot de passe *';
+
+  @override
+  String get regConfirm => 'Confirmer le mot de passe *';
+
+  @override
+  String get regCreating => 'Création du compte…';
+
+  @override
+  String get regHaveAccount => 'Vous avez déjà un compte ?';
+
+  @override
+  String get cloOldSalesFc =>
+      'Anciennes ventes : monnaie supposée rendue en francs.';
+
+  @override
+  String get accMvtCredit => 'Avoir (retour)';
+
+  @override
+  String get accMvtPurchase => 'Achat';
+
+  @override
+  String get accMvtWithdrawal => 'Retrait';
 }

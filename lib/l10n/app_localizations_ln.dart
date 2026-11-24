@@ -3020,4 +3020,189 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get lotProposed => 'epesami';
+
+  @override
+  String get cloByCurrency => 'Na mbongo (fond + ba ventes na espèces)';
+
+  @override
+  String get cloDollars => 'Ba dollars';
+
+  @override
+  String get cloFrancs => 'Ba francs';
+
+  @override
+  String cloExpCounted(String attendu, String compte) {
+    return 'ezelamaki $attendu · etangami $compte';
+  }
+
+  @override
+  String get cloByCurrencyNote =>
+      'Ba niongo, ba dépenses mpe ba dépôts ekabolami na mbongo te: bokokanisi oyo ezali malamu soki mokolo ezalaki mingi na ba ventes.';
+
+  @override
+  String accMsgBalance(String nom, String boutique, String solde) {
+    return 'Mbote $nom, solde na yo na $boutique ezali $solde.';
+  }
+
+  @override
+  String get accMsgLast => 'Ba mouvements ya suka:';
+
+  @override
+  String get accMsgThanks => 'Matondo mpo na confiance na yo!';
+
+  @override
+  String get accMvtDeposit => 'Dépôt';
+
+  @override
+  String get logWrong => 'Nkombo (to e-mail) to mot de passe ezali malamu te.';
+
+  @override
+  String get logDisabled => 'Compte oyo ekangami. Benga patron.';
+
+  @override
+  String get logNoInternet => 'Internet ezali te. Tala réseau na yo.';
+
+  @override
+  String get logError => 'Libunga ya kokota.';
+
+  @override
+  String get logNoProfile => 'Profil moko te ezwami mpo na compte oyo.';
+
+  @override
+  String get logOk => 'Okoti malamu!';
+
+  @override
+  String logWelcome(String nom) {
+    return 'Boyei malamu $nom!';
+  }
+
+  @override
+  String logDbError(String erreur) {
+    return 'Libunga ya kozwa ba données: $erreur';
+  }
+
+  @override
+  String get fillAll => 'Tondisa bisika nyonso.';
+
+  @override
+  String get logEnterPhone => 'Koma nimero ya telefone.';
+
+  @override
+  String logSmsError(String erreur) {
+    return 'Libunga ya SMS: $erreur';
+  }
+
+  @override
+  String get logSmsSent => 'Code SMS etindami!';
+
+  @override
+  String get logEnterCode => 'Koma code oyo ozwi.';
+
+  @override
+  String get logBadCode => 'Code SMS ezali malamu te.';
+
+  @override
+  String get logWithPhone => 'Kota na nimero';
+
+  @override
+  String get logWithId => 'Kota na nkombo to e-mail';
+
+  @override
+  String get logIdLabel => 'E-mail to nkombo';
+
+  @override
+  String get logIdHelp => 'Mosali: koma nkombo oyo patron apesaki yo';
+
+  @override
+  String get logPassword => 'Mot de passe';
+
+  @override
+  String get logSignIn => 'Kota';
+
+  @override
+  String get logPhoneLabel => 'Telefone (ndakisa: +243970000000)';
+
+  @override
+  String get logSendSms => 'Tinda code SMS';
+
+  @override
+  String get logCodeLabel => 'Code ya ba chiffres 6 oyo ozwi na SMS';
+
+  @override
+  String get logValidateCode => 'Ndimisa code';
+
+  @override
+  String get logNew => 'Ozali sika na Nguli?';
+
+  @override
+  String get logCreateBusiness => 'Kela mombongo';
+
+  @override
+  String get regDone => 'Mombongo mpe compte esalemi malamu!';
+
+  @override
+  String regError(String erreur) {
+    return 'Libunga na komikomisa: $erreur';
+  }
+
+  @override
+  String get regCreate => 'Kela mombongo na ngai';
+
+  @override
+  String get regJoin => 'Kota na Nguli';
+
+  @override
+  String get regIntro => 'Bongisa mombongo na yo mpe kamba stock na pete.';
+
+  @override
+  String get regBusinessName => 'Nkombo ya mombongo *';
+
+  @override
+  String get regBusinessHint => 'ndakisa: Établissement La Grâce';
+
+  @override
+  String get regBusinessNeeded => 'Koma nkombo ya mombongo na yo';
+
+  @override
+  String get regManagerName => 'Nkombo na yo mobimba *';
+
+  @override
+  String get regNameNeeded => 'Koma nkombo na yo';
+
+  @override
+  String get regPhone => 'Telefone (ezali na ntina te)';
+
+  @override
+  String get regEmail => 'Adresse e-mail *';
+
+  @override
+  String get regEmailNeeded => 'Koma adresse e-mail';
+
+  @override
+  String get regEmailInvalid => 'Koma adresse e-mail ya malamu';
+
+  @override
+  String get regPassword => 'Mot de passe *';
+
+  @override
+  String get regConfirm => 'Ndimisa mot de passe *';
+
+  @override
+  String get regCreating => 'Ezali kosala compte…';
+
+  @override
+  String get regHaveAccount => 'Ozali na compte kala?';
+
+  @override
+  String get cloOldSalesFc =>
+      'Ba ventes ya kala: mbongo ekanisami ezongisamaki na francs.';
+
+  @override
+  String get accMvtCredit => 'Avoir (bozongisi)';
+
+  @override
+  String get accMvtPurchase => 'Bosombi';
+
+  @override
+  String get accMvtWithdrawal => 'Retrait';
 }

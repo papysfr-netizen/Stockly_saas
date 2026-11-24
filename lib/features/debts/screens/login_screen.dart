@@ -1,3 +1,4 @@
+import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -44,15 +45,15 @@ class _LoginScreenState extends State<LoginScreen> {
       case 'wrong-password':
       case 'user-not-found':
       case 'invalid-email':
-        return "Identifiant (ou e-mail) ou mot de passe incorrect.";
+        return AppLocalizations.of(context).logWrong;
       case 'user-disabled':
-        return "Ce compte est désactivé. Contactez le propriétaire.";
+        return AppLocalizations.of(context).logDisabled;
       case 'too-many-requests':
-        return "Trop d'essais. Patientez quelques minutes puis réessayez.";
+        return AppLocalizations.of(context).pwdTooMany;
       case 'network-request-failed':
-        return "Pas de connexion internet. Vérifiez votre réseau.";
+        return AppLocalizations.of(context).logNoInternet;
       default:
-        return e.message ?? "Erreur de connexion.";
+        return e.message ?? AppLocalizations.of(context).logError;
     }
   }
 
@@ -67,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
           .get();
 
       if (!userDoc.exists) {
-        throw Exception("Aucun profil trouvé dans la collection 'users'.");
+        throw Exception(AppLocalizations.of(context).logNoProfile);
       }
 
       Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
@@ -76,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (userData['estActif'] == false) {
         await FirebaseAuth.instance.signOut();
         _afficherMessage(
-            "Ce compte est désactivé. Contactez le propriétaire de la boutique.");
+            AppLocalizations.of(context).logDisabled);
         return;
       }
 
@@ -86,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
 
       final nom = (userData['nom'] ?? '').toString();
-      _afficherMessage(nom.isEmpty ? "Connexion réussie !" : "Bienvenue $nom !");
+      _afficherMessage(nom.isEmpty ? AppLocalizations.of(context).logOk : AppLocalizations.of(context).logWelcome(nom));
 
       // 🔀 Propriétaire et Gérant → tableau de bord ; Caissier → caisse
       if (role == 'owner' || role == 'admin' || role == 'gerant') {
@@ -95,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacementNamed(context, '/caisse');
       }
     } catch (e) {
-      _afficherMessage("Erreur d'accès à la base de données : ${e.toString()}");
+      _afficherMessage(AppLocalizations.of(context).logDbError(e.toString()));
     }
   }
 
@@ -107,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = _passwordController.text.trim();
 
     if (saisie.isEmpty || password.isEmpty) {
-      _afficherMessage("Veuillez remplir tous les champs.");
+      _afficherMessage(AppLocalizations.of(context).fillAll);
       return;
     }
 
@@ -125,7 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } on FirebaseAuthException catch (e) {
       _afficherMessage(_messageErreurAuth(e));
     } catch (e) {
-      _afficherMessage("Erreur : ${e.toString()}");
+      _afficherMessage(AppLocalizations.of(context).errorWith(e.toString()));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -138,7 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final phone = _phoneController.text.trim();
 
     if (phone.isEmpty) {
-      _afficherMessage("Veuillez entrer un numéro de téléphone.");
+      _afficherMessage(AppLocalizations.of(context).logEnterPhone);
       return;
     }
 
@@ -155,7 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
           }
         },
         verificationFailed: (FirebaseAuthException e) {
-          _afficherMessage("Erreur SMS : ${e.message}");
+          _afficherMessage(AppLocalizations.of(context).logSmsError('${e.message}'));
           if (mounted) setState(() => _isLoading = false);
         },
         codeSent: (String verificationId, int? resendToken) {
@@ -165,13 +166,13 @@ class _LoginScreenState extends State<LoginScreen> {
               _isOtpSent = true;
               _isLoading = false;
             });
-            _afficherMessage("Code SMS envoyé !");
+            _afficherMessage(AppLocalizations.of(context).logSmsSent);
           }
         },
         codeAutoRetrievalTimeout: (String verificationId) {},
       );
     } catch (e) {
-      _afficherMessage("Erreur : ${e.toString()}");
+      _afficherMessage(AppLocalizations.of(context).errorWith(e.toString()));
       if (mounted) setState(() => _isLoading = false);
     }
   }
@@ -183,7 +184,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final otp = _otpController.text.trim();
 
     if (otp.isEmpty || _verificationId == null) {
-      _afficherMessage("Veuillez saisir le code reçu.");
+      _afficherMessage(AppLocalizations.of(context).logEnterCode);
       return;
     }
 
@@ -202,9 +203,9 @@ class _LoginScreenState extends State<LoginScreen> {
         await _fetchUserProfileAndNavigate(userCredential.user!.uid);
       }
     } on FirebaseAuthException catch (e) {
-      _afficherMessage(e.message ?? "Code SMS invalide.");
+      _afficherMessage(e.message ?? AppLocalizations.of(context).logBadCode);
     } catch (e) {
-      _afficherMessage("Erreur : ${e.toString()}");
+      _afficherMessage(AppLocalizations.of(context).errorWith(e.toString()));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -256,8 +257,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 icon: Icon(_isEmailMode ? Icons.phone : Icons.email),
                 label: Text(
                   _isEmailMode
-                      ? 'Se connecter avec un numéro'
-                      : 'Se connecter par identifiant ou e-mail',
+                      ? AppLocalizations.of(context).logWithPhone
+                      : AppLocalizations.of(context).logWithId,
                 ),
               ),
               const SizedBox(height: 24),
@@ -269,10 +270,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   keyboardType: TextInputType.text,
                   autocorrect: false,
                   textCapitalization: TextCapitalization.none,
-                  decoration: const InputDecoration(
-                    labelText: 'E-mail ou identifiant',
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context).logIdLabel,
                     hintText: 'ex : grace.nhgkxz',
-                    helperText: "Employé : tapez l'identifiant reçu du patron",
+                    helperText: AppLocalizations.of(context).logIdHelp,
                     prefixIcon: Icon(Icons.person),
                     border: OutlineInputBorder(),
                   ),
@@ -282,7 +283,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: _passwordController,
                   obscureText: !_motDePasseVisible,
                   decoration: InputDecoration(
-                    labelText: 'Mot de passe',
+                    labelText: AppLocalizations.of(context).logPassword,
                     prefixIcon: const Icon(Icons.lock),
                     border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
@@ -304,7 +305,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: _isLoading ? null : _loginWithEmail,
                     child: _isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text('Se connecter', style: TextStyle(fontSize: 18)),
+                        : Text(AppLocalizations.of(context).logSignIn, style: TextStyle(fontSize: 18)),
                   ),
                 ),
               ]
@@ -313,8 +314,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextField(
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                    labelText: 'Téléphone (ex: +243970000000)',
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context).logPhoneLabel,
                     prefixIcon: Icon(Icons.phone),
                     border: OutlineInputBorder(),
                   ),
@@ -326,7 +327,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: _isLoading ? null : _sendOtp,
                     child: _isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text('Envoyer le code SMS', style: TextStyle(fontSize: 18)),
+                        : Text(AppLocalizations.of(context).logSendSms, style: TextStyle(fontSize: 18)),
                   ),
                 ),
               ]
@@ -335,8 +336,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextField(
                   controller: _otpController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Code à 6 chiffres reçu par SMS',
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context).logCodeLabel,
                     prefixIcon: Icon(Icons.phonelink_ring),
                     border: OutlineInputBorder(),
                   ),
@@ -348,7 +349,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: _isLoading ? null : _verifyOtp,
                     child: _isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text('Valider le code', style: TextStyle(fontSize: 18)),
+                        : Text(AppLocalizations.of(context).logValidateCode, style: TextStyle(fontSize: 18)),
                   ),
                 ),
               ],
@@ -362,7 +363,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Nouveau sur Nguli ?"),
+                  Text(AppLocalizations.of(context).logNew),
                   TextButton(
                     onPressed: () {
                       Navigator.push(
@@ -372,8 +373,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       );
                     },
-                    child: const Text(
-                      'Créer une entreprise',
+                    child: Text(
+                      AppLocalizations.of(context).logCreateBusiness,
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
