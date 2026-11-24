@@ -6734,6 +6734,396 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Tout le monde'**
   String get jrnEveryone;
+
+  /// No description provided for @cptMonths.
+  ///
+  /// In fr, this message translates to:
+  /// **'janvier,février,mars,avril,mai,juin,juillet,août,septembre,octobre,novembre,décembre'**
+  String get cptMonths;
+
+  /// No description provided for @cptSynced.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} ventes rattrapées avec succès !'**
+  String cptSynced(String n);
+
+  /// No description provided for @cptUpToDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Journal nettoyé et à jour.'**
+  String get cptUpToDate;
+
+  /// No description provided for @cptSyncError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de la synchronisation : {erreur}'**
+  String cptSyncError(String erreur);
+
+  /// No description provided for @cptCleaned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nettoyage terminé : {n} écriture(s) obsolète(s) supprimée(s).'**
+  String cptCleaned(String n);
+
+  /// No description provided for @cptNothingToClean.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune écriture obsolète trouvée.'**
+  String get cptNothingToClean;
+
+  /// No description provided for @cptCleanError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors du nettoyage : {erreur}'**
+  String cptCleanError(String erreur);
+
+  /// No description provided for @cptExportingPdf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exportation du Grand Livre PDF en cours…'**
+  String get cptExportingPdf;
+
+  /// No description provided for @cptExportingCsv.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exportation CSV / Excel en cours…'**
+  String get cptExportingCsv;
+
+  /// No description provided for @cptReversed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écriture extournée avec succès.'**
+  String get cptReversed;
+
+  /// No description provided for @cptReverseError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de l\'extourne : {erreur}'**
+  String cptReverseError(String erreur);
+
+  /// No description provided for @cptConfirmDelete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer la suppression'**
+  String get cptConfirmDelete;
+
+  /// No description provided for @cptDeleteQ.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voulez-vous vraiment supprimer cette écriture comptable ?'**
+  String get cptDeleteQ;
+
+  /// No description provided for @cptDeleted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écriture supprimée.'**
+  String get cptDeleted;
+
+  /// No description provided for @cptDeleteError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de la suppression : {erreur}'**
+  String cptDeleteError(String erreur);
+
+  /// No description provided for @cptTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comptabilité SYSCOHADA'**
+  String get cptTitle;
+
+  /// No description provided for @cptExportPdf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter le Grand Livre PDF'**
+  String get cptExportPdf;
+
+  /// No description provided for @cptSyncTip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Synchroniser / rattraper les ventes'**
+  String get cptSyncTip;
+
+  /// No description provided for @cptCleanDup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nettoyer les doublons'**
+  String get cptCleanDup;
+
+  /// No description provided for @cptExportCsv.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter CSV / Excel'**
+  String get cptExportCsv;
+
+  /// No description provided for @cptTabJournal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Journal'**
+  String get cptTabJournal;
+
+  /// No description provided for @cptTabBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bilan & Synthèse'**
+  String get cptTabBalance;
+
+  /// No description provided for @cptLoadError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur de chargement : {erreur}'**
+  String cptLoadError(String erreur);
+
+  /// No description provided for @cptManual.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisie manuelle (OD)'**
+  String get cptManual;
+
+  /// No description provided for @cptSearch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher libellé, compte…'**
+  String get cptSearch;
+
+  /// No description provided for @cptAcc701.
+  ///
+  /// In fr, this message translates to:
+  /// **'701 Ventes'**
+  String get cptAcc701;
+
+  /// No description provided for @cptAcc411.
+  ///
+  /// In fr, this message translates to:
+  /// **'411 Clients'**
+  String get cptAcc411;
+
+  /// No description provided for @cptAcc419.
+  ///
+  /// In fr, this message translates to:
+  /// **'419 Avances'**
+  String get cptAcc419;
+
+  /// No description provided for @cptAcc571.
+  ///
+  /// In fr, this message translates to:
+  /// **'571 Caisse'**
+  String get cptAcc571;
+
+  /// No description provided for @cptAcc521.
+  ///
+  /// In fr, this message translates to:
+  /// **'521 Banque'**
+  String get cptAcc521;
+
+  /// No description provided for @cptAcc6.
+  ///
+  /// In fr, this message translates to:
+  /// **'Classe 6 Charges'**
+  String get cptAcc6;
+
+  /// No description provided for @cptAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous'**
+  String get cptAll;
+
+  /// No description provided for @cptAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte'**
+  String get cptAccount;
+
+  /// No description provided for @cptNoMatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune écriture ne correspond aux critères.'**
+  String get cptNoMatch;
+
+  /// No description provided for @cptCatchUp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rattraper les ventes passées'**
+  String get cptCatchUp;
+
+  /// No description provided for @cptReverse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Extourner (annuler)'**
+  String get cptReverse;
+
+  /// No description provided for @cptSummary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Synthèse générale'**
+  String get cptSummary;
+
+  /// No description provided for @cptCash.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trésorerie globale (571/521)'**
+  String get cptCash;
+
+  /// No description provided for @cptRevenue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chiffre d\'affaires / ventes (701)'**
+  String get cptRevenue;
+
+  /// No description provided for @cptAdvances.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avances et acomptes reçus (419)'**
+  String get cptAdvances;
+
+  /// No description provided for @cptReceivables.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créances clients (411)'**
+  String get cptReceivables;
+
+  /// No description provided for @cptCharges.
+  ///
+  /// In fr, this message translates to:
+  /// **'Charges et achats (classe 6)'**
+  String get cptCharges;
+
+  /// No description provided for @cptResult.
+  ///
+  /// In fr, this message translates to:
+  /// **'Résultat estimé (ventes − charges)'**
+  String get cptResult;
+
+  /// No description provided for @cptBalanceNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Depuis le début, jusqu\'à aujourd\'hui. Les mois terminés sont résumés une fois pour aller vite.'**
+  String get cptBalanceNote;
+
+  /// No description provided for @cptRecompute.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recalculer tout le bilan'**
+  String get cptRecompute;
+
+  /// No description provided for @ecrMin2.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une écriture doit comporter au moins 2 lignes.'**
+  String get ecrMin2;
+
+  /// No description provided for @ecrNeedAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez au moins un montant au débit ou au crédit.'**
+  String get ecrNeedAmount;
+
+  /// No description provided for @ecrUnbalanced.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'écriture n\'est pas équilibrée (écart : {ecart}).'**
+  String ecrUnbalanced(String ecart);
+
+  /// No description provided for @ecrNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle écriture'**
+  String get ecrNew;
+
+  /// No description provided for @ecrEdit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier l\'écriture'**
+  String get ecrEdit;
+
+  /// No description provided for @ecrDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date de l\'écriture'**
+  String get ecrDate;
+
+  /// No description provided for @ecrRef.
+  ///
+  /// In fr, this message translates to:
+  /// **'N° de pièce / réf.'**
+  String get ecrRef;
+
+  /// No description provided for @ecrLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Libellé de la pièce'**
+  String get ecrLabel;
+
+  /// No description provided for @ecrLines.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lignes de l\'écriture'**
+  String get ecrLines;
+
+  /// No description provided for @ecrAddLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter une ligne'**
+  String get ecrAddLine;
+
+  /// No description provided for @ecrAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte SYSCOHADA'**
+  String get ecrAccount;
+
+  /// No description provided for @ecrAccountHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'ex : 601100'**
+  String get ecrAccountHint;
+
+  /// No description provided for @ecrAccountName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Intitulé du compte'**
+  String get ecrAccountName;
+
+  /// No description provided for @ecrAccountNameHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'ex : Achats de marchandises'**
+  String get ecrAccountNameHint;
+
+  /// No description provided for @ecrDebit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Débit'**
+  String get ecrDebit;
+
+  /// No description provided for @ecrCredit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Crédit'**
+  String get ecrCredit;
+
+  /// No description provided for @ecrTotalDebit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total débit : {montant}'**
+  String ecrTotalDebit(String montant);
+
+  /// No description provided for @ecrTotalCredit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total crédit : {montant}'**
+  String ecrTotalCredit(String montant);
+
+  /// No description provided for @ecrBalanced.
+  ///
+  /// In fr, this message translates to:
+  /// **'Équilibré'**
+  String get ecrBalanced;
+
+  /// No description provided for @ecrGap.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écart : {ecart}'**
+  String ecrGap(String ecart);
 }
 
 class _AppLocalizationsDelegate

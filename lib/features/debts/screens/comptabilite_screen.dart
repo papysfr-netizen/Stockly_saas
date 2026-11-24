@@ -1,3 +1,4 @@
+import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
@@ -47,10 +48,6 @@ final soldesAvantProvider = FutureProvider.family<SoldesParBoutique,
     toutRecalculer: cle.version > 0,
   );
 });
-
-const _nomsMois = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet',
-    'août', 'septembre', 'octobre', 'novembre', 'décembre'];
-String _libelleMois(DateTime m) => '${_nomsMois[m.month - 1]} ${m.year}';
 
 /// Controller pour les opérations d'écriture et de synchronisation comptable
 final comptabiliteControllerProvider =
@@ -342,8 +339,8 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
       if (!mounted) return;
 
       final message = count > 0
-          ? '$count ventes rattrapées avec succès !'
-          : 'Journal nettoyé et à jour.';
+          ? AppLocalizations.of(context).cptSynced('$count')
+          : AppLocalizations.of(context).cptUpToDate;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message), backgroundColor: Colors.teal),
@@ -351,7 +348,7 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur lors de la synchronisation : $e')),
+        SnackBar(content: Text(AppLocalizations.of(context).cptSyncError('$e'))),
       );
     }
   }
@@ -365,8 +362,8 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
       if (!mounted) return;
 
       final message = count > 0
-          ? 'Nettoyage terminé : $count écriture(s) obsolète(s) supprimée(s).'
-          : 'Aucune écriture obsolète trouvée.';
+          ? AppLocalizations.of(context).cptCleaned('$count')
+          : AppLocalizations.of(context).cptNothingToClean;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message), backgroundColor: Colors.teal),
@@ -374,20 +371,20 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur lors du nettoyage : $e')),
+        SnackBar(content: Text(AppLocalizations.of(context).cptCleanError('$e'))),
       );
     }
   }
 
   void _exporterPDF() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Exportation du Grand Livre PDF en cours...')),
+      SnackBar(content: Text(AppLocalizations.of(context).cptExportingPdf)),
     );
   }
 
   void _exporterCSV() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Exportation CSV / Excel en cours...')),
+      SnackBar(content: Text(AppLocalizations.of(context).cptExportingCsv)),
     );
   }
 
@@ -399,15 +396,15 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Écriture extournée avec succès.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).cptReversed),
           backgroundColor: Colors.orange,
         ),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur lors de l\'extourne : $e')),
+        SnackBar(content: Text(AppLocalizations.of(context).cptReverseError('$e'))),
       );
     }
   }
@@ -416,9 +413,9 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Confirmer la suppression'),
-        content: const Text(
-            'Voulez-vous vraiment supprimer cette écriture comptable ?'),
+        title: Text(AppLocalizations.of(context).cptConfirmDelete),
+        content: Text(
+            AppLocalizations.of(context).cptDeleteQ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -442,12 +439,12 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Écriture supprimée.')),
+        SnackBar(content: Text(AppLocalizations.of(context).cptDeleted)),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur lors de la suppression : $e')),
+        SnackBar(content: Text(AppLocalizations.of(context).cptDeleteError('$e'))),
       );
     }
   }
@@ -465,8 +462,8 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Comptabilité SYSCOHADA',
+        title: Text(
+          AppLocalizations.of(context).cptTitle,
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.teal.shade800,
@@ -474,12 +471,12 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
         actions: [
           IconButton(
             icon: const Icon(Icons.picture_as_pdf),
-            tooltip: 'Exporter Grand Livre PDF',
+            tooltip: AppLocalizations.of(context).cptExportPdf,
             onPressed: _exporterPDF,
           ),
           IconButton(
             icon: const Icon(Icons.sync),
-            tooltip: 'Synchroniser / Rattraper Ventes',
+            tooltip: AppLocalizations.of(context).cptSyncTip,
             onPressed: isSyncing ? null : _handleSync,
           ),
           PopupMenuButton<String>(
@@ -491,23 +488,23 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'clean',
                 child: Row(
                   children: [
-                    Icon(Icons.cleaning_services, color: Colors.teal, size: 20),
-                    SizedBox(width: 8),
-                    Text('Nettoyer les doublons'),
+                    const Icon(Icons.cleaning_services, color: Colors.teal, size: 20),
+                    const SizedBox(width: 8),
+                    Text(AppLocalizations.of(context).cptCleanDup),
                   ],
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'export_csv',
                 child: Row(
                   children: [
-                    Icon(Icons.table_chart, color: Colors.teal, size: 20),
-                    SizedBox(width: 8),
-                    Text('Exporter CSV / Excel'),
+                    const Icon(Icons.table_chart, color: Colors.teal, size: 20),
+                    const SizedBox(width: 8),
+                    Text(AppLocalizations.of(context).cptExportCsv),
                   ],
                 ),
               ),
@@ -519,9 +516,9 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
           indicatorColor: Colors.amber,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
-          tabs: const [
-            Tab(icon: Icon(Icons.receipt_long), text: 'Journal'),
-            Tab(icon: Icon(Icons.account_balance), text: 'Bilan & Synthèse'),
+          tabs: [
+            Tab(icon: const Icon(Icons.receipt_long), text: AppLocalizations.of(context).cptTabJournal),
+            Tab(icon: const Icon(Icons.account_balance), text: AppLocalizations.of(context).cptTabBalance),
           ],
         ),
       ),
@@ -531,7 +528,7 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              'Erreur de chargement : $err',
+              AppLocalizations.of(context).cptLoadError('$err'),
               textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.red),
             ),
@@ -563,7 +560,7 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
         },
         backgroundColor: Colors.teal.shade800,
         icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('Saisie OD / Manuelle',
+        label: Text(AppLocalizations.of(context).cptManual,
             style: TextStyle(color: Colors.white)),
       ),
     );
@@ -597,7 +594,7 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
               icon: const Icon(Icons.chevron_left),
               onPressed: () => setState(() => _mois = DateTime(_mois.year, _mois.month - 1)),
             ),
-            Text(_libelleMois(_mois), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            Text('${AppLocalizations.of(context).cptMonths.split(',')[_mois.month - 1]} ${_mois.year}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             IconButton(
               icon: const Icon(Icons.chevron_right),
               onPressed: _mois.isBefore(ceMois)
@@ -613,7 +610,7 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
               Expanded(
                 child: TextField(
                   decoration: InputDecoration(
-                    hintText: 'Rechercher libellé, compte...',
+                    hintText: AppLocalizations.of(context).cptSearch,
                     prefixIcon: const Icon(Icons.search),
                     contentPadding:
                         const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
@@ -626,15 +623,15 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
               const SizedBox(width: 8),
               DropdownButton<String?>(
                 value: _selectedAccountFilter,
-                hint: const Text('Compte'),
-                items: const [
-                  DropdownMenuItem(value: null, child: Text('Tous')),
-                  DropdownMenuItem(value: '701', child: Text('701 Ventes')),
-                  DropdownMenuItem(value: '411', child: Text('411 Clients')),
-                  DropdownMenuItem(value: '419', child: Text('419 Avances')),
-                  DropdownMenuItem(value: '571', child: Text('571 Caisse')),
-                  DropdownMenuItem(value: '521', child: Text('521 Banque')),
-                  DropdownMenuItem(value: '6', child: Text('Classe 6 Charges')),
+                hint: Text(AppLocalizations.of(context).cptAccount),
+                items: [
+                  DropdownMenuItem(value: null, child: Text(AppLocalizations.of(context).cptAll)),
+                  DropdownMenuItem(value: '701', child: Text(AppLocalizations.of(context).cptAcc701)),
+                  DropdownMenuItem(value: '411', child: Text(AppLocalizations.of(context).cptAcc411)),
+                  DropdownMenuItem(value: '419', child: Text(AppLocalizations.of(context).cptAcc419)),
+                  DropdownMenuItem(value: '571', child: Text(AppLocalizations.of(context).cptAcc571)),
+                  DropdownMenuItem(value: '521', child: Text(AppLocalizations.of(context).cptAcc521)),
+                  DropdownMenuItem(value: '6', child: Text(AppLocalizations.of(context).cptAcc6)),
                 ],
                 onChanged: (val) => setState(() => _selectedAccountFilter = val),
               ),
@@ -650,8 +647,8 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
                     children: [
                       const Icon(Icons.menu_book, size: 64, color: Colors.grey),
                       const SizedBox(height: 12),
-                      const Text(
-                        'Aucune écriture ne correspond aux critères.',
+                      Text(
+                        AppLocalizations.of(context).cptNoMatch,
                         style: TextStyle(color: Colors.grey, fontSize: 16),
                       ),
                       const SizedBox(height: 16),
@@ -661,7 +658,7 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
                               backgroundColor: Colors.teal.shade800),
                           onPressed: isSyncing ? null : _handleSync,
                           icon: const Icon(Icons.sync, color: Colors.white),
-                          label: const Text('Rattraper les ventes passées',
+                          label: Text(AppLocalizations.of(context).cptCatchUp,
                               style: TextStyle(color: Colors.white)),
                         ),
                     ],
@@ -744,9 +741,9 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'reverse',
-                  child: Text('Extourner (Annuler)'),
+                  child: Text(AppLocalizations.of(context).cptReverse),
                 ),
                 const PopupMenuItem(
                   value: 'delete',
@@ -806,7 +803,7 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Text('Erreur de chargement : ${avant.error ?? courant.error}',
+          child: Text(AppLocalizations.of(context).cptLoadError('${avant.error ?? courant.error}'),
               textAlign: TextAlign.center, style: const TextStyle(color: Colors.red)),
         ),
       );
@@ -854,43 +851,43 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Synthèse Générale',
+                  Text(
+                    AppLocalizations.of(context).cptSummary,
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const Divider(height: 20),
                   _buildSummaryRow(
-                    'Trésorerie Globale (571/521)',
+                    AppLocalizations.of(context).cptCash,
                     currencyState.formatPrice(totalTresorerie),
                     Colors.green.shade700,
                   ),
                   const Divider(),
                   _buildSummaryRow(
-                    'Chiffre d\'Affaires / Ventes (701)',
+                    AppLocalizations.of(context).cptRevenue,
                     currencyState.formatPrice(totalVentes),
                     Colors.blue.shade700,
                   ),
                   const Divider(),
                   _buildSummaryRow(
-                    'Avances & Acomptes Reçus (419)',
+                    AppLocalizations.of(context).cptAdvances,
                     currencyState.formatPrice(totalAvances),
                     Colors.orange.shade800,
                   ),
                   const Divider(),
                   _buildSummaryRow(
-                    'Créances Clients (411)',
+                    AppLocalizations.of(context).cptReceivables,
                     currencyState.formatPrice(totalCreances),
                     Colors.red.shade700,
                   ),
                   const Divider(),
                   _buildSummaryRow(
-                    'Charges & Achats (Classe 6)',
+                    AppLocalizations.of(context).cptCharges,
                     currencyState.formatPrice(totalCharges),
                     Colors.purple.shade700,
                   ),
                   const Divider(thickness: 1.5),
                   _buildSummaryRow(
-                    'Résultat Estimé (Ventes - Charges)',
+                    AppLocalizations.of(context).cptResult,
                     currencyState.formatPrice(resultat),
                     resultat >= 0 ? Colors.teal.shade800 : Colors.red.shade900,
                   ),
@@ -900,14 +897,13 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
           ),
           const SizedBox(height: 8),
           Text(
-            'Depuis le début, jusqu\'à aujourd\'hui. Les mois terminés sont résumés '
-            'une fois pour aller vite.',
+            AppLocalizations.of(context).cptBalanceNote,
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
           ),
           TextButton.icon(
             icon: const Icon(Icons.refresh, size: 18),
-            label: const Text('Recalculer tout le bilan'),
+            label: Text(AppLocalizations.of(context).cptRecompute),
             onPressed: () => setState(() => _versionBilan++),
           ),
         ],

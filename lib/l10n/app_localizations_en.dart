@@ -4026,4 +4026,224 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get jrnEveryone => 'Everyone';
+
+  @override
+  String get cptMonths =>
+      'January,February,March,April,May,June,July,August,September,October,November,December';
+
+  @override
+  String cptSynced(String n) {
+    return '$n sales caught up!';
+  }
+
+  @override
+  String get cptUpToDate => 'Journal cleaned and up to date.';
+
+  @override
+  String cptSyncError(String erreur) {
+    return 'Synchronisation error: $erreur';
+  }
+
+  @override
+  String cptCleaned(String n) {
+    return 'Cleaning done: $n outdated entry(ies) removed.';
+  }
+
+  @override
+  String get cptNothingToClean => 'No outdated entry found.';
+
+  @override
+  String cptCleanError(String erreur) {
+    return 'Cleaning error: $erreur';
+  }
+
+  @override
+  String get cptExportingPdf => 'Exporting the general ledger PDF…';
+
+  @override
+  String get cptExportingCsv => 'Exporting CSV / Excel…';
+
+  @override
+  String get cptReversed => 'Entry reversed.';
+
+  @override
+  String cptReverseError(String erreur) {
+    return 'Reversal error: $erreur';
+  }
+
+  @override
+  String get cptConfirmDelete => 'Confirm deletion';
+
+  @override
+  String get cptDeleteQ =>
+      'Do you really want to delete this accounting entry?';
+
+  @override
+  String get cptDeleted => 'Entry deleted.';
+
+  @override
+  String cptDeleteError(String erreur) {
+    return 'Deletion error: $erreur';
+  }
+
+  @override
+  String get cptTitle => 'SYSCOHADA accounting';
+
+  @override
+  String get cptExportPdf => 'Export the general ledger PDF';
+
+  @override
+  String get cptSyncTip => 'Sync / catch up sales';
+
+  @override
+  String get cptCleanDup => 'Clean duplicates';
+
+  @override
+  String get cptExportCsv => 'Export CSV / Excel';
+
+  @override
+  String get cptTabJournal => 'Journal';
+
+  @override
+  String get cptTabBalance => 'Balance & summary';
+
+  @override
+  String cptLoadError(String erreur) {
+    return 'Loading error: $erreur';
+  }
+
+  @override
+  String get cptManual => 'Manual entry (OD)';
+
+  @override
+  String get cptSearch => 'Search label, account…';
+
+  @override
+  String get cptAcc701 => '701 Sales';
+
+  @override
+  String get cptAcc411 => '411 Customers';
+
+  @override
+  String get cptAcc419 => '419 Advances';
+
+  @override
+  String get cptAcc571 => '571 Cash';
+
+  @override
+  String get cptAcc521 => '521 Bank';
+
+  @override
+  String get cptAcc6 => 'Class 6 Expenses';
+
+  @override
+  String get cptAll => 'All';
+
+  @override
+  String get cptAccount => 'Account';
+
+  @override
+  String get cptNoMatch => 'No entry matches the criteria.';
+
+  @override
+  String get cptCatchUp => 'Catch up past sales';
+
+  @override
+  String get cptReverse => 'Reverse (cancel)';
+
+  @override
+  String get cptSummary => 'General summary';
+
+  @override
+  String get cptCash => 'Total cash (571/521)';
+
+  @override
+  String get cptRevenue => 'Revenue / sales (701)';
+
+  @override
+  String get cptAdvances => 'Advances and deposits received (419)';
+
+  @override
+  String get cptReceivables => 'Customer receivables (411)';
+
+  @override
+  String get cptCharges => 'Expenses and purchases (class 6)';
+
+  @override
+  String get cptResult => 'Estimated result (sales − expenses)';
+
+  @override
+  String get cptBalanceNote =>
+      'From the start until today. Finished months are summarised once, to go fast.';
+
+  @override
+  String get cptRecompute => 'Recompute the whole balance';
+
+  @override
+  String get ecrMin2 => 'An entry needs at least 2 lines.';
+
+  @override
+  String get ecrNeedAmount => 'Enter at least one debit or credit amount.';
+
+  @override
+  String ecrUnbalanced(String ecart) {
+    return 'The entry is not balanced (difference: $ecart).';
+  }
+
+  @override
+  String get ecrNew => 'New entry';
+
+  @override
+  String get ecrEdit => 'Edit the entry';
+
+  @override
+  String get ecrDate => 'Entry date';
+
+  @override
+  String get ecrRef => 'Document no. / ref.';
+
+  @override
+  String get ecrLabel => 'Document label';
+
+  @override
+  String get ecrLines => 'Entry lines';
+
+  @override
+  String get ecrAddLine => 'Add a line';
+
+  @override
+  String get ecrAccount => 'SYSCOHADA account';
+
+  @override
+  String get ecrAccountHint => 'e.g. 601100';
+
+  @override
+  String get ecrAccountName => 'Account name';
+
+  @override
+  String get ecrAccountNameHint => 'e.g. Purchases of goods';
+
+  @override
+  String get ecrDebit => 'Debit';
+
+  @override
+  String get ecrCredit => 'Credit';
+
+  @override
+  String ecrTotalDebit(String montant) {
+    return 'Total debit: $montant';
+  }
+
+  @override
+  String ecrTotalCredit(String montant) {
+    return 'Total credit: $montant';
+  }
+
+  @override
+  String get ecrBalanced => 'Balanced';
+
+  @override
+  String ecrGap(String ecart) {
+    return 'Difference: $ecart';
+  }
 }

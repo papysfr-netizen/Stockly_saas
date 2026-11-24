@@ -4043,4 +4043,225 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get jrnEveryone => 'Tout le monde';
+
+  @override
+  String get cptMonths =>
+      'janvier,février,mars,avril,mai,juin,juillet,août,septembre,octobre,novembre,décembre';
+
+  @override
+  String cptSynced(String n) {
+    return '$n ventes rattrapées avec succès !';
+  }
+
+  @override
+  String get cptUpToDate => 'Journal nettoyé et à jour.';
+
+  @override
+  String cptSyncError(String erreur) {
+    return 'Erreur lors de la synchronisation : $erreur';
+  }
+
+  @override
+  String cptCleaned(String n) {
+    return 'Nettoyage terminé : $n écriture(s) obsolète(s) supprimée(s).';
+  }
+
+  @override
+  String get cptNothingToClean => 'Aucune écriture obsolète trouvée.';
+
+  @override
+  String cptCleanError(String erreur) {
+    return 'Erreur lors du nettoyage : $erreur';
+  }
+
+  @override
+  String get cptExportingPdf => 'Exportation du Grand Livre PDF en cours…';
+
+  @override
+  String get cptExportingCsv => 'Exportation CSV / Excel en cours…';
+
+  @override
+  String get cptReversed => 'Écriture extournée avec succès.';
+
+  @override
+  String cptReverseError(String erreur) {
+    return 'Erreur lors de l\'extourne : $erreur';
+  }
+
+  @override
+  String get cptConfirmDelete => 'Confirmer la suppression';
+
+  @override
+  String get cptDeleteQ =>
+      'Voulez-vous vraiment supprimer cette écriture comptable ?';
+
+  @override
+  String get cptDeleted => 'Écriture supprimée.';
+
+  @override
+  String cptDeleteError(String erreur) {
+    return 'Erreur lors de la suppression : $erreur';
+  }
+
+  @override
+  String get cptTitle => 'Comptabilité SYSCOHADA';
+
+  @override
+  String get cptExportPdf => 'Exporter le Grand Livre PDF';
+
+  @override
+  String get cptSyncTip => 'Synchroniser / rattraper les ventes';
+
+  @override
+  String get cptCleanDup => 'Nettoyer les doublons';
+
+  @override
+  String get cptExportCsv => 'Exporter CSV / Excel';
+
+  @override
+  String get cptTabJournal => 'Journal';
+
+  @override
+  String get cptTabBalance => 'Bilan & Synthèse';
+
+  @override
+  String cptLoadError(String erreur) {
+    return 'Erreur de chargement : $erreur';
+  }
+
+  @override
+  String get cptManual => 'Saisie manuelle (OD)';
+
+  @override
+  String get cptSearch => 'Rechercher libellé, compte…';
+
+  @override
+  String get cptAcc701 => '701 Ventes';
+
+  @override
+  String get cptAcc411 => '411 Clients';
+
+  @override
+  String get cptAcc419 => '419 Avances';
+
+  @override
+  String get cptAcc571 => '571 Caisse';
+
+  @override
+  String get cptAcc521 => '521 Banque';
+
+  @override
+  String get cptAcc6 => 'Classe 6 Charges';
+
+  @override
+  String get cptAll => 'Tous';
+
+  @override
+  String get cptAccount => 'Compte';
+
+  @override
+  String get cptNoMatch => 'Aucune écriture ne correspond aux critères.';
+
+  @override
+  String get cptCatchUp => 'Rattraper les ventes passées';
+
+  @override
+  String get cptReverse => 'Extourner (annuler)';
+
+  @override
+  String get cptSummary => 'Synthèse générale';
+
+  @override
+  String get cptCash => 'Trésorerie globale (571/521)';
+
+  @override
+  String get cptRevenue => 'Chiffre d\'affaires / ventes (701)';
+
+  @override
+  String get cptAdvances => 'Avances et acomptes reçus (419)';
+
+  @override
+  String get cptReceivables => 'Créances clients (411)';
+
+  @override
+  String get cptCharges => 'Charges et achats (classe 6)';
+
+  @override
+  String get cptResult => 'Résultat estimé (ventes − charges)';
+
+  @override
+  String get cptBalanceNote =>
+      'Depuis le début, jusqu\'à aujourd\'hui. Les mois terminés sont résumés une fois pour aller vite.';
+
+  @override
+  String get cptRecompute => 'Recalculer tout le bilan';
+
+  @override
+  String get ecrMin2 => 'Une écriture doit comporter au moins 2 lignes.';
+
+  @override
+  String get ecrNeedAmount =>
+      'Saisissez au moins un montant au débit ou au crédit.';
+
+  @override
+  String ecrUnbalanced(String ecart) {
+    return 'L\'écriture n\'est pas équilibrée (écart : $ecart).';
+  }
+
+  @override
+  String get ecrNew => 'Nouvelle écriture';
+
+  @override
+  String get ecrEdit => 'Modifier l\'écriture';
+
+  @override
+  String get ecrDate => 'Date de l\'écriture';
+
+  @override
+  String get ecrRef => 'N° de pièce / réf.';
+
+  @override
+  String get ecrLabel => 'Libellé de la pièce';
+
+  @override
+  String get ecrLines => 'Lignes de l\'écriture';
+
+  @override
+  String get ecrAddLine => 'Ajouter une ligne';
+
+  @override
+  String get ecrAccount => 'Compte SYSCOHADA';
+
+  @override
+  String get ecrAccountHint => 'ex : 601100';
+
+  @override
+  String get ecrAccountName => 'Intitulé du compte';
+
+  @override
+  String get ecrAccountNameHint => 'ex : Achats de marchandises';
+
+  @override
+  String get ecrDebit => 'Débit';
+
+  @override
+  String get ecrCredit => 'Crédit';
+
+  @override
+  String ecrTotalDebit(String montant) {
+    return 'Total débit : $montant';
+  }
+
+  @override
+  String ecrTotalCredit(String montant) {
+    return 'Total crédit : $montant';
+  }
+
+  @override
+  String get ecrBalanced => 'Équilibré';
+
+  @override
+  String ecrGap(String ecart) {
+    return 'Écart : $ecart';
+  }
 }

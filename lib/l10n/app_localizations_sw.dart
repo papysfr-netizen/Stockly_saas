@@ -4024,4 +4024,223 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get jrnEveryone => 'Kila mtu';
+
+  @override
+  String get cptMonths =>
+      'Januari,Februari,Machi,Aprili,Mei,Juni,Julai,Agosti,Septemba,Oktoba,Novemba,Desemba';
+
+  @override
+  String cptSynced(String n) {
+    return 'Mauzo $n yamesasishwa!';
+  }
+
+  @override
+  String get cptUpToDate => 'Daftari limesafishwa na liko sawa.';
+
+  @override
+  String cptSyncError(String erreur) {
+    return 'Hitilafu ya kusawazisha: $erreur';
+  }
+
+  @override
+  String cptCleaned(String n) {
+    return 'Usafishaji umekamilika: maingizo $n ya zamani yamefutwa.';
+  }
+
+  @override
+  String get cptNothingToClean => 'Hakuna ingizo la zamani lililopatikana.';
+
+  @override
+  String cptCleanError(String erreur) {
+    return 'Hitilafu ya kusafisha: $erreur';
+  }
+
+  @override
+  String get cptExportingPdf => 'Inahamisha daftari kuu PDF…';
+
+  @override
+  String get cptExportingCsv => 'Inahamisha CSV / Excel…';
+
+  @override
+  String get cptReversed => 'Ingizo limegeuzwa.';
+
+  @override
+  String cptReverseError(String erreur) {
+    return 'Hitilafu ya kugeuza: $erreur';
+  }
+
+  @override
+  String get cptConfirmDelete => 'Thibitisha kufuta';
+
+  @override
+  String get cptDeleteQ => 'Je, kweli unataka kufuta ingizo hili la hesabu?';
+
+  @override
+  String get cptDeleted => 'Ingizo limefutwa.';
+
+  @override
+  String cptDeleteError(String erreur) {
+    return 'Hitilafu ya kufuta: $erreur';
+  }
+
+  @override
+  String get cptTitle => 'Uhasibu SYSCOHADA';
+
+  @override
+  String get cptExportPdf => 'Hamisha daftari kuu PDF';
+
+  @override
+  String get cptSyncTip => 'Sawazisha / kamilisha mauzo';
+
+  @override
+  String get cptCleanDup => 'Safisha nakala';
+
+  @override
+  String get cptExportCsv => 'Hamisha CSV / Excel';
+
+  @override
+  String get cptTabJournal => 'Daftari';
+
+  @override
+  String get cptTabBalance => 'Mizania & muhtasari';
+
+  @override
+  String cptLoadError(String erreur) {
+    return 'Hitilafu ya kupakia: $erreur';
+  }
+
+  @override
+  String get cptManual => 'Ingizo la mkono (OD)';
+
+  @override
+  String get cptSearch => 'Tafuta maelezo, akaunti…';
+
+  @override
+  String get cptAcc701 => '701 Mauzo';
+
+  @override
+  String get cptAcc411 => '411 Wateja';
+
+  @override
+  String get cptAcc419 => '419 Malipo ya awali';
+
+  @override
+  String get cptAcc571 => '571 Pesa taslimu';
+
+  @override
+  String get cptAcc521 => '521 Benki';
+
+  @override
+  String get cptAcc6 => 'Daraja 6 Gharama';
+
+  @override
+  String get cptAll => 'Zote';
+
+  @override
+  String get cptAccount => 'Akaunti';
+
+  @override
+  String get cptNoMatch => 'Hakuna ingizo linalolingana na vigezo.';
+
+  @override
+  String get cptCatchUp => 'Kamilisha mauzo ya zamani';
+
+  @override
+  String get cptReverse => 'Geuza (futa)';
+
+  @override
+  String get cptSummary => 'Muhtasari wa jumla';
+
+  @override
+  String get cptCash => 'Fedha zote (571/521)';
+
+  @override
+  String get cptRevenue => 'Mapato / mauzo (701)';
+
+  @override
+  String get cptAdvances => 'Malipo ya awali yaliyopokelewa (419)';
+
+  @override
+  String get cptReceivables => 'Madeni ya wateja (411)';
+
+  @override
+  String get cptCharges => 'Gharama na manunuzi (daraja 6)';
+
+  @override
+  String get cptResult => 'Matokeo yanayokadiriwa (mauzo − gharama)';
+
+  @override
+  String get cptBalanceNote =>
+      'Tangu mwanzo hadi leo. Miezi iliyokwisha inafupishwa mara moja ili kwenda haraka.';
+
+  @override
+  String get cptRecompute => 'Hesabu upya mizania yote';
+
+  @override
+  String get ecrMin2 => 'Ingizo linahitaji mistari 2 angalau.';
+
+  @override
+  String get ecrNeedAmount => 'Weka angalau kiasi kimoja cha debit au credit.';
+
+  @override
+  String ecrUnbalanced(String ecart) {
+    return 'Ingizo halijalingana (tofauti: $ecart).';
+  }
+
+  @override
+  String get ecrNew => 'Ingizo jipya';
+
+  @override
+  String get ecrEdit => 'Hariri ingizo';
+
+  @override
+  String get ecrDate => 'Tarehe ya ingizo';
+
+  @override
+  String get ecrRef => 'Nambari ya hati / kumbukumbu';
+
+  @override
+  String get ecrLabel => 'Maelezo ya hati';
+
+  @override
+  String get ecrLines => 'Mistari ya ingizo';
+
+  @override
+  String get ecrAddLine => 'Ongeza mstari';
+
+  @override
+  String get ecrAccount => 'Akaunti ya SYSCOHADA';
+
+  @override
+  String get ecrAccountHint => 'mfano: 601100';
+
+  @override
+  String get ecrAccountName => 'Jina la akaunti';
+
+  @override
+  String get ecrAccountNameHint => 'mfano: Manunuzi ya bidhaa';
+
+  @override
+  String get ecrDebit => 'Debit';
+
+  @override
+  String get ecrCredit => 'Credit';
+
+  @override
+  String ecrTotalDebit(String montant) {
+    return 'Jumla ya debit: $montant';
+  }
+
+  @override
+  String ecrTotalCredit(String montant) {
+    return 'Jumla ya credit: $montant';
+  }
+
+  @override
+  String get ecrBalanced => 'Imelingana';
+
+  @override
+  String ecrGap(String ecart) {
+    return 'Tofauti: $ecart';
+  }
 }

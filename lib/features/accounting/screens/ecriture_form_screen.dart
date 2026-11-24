@@ -1,3 +1,4 @@
+import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -116,8 +117,8 @@ class _EcritureFormScreenState extends State<EcritureFormScreen> {
   void _removeLine(int index) {
     if (_lines.length <= 2) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Une écriture doit comporter au moins 2 lignes.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).ecrMin2),
         ),
       );
       return;
@@ -149,8 +150,8 @@ class _EcritureFormScreenState extends State<EcritureFormScreen> {
           backgroundColor: Theme.of(context).colorScheme.error,
           content: Text(
             _totalDebit == 0
-                ? 'Veuillez saisir au moins un montant Débit/Crédit.'
-                : 'L\'écriture n\'est pas équilibrée (Écart : ${_difference.toStringAsFixed(2)}).',
+                ? AppLocalizations.of(context).ecrNeedAmount
+                : AppLocalizations.of(context).ecrUnbalanced(_difference.toStringAsFixed(2)),
           ),
         ),
       );
@@ -187,8 +188,8 @@ class _EcritureFormScreenState extends State<EcritureFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.entryToEdit == null
-            ? 'Nouvelle Écriture'
-            : 'Modifier Écriture'),
+            ? AppLocalizations.of(context).ecrNew
+            : AppLocalizations.of(context).ecrEdit),
         actions: [
           IconButton(
             icon: const Icon(Icons.check),
@@ -211,8 +212,8 @@ class _EcritureFormScreenState extends State<EcritureFormScreen> {
                         child: InkWell(
                           onTap: _selectDate,
                           child: InputDecorator(
-                            decoration: const InputDecoration(
-                              labelText: 'Date d\'écriture',
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(context).ecrDate,
                               prefixIcon: Icon(Icons.calendar_today),
                               border: OutlineInputBorder(),
                             ),
@@ -250,8 +251,8 @@ class _EcritureFormScreenState extends State<EcritureFormScreen> {
                         flex: 1,
                         child: TextFormField(
                           controller: _referenceController,
-                          decoration: const InputDecoration(
-                            labelText: 'N° Pièce / Réf.',
+                          decoration: InputDecoration(
+                            labelText: AppLocalizations.of(context).ecrRef,
                             border: OutlineInputBorder(),
                           ),
                           validator: (v) =>
@@ -263,8 +264,8 @@ class _EcritureFormScreenState extends State<EcritureFormScreen> {
                         flex: 2,
                         child: TextFormField(
                           controller: _labelController,
-                          decoration: const InputDecoration(
-                            labelText: 'Libellé de la pièce',
+                          decoration: InputDecoration(
+                            labelText: AppLocalizations.of(context).ecrLabel,
                             border: OutlineInputBorder(),
                           ),
                           validator: (v) =>
@@ -278,7 +279,7 @@ class _EcritureFormScreenState extends State<EcritureFormScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Lignes d\'écriture',
+                        AppLocalizations.of(context).ecrLines,
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
@@ -287,7 +288,7 @@ class _EcritureFormScreenState extends State<EcritureFormScreen> {
                       TextButton.icon(
                         onPressed: _addLine,
                         icon: const Icon(Icons.add),
-                        label: const Text('Ajouter une ligne'),
+                        label: Text(AppLocalizations.of(context).ecrAddLine),
                       ),
                     ],
                   ),
@@ -314,9 +315,9 @@ class _EcritureFormScreenState extends State<EcritureFormScreen> {
                                   child: TextFormField(
                                     controller: line.accountCodeController,
                                     keyboardType: TextInputType.number,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Compte SYSCOHADA',
-                                      hintText: 'ex: 601100',
+                                    decoration: InputDecoration(
+                                      labelText: AppLocalizations.of(context).ecrAccount,
+                                      hintText: AppLocalizations.of(context).ecrAccountHint,
                                       isDense: true,
                                     ),
                                     validator: (v) =>
@@ -328,9 +329,9 @@ class _EcritureFormScreenState extends State<EcritureFormScreen> {
                                   flex: 3,
                                   child: TextFormField(
                                     controller: line.accountLabelController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Intitulé du compte',
-                                      hintText: 'ex: Achats de marchandises',
+                                    decoration: InputDecoration(
+                                      labelText: AppLocalizations.of(context).ecrAccountName,
+                                      hintText: AppLocalizations.of(context).ecrAccountNameHint,
                                       isDense: true,
                                     ),
                                     validator: (v) =>
@@ -357,8 +358,8 @@ class _EcritureFormScreenState extends State<EcritureFormScreen> {
                                       FilteringTextInputFormatter.allow(
                                           RegExp(r'^\d*[\.,]?\d*')),
                                     ],
-                                    decoration: const InputDecoration(
-                                      labelText: 'Débit',
+                                    decoration: InputDecoration(
+                                      labelText: AppLocalizations.of(context).ecrDebit,
                                       suffixText: 'FCFA',
                                       isDense: true,
                                     ),
@@ -376,8 +377,8 @@ class _EcritureFormScreenState extends State<EcritureFormScreen> {
                                       FilteringTextInputFormatter.allow(
                                           RegExp(r'^\d*[\.,]?\d*')),
                                     ],
-                                    decoration: const InputDecoration(
-                                      labelText: 'Crédit',
+                                    decoration: InputDecoration(
+                                      labelText: AppLocalizations.of(context).ecrCredit,
                                       suffixText: 'FCFA',
                                       isDense: true,
                                     ),
@@ -411,11 +412,11 @@ class _EcritureFormScreenState extends State<EcritureFormScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Total Débit: ${_totalDebit.toStringAsFixed(2)}',
+                          AppLocalizations.of(context).ecrTotalDebit(_totalDebit.toStringAsFixed(2)),
                           style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
                         Text(
-                          'Total Crédit: ${_totalCredit.toStringAsFixed(2)}',
+                          AppLocalizations.of(context).ecrTotalCredit(_totalCredit.toStringAsFixed(2)),
                           style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
                       ],
@@ -430,8 +431,8 @@ class _EcritureFormScreenState extends State<EcritureFormScreen> {
                       ),
                       label: Text(
                         _isBalanced
-                            ? 'Équilibré'
-                            : 'Écart: ${_difference.toStringAsFixed(2)}',
+                            ? AppLocalizations.of(context).ecrBalanced
+                            : AppLocalizations.of(context).ecrGap(_difference.toStringAsFixed(2)),
                         style: const TextStyle(
                             color: Colors.white, fontWeight: FontWeight.bold),
                       ),

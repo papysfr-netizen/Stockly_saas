@@ -4033,4 +4033,223 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get jrnEveryone => 'Bato nyonso';
+
+  @override
+  String get cptMonths =>
+      'Sanza ya yambo,Sanza ya mibale,Sanza ya misato,Sanza ya minei,Sanza ya mitano,Sanza ya motoba,Sanza ya nsambo,Sanza ya mwambe,Sanza ya libwa,Sanza ya zomi,Sanza ya zomi na moko,Sanza ya zomi na mibale';
+
+  @override
+  String cptSynced(String n) {
+    return 'Ba ventes $n ezongisami malamu!';
+  }
+
+  @override
+  String get cptUpToDate => 'Journal epetolami mpe ezali à jour.';
+
+  @override
+  String cptSyncError(String erreur) {
+    return 'Libunga na synchronisation: $erreur';
+  }
+
+  @override
+  String cptCleaned(String n) {
+    return 'Bopetoli esili: ba écritures $n ya kala elongwami.';
+  }
+
+  @override
+  String get cptNothingToClean => 'Écriture ya kala moko te ezwami.';
+
+  @override
+  String cptCleanError(String erreur) {
+    return 'Libunga na bopetoli: $erreur';
+  }
+
+  @override
+  String get cptExportingPdf => 'Ezali kobimisa Grand Livre PDF…';
+
+  @override
+  String get cptExportingCsv => 'Ezali kobimisa CSV / Excel…';
+
+  @override
+  String get cptReversed => 'Écriture ezongisami malamu.';
+
+  @override
+  String cptReverseError(String erreur) {
+    return 'Libunga na bozongisi: $erreur';
+  }
+
+  @override
+  String get cptConfirmDelete => 'Ndimisa bolongoli';
+
+  @override
+  String get cptDeleteQ => 'Olingi solo kolongola écriture oyo?';
+
+  @override
+  String get cptDeleted => 'Écriture elongwami.';
+
+  @override
+  String cptDeleteError(String erreur) {
+    return 'Libunga na bolongoli: $erreur';
+  }
+
+  @override
+  String get cptTitle => 'Comptabilité SYSCOHADA';
+
+  @override
+  String get cptExportPdf => 'Bimisa Grand Livre PDF';
+
+  @override
+  String get cptSyncTip => 'Synchroniser / zongisa ba ventes';
+
+  @override
+  String get cptCleanDup => 'Petola ba doublons';
+
+  @override
+  String get cptExportCsv => 'Bimisa CSV / Excel';
+
+  @override
+  String get cptTabJournal => 'Journal';
+
+  @override
+  String get cptTabBalance => 'Bilan & bokuse';
+
+  @override
+  String cptLoadError(String erreur) {
+    return 'Libunga ya kozwa: $erreur';
+  }
+
+  @override
+  String get cptManual => 'Kokoma na loboko (OD)';
+
+  @override
+  String get cptSearch => 'Luka libelle, compte…';
+
+  @override
+  String get cptAcc701 => '701 Ba ventes';
+
+  @override
+  String get cptAcc411 => '411 Ba clients';
+
+  @override
+  String get cptAcc419 => '419 Ba avances';
+
+  @override
+  String get cptAcc571 => '571 Caisse';
+
+  @override
+  String get cptAcc521 => '521 Banque';
+
+  @override
+  String get cptAcc6 => 'Classe 6 Ba charges';
+
+  @override
+  String get cptAll => 'Nyonso';
+
+  @override
+  String get cptAccount => 'Compte';
+
+  @override
+  String get cptNoMatch => 'Écriture moko te ekokani na ba critères.';
+
+  @override
+  String get cptCatchUp => 'Zongisa ba ventes ya kala';
+
+  @override
+  String get cptReverse => 'Zongisa (longola)';
+
+  @override
+  String get cptSummary => 'Bokuse ya nyonso';
+
+  @override
+  String get cptCash => 'Mbongo nyonso (571/521)';
+
+  @override
+  String get cptRevenue => 'Mbongo ya ba ventes (701)';
+
+  @override
+  String get cptAdvances => 'Ba avances mpe ba acomptes ezwami (419)';
+
+  @override
+  String get cptReceivables => 'Ba niongo ya ba clients (411)';
+
+  @override
+  String get cptCharges => 'Ba charges mpe ba bosombi (classe 6)';
+
+  @override
+  String get cptResult => 'Litomba ekanisami (ba ventes − ba charges)';
+
+  @override
+  String get cptBalanceNote =>
+      'Banda ebandeli tii lelo. Ba sanza oyo esili ekusamaka mbala moko mpo na kokende noki.';
+
+  @override
+  String get cptRecompute => 'Tanga lisusu bilan mobimba';
+
+  @override
+  String get ecrMin2 => 'Écriture esengeli kozala na milongo 2 to koleka.';
+
+  @override
+  String get ecrNeedAmount => 'Koma ata mbongo moko na débit to na crédit.';
+
+  @override
+  String ecrUnbalanced(String ecart) {
+    return 'Écriture ekokani te (bokeseni: $ecart).';
+  }
+
+  @override
+  String get ecrNew => 'Écriture ya sika';
+
+  @override
+  String get ecrEdit => 'Bongola écriture';
+
+  @override
+  String get ecrDate => 'Mokolo ya écriture';
+
+  @override
+  String get ecrRef => 'N° ya pièce / réf.';
+
+  @override
+  String get ecrLabel => 'Libelle ya pièce';
+
+  @override
+  String get ecrLines => 'Milongo ya écriture';
+
+  @override
+  String get ecrAddLine => 'Bakisa molongo';
+
+  @override
+  String get ecrAccount => 'Compte SYSCOHADA';
+
+  @override
+  String get ecrAccountHint => 'ndakisa: 601100';
+
+  @override
+  String get ecrAccountName => 'Nkombo ya compte';
+
+  @override
+  String get ecrAccountNameHint => 'ndakisa: Bosombi ya biloko';
+
+  @override
+  String get ecrDebit => 'Débit';
+
+  @override
+  String get ecrCredit => 'Crédit';
+
+  @override
+  String ecrTotalDebit(String montant) {
+    return 'Nyonso débit: $montant';
+  }
+
+  @override
+  String ecrTotalCredit(String montant) {
+    return 'Nyonso crédit: $montant';
+  }
+
+  @override
+  String get ecrBalanced => 'Ekokani';
+
+  @override
+  String ecrGap(String ecart) {
+    return 'Bokeseni: $ecart';
+  }
 }
