@@ -4412,4 +4412,48 @@ class AppLocalizationsFr extends AppLocalizations {
   String arrInvoiceDate(String date) {
     return 'Facture du $date';
   }
+
+  @override
+  String get astTitle => '✨ Demandez à Nguli';
+
+  @override
+  String get astIntro =>
+      'Bonjour ! Je connais les chiffres de votre boutique des 30 derniers jours : ventes, stock, crédits, dépenses. Posez-moi une question.';
+
+  @override
+  String get astLoading => 'Je lis les chiffres de la boutique…';
+
+  @override
+  String get astLoadError =>
+      'Impossible de lire les chiffres. Vérifiez internet et réessayez.';
+
+  @override
+  String get astPlaceholder => 'Votre question…';
+
+  @override
+  String get astSuggest1 => 'Combien ai-je vendu hier ?';
+
+  @override
+  String get astSuggest2 => 'Quels produits dois-je recommander ?';
+
+  @override
+  String get astSuggest3 => 'Quel vendeur vend le plus ?';
+
+  @override
+  String get astSuggest4 => 'Qui me doit le plus d\'argent ?';
+
+  @override
+  String get astNoAnswer => 'Je n\'ai pas de réponse. Reformulez la question.';
+
+  @override
+  String get astTimeout =>
+      'La réponse prend trop de temps. Vérifiez internet et réessayez.';
+
+  @override
+  String get astError =>
+      'Je n\'ai pas pu répondre (internet ou service indisponible). Réessayez.';
+
+  @override
+  String get astDisclaimer =>
+      'Réponses de l\'IA à partir des 30 derniers jours : vérifiez les chiffres importants.';
 }

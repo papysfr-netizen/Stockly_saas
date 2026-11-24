@@ -1208,5 +1208,18 @@
   "impInvoiceDate": "ankara ya {date}",
   "arrFees": "Gharama (usafirishaji…): {montant}",
   "arrProfitAfterFees": "Faida baada ya gharama: {montant}",
-  "arrInvoiceDate": "Ankara ya {date}"
+  "arrInvoiceDate": "Ankara ya {date}",
+  "astTitle": "✨ Uliza Nguli",
+  "astIntro": "Habari! Najua takwimu za duka lako za siku 30 zilizopita: mauzo, hisa, mikopo, matumizi. Niulize swali.",
+  "astLoading": "Ninasoma takwimu za duka…",
+  "astLoadError": "Imeshindwa kusoma takwimu. Angalia intaneti na ujaribu tena.",
+  "astPlaceholder": "Swali lako…",
+  "astSuggest1": "Niliuza kiasi gani jana?",
+  "astSuggest2": "Bidhaa gani niagize tena?",
+  "astSuggest3": "Muuzaji gani anauza zaidi?",
+  "astSuggest4": "Nani ananidai pesa nyingi zaidi?",
+  "astNoAnswer": "Sina jibu. Uliza kwa njia nyingine.",
+  "astTimeout": "Jibu linachukua muda mrefu. Angalia intaneti na ujaribu tena.",
+  "astError": "Sikuweza kujibu (intaneti au huduma haipatikani). Jaribu tena.",
+  "astDisclaimer": "Majibu ya AI kutoka siku 30 zilizopita: kagua takwimu muhimu."
 }

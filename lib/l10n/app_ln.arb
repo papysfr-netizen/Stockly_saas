@@ -1208,5 +1208,18 @@
   "impInvoiceDate": "facture ya {date}",
   "arrFees": "Ba frais (fret, transport…): {montant}",
   "arrProfitAfterFees": "Litomba sima ya ba frais: {montant}",
-  "arrInvoiceDate": "Facture ya {date}"
+  "arrInvoiceDate": "Facture ya {date}",
+  "astTitle": "✨ Tuna Nguli",
+  "astIntro": "Mbote! Nayebi ba chiffres ya butiki na yo ya mikolo 30 eleki: ba ventes, stock, ba crédits, ba dépenses. Tuna ngai motuna.",
+  "astLoading": "Nazali kotanga ba chiffres ya butiki…",
+  "astLoadError": "Ekoki te kotanga ba chiffres. Tala internet mpe meka lisusu.",
+  "astPlaceholder": "Motuna na yo…",
+  "astSuggest1": "Natekaki boni lobi?",
+  "astSuggest2": "Biloko nini nasengeli kosomba lisusu?",
+  "astSuggest3": "Moteki nani atekaka mingi?",
+  "astSuggest4": "Nani azali na niongo na ngai mingi?",
+  "astNoAnswer": "Nazali na eyano te. Tuna na lolenge mosusu.",
+  "astTimeout": "Eyano ezali koumela. Tala internet mpe meka lisusu.",
+  "astError": "Nakokaki koyanola te (internet to service ezali te). Meka lisusu.",
+  "astDisclaimer": "Biyano ya IA na mikolo 30 eleki: tala malamu ba chiffres ya ntina."
 }

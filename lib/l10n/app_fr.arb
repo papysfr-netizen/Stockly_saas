@@ -2702,5 +2702,18 @@
   "arrProfitAfterFees": "Bénéfice après frais : {montant}",
   "@arrProfitAfterFees": {"placeholders": {"montant": {"type": "String"}}},
   "arrInvoiceDate": "Facture du {date}",
-  "@arrInvoiceDate": {"placeholders": {"date": {"type": "String"}}}
+  "@arrInvoiceDate": {"placeholders": {"date": {"type": "String"}}},
+  "astTitle": "✨ Demandez à Nguli",
+  "astIntro": "Bonjour ! Je connais les chiffres de votre boutique des 30 derniers jours : ventes, stock, crédits, dépenses. Posez-moi une question.",
+  "astLoading": "Je lis les chiffres de la boutique…",
+  "astLoadError": "Impossible de lire les chiffres. Vérifiez internet et réessayez.",
+  "astPlaceholder": "Votre question…",
+  "astSuggest1": "Combien ai-je vendu hier ?",
+  "astSuggest2": "Quels produits dois-je recommander ?",
+  "astSuggest3": "Quel vendeur vend le plus ?",
+  "astSuggest4": "Qui me doit le plus d'argent ?",
+  "astNoAnswer": "Je n'ai pas de réponse. Reformulez la question.",
+  "astTimeout": "La réponse prend trop de temps. Vérifiez internet et réessayez.",
+  "astError": "Je n'ai pas pu répondre (internet ou service indisponible). Réessayez.",
+  "astDisclaimer": "Réponses de l'IA à partir des 30 derniers jours : vérifiez les chiffres importants."
 }

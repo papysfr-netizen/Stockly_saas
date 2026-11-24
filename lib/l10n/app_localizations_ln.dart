@@ -4400,4 +4400,48 @@ class AppLocalizationsLn extends AppLocalizations {
   String arrInvoiceDate(String date) {
     return 'Facture ya $date';
   }
+
+  @override
+  String get astTitle => '✨ Tuna Nguli';
+
+  @override
+  String get astIntro =>
+      'Mbote! Nayebi ba chiffres ya butiki na yo ya mikolo 30 eleki: ba ventes, stock, ba crédits, ba dépenses. Tuna ngai motuna.';
+
+  @override
+  String get astLoading => 'Nazali kotanga ba chiffres ya butiki…';
+
+  @override
+  String get astLoadError =>
+      'Ekoki te kotanga ba chiffres. Tala internet mpe meka lisusu.';
+
+  @override
+  String get astPlaceholder => 'Motuna na yo…';
+
+  @override
+  String get astSuggest1 => 'Natekaki boni lobi?';
+
+  @override
+  String get astSuggest2 => 'Biloko nini nasengeli kosomba lisusu?';
+
+  @override
+  String get astSuggest3 => 'Moteki nani atekaka mingi?';
+
+  @override
+  String get astSuggest4 => 'Nani azali na niongo na ngai mingi?';
+
+  @override
+  String get astNoAnswer => 'Nazali na eyano te. Tuna na lolenge mosusu.';
+
+  @override
+  String get astTimeout =>
+      'Eyano ezali koumela. Tala internet mpe meka lisusu.';
+
+  @override
+  String get astError =>
+      'Nakokaki koyanola te (internet to service ezali te). Meka lisusu.';
+
+  @override
+  String get astDisclaimer =>
+      'Biyano ya IA na mikolo 30 eleki: tala malamu ba chiffres ya ntina.';
 }

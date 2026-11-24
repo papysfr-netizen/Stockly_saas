@@ -7358,6 +7358,84 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Facture du {date}'**
   String arrInvoiceDate(String date);
+
+  /// No description provided for @astTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'✨ Demandez à Nguli'**
+  String get astTitle;
+
+  /// No description provided for @astIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour ! Je connais les chiffres de votre boutique des 30 derniers jours : ventes, stock, crédits, dépenses. Posez-moi une question.'**
+  String get astIntro;
+
+  /// No description provided for @astLoading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je lis les chiffres de la boutique…'**
+  String get astLoading;
+
+  /// No description provided for @astLoadError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de lire les chiffres. Vérifiez internet et réessayez.'**
+  String get astLoadError;
+
+  /// No description provided for @astPlaceholder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre question…'**
+  String get astPlaceholder;
+
+  /// No description provided for @astSuggest1.
+  ///
+  /// In fr, this message translates to:
+  /// **'Combien ai-je vendu hier ?'**
+  String get astSuggest1;
+
+  /// No description provided for @astSuggest2.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quels produits dois-je recommander ?'**
+  String get astSuggest2;
+
+  /// No description provided for @astSuggest3.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quel vendeur vend le plus ?'**
+  String get astSuggest3;
+
+  /// No description provided for @astSuggest4.
+  ///
+  /// In fr, this message translates to:
+  /// **'Qui me doit le plus d\'argent ?'**
+  String get astSuggest4;
+
+  /// No description provided for @astNoAnswer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je n\'ai pas de réponse. Reformulez la question.'**
+  String get astNoAnswer;
+
+  /// No description provided for @astTimeout.
+  ///
+  /// In fr, this message translates to:
+  /// **'La réponse prend trop de temps. Vérifiez internet et réessayez.'**
+  String get astTimeout;
+
+  /// No description provided for @astError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je n\'ai pas pu répondre (internet ou service indisponible). Réessayez.'**
+  String get astError;
+
+  /// No description provided for @astDisclaimer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réponses de l\'IA à partir des 30 derniers jours : vérifiez les chiffres importants.'**
+  String get astDisclaimer;
 }
 
 class _AppLocalizationsDelegate

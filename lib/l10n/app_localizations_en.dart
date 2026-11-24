@@ -4394,4 +4394,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String arrInvoiceDate(String date) {
     return 'Invoice of $date';
   }
+
+  @override
+  String get astTitle => '✨ Ask Nguli';
+
+  @override
+  String get astIntro =>
+      'Hello! I know your shop\'s figures for the last 30 days: sales, stock, credit, expenses. Ask me a question.';
+
+  @override
+  String get astLoading => 'Reading the shop\'s figures…';
+
+  @override
+  String get astLoadError =>
+      'Could not read the figures. Check the internet and try again.';
+
+  @override
+  String get astPlaceholder => 'Your question…';
+
+  @override
+  String get astSuggest1 => 'How much did I sell yesterday?';
+
+  @override
+  String get astSuggest2 => 'Which products should I reorder?';
+
+  @override
+  String get astSuggest3 => 'Which seller sells the most?';
+
+  @override
+  String get astSuggest4 => 'Who owes me the most money?';
+
+  @override
+  String get astNoAnswer => 'I have no answer. Rephrase the question.';
+
+  @override
+  String get astTimeout =>
+      'The answer is taking too long. Check the internet and try again.';
+
+  @override
+  String get astError =>
+      'I could not answer (internet or service unavailable). Try again.';
+
+  @override
+  String get astDisclaimer =>
+      'AI answers based on the last 30 days: check important figures.';
 }

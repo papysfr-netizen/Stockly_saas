@@ -4391,4 +4391,48 @@ class AppLocalizationsSw extends AppLocalizations {
   String arrInvoiceDate(String date) {
     return 'Ankara ya $date';
   }
+
+  @override
+  String get astTitle => '✨ Uliza Nguli';
+
+  @override
+  String get astIntro =>
+      'Habari! Najua takwimu za duka lako za siku 30 zilizopita: mauzo, hisa, mikopo, matumizi. Niulize swali.';
+
+  @override
+  String get astLoading => 'Ninasoma takwimu za duka…';
+
+  @override
+  String get astLoadError =>
+      'Imeshindwa kusoma takwimu. Angalia intaneti na ujaribu tena.';
+
+  @override
+  String get astPlaceholder => 'Swali lako…';
+
+  @override
+  String get astSuggest1 => 'Niliuza kiasi gani jana?';
+
+  @override
+  String get astSuggest2 => 'Bidhaa gani niagize tena?';
+
+  @override
+  String get astSuggest3 => 'Muuzaji gani anauza zaidi?';
+
+  @override
+  String get astSuggest4 => 'Nani ananidai pesa nyingi zaidi?';
+
+  @override
+  String get astNoAnswer => 'Sina jibu. Uliza kwa njia nyingine.';
+
+  @override
+  String get astTimeout =>
+      'Jibu linachukua muda mrefu. Angalia intaneti na ujaribu tena.';
+
+  @override
+  String get astError =>
+      'Sikuweza kujibu (intaneti au huduma haipatikani). Jaribu tena.';
+
+  @override
+  String get astDisclaimer =>
+      'Majibu ya AI kutoka siku 30 zilizopita: kagua takwimu muhimu.';
 }

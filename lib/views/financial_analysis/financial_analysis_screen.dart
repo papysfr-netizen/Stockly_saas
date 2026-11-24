@@ -7,6 +7,7 @@
 //  - indicateurs : CA net, marge brute %, nombre de ventes, panier moyen
 //  - tableau du compte de résultat avec sous-totaux, chaque ligne détaillable
 
+import 'package:stockly_saas/features/assistant/assistant_screen.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -298,6 +299,17 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
+          // ✨ Demandez à Nguli (l'IA répond avec les chiffres de la boutique)
+          IconButton(
+            icon: const Icon(Icons.auto_awesome, color: Colors.amber),
+            tooltip: AppLocalizations.of(context).astTitle,
+            onPressed: entrepriseId.isEmpty
+                ? null
+                : () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => AssistantScreen(entrepriseId: entrepriseId)),
+                    ),
+          ),
           Center(child: SelecteurBoutique(entrepriseId: entrepriseId)),
           const SizedBox(width: 4),
           PopupMenuButton<String>(
