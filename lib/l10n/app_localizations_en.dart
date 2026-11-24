@@ -4246,4 +4246,101 @@ class AppLocalizationsEn extends AppLocalizations {
   String ecrGap(String ecart) {
     return 'Difference: $ecart';
   }
+
+  @override
+  String get rcNone => 'No customer found';
+
+  @override
+  String get rcOther => 'Other customers';
+
+  @override
+  String get rcSearch => '🔎 Search a customer';
+
+  @override
+  String get rcName => 'Customer name…';
+
+  @override
+  String get rcLoading => 'Loading…';
+
+  @override
+  String get rcLoadingDebts => 'Loading debts…';
+
+  @override
+  String rcOwesTotal(String montant) {
+    return 'Owes in total: $montant';
+  }
+
+  @override
+  String get rcOwesNothing => 'Owes nothing';
+
+  @override
+  String get rcPurchasesPeriod => 'Purchases (period)';
+
+  @override
+  String get rcPaid => 'Paid';
+
+  @override
+  String get rcPurchases => 'Purchases in the period';
+
+  @override
+  String get rcNoPurchase => 'No purchase in this period.';
+
+  @override
+  String rcLeft(String montant) {
+    return 'left $montant';
+  }
+
+  @override
+  String get rcDebts => 'Debts and payments (all periods)';
+
+  @override
+  String get rcNoDebt => 'No debt recorded.';
+
+  @override
+  String rcCreditOf(String montant) {
+    return 'Credit of $montant';
+  }
+
+  @override
+  String get rcSettled => 'settled ✔';
+
+  @override
+  String get iaTakePhoto => 'Take a photo';
+
+  @override
+  String get iaPickImage => 'Choose an image or a screenshot';
+
+  @override
+  String iaCameraError(String erreur) {
+    return 'Could not open the camera: $erreur';
+  }
+
+  @override
+  String get iaReading =>
+      '🤖 The AI is reading the document…\nA big table can take up to 2 minutes. Keep the app open.';
+
+  @override
+  String get iaTimeout =>
+      'The AI took too long. Try a photo of part of the table (20 to 25 lines), or a better connection.';
+
+  @override
+  String get iaCut =>
+      'The internet connection dropped while sending. Try again with a better network.';
+
+  @override
+  String iaFailed(String detail) {
+    return 'The AI could not read the document. Detail: $detail';
+  }
+
+  @override
+  String get iaNothing =>
+      'The AI found no product. Try a sharper, straight photo.';
+
+  @override
+  String get iaOtherCurrency => 'Prices in another currency';
+
+  @override
+  String iaRateQ(String devise, String code) {
+    return 'The prices in this document are in $devise.\nHow many $code for 1 \$? Prices will be converted to dollars.';
+  }
 }

@@ -4,6 +4,7 @@
 // Achats sur la période, ce qu'il doit, ses dettes et ses paiements.
 // Lecture seulement.
 
+import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -177,7 +178,7 @@ class _RechercheClientSheetState extends State<RechercheClientSheet> {
               children: [
                 if (_client != null)
                   IconButton(
-                    tooltip: 'Autres clients',
+                    tooltip: AppLocalizations.of(context).rcOther,
                     icon: const Icon(Icons.arrow_back_rounded),
                     onPressed: () => setState(() => _client = null),
                   ),
@@ -185,7 +186,7 @@ class _RechercheClientSheetState extends State<RechercheClientSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(_client ?? '🔎 Rechercher un client',
+                      Text(_client ?? AppLocalizations.of(context).rcSearch,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold, color: _encre)),
@@ -209,7 +210,7 @@ class _RechercheClientSheetState extends State<RechercheClientSheet> {
                 autofocus: true,
                 textCapitalization: TextCapitalization.words,
                 decoration: InputDecoration(
-                  hintText: 'Nom du client…',
+                  hintText: AppLocalizations.of(context).rcName,
                   prefixIcon: const Icon(Icons.search_rounded),
                   filled: true,
                   fillColor: _fondChamp,
@@ -231,7 +232,7 @@ class _RechercheClientSheetState extends State<RechercheClientSheet> {
     final trouves = q.isEmpty ? tous : tous.where((n) => n.toLowerCase().contains(q)).toList();
     if (trouves.isEmpty) {
       return Center(
-        child: Text(_chargement ? 'Chargement…' : 'Aucun client trouvé',
+        child: Text(_chargement ? AppLocalizations.of(context).rcLoading : AppLocalizations.of(context).rcNone,
             style: TextStyle(color: Colors.grey.shade600)),
       );
     }
@@ -347,10 +348,10 @@ class _RechercheClientSheetState extends State<RechercheClientSheet> {
             Expanded(
               child: Text(
                 _chargement
-                    ? 'Chargement des dettes…'
+                    ? AppLocalizations.of(context).rcLoadingDebts
                     : doitEnTout > 0.005
-                        ? 'Doit en tout : ${fmt(doitEnTout)} $cur'
-                        : 'Ne doit rien',
+                        ? AppLocalizations.of(context).rcOwesTotal('${fmt(doitEnTout)} $cur')
+                        : AppLocalizations.of(context).rcOwesNothing,
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: doitEnTout > 0.005 ? _rouge : _vert),
@@ -360,17 +361,17 @@ class _RechercheClientSheetState extends State<RechercheClientSheet> {
         ),
         const SizedBox(height: 10),
         Row(children: [
-          _stat('Achats (période)', '${achats.length} • ${fmt(total)}', _encre),
+          _stat(AppLocalizations.of(context).rcPurchasesPeriod, '${achats.length} • ${fmt(total)}', _encre),
           const SizedBox(width: 8),
-          _stat('Payé', fmt(paye), _vert),
+          _stat(AppLocalizations.of(context).rcPaid, fmt(paye), _vert),
           const SizedBox(width: 8),
           _stat('Reste', fmt(reste), reste > 0.005 ? _rouge : _encre),
         ]),
 
         // ----- Achats -----
-        _titre('Achats sur la période'),
+        _titre(AppLocalizations.of(context).rcPurchases),
         if (achats.isEmpty)
-          Text('Aucun achat sur cette période.', style: TextStyle(color: Colors.grey.shade600)),
+          Text(AppLocalizations.of(context).rcNoPurchase, style: TextStyle(color: Colors.grey.shade600)),
         for (final m in achats)
           Card(
             margin: const EdgeInsets.only(bottom: 6),
@@ -398,7 +399,7 @@ class _RechercheClientSheetState extends State<RechercheClientSheet> {
                   Text(fmt(_n(m['montantTotal'] ?? m['total'])),
                       style: const TextStyle(fontWeight: FontWeight.bold)),
                   if (_n(m['resteAPayer']) > 0.005)
-                    Text('reste ${fmt(_n(m['resteAPayer']))}',
+                    Text(AppLocalizations.of(context).rcLeft(fmt(_n(m['resteAPayer']))),
                         style: const TextStyle(fontSize: 11, color: _rouge)),
                 ],
               ),
@@ -406,9 +407,9 @@ class _RechercheClientSheetState extends State<RechercheClientSheet> {
           ),
 
         // ----- Dettes et paiements -----
-        _titre('Dettes et paiements (toutes périodes)'),
+        _titre(AppLocalizations.of(context).rcDebts),
         if (!_chargement && dettes.isEmpty)
-          Text('Aucune dette enregistrée.', style: TextStyle(color: Colors.grey.shade600)),
+          Text(AppLocalizations.of(context).rcNoDebt, style: TextStyle(color: Colors.grey.shade600)),
         for (final c in dettes)
           Card(
             margin: const EdgeInsets.only(bottom: 8),
@@ -420,15 +421,15 @@ class _RechercheClientSheetState extends State<RechercheClientSheet> {
                   Row(children: [
                     Expanded(
                       child: Text(
-                        'Crédit de ${fmt(_n(c['montantInitial']))} $cur'
+                        '${AppLocalizations.of(context).rcCreditOf('${fmt(_n(c['montantInitial']))} $cur')}'
                         '${_d(c['dateCreation'] ?? c['createdAt']) == null ? '' : ' • ${dfJour.format(_d(c['dateCreation'] ?? c['createdAt'])!)}'}',
                         style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ),
                     Text(
                       _n(c['montantReste']) > 0.005
-                          ? 'reste ${fmt(_n(c['montantReste']))}'
-                          : 'soldé ✔',
+                          ? AppLocalizations.of(context).rcLeft(fmt(_n(c['montantReste'])))
+                          : AppLocalizations.of(context).rcSettled,
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: _n(c['montantReste']) > 0.005 ? _rouge : _vert),

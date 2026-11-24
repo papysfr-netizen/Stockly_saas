@@ -4264,4 +4264,101 @@ class AppLocalizationsFr extends AppLocalizations {
   String ecrGap(String ecart) {
     return 'Écart : $ecart';
   }
+
+  @override
+  String get rcNone => 'Aucun client trouvé';
+
+  @override
+  String get rcOther => 'Autres clients';
+
+  @override
+  String get rcSearch => '🔎 Rechercher un client';
+
+  @override
+  String get rcName => 'Nom du client…';
+
+  @override
+  String get rcLoading => 'Chargement…';
+
+  @override
+  String get rcLoadingDebts => 'Chargement des dettes…';
+
+  @override
+  String rcOwesTotal(String montant) {
+    return 'Doit en tout : $montant';
+  }
+
+  @override
+  String get rcOwesNothing => 'Ne doit rien';
+
+  @override
+  String get rcPurchasesPeriod => 'Achats (période)';
+
+  @override
+  String get rcPaid => 'Payé';
+
+  @override
+  String get rcPurchases => 'Achats sur la période';
+
+  @override
+  String get rcNoPurchase => 'Aucun achat sur cette période.';
+
+  @override
+  String rcLeft(String montant) {
+    return 'reste $montant';
+  }
+
+  @override
+  String get rcDebts => 'Dettes et paiements (toutes périodes)';
+
+  @override
+  String get rcNoDebt => 'Aucune dette enregistrée.';
+
+  @override
+  String rcCreditOf(String montant) {
+    return 'Crédit de $montant';
+  }
+
+  @override
+  String get rcSettled => 'soldé ✔';
+
+  @override
+  String get iaTakePhoto => 'Prendre une photo';
+
+  @override
+  String get iaPickImage => 'Choisir une image ou une capture';
+
+  @override
+  String iaCameraError(String erreur) {
+    return 'Impossible d\'ouvrir l\'appareil photo : $erreur';
+  }
+
+  @override
+  String get iaReading =>
+      '🤖 L\'IA lit le document…\nUn grand tableau peut prendre jusqu\'à 2 minutes. Gardez l\'application ouverte.';
+
+  @override
+  String get iaTimeout =>
+      'L\'IA a mis trop de temps. Essayez une photo d\'une partie du tableau (20 à 25 lignes), ou une meilleure connexion.';
+
+  @override
+  String get iaCut =>
+      'La connexion internet s\'est coupée pendant l\'envoi. Réessayez avec un meilleur réseau.';
+
+  @override
+  String iaFailed(String detail) {
+    return 'L\'IA n\'a pas pu lire le document. Détail : $detail';
+  }
+
+  @override
+  String get iaNothing =>
+      'L\'IA n\'a trouvé aucun produit. Essayez une photo plus nette, bien droite.';
+
+  @override
+  String get iaOtherCurrency => 'Prix dans une autre monnaie';
+
+  @override
+  String iaRateQ(String devise, String code) {
+    return 'Les prix de ce document sont en $devise.\nCombien de $code pour 1 \$ ? Les prix seront convertis en dollars.';
+  }
 }

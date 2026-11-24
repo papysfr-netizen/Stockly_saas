@@ -1,3 +1,4 @@
+import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -60,12 +61,12 @@ Règles :
           children: [
             ListTile(
               leading: const Icon(Icons.photo_camera_rounded),
-              title: const Text('Prendre une photo'),
+              title: Text(AppLocalizations.of(context).iaTakePhoto),
               onTap: () => Navigator.pop(ctx, ImageSource.camera),
             ),
             ListTile(
               leading: const Icon(Icons.photo_library_rounded),
-              title: const Text('Choisir une image ou une capture'),
+              title: Text(AppLocalizations.of(context).iaPickImage),
               onTap: () => Navigator.pop(ctx, ImageSource.gallery),
             ),
             const SizedBox(height: 8),
@@ -80,7 +81,7 @@ Règles :
       // Photo allégée : plus rapide à envoyer en 4G, toujours lisible par l'IA
       photo = await ImagePicker().pickImage(source: source, maxWidth: 1600, maxHeight: 3200, imageQuality: 75);
     } catch (e) {
-      if (context.mounted) _message(context, "Impossible d'ouvrir l'appareil photo : $e");
+      if (context.mounted) _message(context, AppLocalizations.of(context).iaCameraError('$e'));
       return null;
     }
     if (photo == null || !context.mounted) return null;
@@ -92,14 +93,13 @@ Règles :
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const AlertDialog(
+      builder: (_) => AlertDialog(
         content: Row(
           children: [
-            CircularProgressIndicator(),
-            SizedBox(width: 18),
+            const CircularProgressIndicator(),
+            const SizedBox(width: 18),
             Expanded(
-              child: Text("🤖 L'IA lit le document…\n"
-                  'Un grand tableau peut prendre jusqu\'à 2 minutes. Gardez l\'application ouverte.'),
+              child: Text(AppLocalizations.of(context).iaReading),
             ),
           ],
         ),
@@ -122,17 +122,17 @@ Règles :
       if (context.mounted) {
         final s = e.toString();
         final texte = s.contains('Timeout')
-            ? "L'IA a mis trop de temps. Essayez une photo d'une partie du tableau (20 à 25 lignes), ou une meilleure connexion."
+            ? AppLocalizations.of(context).iaTimeout
             : (_coupure(e)
-                ? "La connexion internet s'est coupée pendant l'envoi. Réessayez avec un meilleur réseau."
-                : "L'IA n'a pas pu lire le document. Détail : $s");
+                ? AppLocalizations.of(context).iaCut
+                : AppLocalizations.of(context).iaFailed(s));
         _message(context, texte);
       }
       return null;
     }
     if (!context.mounted) return null;
     if (produits.isEmpty) {
-      _message(context, "L'IA n'a trouvé aucun produit. Essayez une photo plus nette, bien droite.");
+      _message(context, AppLocalizations.of(context).iaNothing);
       return null;
     }
 
@@ -235,13 +235,12 @@ Règles :
     final taux = await showDialog<double>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Prix dans une autre monnaie'),
+        title: Text(AppLocalizations.of(context).iaOtherCurrency),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Les prix de ce document sont en $devise$nom.\n'
-                'Combien de $devise pour 1 \$ ? Les prix seront convertis en dollars.'),
+            Text(AppLocalizations.of(context).iaRateQ('$devise$nom', devise)),
             const SizedBox(height: 12),
             TextField(
               controller: ctrl,

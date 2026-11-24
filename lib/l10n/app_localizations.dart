@@ -7124,6 +7124,168 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Écart : {ecart}'**
   String ecrGap(String ecart);
+
+  /// No description provided for @rcNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun client trouvé'**
+  String get rcNone;
+
+  /// No description provided for @rcOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autres clients'**
+  String get rcOther;
+
+  /// No description provided for @rcSearch.
+  ///
+  /// In fr, this message translates to:
+  /// **'🔎 Rechercher un client'**
+  String get rcSearch;
+
+  /// No description provided for @rcName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom du client…'**
+  String get rcName;
+
+  /// No description provided for @rcLoading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chargement…'**
+  String get rcLoading;
+
+  /// No description provided for @rcLoadingDebts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chargement des dettes…'**
+  String get rcLoadingDebts;
+
+  /// No description provided for @rcOwesTotal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Doit en tout : {montant}'**
+  String rcOwesTotal(String montant);
+
+  /// No description provided for @rcOwesNothing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ne doit rien'**
+  String get rcOwesNothing;
+
+  /// No description provided for @rcPurchasesPeriod.
+  ///
+  /// In fr, this message translates to:
+  /// **'Achats (période)'**
+  String get rcPurchasesPeriod;
+
+  /// No description provided for @rcPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payé'**
+  String get rcPaid;
+
+  /// No description provided for @rcPurchases.
+  ///
+  /// In fr, this message translates to:
+  /// **'Achats sur la période'**
+  String get rcPurchases;
+
+  /// No description provided for @rcNoPurchase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun achat sur cette période.'**
+  String get rcNoPurchase;
+
+  /// No description provided for @rcLeft.
+  ///
+  /// In fr, this message translates to:
+  /// **'reste {montant}'**
+  String rcLeft(String montant);
+
+  /// No description provided for @rcDebts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dettes et paiements (toutes périodes)'**
+  String get rcDebts;
+
+  /// No description provided for @rcNoDebt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune dette enregistrée.'**
+  String get rcNoDebt;
+
+  /// No description provided for @rcCreditOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Crédit de {montant}'**
+  String rcCreditOf(String montant);
+
+  /// No description provided for @rcSettled.
+  ///
+  /// In fr, this message translates to:
+  /// **'soldé ✔'**
+  String get rcSettled;
+
+  /// No description provided for @iaTakePhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prendre une photo'**
+  String get iaTakePhoto;
+
+  /// No description provided for @iaPickImage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir une image ou une capture'**
+  String get iaPickImage;
+
+  /// No description provided for @iaCameraError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible d\'ouvrir l\'appareil photo : {erreur}'**
+  String iaCameraError(String erreur);
+
+  /// No description provided for @iaReading.
+  ///
+  /// In fr, this message translates to:
+  /// **'🤖 L\'IA lit le document…\nUn grand tableau peut prendre jusqu\'à 2 minutes. Gardez l\'application ouverte.'**
+  String get iaReading;
+
+  /// No description provided for @iaTimeout.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'IA a mis trop de temps. Essayez une photo d\'une partie du tableau (20 à 25 lignes), ou une meilleure connexion.'**
+  String get iaTimeout;
+
+  /// No description provided for @iaCut.
+  ///
+  /// In fr, this message translates to:
+  /// **'La connexion internet s\'est coupée pendant l\'envoi. Réessayez avec un meilleur réseau.'**
+  String get iaCut;
+
+  /// No description provided for @iaFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'IA n\'a pas pu lire le document. Détail : {detail}'**
+  String iaFailed(String detail);
+
+  /// No description provided for @iaNothing.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'IA n\'a trouvé aucun produit. Essayez une photo plus nette, bien droite.'**
+  String get iaNothing;
+
+  /// No description provided for @iaOtherCurrency.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix dans une autre monnaie'**
+  String get iaOtherCurrency;
+
+  /// No description provided for @iaRateQ.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les prix de ce document sont en {devise}.\nCombien de {code} pour 1 \$ ? Les prix seront convertis en dollars.'**
+  String iaRateQ(String devise, String code);
 }
 
 class _AppLocalizationsDelegate

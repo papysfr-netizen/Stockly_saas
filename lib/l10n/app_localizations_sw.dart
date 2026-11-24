@@ -4243,4 +4243,101 @@ class AppLocalizationsSw extends AppLocalizations {
   String ecrGap(String ecart) {
     return 'Tofauti: $ecart';
   }
+
+  @override
+  String get rcNone => 'Hakuna mteja aliyepatikana';
+
+  @override
+  String get rcOther => 'Wateja wengine';
+
+  @override
+  String get rcSearch => '🔎 Tafuta mteja';
+
+  @override
+  String get rcName => 'Jina la mteja…';
+
+  @override
+  String get rcLoading => 'Inapakia…';
+
+  @override
+  String get rcLoadingDebts => 'Inapakia madeni…';
+
+  @override
+  String rcOwesTotal(String montant) {
+    return 'Anadaiwa jumla: $montant';
+  }
+
+  @override
+  String get rcOwesNothing => 'Hadaiwi chochote';
+
+  @override
+  String get rcPurchasesPeriod => 'Manunuzi (kipindi)';
+
+  @override
+  String get rcPaid => 'Imelipwa';
+
+  @override
+  String get rcPurchases => 'Manunuzi katika kipindi';
+
+  @override
+  String get rcNoPurchase => 'Hakuna ununuzi katika kipindi hiki.';
+
+  @override
+  String rcLeft(String montant) {
+    return 'imebaki $montant';
+  }
+
+  @override
+  String get rcDebts => 'Madeni na malipo (vipindi vyote)';
+
+  @override
+  String get rcNoDebt => 'Hakuna deni lililorekodiwa.';
+
+  @override
+  String rcCreditOf(String montant) {
+    return 'Mkopo wa $montant';
+  }
+
+  @override
+  String get rcSettled => 'imelipwa yote ✔';
+
+  @override
+  String get iaTakePhoto => 'Piga picha';
+
+  @override
+  String get iaPickImage => 'Chagua picha au picha ya skrini';
+
+  @override
+  String iaCameraError(String erreur) {
+    return 'Imeshindwa kufungua kamera: $erreur';
+  }
+
+  @override
+  String get iaReading =>
+      '🤖 AI inasoma hati…\nJedwali kubwa linaweza kuchukua hadi dakika 2. Acha programu wazi.';
+
+  @override
+  String get iaTimeout =>
+      'AI imechukua muda mrefu. Jaribu picha ya sehemu ya jedwali (mistari 20 hadi 25), au mtandao bora.';
+
+  @override
+  String get iaCut =>
+      'Intaneti ilikatika wakati wa kutuma. Jaribu tena kwa mtandao bora.';
+
+  @override
+  String iaFailed(String detail) {
+    return 'AI imeshindwa kusoma hati. Maelezo: $detail';
+  }
+
+  @override
+  String get iaNothing =>
+      'AI haikupata bidhaa yoyote. Jaribu picha iliyo wazi zaidi na iliyonyooka.';
+
+  @override
+  String get iaOtherCurrency => 'Bei katika sarafu nyingine';
+
+  @override
+  String iaRateQ(String devise, String code) {
+    return 'Bei za hati hii ziko kwa $devise.\n$code ngapi kwa \$1? Bei zitabadilishwa kuwa dola.';
+  }
 }

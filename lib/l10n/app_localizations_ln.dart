@@ -4252,4 +4252,101 @@ class AppLocalizationsLn extends AppLocalizations {
   String ecrGap(String ecart) {
     return 'Bokeseni: $ecart';
   }
+
+  @override
+  String get rcNone => 'Client moko te ezwami';
+
+  @override
+  String get rcOther => 'Ba clients mosusu';
+
+  @override
+  String get rcSearch => '🔎 Luka client';
+
+  @override
+  String get rcName => 'Nkombo ya client…';
+
+  @override
+  String get rcLoading => 'Ezali kozwa…';
+
+  @override
+  String get rcLoadingDebts => 'Ezali kozwa ba niongo…';
+
+  @override
+  String rcOwesTotal(String montant) {
+    return 'Azali na niongo nyonso: $montant';
+  }
+
+  @override
+  String get rcOwesNothing => 'Azali na niongo te';
+
+  @override
+  String get rcPurchasesPeriod => 'Bosombi (tango)';
+
+  @override
+  String get rcPaid => 'Efutami';
+
+  @override
+  String get rcPurchases => 'Bosombi na tango oyo';
+
+  @override
+  String get rcNoPurchase => 'Bosombi moko te na tango oyo.';
+
+  @override
+  String rcLeft(String montant) {
+    return 'etikali $montant';
+  }
+
+  @override
+  String get rcDebts => 'Ba niongo mpe ba bofuti (ba tango nyonso)';
+
+  @override
+  String get rcNoDebt => 'Niongo moko te ekomami.';
+
+  @override
+  String rcCreditOf(String montant) {
+    return 'Crédit ya $montant';
+  }
+
+  @override
+  String get rcSettled => 'efutami nyonso ✔';
+
+  @override
+  String get iaTakePhoto => 'Zwa foto';
+
+  @override
+  String get iaPickImage => 'Pona elilingi to capture';
+
+  @override
+  String iaCameraError(String erreur) {
+    return 'Ekoki te kofungola caméra: $erreur';
+  }
+
+  @override
+  String get iaReading =>
+      '🤖 IA ezali kotanga mokanda…\nTableau monene ekoki kozwa tii miniti 2. Tika application efungwama.';
+
+  @override
+  String get iaTimeout =>
+      'IA ezwi ntango mingi. Meka foto ya eteni ya tableau (milongo 20 tii 25), to connexion ya malamu.';
+
+  @override
+  String get iaCut =>
+      'Internet ekatanaki na tango ya kotinda. Meka lisusu na réseau ya malamu.';
+
+  @override
+  String iaFailed(String detail) {
+    return 'IA ekoki te kotanga mokanda. Makambo: $detail';
+  }
+
+  @override
+  String get iaNothing =>
+      'IA ezwi eloko moko te. Meka foto oyo emonani malamu, ya semba.';
+
+  @override
+  String get iaOtherCurrency => 'Ba ntalo na mbongo mosusu';
+
+  @override
+  String iaRateQ(String devise, String code) {
+    return 'Ba ntalo ya mokanda oyo ezali na $devise.\n$code boni mpo na 1 \$? Ba ntalo ekobongwana na dollars.';
+  }
 }
