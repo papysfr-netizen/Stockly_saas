@@ -14,6 +14,7 @@ import 'package:firebase_ai/firebase_ai.dart';
 import 'package:firebase_ai/src/api.dart' show ThinkingConfig;
 
 import '../../core/models/produit.dart';
+import '../../core/services/argent_vente.dart';
 import '../../core/services/photo_ia_service.dart';
 
 class AssistantService {
@@ -52,6 +53,7 @@ class AssistantService {
   }) {
     double ca = 0, cout = 0, encaisse = 0, credit = 0;
     final parJour = <String, double>{};
+    final margeJour = <String, double>{};
     final parVendeur = <String, double>{};
     final parBoutique = <String, double>{};
     final qteProduit = <String, double>{};
@@ -65,10 +67,11 @@ class AssistantService {
       final net = _n(v['montantTotal']) - _n(v['montantRetourne']) - _n(v['montantAnnule']);
       nombre++;
       ca += net;
-      cout += _n(v['coutMarchandises']);
+      cout += ArgentVente.coutNet(v); // retours déduits, comme le Rapport
       credit += _n(v['resteAPayer']);
       encaisse += net - _n(v['resteAPayer']);
       parJour[_jour(d)] = (parJour[_jour(d)] ?? 0) + net;
+      margeJour[_jour(d)] = (margeJour[_jour(d)] ?? 0) + net - ArgentVente.coutNet(v);
       final vendeur = (v['vendeurNom'] ?? '').toString();
       if (vendeur.isNotEmpty) parVendeur[vendeur] = (parVendeur[vendeur] ?? 0) + net;
       final b = (v['boutiqueId'] ?? '').toString();
@@ -125,14 +128,49 @@ class AssistantService {
     }
 
     final parCategorie = <String, double>{};
+    final depenseJour = <String, double>{};
     for (final d in depenses) {
       final c = (d['categorie'] ?? 'Autre').toString();
       parCategorie[c] = (parCategorie[c] ?? 0) + _n(d['montant']);
+      final dd = _date(d['date']);
+      if (dd != null) depenseJour[_jour(dd)] = (depenseJour[_jour(dd)] ?? 0) + _n(d['montant']);
     }
+
+    // 📅 Totaux déjà calculés par période (l'IA n'a qu'à les lire, pas à additionner)
+    final aujourdhui = DateTime(maintenant.year, maintenant.month, maintenant.day);
+    final lundi = aujourdhui.subtract(Duration(days: aujourdhui.weekday - 1));
+    Map<String, dynamic> periode(DateTime debut, DateTime fin) {
+      double ventesP = 0, margeP = 0, depensesP = 0;
+      for (var j = debut; !j.isAfter(fin); j = DateTime(j.year, j.month, j.day + 1)) {
+        ventesP += parJour[_jour(j)] ?? 0;
+        margeP += margeJour[_jour(j)] ?? 0;
+        depensesP += depenseJour[_jour(j)] ?? 0;
+      }
+      return {
+        'du': _jour(debut),
+        'au': _jour(fin),
+        'ventesNettes': _r(ventesP),
+        'margeBrute': _r(margeP),
+        'depenses': _r(depensesP),
+        'beneficeNet': _r(margeP - depensesP),
+      };
+    }
+    final debut30 = aujourdhui.subtract(const Duration(days: jours - 1));
+    DateTime borne(DateTime d) => d.isBefore(debut30) ? debut30 : d;
+    final periodes = {
+      'aujourdhui': periode(aujourdhui, aujourdhui),
+      'hier': periode(aujourdhui.subtract(const Duration(days: 1)), aujourdhui.subtract(const Duration(days: 1))),
+      'cetteSemaine (depuis lundi)': periode(borne(lundi), aujourdhui),
+      'semaineDerniere': periode(borne(lundi.subtract(const Duration(days: 7))), lundi.subtract(const Duration(days: 1))),
+      '7derniersJours': periode(aujourdhui.subtract(const Duration(days: 6)), aujourdhui),
+      'ceMois (depuis le 1er)': periode(borne(DateTime(aujourdhui.year, aujourdhui.month)), aujourdhui),
+      '30derniersJours': periode(debut30, aujourdhui),
+    };
 
     return {
       'aujourdhui': _jour(maintenant),
       'periode': 'les $jours derniers jours',
+      'parPeriode': periodes,
       'devise': 'USD',
       if (tauxCDF > 0) 'taux': '1 USD = ${tauxCDF.round()} FC',
       'ventes': {
@@ -222,7 +260,9 @@ Règles :
 - Utilise UNIQUEMENT les données JSON ci-dessous (${resume['periode']}). N'invente aucun chiffre.
 - Si la question porte sur une période ou une information absente, dis-le simplement.
 - Pour « que recommander ? » : utilise stock.aRecommander (joursRestants = jours avant rupture au rythme actuel).
-- « Aujourd'hui » = ${resume['aujourdhui']} ; « hier » = la veille, dans ventes.parJour.
+- Pour aujourd'hui, hier, cette semaine, la semaine dernière, 7 jours, ce mois : utilise parPeriode
+  (déjà calculé : ventes nettes, marge brute, dépenses, bénéfice net = ce qui a été « gagné »).
+- « Aujourd'hui » = ${resume['aujourdhui']}. Pour un autre jour précis : ventes.parJour.
 - Pas de conseil juridique ou fiscal ; reste sur la gestion de la boutique.
 
 DONNÉES :
@@ -303,7 +343,7 @@ ${jsonEncode(resume)}
       );
       final morceaux = StringBuffer();
       try {
-        await for (final r in model.generateContentStream(contenu).timeout(const Duration(seconds: 20))) {
+        await for (final r in model.generateContentStream(contenu).timeout(const Duration(seconds: 45))) {
           final texte = r.text;
           if (texte == null || texte.isEmpty) continue;
           morceaux.write(texte);

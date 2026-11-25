@@ -63,5 +63,11 @@ void main() {
     expect((r['jeDoisAuxFournisseurs'] as Map)['total'], 300);
     expect((r['depenses'] as Map)['total'], 8);
     expect(r['taux'], '1 USD = 2800 FC');
+    // périodes déjà calculées (24/11/2026 = un mardi)
+    final p = r['parPeriode'] as Map;
+    expect((p['aujourdhui'] as Map)['ventesNettes'], 50);
+    expect((p['hier'] as Map)['ventesNettes'], 30);
+    expect((p['cetteSemaine (depuis lundi)'] as Map)['ventesNettes'], 80);
+    expect((p['cetteSemaine (depuis lundi)'] as Map)['du'], '2026-11-23');
   });
 }
