@@ -14,6 +14,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stockly_saas/features/assistant/avatar_nguli.dart';
 
 import '../../core/providers/currency_provider.dart';
 import '../../core/providers/user_role_provider.dart';
@@ -301,7 +302,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
         actions: [
           // ✨ Demandez à Nguli (l'IA répond avec les chiffres de la boutique)
           IconButton(
-            icon: const Icon(Icons.auto_awesome, color: Colors.amber),
+            icon: const AvatarNguli(taille: 30),
             tooltip: AppLocalizations.of(context).astTitle,
             onPressed: entrepriseId.isEmpty
                 ? null

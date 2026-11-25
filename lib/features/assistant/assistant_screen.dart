@@ -1,4 +1,4 @@
-// ✨ Écran « Demandez à Nguli » (Rapport → bouton ✨)
+// ✨ Écran « Demandez à Nguli » (Rapport → visage de Nguli)
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -9,6 +9,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
+
+import 'avatar_nguli.dart';
 
 import '../../core/providers/currency_provider.dart';
 import '../../core/providers/produit_provider.dart';
@@ -299,7 +301,7 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
   Widget _bulle(String texte, {required bool moi}) {
     final t = AppLocalizations.of(context);
     final sombre = Theme.of(context).brightness == Brightness.dark;
-    return Align(
+    final bulle = Align(
       alignment: moi ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.82),
@@ -332,6 +334,15 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
         ),
       ),
     );
+    if (moi) return bulle;
+    // 👩🏾 Le visage de Nguli à côté de chaque réponse
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(padding: EdgeInsets.only(top: 6, right: 6), child: AvatarNguli(taille: 30)),
+        Flexible(child: bulle),
+      ],
+    );
   }
 
   @override
@@ -340,7 +351,11 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
     final suggestions = [t.astSuggest1, t.astSuggest2, t.astSuggest3, t.astSuggest4];
     return Scaffold(
       appBar: AppBar(
-        title: Text(t.astTitle),
+        title: Row(children: [
+          const AvatarNguli(taille: 34),
+          const SizedBox(width: 10),
+          Flexible(child: Text(t.astTitle, overflow: TextOverflow.ellipsis)),
+        ]),
         actions: [
           // 🕘 Discussions passées et ➕ nouvelle discussion
           IconButton(
@@ -372,6 +387,8 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
                 : _resume == null
                     ? Center(
                         child: Column(mainAxisSize: MainAxisSize.min, children: [
+                          const AvatarNguli(taille: 96),
+                          const SizedBox(height: 16),
                           const CircularProgressIndicator(),
                           const SizedBox(height: 12),
                           Text(t.astLoading),
@@ -395,11 +412,12 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
                             _bulle(q, moi: true),
                             if (r.isEmpty)
                               const Padding(
-                                padding: EdgeInsets.all(8),
-                                child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2)),
-                                ),
+                                padding: EdgeInsets.symmetric(vertical: 6),
+                                child: Row(children: [
+                                  AvatarNguli(taille: 30),
+                                  SizedBox(width: 10),
+                                  SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                                ]),
                               )
                             else
                               _bulle(r, moi: false),
