@@ -316,7 +316,8 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             SelectableText(
-              texte,
+              // Au cas où l'IA met quand même du markdown : on retire ** et # en début de ligne
+              moi ? texte : texte.replaceAll('**', '').replaceAll(RegExp(r'^#+\s*', multiLine: true), ''),
               style: TextStyle(color: moi ? Colors.white : null, fontSize: 15, height: 1.35),
             ),
             // 🔊 Réécouter la réponse

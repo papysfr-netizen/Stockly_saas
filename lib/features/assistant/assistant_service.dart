@@ -264,6 +264,8 @@ Règles :
   (déjà calculé : ventes nettes, marge brute, dépenses, bénéfice net = ce qui a été « gagné »).
 - « Aujourd'hui » = ${resume['aujourdhui']}. Pour un autre jour précis : ventes.parJour.
 - Pas de conseil juridique ou fiscal ; reste sur la gestion de la boutique.
+- Écris du TEXTE SIMPLE, sans mise en forme markdown : pas d'astérisques (*), pas de #.
+  Pour une liste, commence chaque ligne par « • ».
 
 DONNÉES :
 ${jsonEncode(resume)}
