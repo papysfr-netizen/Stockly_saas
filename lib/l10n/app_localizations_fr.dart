@@ -4483,4 +4483,21 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get astQuota =>
       'Les questions gratuites de l\'IA de Google sont épuisées pour le moment. Réessayez plus tard (le compteur repart chaque jour).';
+
+  @override
+  String get astHistory => 'Discussions passées';
+
+  @override
+  String get astHistoryEmpty => 'Aucune discussion enregistrée pour le moment.';
+
+  @override
+  String get astNew => 'Nouvelle discussion';
+
+  @override
+  String get astDelete => 'Supprimer';
+
+  @override
+  String astNbQuestions(String n) {
+    return '$n question(s)';
+  }
 }

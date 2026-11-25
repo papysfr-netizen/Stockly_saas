@@ -1229,5 +1229,10 @@
   "astVoiceOn": "Tanga biyano na mongongo",
   "astVoiceOff": "Tanga lisusu biyano te",
   "astBusy": "IA ya Google ezali na bato ebele sikoyo. Meka lisusu nsima ya miniti moko.",
-  "astQuota": "Mituna ya ofele ya IA ya Google esili mpo na sikoyo. Meka lisusu nsima (motango ebandaka lisusu mokolo na mokolo)."
+  "astQuota": "Mituna ya ofele ya IA ya Google esili mpo na sikoyo. Meka lisusu nsima (motango ebandaka lisusu mokolo na mokolo).",
+  "astHistory": "Masolo oyo eleki",
+  "astHistoryEmpty": "Lisolo moko te ebombami naino.",
+  "astNew": "Lisolo ya sika",
+  "astDelete": "Longola",
+  "astNbQuestions": "mituna {n}"
 }

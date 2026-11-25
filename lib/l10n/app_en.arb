@@ -1229,5 +1229,10 @@
   "astVoiceOn": "Read the answers aloud",
   "astVoiceOff": "Stop reading the answers",
   "astBusy": "Google's AI is very busy right now. Try again in a minute.",
-  "astQuota": "Google's free AI questions are used up for now. Try again later (the counter resets every day)."
+  "astQuota": "Google's free AI questions are used up for now. Try again later (the counter resets every day).",
+  "astHistory": "Past conversations",
+  "astHistoryEmpty": "No saved conversation yet.",
+  "astNew": "New conversation",
+  "astDelete": "Delete",
+  "astNbQuestions": "{n} question(s)"
 }

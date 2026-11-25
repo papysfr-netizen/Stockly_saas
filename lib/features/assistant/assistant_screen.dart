@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -15,6 +16,7 @@ import '../../l10n/app_localizations.dart';
 import '../boutiques/boutique_provider.dart';
 import '../../core/services/photo_ia_service.dart';
 import 'assistant_service.dart';
+import 'historique_assistant.dart';
 
 class AssistantScreen extends ConsumerStatefulWidget {
   final String entrepriseId;
@@ -28,6 +30,78 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
   final _question = TextEditingController();
   final _defilement = ScrollController();
   final List<(String, String)> _echanges = []; // (question, réponse)
+
+  // 🕘 Discussion en cours (gardée sur le téléphone)
+  int _idDiscussion = DateTime.now().millisecondsSinceEpoch;
+  String get _uid => FirebaseAuth.instance.currentUser?.uid ?? '';
+  void _sauver() => unawaited(
+      HistoriqueAssistant.enregistrer(widget.entrepriseId, _uid, Discussion(_idDiscussion, List.of(_echanges))));
+
+  void _nouvelleDiscussion() {
+    _voix.stop();
+    setState(() {
+      _echanges.clear();
+      _idDiscussion = DateTime.now().millisecondsSinceEpoch;
+    });
+  }
+
+  Future<void> _ouvrirHistorique() async {
+    final t = AppLocalizations.of(context);
+    final liste = await HistoriqueAssistant.lire(widget.entrepriseId, _uid);
+    if (!mounted) return;
+    final choisie = await showModalBottomSheet<Discussion>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setStateFeuille) => SafeArea(
+          child: SizedBox(
+            height: MediaQuery.of(ctx).size.height * 0.7,
+            child: liste.isEmpty
+                ? Center(child: Text(t.astHistoryEmpty))
+                : ListView(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                        child: Text(t.astHistory, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                      ),
+                      for (final d in liste)
+                        ListTile(
+                          leading: const Icon(Icons.chat_bubble_outline),
+                          title: Text(d.titre, maxLines: 2, overflow: TextOverflow.ellipsis),
+                          subtitle: Text(
+                              '${_dateCourte(d.date)} · ${t.astNbQuestions('${d.echanges.length}')}'),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete_outline),
+                            tooltip: t.astDelete,
+                            onPressed: () async {
+                              await HistoriqueAssistant.supprimer(widget.entrepriseId, _uid, d.id);
+                              setStateFeuille(() => liste.remove(d));
+                            },
+                          ),
+                          onTap: () => Navigator.pop(ctx, d),
+                        ),
+                    ],
+                  ),
+          ),
+        ),
+      ),
+    );
+    if (choisie == null || !mounted) return;
+    _voix.stop();
+    setState(() {
+      _echanges
+        ..clear()
+        ..addAll(choisie.echanges);
+      _idDiscussion = choisie.id; // on peut continuer cette discussion
+    });
+    _enBas();
+  }
+
+  static String _dateCourte(DateTime d) {
+    String deux(int v) => v.toString().padLeft(2, '0');
+    return '${deux(d.day)}/${deux(d.month)}/${d.year} ${deux(d.hour)}:${deux(d.minute)}';
+  }
   Map<String, dynamic>? _resume;
   String? _erreur;
   bool _reflechit = false;
@@ -144,6 +218,7 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
       _echanges[_echanges.length - 1] = (question, reponse);
       _reflechit = false;
     });
+    _sauver();
     _enBas();
     if (_lireReponses) unawaited(_lire(reponse));
   }
@@ -208,6 +283,7 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
       _echanges[_echanges.length - 1] = (q, reponse);
       _reflechit = false;
     });
+    _sauver();
     _enBas();
   }
 
@@ -265,6 +341,17 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
       appBar: AppBar(
         title: Text(t.astTitle),
         actions: [
+          // 🕘 Discussions passées et ➕ nouvelle discussion
+          IconButton(
+            tooltip: t.astHistory,
+            icon: const Icon(Icons.history_rounded),
+            onPressed: _reflechit || _ecoute ? null : _ouvrirHistorique,
+          ),
+          IconButton(
+            tooltip: t.astNew,
+            icon: const Icon(Icons.add_comment_outlined),
+            onPressed: _reflechit || _ecoute || _echanges.isEmpty ? null : _nouvelleDiscussion,
+          ),
           // 🔊 Lire (ou non) les réponses à voix haute
           IconButton(
             tooltip: _lireReponses ? t.astVoiceOff : t.astVoiceOn,

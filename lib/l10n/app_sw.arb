@@ -1229,5 +1229,10 @@
   "astVoiceOn": "Soma majibu kwa sauti",
   "astVoiceOff": "Acha kusoma majibu",
   "astBusy": "AI ya Google ina watumiaji wengi sasa hivi. Jaribu tena baada ya dakika moja.",
-  "astQuota": "Maswali ya bure ya AI ya Google yamekwisha kwa sasa. Jaribu tena baadaye (hesabu huanza upya kila siku)."
+  "astQuota": "Maswali ya bure ya AI ya Google yamekwisha kwa sasa. Jaribu tena baadaye (hesabu huanza upya kila siku).",
+  "astHistory": "Mazungumzo yaliyopita",
+  "astHistoryEmpty": "Hakuna mazungumzo yaliyohifadhiwa bado.",
+  "astNew": "Mazungumzo mapya",
+  "astDelete": "Futa",
+  "astNbQuestions": "maswali {n}"
 }

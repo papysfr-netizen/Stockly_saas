@@ -2723,5 +2723,11 @@
   "astVoiceOn": "Lire les réponses à voix haute",
   "astVoiceOff": "Ne plus lire les réponses",
   "astBusy": "L'IA de Google est très demandée en ce moment. Réessayez dans une minute.",
-  "astQuota": "Les questions gratuites de l'IA de Google sont épuisées pour le moment. Réessayez plus tard (le compteur repart chaque jour)."
+  "astQuota": "Les questions gratuites de l'IA de Google sont épuisées pour le moment. Réessayez plus tard (le compteur repart chaque jour).",
+  "astHistory": "Discussions passées",
+  "astHistoryEmpty": "Aucune discussion enregistrée pour le moment.",
+  "astNew": "Nouvelle discussion",
+  "astDelete": "Supprimer",
+  "astNbQuestions": "{n} question(s)",
+  "@astNbQuestions": {"placeholders": {"n": {"type": "String"}}}
 }

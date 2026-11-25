@@ -4465,4 +4465,21 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get astQuota =>
       'Google\'s free AI questions are used up for now. Try again later (the counter resets every day).';
+
+  @override
+  String get astHistory => 'Past conversations';
+
+  @override
+  String get astHistoryEmpty => 'No saved conversation yet.';
+
+  @override
+  String get astNew => 'New conversation';
+
+  @override
+  String get astDelete => 'Delete';
+
+  @override
+  String astNbQuestions(String n) {
+    return '$n question(s)';
+  }
 }

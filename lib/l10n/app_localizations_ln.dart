@@ -4471,4 +4471,21 @@ class AppLocalizationsLn extends AppLocalizations {
   @override
   String get astQuota =>
       'Mituna ya ofele ya IA ya Google esili mpo na sikoyo. Meka lisusu nsima (motango ebandaka lisusu mokolo na mokolo).';
+
+  @override
+  String get astHistory => 'Masolo oyo eleki';
+
+  @override
+  String get astHistoryEmpty => 'Lisolo moko te ebombami naino.';
+
+  @override
+  String get astNew => 'Lisolo ya sika';
+
+  @override
+  String get astDelete => 'Longola';
+
+  @override
+  String astNbQuestions(String n) {
+    return 'mituna $n';
+  }
 }

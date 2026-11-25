@@ -7484,6 +7484,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Les questions gratuites de l\'IA de Google sont épuisées pour le moment. Réessayez plus tard (le compteur repart chaque jour).'**
   String get astQuota;
+
+  /// No description provided for @astHistory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Discussions passées'**
+  String get astHistory;
+
+  /// No description provided for @astHistoryEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune discussion enregistrée pour le moment.'**
+  String get astHistoryEmpty;
+
+  /// No description provided for @astNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle discussion'**
+  String get astNew;
+
+  /// No description provided for @astDelete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get astDelete;
+
+  /// No description provided for @astNbQuestions.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} question(s)'**
+  String astNbQuestions(String n);
 }
 
 class _AppLocalizationsDelegate

@@ -4462,4 +4462,21 @@ class AppLocalizationsSw extends AppLocalizations {
   @override
   String get astQuota =>
       'Maswali ya bure ya AI ya Google yamekwisha kwa sasa. Jaribu tena baadaye (hesabu huanza upya kila siku).';
+
+  @override
+  String get astHistory => 'Mazungumzo yaliyopita';
+
+  @override
+  String get astHistoryEmpty => 'Hakuna mazungumzo yaliyohifadhiwa bado.';
+
+  @override
+  String get astNew => 'Mazungumzo mapya';
+
+  @override
+  String get astDelete => 'Futa';
+
+  @override
+  String astNbQuestions(String n) {
+    return 'maswali $n';
+  }
 }
