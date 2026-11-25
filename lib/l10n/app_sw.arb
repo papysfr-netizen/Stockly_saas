@@ -1228,5 +1228,6 @@
   "astReadAloud": "Soma kwa sauti",
   "astVoiceOn": "Soma majibu kwa sauti",
   "astVoiceOff": "Acha kusoma majibu",
-  "astBusy": "AI ya Google ina watumiaji wengi sasa hivi. Jaribu tena baada ya dakika moja."
+  "astBusy": "AI ya Google ina watumiaji wengi sasa hivi. Jaribu tena baada ya dakika moja.",
+  "astQuota": "Maswali ya bure ya AI ya Google yamekwisha kwa sasa. Jaribu tena baadaye (hesabu huanza upya kila siku)."
 }

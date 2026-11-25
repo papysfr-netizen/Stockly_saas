@@ -4458,4 +4458,8 @@ class AppLocalizationsSw extends AppLocalizations {
   @override
   String get astBusy =>
       'AI ya Google ina watumiaji wengi sasa hivi. Jaribu tena baada ya dakika moja.';
+
+  @override
+  String get astQuota =>
+      'Maswali ya bure ya AI ya Google yamekwisha kwa sasa. Jaribu tena baadaye (hesabu huanza upya kila siku).';
 }

@@ -261,7 +261,8 @@ ${jsonEncode(resume)}
       ]),
     ];
     final reponse = await PhotoIaService.avecSecours(
-        (nom) => modelePour(nom).generateContent(contenu).timeout(const Duration(seconds: 60)));
+        (nom) => modelePour(nom).generateContent(contenu).timeout(const Duration(seconds: 40)),
+        modeles: PhotoIaService.modelesAssistant);
     final donnees = jsonDecode((reponse.text ?? '{}').trim());
     if (donnees is! Map) return ('', '');
     return ((donnees['question'] ?? '').toString().trim(), (donnees['reponse'] ?? '').toString().trim());
@@ -287,10 +288,11 @@ ${jsonEncode(resume)}
     final contenu = <Content>[..._historique(historique), Content.text(question)];
     Object? derniere;
     // 🔁 Modèle saturé AVANT le premier mot : on réessaie, puis on change de modèle
-    for (var i = 0; i < PhotoIaService.modeles.length; i++) {
+    const modeles = PhotoIaService.modelesAssistant;
+    for (var i = 0; i < modeles.length; i++) {
       for (var essai = 0; essai < (i == 0 ? 2 : 1); essai++) {
         final model = FirebaseAI.googleAI().generativeModel(
-          model: PhotoIaService.modeles[i],
+          model: modeles[i],
           systemInstruction: Content.system(_consigne(resume, langue)),
           generationConfig: GenerationConfig(
             temperature: 0.2,
@@ -301,7 +303,7 @@ ${jsonEncode(resume)}
         try {
           await for (final r in model
               .generateContentStream(contenu)
-              .timeout(const Duration(seconds: 30))) {
+              .timeout(const Duration(seconds: 20))) {
             final texte = r.text;
             if (texte == null || texte.isEmpty) continue;
             morceaux.write(texte);

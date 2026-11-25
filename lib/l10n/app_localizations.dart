@@ -7478,6 +7478,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'L\'IA de Google est très demandée en ce moment. Réessayez dans une minute.'**
   String get astBusy;
+
+  /// No description provided for @astQuota.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les questions gratuites de l\'IA de Google sont épuisées pour le moment. Réessayez plus tard (le compteur repart chaque jour).'**
+  String get astQuota;
 }
 
 class _AppLocalizationsDelegate

@@ -15,12 +15,21 @@ class PhotoIaService {
 
   /// 🔁 Si le modèle est saturé chez Google : on réessaie, puis on passe aux suivants
   ///    (noms « -latest » : Google les fait pointer vers ses modèles du moment)
-  static const List<String> modeles = [modele, 'gemini-flash-lite-latest', 'gemini-flash-latest'];
+  static const List<String> modeles = [modele, 'gemini-flash-latest', 'gemini-flash-lite-latest'];
+
+  /// Assistant : le modèle LÉGER d'abord (plus rapide, et bien plus de questions
+  /// gratuites par jour chez Google), le plus puissant ensuite
+  static const List<String> modelesAssistant = ['gemini-flash-lite-latest', modele, 'gemini-flash-latest'];
 
   /// Saturation ou indisponibilité passagère (on peut réessayer ailleurs)
   static bool surcharge(Object e) {
     final s = e.toString().toLowerCase();
-    return s.contains('high demand') ||
+    return s.contains('timeout') ||
+        s.contains('deadline') ||
+        s.contains('quota') ||
+        s.contains('rate limit') ||
+        s.contains('rate-limit') ||
+        s.contains('high demand') ||
         s.contains('overloaded') ||
         s.contains('unavailable') ||
         s.contains('503') ||
@@ -32,7 +41,8 @@ class PhotoIaService {
   }
 
   /// Essaie [appel] avec chaque modèle (une 2e chance après 1,5 s sur le premier)
-  static Future<T> avecSecours<T>(Future<T> Function(String modele) appel) async {
+  static Future<T> avecSecours<T>(Future<T> Function(String modele) appel,
+      {List<String> modeles = modeles}) async {
     Object? derniere;
     for (var i = 0; i < modeles.length; i++) {
       for (var essai = 0; essai < (i == 0 ? 2 : 1); essai++) {

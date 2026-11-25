@@ -4461,4 +4461,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get astBusy =>
       'Google\'s AI is very busy right now. Try again in a minute.';
+
+  @override
+  String get astQuota =>
+      'Google\'s free AI questions are used up for now. Try again later (the counter resets every day).';
 }

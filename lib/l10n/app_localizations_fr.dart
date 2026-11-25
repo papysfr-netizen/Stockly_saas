@@ -4479,4 +4479,8 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get astBusy =>
       'L\'IA de Google est très demandée en ce moment. Réessayez dans une minute.';
+
+  @override
+  String get astQuota =>
+      'Les questions gratuites de l\'IA de Google sont épuisées pour le moment. Réessayez plus tard (le compteur repart chaque jour).';
 }

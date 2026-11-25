@@ -133,9 +133,11 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
       reponse = t.astTimeout;
     } catch (e) {
       // Google saturé (même après les modèles de secours) : message clair, sans anglais
-      reponse = PhotoIaService.surcharge(e)
-          ? t.astBusy
-          : '${t.astError}\n(${AssistantService.raison(e)})';
+      reponse = e.toString().toLowerCase().contains('quota')
+          ? t.astQuota
+          : PhotoIaService.surcharge(e)
+              ? t.astBusy
+              : '${t.astError}\n(${AssistantService.raison(e)})';
     }
     if (!mounted) return;
     setState(() {
@@ -195,9 +197,11 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
       reponse = reponse.isNotEmpty ? reponse : t.astTimeout;
     } catch (e) {
       // Google saturé (même après les modèles de secours) : message clair, sans anglais
-      reponse = PhotoIaService.surcharge(e)
-          ? t.astBusy
-          : '${t.astError}\n(${AssistantService.raison(e)})';
+      reponse = e.toString().toLowerCase().contains('quota')
+          ? t.astQuota
+          : PhotoIaService.surcharge(e)
+              ? t.astBusy
+              : '${t.astError}\n(${AssistantService.raison(e)})';
     }
     if (!mounted) return;
     setState(() {
