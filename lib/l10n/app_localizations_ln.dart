@@ -4463,4 +4463,8 @@ class AppLocalizationsLn extends AppLocalizations {
 
   @override
   String get astVoiceOff => 'Tanga lisusu biyano te';
+
+  @override
+  String get astBusy =>
+      'IA ya Google ezali na bato ebele sikoyo. Meka lisusu nsima ya miniti moko.';
 }

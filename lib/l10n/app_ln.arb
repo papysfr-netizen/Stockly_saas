@@ -1227,5 +1227,6 @@
   "astMicDenied": "Pesa nzela na micro na ba paramètres ya telefone mpo na kosolola na Nguli.",
   "astReadAloud": "Tanga na mongongo",
   "astVoiceOn": "Tanga biyano na mongongo",
-  "astVoiceOff": "Tanga lisusu biyano te"
+  "astVoiceOff": "Tanga lisusu biyano te",
+  "astBusy": "IA ya Google ezali na bato ebele sikoyo. Meka lisusu nsima ya miniti moko."
 }

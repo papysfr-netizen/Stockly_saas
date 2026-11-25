@@ -4475,4 +4475,8 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get astVoiceOff => 'Ne plus lire les réponses';
+
+  @override
+  String get astBusy =>
+      'L\'IA de Google est très demandée en ce moment. Réessayez dans une minute.';
 }

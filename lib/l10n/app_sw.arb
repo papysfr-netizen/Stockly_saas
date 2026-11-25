@@ -1227,5 +1227,6 @@
   "astMicDenied": "Ruhusu kipaza sauti katika mipangilio ya simu ili kuongea na Nguli.",
   "astReadAloud": "Soma kwa sauti",
   "astVoiceOn": "Soma majibu kwa sauti",
-  "astVoiceOff": "Acha kusoma majibu"
+  "astVoiceOff": "Acha kusoma majibu",
+  "astBusy": "AI ya Google ina watumiaji wengi sasa hivi. Jaribu tena baada ya dakika moja."
 }

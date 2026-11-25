@@ -13,6 +13,41 @@ class PhotoIaService {
   /// Modèle conseillé par Firebase (utilisable sans plan payant)
   static const String modele = 'gemini-3.8-flash';
 
+  /// 🔁 Si le modèle est saturé chez Google : on réessaie, puis on passe aux suivants
+  ///    (noms « -latest » : Google les fait pointer vers ses modèles du moment)
+  static const List<String> modeles = [modele, 'gemini-flash-lite-latest', 'gemini-flash-latest'];
+
+  /// Saturation ou indisponibilité passagère (on peut réessayer ailleurs)
+  static bool surcharge(Object e) {
+    final s = e.toString().toLowerCase();
+    return s.contains('high demand') ||
+        s.contains('overloaded') ||
+        s.contains('unavailable') ||
+        s.contains('503') ||
+        s.contains('429') ||
+        s.contains('resource_exhausted') ||
+        s.contains('resource exhausted') ||
+        s.contains('not found') ||
+        s.contains('404');
+  }
+
+  /// Essaie [appel] avec chaque modèle (une 2e chance après 1,5 s sur le premier)
+  static Future<T> avecSecours<T>(Future<T> Function(String modele) appel) async {
+    Object? derniere;
+    for (var i = 0; i < modeles.length; i++) {
+      for (var essai = 0; essai < (i == 0 ? 2 : 1); essai++) {
+        try {
+          return await appel(modeles[i]);
+        } catch (e) {
+          if (!surcharge(e)) rethrow;
+          derniere = e;
+          if (i == 0 && essai == 0) await Future<void>.delayed(const Duration(milliseconds: 1500));
+        }
+      }
+    }
+    throw derniere ?? StateError('IA indisponible');
+  }
+
   /// Dernière lecture : monnaie du document et frais d'arrivage (fret…), convertis en dollars
   static String derniereDevise = 'USD';
   static double derniersFrais = 0;
@@ -133,7 +168,9 @@ Règles :
       navigateur.pop();
       if (context.mounted) {
         final s = e.toString();
-        final texte = s.contains('Timeout')
+        final texte = surcharge(e)
+            ? AppLocalizations.of(context).astBusy
+            : s.contains('Timeout')
             ? AppLocalizations.of(context).iaTimeout
             : (_coupure(e)
                 ? AppLocalizations.of(context).iaCut
@@ -188,18 +225,18 @@ Règles :
       optionalProperties: ['fournisseur', 'numero', 'date', 'devise', 'frais'],
     );
 
-    final model = FirebaseAI.googleAI().generativeModel(
-      model: modele,
-      generationConfig: GenerationConfig(
-        responseMimeType: 'application/json',
-        responseSchema: schema,
-        temperature: 0,
-      ),
-    );
-
-    final reponse = await model.generateContent([
-      Content.multi([TextPart(_consigne), InlineDataPart(mimeType, bytes)]),
-    ]).timeout(const Duration(seconds: 150));
+    final reponse = await avecSecours((nom) => FirebaseAI.googleAI()
+        .generativeModel(
+          model: nom,
+          generationConfig: GenerationConfig(
+            responseMimeType: 'application/json',
+            responseSchema: schema,
+            temperature: 0,
+          ),
+        )
+        .generateContent([
+          Content.multi([TextPart(_consigne), InlineDataPart(mimeType, bytes)]),
+        ]).timeout(const Duration(seconds: 150)));
 
     final texte = (reponse.text ?? '').trim();
     if (texte.isEmpty) return [];

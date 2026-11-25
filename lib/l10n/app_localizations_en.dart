@@ -4457,4 +4457,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get astVoiceOff => 'Stop reading the answers';
+
+  @override
+  String get astBusy =>
+      'Google\'s AI is very busy right now. Try again in a minute.';
 }

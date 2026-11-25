@@ -13,6 +13,7 @@ import '../../core/providers/currency_provider.dart';
 import '../../core/providers/produit_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../boutiques/boutique_provider.dart';
+import '../../core/services/photo_ia_service.dart';
 import 'assistant_service.dart';
 
 class AssistantScreen extends ConsumerStatefulWidget {
@@ -131,7 +132,10 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
     } on TimeoutException {
       reponse = t.astTimeout;
     } catch (e) {
-      reponse = '${t.astError}\n(${AssistantService.raison(e)})';
+      // Google saturé (même après les modèles de secours) : message clair, sans anglais
+      reponse = PhotoIaService.surcharge(e)
+          ? t.astBusy
+          : '${t.astError}\n(${AssistantService.raison(e)})';
     }
     if (!mounted) return;
     setState(() {
@@ -190,7 +194,10 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
     } on TimeoutException {
       reponse = reponse.isNotEmpty ? reponse : t.astTimeout;
     } catch (e) {
-      reponse = '${t.astError}\n(${AssistantService.raison(e)})';
+      // Google saturé (même après les modèles de secours) : message clair, sans anglais
+      reponse = PhotoIaService.surcharge(e)
+          ? t.astBusy
+          : '${t.astError}\n(${AssistantService.raison(e)})';
     }
     if (!mounted) return;
     setState(() {

@@ -1227,5 +1227,6 @@
   "astMicDenied": "Allow the microphone in the phone settings to talk to Nguli.",
   "astReadAloud": "Read aloud",
   "astVoiceOn": "Read the answers aloud",
-  "astVoiceOff": "Stop reading the answers"
+  "astVoiceOff": "Stop reading the answers",
+  "astBusy": "Google's AI is very busy right now. Try again in a minute."
 }

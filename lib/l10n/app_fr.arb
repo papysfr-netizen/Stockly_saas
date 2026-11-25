@@ -2721,5 +2721,6 @@
   "astMicDenied": "Autorisez le micro dans les paramètres du téléphone pour parler à Nguli.",
   "astReadAloud": "Lire à voix haute",
   "astVoiceOn": "Lire les réponses à voix haute",
-  "astVoiceOff": "Ne plus lire les réponses"
+  "astVoiceOff": "Ne plus lire les réponses",
+  "astBusy": "L'IA de Google est très demandée en ce moment. Réessayez dans une minute."
 }

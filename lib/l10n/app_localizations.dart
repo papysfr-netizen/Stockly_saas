@@ -7472,6 +7472,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Ne plus lire les réponses'**
   String get astVoiceOff;
+
+  /// No description provided for @astBusy.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'IA de Google est très demandée en ce moment. Réessayez dans une minute.'**
+  String get astBusy;
 }
 
 class _AppLocalizationsDelegate

@@ -238,8 +238,8 @@ ${jsonEncode(resume)}
     required String langue,
     List<(String, String)> historique = const [],
   }) async {
-    final model = FirebaseAI.googleAI().generativeModel(
-      model: PhotoIaService.modele,
+    GenerativeModel modelePour(String nom) => FirebaseAI.googleAI().generativeModel(
+      model: nom,
       systemInstruction: Content.system(_consigne(resume, langue)),
       generationConfig: GenerationConfig(
         temperature: 0.2,
@@ -260,7 +260,8 @@ ${jsonEncode(resume)}
         InlineDataPart(mimeType, audio),
       ]),
     ];
-    final reponse = await model.generateContent(contenu).timeout(const Duration(seconds: 60));
+    final reponse = await PhotoIaService.avecSecours(
+        (nom) => modelePour(nom).generateContent(contenu).timeout(const Duration(seconds: 60)));
     final donnees = jsonDecode((reponse.text ?? '{}').trim());
     if (donnees is! Map) return ('', '');
     return ((donnees['question'] ?? '').toString().trim(), (donnees['reponse'] ?? '').toString().trim());
@@ -283,24 +284,39 @@ ${jsonEncode(resume)}
     required String langue,
     List<(String, String)> historique = const [],
   }) async* {
-    final model = FirebaseAI.googleAI().generativeModel(
-      model: PhotoIaService.modele,
-      systemInstruction: Content.system(_consigne(resume, langue)),
-      generationConfig: GenerationConfig(
-        temperature: 0.2,
-        thinkingConfig: ThinkingConfig(thinkingBudget: 0),
-      ),
-    );
     final contenu = <Content>[..._historique(historique), Content.text(question)];
-    final morceaux = StringBuffer();
-    await for (final r in model
-        .generateContentStream(contenu)
-        .timeout(const Duration(seconds: 30))) {
-      final texte = r.text;
-      if (texte == null || texte.isEmpty) continue;
-      morceaux.write(texte);
-      yield morceaux.toString();
+    Object? derniere;
+    // 🔁 Modèle saturé AVANT le premier mot : on réessaie, puis on change de modèle
+    for (var i = 0; i < PhotoIaService.modeles.length; i++) {
+      for (var essai = 0; essai < (i == 0 ? 2 : 1); essai++) {
+        final model = FirebaseAI.googleAI().generativeModel(
+          model: PhotoIaService.modeles[i],
+          systemInstruction: Content.system(_consigne(resume, langue)),
+          generationConfig: GenerationConfig(
+            temperature: 0.2,
+            thinkingConfig: ThinkingConfig(thinkingBudget: 0),
+          ),
+        );
+        final morceaux = StringBuffer();
+        try {
+          await for (final r in model
+              .generateContentStream(contenu)
+              .timeout(const Duration(seconds: 30))) {
+            final texte = r.text;
+            if (texte == null || texte.isEmpty) continue;
+            morceaux.write(texte);
+            yield morceaux.toString();
+          }
+          return;
+        } catch (e) {
+          // Déjà une partie de la réponse : on garde ce qu'on a
+          if (morceaux.isNotEmpty || !PhotoIaService.surcharge(e)) rethrow;
+          derniere = e;
+          if (i == 0 && essai == 0) await Future<void>.delayed(const Duration(milliseconds: 1500));
+        }
+      }
     }
+    throw derniere ?? StateError('IA indisponible');
   }
 
   /// Raison courte d'un échec (affichée pour pouvoir corriger)

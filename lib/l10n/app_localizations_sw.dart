@@ -4454,4 +4454,8 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get astVoiceOff => 'Acha kusoma majibu';
+
+  @override
+  String get astBusy =>
+      'AI ya Google ina watumiaji wengi sasa hivi. Jaribu tena baada ya dakika moja.';
 }
