@@ -238,12 +238,12 @@ ${jsonEncode(resume)}
     required String langue,
     List<(String, String)> historique = const [],
   }) async {
-    GenerativeModel modelePour(String nom) => FirebaseAI.googleAI().generativeModel(
+    GenerativeModel modelePour(String nom, bool sansReflexion) => FirebaseAI.googleAI().generativeModel(
       model: nom,
       systemInstruction: Content.system(_consigne(resume, langue)),
       generationConfig: GenerationConfig(
         temperature: 0.2,
-        thinkingConfig: ThinkingConfig(thinkingBudget: 0),
+        thinkingConfig: sansReflexion ? ThinkingConfig(thinkingBudget: 0) : null,
         responseMimeType: 'application/json',
         responseSchema: Schema.object(properties: {
           'question': Schema.string(),
@@ -260,20 +260,24 @@ ${jsonEncode(resume)}
         InlineDataPart(mimeType, audio),
       ]),
     ];
-    final reponse = await PhotoIaService.avecSecours(
-        (nom) => modelePour(nom).generateContent(contenu).timeout(const Duration(seconds: 40)),
-        modeles: PhotoIaService.modelesAssistant);
+    final reponse = await _essayer((nom, sansReflexion) =>
+        modelePour(nom, sansReflexion).generateContent(contenu).timeout(const Duration(seconds: 40)));
     final donnees = jsonDecode((reponse.text ?? '{}').trim());
     if (donnees is! Map) return ('', '');
     return ((donnees['question'] ?? '').toString().trim(), (donnees['reponse'] ?? '').toString().trim());
   }
 
-  static List<Content> _historique(List<(String, String)> historique) => [
-        for (final (q, r) in historique.length > 6 ? historique.sublist(historique.length - 6) : historique) ...[
-          Content.text(q),
-          Content.model([TextPart(r)]),
-        ],
-      ];
+  /// Les 6 derniers échanges complets (une réponse vide serait refusée par l'IA)
+  static List<Content> _historique(List<(String, String)> historique) {
+    final complets = [for (final e in historique) if (e.$1.trim().isNotEmpty && e.$2.trim().isNotEmpty) e];
+    final recents = complets.length > 6 ? complets.sublist(complets.length - 6) : complets;
+    return [
+      for (final (q, r) in recents) ...[
+        Content.text(q),
+        Content.model([TextPart(r)]),
+      ],
+    ];
+  }
 
   /// Pose une question à l'IA avec le résumé ; [historique] = échanges précédents (question, réponse)
   ///
@@ -287,35 +291,59 @@ ${jsonEncode(resume)}
   }) async* {
     final contenu = <Content>[..._historique(historique), Content.text(question)];
     Object? derniere;
-    // 🔁 Modèle saturé AVANT le premier mot : on réessaie, puis on change de modèle
-    const modeles = PhotoIaService.modelesAssistant;
-    for (var i = 0; i < modeles.length; i++) {
-      for (var essai = 0; essai < (i == 0 ? 2 : 1); essai++) {
-        final model = FirebaseAI.googleAI().generativeModel(
-          model: modeles[i],
-          systemInstruction: Content.system(_consigne(resume, langue)),
-          generationConfig: GenerationConfig(
-            temperature: 0.2,
-            thinkingConfig: ThinkingConfig(thinkingBudget: 0),
-          ),
-        );
-        final morceaux = StringBuffer();
-        try {
-          await for (final r in model
-              .generateContentStream(contenu)
-              .timeout(const Duration(seconds: 20))) {
-            final texte = r.text;
-            if (texte == null || texte.isEmpty) continue;
-            morceaux.write(texte);
-            yield morceaux.toString();
-          }
-          return;
-        } catch (e) {
-          // Déjà une partie de la réponse : on garde ce qu'on a
-          if (morceaux.isNotEmpty || !PhotoIaService.surcharge(e)) rethrow;
-          derniere = e;
-          if (i == 0 && essai == 0) await Future<void>.delayed(const Duration(milliseconds: 1500));
+    for (final (nom, sansReflexion, attendre) in _tentatives()) {
+      if (attendre) await Future<void>.delayed(const Duration(milliseconds: 1500));
+      final model = FirebaseAI.googleAI().generativeModel(
+        model: nom,
+        systemInstruction: Content.system(_consigne(resume, langue)),
+        generationConfig: GenerationConfig(
+          temperature: 0.2,
+          thinkingConfig: sansReflexion ? ThinkingConfig(thinkingBudget: 0) : null,
+        ),
+      );
+      final morceaux = StringBuffer();
+      try {
+        await for (final r in model.generateContentStream(contenu).timeout(const Duration(seconds: 20))) {
+          final texte = r.text;
+          if (texte == null || texte.isEmpty) continue;
+          morceaux.write(texte);
+          yield morceaux.toString();
         }
+        return;
+      } catch (e) {
+        // Déjà une partie de la réponse : on garde ce qu'on a
+        if (morceaux.isNotEmpty || !_onPeutReessayer(e)) rethrow;
+        derniere = e;
+      }
+    }
+    throw derniere ?? StateError('IA indisponible');
+  }
+
+  /// 🔁 Ordre des essais : (modèle, sans réflexion ?, attendre avant ?).
+  ///    Chaque modèle : d'abord « sans réflexion » (rapide) ; s'il refuse ce réglage
+  ///    (« invalid argument »), le même modèle avec ses réglages par défaut.
+  ///    Le premier modèle a droit à une 2e chance après 1,5 s (saturation passagère).
+  static List<(String, bool, bool)> _tentatives() => [
+        for (var i = 0; i < PhotoIaService.modelesAssistant.length; i++) ...[
+          (PhotoIaService.modelesAssistant[i], true, false),
+          (PhotoIaService.modelesAssistant[i], false, false),
+          if (i == 0) (PhotoIaService.modelesAssistant[i], false, true),
+        ],
+      ];
+
+  /// Erreur pour laquelle un autre essai a du sens
+  static bool _onPeutReessayer(Object e) =>
+      PhotoIaService.surcharge(e) || e.toString().toLowerCase().contains('invalid argument');
+
+  static Future<T> _essayer<T>(Future<T> Function(String nom, bool sansReflexion) appel) async {
+    Object? derniere;
+    for (final (nom, sansReflexion, attendre) in _tentatives()) {
+      if (attendre) await Future<void>.delayed(const Duration(milliseconds: 1500));
+      try {
+        return await appel(nom, sansReflexion);
+      } catch (e) {
+        if (!_onPeutReessayer(e)) rethrow;
+        derniere = e;
       }
     }
     throw derniere ?? StateError('IA indisponible');
