@@ -42,20 +42,19 @@
     <path d="M196 236 q22 -14 44 -2" stroke="#2b160b" stroke-width="7" fill="none" stroke-linecap="round"/>
     <path d="M272 234 q22 -12 44 2" stroke="#2b160b" stroke-width="7" fill="none" stroke-linecap="round"/>
     <!-- yeux -->
-    <ellipse cx="218" cy="262" rx="14" ry="16" fill="#fff"/><ellipse cx="294" cy="262" rx="14" ry="16" fill="#fff"/>
-    <circle cx="220" cy="264" r="9" fill="#2b160b"/><circle cx="296" cy="264" r="9" fill="#2b160b"/>
-    <circle cx="223" cy="260" r="3" fill="#fff"/><circle cx="299" cy="260" r="3" fill="#fff"/>
+    <g id="oeilA">
+      <path d="M198 264 Q218 246 240 262 Q218 276 198 264Z" fill="#fbf6ef"/>
+      <circle cx="219" cy="263" r="9" fill="#3b1f10"/><circle cx="219" cy="263" r="4.5" fill="#120804"/>
+      <circle cx="222" cy="260" r="2.6" fill="#fff"/>
+      <path d="M195 263 Q218 242 243 261" stroke="#1d0d05" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M197 262 l-6 -5 M203 255 l-4 -6" stroke="#1d0d05" stroke-width="3" stroke-linecap="round"/>
+    </g>
+    <use href="#oeilA" transform="translate(512 0) scale(-1 1)"/>
     <!-- nez -->
     <path d="M246 280 q10 22 -2 30 q12 6 24 0 q-12 -8 -2 -30" fill="#4e2c19" opacity=".6"/>
     <!-- joues -->
     <circle cx="196" cy="304" r="15" fill="#c0603e" opacity=".35"/><circle cx="316" cy="304" r="15" fill="#c0603e" opacity=".35"/>
     <!-- sourire -->
     <path d="M216 318 Q256 356 296 318 Q256 336 216 318Z" fill="#fff" stroke="#7a2a1a" stroke-width="5" stroke-linejoin="round"/>
-    <!-- étincelle IA -->
-    <g transform="translate(412 108)">
-      <circle r="58" fill="#ffffff" opacity=".18"/>
-      <path d="M0 -44 Q8 -8 44 0 Q8 8 0 44 Q-8 8 -44 0 Q-8 -8 0 -44Z" fill="#ffd54a"/>
-      <path d="M40 -40 Q43 -30 52 -28 Q43 -25 40 -16 Q37 -25 28 -28 Q37 -30 40 -40Z" fill="#fff"/>
-    </g>
   </g>
 </svg>
