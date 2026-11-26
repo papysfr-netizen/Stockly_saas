@@ -1,0 +1,26 @@
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:540px;height:960px;overflow:hidden}
+body{font-family:'Inter','Noto Color Emoji',sans-serif;background:linear-gradient(180deg,#1f8a5b 0%,#0f4d3a 70%,#0b3a2c 100%);color:#fff;position:relative}
+.colline1{position:absolute;left:-60px;right:-60px;bottom:-40px;height:230px;background:#17734c;border-radius:50% 50% 0 0;opacity:.55}
+.colline2{position:absolute;left:-120px;width:500px;bottom:-60px;height:200px;background:#145f40;border-radius:50% 50% 0 0;opacity:.7}
+.a{position:absolute;opacity:0;will-change:transform,opacity}
+.centre{left:0;right:0;text-align:center;padding:0 34px}
+.titre{font-size:46px;font-weight:900;line-height:1.12;letter-spacing:-.5px;text-shadow:0 3px 0 rgba(0,0,0,.15)}
+.jaune{color:#f9c440}
+.sous{font-size:24px;font-weight:600;opacity:.95;line-height:1.3}
+.legende{font-size:27px;font-weight:800;line-height:1.2}
+.tel{left:120px;width:300px;height:600px;top:250px;background:#111;border-radius:42px;padding:12px;box-shadow:0 30px 60px rgba(0,0,0,.35)}
+.ecran{width:100%;height:100%;background:#f4f5f7;border-radius:32px;overflow:hidden;position:relative;color:#16202a}
+.barre{height:64px;background:#1e3a8a;color:#fff;display:flex;align-items:center;gap:10px;padding:18px 16px 0;font-weight:800;font-size:17px}
+.barre img{width:30px;height:30px;border-radius:50%}
+.carte{position:absolute;left:12px;right:12px;background:#fff;border-radius:14px;padding:11px 12px;box-shadow:0 2px 6px rgba(0,0,0,.08);font-size:14px}
+.carte b{font-size:15px}
+.rouge{color:#c62828}.vert{color:#1b8a4b}.gris{color:#6b7480}
+.bouton{position:absolute;left:12px;right:12px;border-radius:14px;padding:13px;text-align:center;font-weight:800;font-size:15px;color:#fff;background:#25a244}
+.bulle{position:absolute;max-width:210px;border-radius:16px;padding:10px 12px;font-size:14px;line-height:1.35}
+.moi{right:12px;background:#1e3a8a;color:#fff}
+.ia{left:44px;background:#e0f2ef;color:#16202a}
+.mini{position:absolute;left:10px;width:28px;height:28px;border-radius:50%}
+.puce{display:inline-block;background:#fff;color:#0f4d3a;border-radius:30px;padding:8px 16px;margin:4px;font-weight:800;font-size:20px}
+.ruban{background:#f9c440;color:#3b2500;border-radius:18px;padding:14px 18px;font-weight:900;font-size:24px;line-height:1.2}
+.gros{font-size:30px;font-weight:900}
