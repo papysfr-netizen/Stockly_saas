@@ -19,6 +19,7 @@ import '../boutiques/boutique_provider.dart';
 import '../../core/services/photo_ia_service.dart';
 import 'assistant_service.dart';
 import 'historique_assistant.dart';
+import 'voix_naturelle.dart';
 
 class AssistantScreen extends ConsumerStatefulWidget {
   final String entrepriseId;
@@ -131,26 +132,42 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
     super.dispose();
   }
 
-  /// 🔊 Lit un texte dans la langue de l'application (lingala : voix française,
-  ///    aucune voix lingala n'existe sur Android)
+  /// 🔊 Lit un texte dans la langue de l'application, avec la voix la plus naturelle
+  ///    installée sur le téléphone (lingala : voix française, aucune voix lingala n'existe)
+  String? _langueVoix;
   Future<void> _lire(String texte) async {
     final code = Localizations.localeOf(context).languageCode;
     final essais = switch (code) {
       'en' => ['en-US', 'en-GB'],
       'sw' => ['sw-KE', 'sw-TZ', 'sw', 'fr-FR'],
-      _ => ['fr-FR', 'fr'],
+      _ => ['fr-FR', 'fr-BE', 'fr'],
     };
-    for (final l in essais) {
+    if (_langueVoix != code) {
+      var choisie = false;
       try {
-        if (await _voix.isLanguageAvailable(l) == true) {
-          await _voix.setLanguage(l);
-          break;
+        final voix = await _voix.getVoices;
+        final meilleure = VoixNaturelle.choisirVoix(voix is List ? voix : const [], essais);
+        if (meilleure != null) {
+          await _voix.setVoice(meilleure);
+          choisie = true;
         }
       } catch (_) {}
+      if (!choisie) {
+        for (final l in essais) {
+          try {
+            if (await _voix.isLanguageAvailable(l) == true) {
+              await _voix.setLanguage(l);
+              break;
+            }
+          } catch (_) {}
+        }
+      }
+      await _voix.setSpeechRate(0.5); // vitesse normale (0,5 = 1,0 sur Android)
+      await _voix.setPitch(1.0);
+      _langueVoix = code;
     }
-    await _voix.setSpeechRate(0.48);
     await _voix.stop();
-    await _voix.speak(texte.replaceAll('*', ''));
+    await _voix.speak(VoixNaturelle.preparer(texte, code));
   }
 
   /// 🎤 Premier appui : on écoute. Deuxième appui (ou 30 s) : on envoie.
