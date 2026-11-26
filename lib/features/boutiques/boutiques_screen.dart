@@ -15,6 +15,7 @@ import 'package:stockly_saas/l10n/app_localizations.dart';
 
 import 'prix_boutiques_screen.dart';
 import 'transferts_screen.dart';
+import 'package:stockly_saas/core/widgets/chargement_squelette.dart';
 
 class BoutiquesService {
   static const String idPrincipale = 'principale';
@@ -272,7 +273,7 @@ class _BoutiquesScreenState extends State<BoutiquesScreen> {
               ),
             );
           }
-          if (!snap.hasData) return const Center(child: CircularProgressIndicator());
+          if (!snap.hasData) return const ChargementSquelette();
 
           final docs = snap.data!.docs.toList()
             ..sort((a, b) {

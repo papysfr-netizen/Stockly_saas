@@ -12,6 +12,7 @@ import '../../core/providers/produit_provider.dart';
 import '../../core/providers/user_role_provider.dart';
 import '../../core/services/report_export_service.dart';
 import 'widgets/produits_view.dart';
+import 'package:stockly_saas/core/widgets/chargement_squelette.dart';
 
 /// 🧾 Écran de la caisse.
 ///  - Téléphone : les produits, et le panier dans une fenêtre du bas.
@@ -26,7 +27,7 @@ class CaisseScreen extends ConsumerWidget {
 
     return profileAsync.when(
       loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        body: ChargementSquelette(grille: true),
       ),
       error: (err, stack) => Scaffold(
         body: Center(

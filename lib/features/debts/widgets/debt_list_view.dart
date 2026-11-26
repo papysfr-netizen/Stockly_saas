@@ -20,6 +20,8 @@ import 'debt_dialogs.dart';
 import 'debt_detail_sheet.dart';
 import 'package:stockly_saas/core/services/messages_clients.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
+import 'package:stockly_saas/core/widgets/liste_paresseuse.dart';
+import 'package:stockly_saas/core/widgets/recherche_differee.dart';
 
 enum _Filtre { enCours, recentes, enRetard, partielles, soldees }
 
@@ -41,7 +43,7 @@ class DebtListView extends ConsumerStatefulWidget {
   ConsumerState<DebtListView> createState() => _DebtListViewState();
 }
 
-class _DebtListViewState extends ConsumerState<DebtListView> {
+class _DebtListViewState extends ConsumerState<DebtListView> with RechercheDifferee<DebtListView> {
   static const Color _bleuNuit = Color(0xFF1E293B);
   // 🌙 Mode sombre
   bool get _sombre => Theme.of(context).brightness == Brightness.dark;
@@ -228,9 +230,11 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
         return a.dateCreation.compareTo(b.dateCreation);
       });
 
-    return ListView(
+    return ListeParesseuse(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-      children: [
+      elements: liste.isEmpty ? const [] : visibles,
+      construire: (_, d) => _carte(d),
+      avant: [
         _synthese(total, ouvertes.length, nbTiers, totalRetard, enRetard.length),
         const SizedBox(height: 14),
         _barreRecherche(),
@@ -247,9 +251,7 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
           )
         else if (visibles.isEmpty)
           _etatVide(Icons.search_off_rounded, _t.noResults,
-              _t.noResultsHint)
-        else
-          ...visibles.map(_carte),
+              _t.noResultsHint),
       ],
     );
   }
@@ -345,7 +347,7 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
   Widget _barreRecherche() {
     return TextField(
       controller: _recherche,
-      onChanged: (v) => setState(() => _texte = v.trim()),
+      onChanged: (v) => differer(() => setState(() => _texte = v.trim())),
       decoration: InputDecoration(
         hintText: _isClient
             ? _t.debtSearchClients
@@ -356,6 +358,7 @@ class _DebtListViewState extends ConsumerState<DebtListView> {
             : IconButton(
                 icon: const Icon(Icons.close_rounded),
                 onPressed: () {
+                  annulerRecherche();
                   _recherche.clear();
                   setState(() => _texte = '');
                 },

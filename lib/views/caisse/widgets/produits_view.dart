@@ -13,6 +13,8 @@ import 'package:stockly_saas/views/caisse/dialogs/prix_negocie_dialog.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:stockly_saas/views/caisse/dialogs/paiement_dialog.dart';
 import 'package:stockly_saas/core/widgets/quick_scanner_widget.dart';
+import 'package:stockly_saas/core/widgets/recherche_differee.dart';
+import 'package:stockly_saas/core/widgets/chargement_squelette.dart';
 
 // =============================================================================
 // 🧾 CAISSE EN 3 TOUCHES
@@ -87,7 +89,7 @@ class ProduitsView extends ConsumerStatefulWidget {
   ConsumerState<ProduitsView> createState() => _ProduitsViewState();
 }
 
-class _ProduitsViewState extends ConsumerState<ProduitsView> {
+class _ProduitsViewState extends ConsumerState<ProduitsView> with RechercheDifferee<ProduitsView> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String _selectedCategory = 'Tous';
@@ -234,6 +236,7 @@ class _ProduitsViewState extends ConsumerState<ProduitsView> {
                       IconButton(
                         icon: const Icon(Icons.clear),
                         onPressed: () {
+                          annulerRecherche();
                           _searchController.clear();
                           setState(() => _searchQuery = '');
                         },
@@ -264,14 +267,14 @@ class _ProduitsViewState extends ConsumerState<ProduitsView> {
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               ),
-              onChanged: (value) => setState(() => _searchQuery = value.trim().toLowerCase()),
+              onChanged: (value) => differer(() => setState(() => _searchQuery = value.trim().toLowerCase())),
             ),
             const SizedBox(height: 8),
 
             // CONTENU (CATÉGORIES + TUILES)
             Expanded(
               child: produitsAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const ChargementSquelette(grille: true),
                 error: (err, stack) => Center(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),

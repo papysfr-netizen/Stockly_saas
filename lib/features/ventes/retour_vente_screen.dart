@@ -13,6 +13,7 @@ import '../../core/services/journal_service.dart';
 import '../../core/utils/currency_extension.dart';
 import '../comptes_clients/compte_client_service.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
+import 'package:stockly_saas/core/widgets/chargement_squelette.dart';
 
 // ============================================================================
 // ↩️ RETOUR DE MARCHANDISE  /  ✖️ ANNULATION DE VENTE NON RETIRÉE
@@ -196,7 +197,7 @@ class _RetourVenteScreenState extends ConsumerState<RetourVenteScreen> {
         foregroundColor: Colors.white,
       ),
       body: profileAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const ChargementSquelette(),
         error: (e, _) => Center(child: Text(_t.errorPrefix('$e'))),
         data: (profile) => _corps(
           peutRetour: profile.peutFaireRetours,

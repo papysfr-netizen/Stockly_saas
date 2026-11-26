@@ -8,6 +8,7 @@ import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:stockly_saas/core/widgets/recherche_differee.dart';
 
 class RechercheClientSheet extends StatefulWidget {
   final String entrepriseId;
@@ -56,7 +57,7 @@ class RechercheClientSheet extends StatefulWidget {
   State<RechercheClientSheet> createState() => _RechercheClientSheetState();
 }
 
-class _RechercheClientSheetState extends State<RechercheClientSheet> {
+class _RechercheClientSheetState extends State<RechercheClientSheet> with RechercheDifferee<RechercheClientSheet> {
   static const Color _bleuNuit = Color(0xFF1E293B);
   // 🌙 Mode sombre
   bool get _sombre => Theme.of(context).brightness == Brightness.dark;
@@ -217,7 +218,7 @@ class _RechercheClientSheetState extends State<RechercheClientSheet> {
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                 ),
-                onChanged: (v) => setState(() => _q = v),
+                onChanged: (v) => differer(() => setState(() => _q = v)),
               ),
             ),
           Expanded(child: _client == null ? _liste() : _fiche(_client!)),

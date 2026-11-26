@@ -12,6 +12,7 @@ import 'package:stockly_saas/core/services/report_export_service.dart';
 import 'package:stockly_saas/features/debts/widgets/debt_dialogs.dart';
 import 'package:stockly_saas/features/debts/widgets/debt_list_view.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
+import 'package:stockly_saas/core/widgets/chargement_squelette.dart';
 
 class DebtManagementScreen extends ConsumerWidget {
   const DebtManagementScreen({super.key});
@@ -159,7 +160,7 @@ class DebtManagementScreen extends ConsumerWidget {
             body: Stack(
               children: [
                 dettesAsync.when(
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () => const ChargementSquelette(),
                   error: (err, stack) => Center(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),

@@ -17,6 +17,8 @@ import '../../../core/services/photo_ia_service.dart';
 import '../../../core/widgets/add_product_modal.dart';
 import '../../../core/widgets/changer_mot_de_passe_dialog.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
+import 'package:stockly_saas/core/widgets/recherche_differee.dart';
+import 'package:stockly_saas/core/widgets/chargement_squelette.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   final UserModel currentUser;
@@ -26,7 +28,7 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> with RechercheDifferee<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
   bool _isImporting = false;
@@ -314,7 +316,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             padding: const EdgeInsets.all(16.0),
             child: TextField(
               controller: _searchController,
-              onChanged: (value) => setState(() => _searchQuery = value.toLowerCase()),
+              onChanged: (value) => differer(() => setState(() => _searchQuery = value.toLowerCase())),
               decoration: InputDecoration(
                 hintText: t.caisseSearch,
                 prefixIcon: const Icon(Icons.search, color: Colors.blue),
@@ -322,6 +324,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ? IconButton(
                         icon: const Icon(Icons.clear),
                         onPressed: () {
+                          annulerRecherche();
                           _searchController.clear();
                           setState(() => _searchQuery = "");
                         },
@@ -340,7 +343,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           // ================= 3. LISTE ET STATISTIQUES =================
           Expanded(
             child: produitsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const ChargementSquelette(),
               error: (err, _) => Center(
                 child: Text(t.debtLoadError('$err')),
               ),

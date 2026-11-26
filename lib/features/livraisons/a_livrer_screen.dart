@@ -15,6 +15,8 @@ import '../boutiques/boutique_provider.dart';
 import 'package:stockly_saas/core/services/journal_service.dart';
 import '../ventes/restes_creances.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
+import 'package:stockly_saas/core/widgets/liste_paresseuse.dart';
+import 'package:stockly_saas/core/widgets/chargement_squelette.dart';
 
 // ============================================================================
 // 🚚 VENTES À LIVRER (statutLivraison == 'Non livré')
@@ -178,7 +180,7 @@ class ALivrerScreen extends ConsumerWidget {
         foregroundColor: Colors.white,
       ),
       body: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const ChargementSquelette(),
         error: (e, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -207,9 +209,16 @@ class ALivrerScreen extends ConsumerWidget {
 
           final nbRetard = docs.where((d) => _estEnRetard(d.data())).length;
 
-          return ListView(
+          return ListeParesseuse(
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
-            children: [
+            elements: docs,
+            construire: (_, d) => _CarteLivraison(
+              key: ValueKey(d.id),
+              entrepriseId: entrepriseId,
+              venteId: d.id,
+              data: d.data(),
+            ),
+            avant: [
               Padding(
                 padding: const EdgeInsets.only(bottom: 8, left: 4),
                 child: Text(
@@ -222,12 +231,6 @@ class ALivrerScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              ...docs.map((d) => _CarteLivraison(
-                    key: ValueKey(d.id),
-                    entrepriseId: entrepriseId,
-                    venteId: d.id,
-                    data: d.data(),
-                  )),
             ],
           );
         },

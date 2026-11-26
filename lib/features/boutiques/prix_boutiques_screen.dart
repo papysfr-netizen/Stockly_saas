@@ -15,6 +15,8 @@ import 'package:stockly_saas/core/models/produit.dart';
 import 'package:stockly_saas/core/providers/currency_provider.dart';
 import 'package:stockly_saas/core/providers/user_role_provider.dart';
 import 'boutique_provider.dart';
+import 'package:stockly_saas/core/widgets/recherche_differee.dart';
+import 'package:stockly_saas/core/widgets/chargement_squelette.dart';
 
 class PrixBoutiquesScreen extends ConsumerStatefulWidget {
   final String entrepriseId;
@@ -24,7 +26,7 @@ class PrixBoutiquesScreen extends ConsumerStatefulWidget {
   ConsumerState<PrixBoutiquesScreen> createState() => _PrixBoutiquesScreenState();
 }
 
-class _PrixBoutiquesScreenState extends ConsumerState<PrixBoutiquesScreen> {
+class _PrixBoutiquesScreenState extends ConsumerState<PrixBoutiquesScreen> with RechercheDifferee<PrixBoutiquesScreen> {
   static const Color _bleuNuit = Color(0xFF1E293B);
   // 🌙 Mode sombre
   bool get _sombre => Theme.of(context).brightness == Brightness.dark;
@@ -167,7 +169,7 @@ class _PrixBoutiquesScreenState extends ConsumerState<PrixBoutiquesScreen> {
                 ),
                 const SizedBox(height: 10),
                 TextField(
-                  onChanged: (v) => setState(() => _recherche = v.trim().toLowerCase()),
+                  onChanged: (v) => differer(() => setState(() => _recherche = v.trim().toLowerCase())),
                   decoration: InputDecoration(
                     hintText: AppLocalizations.of(context).searchProduct,
                     prefixIcon: const Icon(Icons.search_rounded),
@@ -186,7 +188,7 @@ class _PrixBoutiquesScreenState extends ConsumerState<PrixBoutiquesScreen> {
                     stream: _produits.snapshots(),
                     builder: (context, snap) {
                       if (snap.hasError) return _message(Icons.error_outline, 'Erreur', '${snap.error}');
-                      if (!snap.hasData) return const Center(child: CircularProgressIndicator());
+                      if (!snap.hasData) return const ChargementSquelette();
                       final produits = snap.data!.docs.map(Produit.fromDocument).toList()
                         ..sort((a, b) => a.nom.toLowerCase().compareTo(b.nom.toLowerCase()));
                       final visibles = produits

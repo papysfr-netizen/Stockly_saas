@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:stockly_saas/core/utils/payment_calculator.dart';
 
 import '../../core/services/packing_list_service.dart';
+import 'package:stockly_saas/core/widgets/liste_paresseuse.dart';
 
 /// 📥 Écran d'aperçu avant import : on voit tout, on choisit, puis on confirme.
 class ImportApercuScreen extends StatefulWidget {
@@ -252,9 +253,11 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
         body: Column(
           children: [
             Expanded(
-              child: ListView(
+              child: ListeParesseuse(
                 padding: const EdgeInsets.all(12),
-                children: [
+                elements: a.lignes.isEmpty ? const [] : [...douteux, ...autres],
+                construire: (_, l) => _tuile(l),
+                avant: [
                   // Fichier + colonnes reconnues
                   Card(
                     child: Padding(
@@ -447,9 +450,7 @@ class _ImportApercuScreenState extends State<ImportApercuScreen> {
                     Padding(
                       padding: const EdgeInsets.all(24),
                       child: Center(child: Text(AppLocalizations.of(context).impEmpty)),
-                    )
-                  else
-                    ...[...douteux, ...autres].map(_tuile),
+                    ),
                 ],
               ),
             ),

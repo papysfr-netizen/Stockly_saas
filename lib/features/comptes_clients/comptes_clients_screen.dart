@@ -12,6 +12,9 @@ import '../../core/services/journal_service.dart';
 import 'compte_client_service.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:stockly_saas/core/utils/payment_calculator.dart';
+import 'package:stockly_saas/core/widgets/liste_paresseuse.dart';
+import 'package:stockly_saas/core/widgets/recherche_differee.dart';
+import 'package:stockly_saas/core/widgets/chargement_squelette.dart';
 
 // ============================================================================
 // 💰 COMPTES CLIENTS : liste, dépôts, retraits, historique, relevé WhatsApp
@@ -225,7 +228,7 @@ class ComptesClientsScreen extends ConsumerStatefulWidget {
   ConsumerState<ComptesClientsScreen> createState() => _ComptesClientsScreenState();
 }
 
-class _ComptesClientsScreenState extends ConsumerState<ComptesClientsScreen> {
+class _ComptesClientsScreenState extends ConsumerState<ComptesClientsScreen> with RechercheDifferee<ComptesClientsScreen> {
   final _rechercheCtrl = TextEditingController();
   String _recherche = '';
 
@@ -264,7 +267,7 @@ class _ComptesClientsScreenState extends ConsumerState<ComptesClientsScreen> {
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
             child: TextField(
               controller: _rechercheCtrl,
-              onChanged: (v) => setState(() => _recherche = v.trim().toLowerCase()),
+              onChanged: (v) => differer(() => setState(() => _recherche = v.trim().toLowerCase())),
               decoration: InputDecoration(
                 hintText: t.ccSearchHint,
                 prefixIcon: const Icon(Icons.search),
@@ -273,7 +276,7 @@ class _ComptesClientsScreenState extends ConsumerState<ComptesClientsScreen> {
           ),
           Expanded(
             child: async.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const ChargementSquelette(),
               error: (e, _) => Center(child: Text(t.errorPrefix('$e'))),
               data: (docs) {
                 final filtres = docs.where((d) {
@@ -472,9 +475,11 @@ class CompteClientDetailScreen extends ConsumerWidget {
                   snapMvts.data?.docs.map((d) => d.data()).toList() ??
                       const <Map<String, dynamic>>[];
 
-              return ListView(
+              return ListeParesseuse(
                 padding: const EdgeInsets.fromLTRB(14, 14, 14, 28),
-                children: [
+                elements: mouvements,
+                construire: (_, m) => _LigneMouvement(m: m),
+                avant: [
                   // En-tête
                   Card(
                     color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF15302D) : Colors.teal.shade50,
@@ -578,7 +583,6 @@ class CompteClientDetailScreen extends ConsumerWidget {
                       padding: const EdgeInsets.all(16),
                       child: Text(t.ccNoMovement, style: const TextStyle(color: Colors.grey)),
                     ),
-                  for (final m in mouvements) _LigneMouvement(m: m),
                 ],
               );
             },

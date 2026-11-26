@@ -16,6 +16,7 @@ import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
 
 import 'cloture_service.dart';
+import 'package:stockly_saas/core/widgets/chargement_squelette.dart';
 
 const _vert = Color(0xFF0B7A5A);
 
@@ -533,7 +534,7 @@ class ClotureHistoriqueScreen extends ConsumerWidget {
             .limit(60)
             .snapshots(),
         builder: (context, snap) {
-          if (!snap.hasData) return const Center(child: CircularProgressIndicator());
+          if (!snap.hasData) return const ChargementSquelette();
           final docs = snap.data!.docs;
           if (docs.isEmpty) return Center(child: Text(t.cloHistoryEmpty));
           return ListView.builder(

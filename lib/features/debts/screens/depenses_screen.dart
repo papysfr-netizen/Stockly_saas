@@ -13,6 +13,7 @@ import '../../../core/providers/user_role_provider.dart';
 import '../../../core/services/report_export_service.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
 import 'package:stockly_saas/core/utils/payment_calculator.dart';
+import 'package:stockly_saas/core/widgets/chargement_squelette.dart';
 
 /// Nom affiché d'une catégorie (la valeur enregistrée reste en français)
 String _nomCategorie(AppLocalizations t, String cat) {
@@ -274,7 +275,7 @@ class _DepensesScreenState extends ConsumerState<DepensesScreen>
         ],
       ),
       body: depensesAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const ChargementSquelette(),
         error: (err, stack) => Center(child: Text(t.errorPrefix('$err'))),
         data: (depenses) {
           final depensesFiltrees = _filtrerDepenses(depenses);

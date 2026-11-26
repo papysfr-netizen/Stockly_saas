@@ -20,6 +20,7 @@ import '../../core/providers/user_role_provider.dart';
 import '../../core/services/journal_service.dart';
 import '../../core/services/utilisateur_service.dart';
 import 'lots_service.dart';
+import 'package:stockly_saas/core/widgets/chargement_squelette.dart';
 
 double _n(dynamic v) => v is num ? v.toDouble() : double.tryParse('${v ?? ''}') ?? 0.0;
 
@@ -51,7 +52,7 @@ class ArrivagesScreen extends ConsumerWidget {
           if (snap.hasError) {
             return Center(child: Text(AppLocalizations.of(context).errorWith('${snap.error}')));
           }
-          if (!snap.hasData) return const Center(child: CircularProgressIndicator());
+          if (!snap.hasData) return const ChargementSquelette();
           final docs = snap.data!.docs;
           if (docs.isEmpty) {
             return Center(
@@ -258,7 +259,7 @@ class _ArrivageDetailScreenState extends ConsumerState<ArrivageDetailScreen> {
       body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
         stream: _arrivages(widget.entrepriseId).doc(widget.arrivageId).snapshots(),
         builder: (context, snap) {
-          if (!snap.hasData) return const Center(child: CircularProgressIndicator());
+          if (!snap.hasData) return const ChargementSquelette();
           final d = snap.data!.data();
           if (d == null) return Center(child: Text(AppLocalizations.of(context).arrNotFound));
           final annule = d['statut'] == 'annule';

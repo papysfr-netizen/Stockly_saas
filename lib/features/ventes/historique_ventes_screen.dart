@@ -11,6 +11,8 @@ import '../../core/utils/currency_extension.dart';
 import '../../screens/bon_livraison_screen.dart';
 import 'restes_creances.dart';
 import 'retour_vente_screen.dart';
+import 'package:stockly_saas/core/widgets/recherche_differee.dart';
+import 'package:stockly_saas/core/widgets/chargement_squelette.dart';
 
 // ============================================================================
 // 🧾 HISTORIQUE DES VENTES
@@ -100,7 +102,7 @@ class HistoriqueVentesScreen extends ConsumerStatefulWidget {
       _HistoriqueVentesScreenState();
 }
 
-class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen> {
+class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen> with RechercheDifferee<HistoriqueVentesScreen> {
   /// 🏬 La vente appartient-elle à la boutique affichée ? (sans boutique = principale)
   bool _dansBoutique(Map d) {
     final choisie = ref.read(boutiqueActiveProvider);
@@ -164,7 +166,7 @@ class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen>
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
             child: TextField(
               controller: _rechercheCtrl,
-              onChanged: (v) => setState(() => _recherche = v.trim().toLowerCase()),
+              onChanged: (v) => differer(() => setState(() => _recherche = v.trim().toLowerCase())),
               decoration: InputDecoration(
                 hintText: l.histSearch,
                 prefixIcon: const Icon(Icons.search),
@@ -172,6 +174,7 @@ class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen>
                     ? IconButton(
                         icon: const Icon(Icons.clear),
                         onPressed: () {
+                          annulerRecherche();
                           _rechercheCtrl.clear();
                           setState(() => _recherche = '');
                         },
@@ -201,7 +204,7 @@ class _HistoriqueVentesScreenState extends ConsumerState<HistoriqueVentesScreen>
 
           Expanded(
             child: async.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const ChargementSquelette(),
               error: (e, _) => Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24),

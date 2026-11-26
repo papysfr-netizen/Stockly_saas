@@ -10,6 +10,7 @@ import '../core/services/equipe_service.dart';
 import '../core/services/journal_service.dart';
 import 'package:stockly_saas/features/boutiques/boutique_provider.dart';
 import 'package:stockly_saas/l10n/app_localizations.dart';
+import 'package:stockly_saas/core/widgets/chargement_squelette.dart';
 
 /// Membres de la boutique (collection users, même entrepriseId)
 final membresEquipeProvider = StreamProvider.family<
@@ -33,7 +34,7 @@ class GestionEquipeScreen extends ConsumerWidget {
     return profileAsync.when(
       loading: () => Scaffold(
         appBar: AppBar(title: Text(t.teamTitle)),
-        body: const Center(child: CircularProgressIndicator()),
+        body: const ChargementSquelette(),
       ),
       error: (err, _) => Scaffold(
         appBar: AppBar(title: Text(t.teamTitle)),
@@ -63,7 +64,7 @@ class GestionEquipeScreen extends ConsumerWidget {
         return Scaffold(
           appBar: AppBar(title: Text(t.teamTitle)),
           body: membresAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => const ChargementSquelette(),
             error: (err, _) => Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),

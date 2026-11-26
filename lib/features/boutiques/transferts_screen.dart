@@ -22,6 +22,8 @@ import 'package:stockly_saas/core/models/produit.dart';
 import 'package:stockly_saas/core/providers/user_role_provider.dart';
 import 'boutique_provider.dart';
 import 'boutiques_screen.dart';
+import 'package:stockly_saas/core/widgets/recherche_differee.dart';
+import 'package:stockly_saas/core/widgets/chargement_squelette.dart';
 
 class TransfertsScreen extends ConsumerStatefulWidget {
   final String entrepriseId;
@@ -31,7 +33,7 @@ class TransfertsScreen extends ConsumerStatefulWidget {
   ConsumerState<TransfertsScreen> createState() => _TransfertsScreenState();
 }
 
-class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
+class _TransfertsScreenState extends ConsumerState<TransfertsScreen> with RechercheDifferee<TransfertsScreen> {
   static const Color _bleuNuit = Color(0xFF1E293B);
   // 🌙 Mode sombre
   bool get _sombre => Theme.of(context).brightness == Brightness.dark;
@@ -280,7 +282,7 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
         if (snap.hasError) {
           return _message(Icons.error_outline, 'Erreur', '${snap.error}');
         }
-        if (!snap.hasData) return const Center(child: CircularProgressIndicator());
+        if (!snap.hasData) return const ChargementSquelette();
 
         final produits = snap.data!.docs.map(Produit.fromDocument).toList()
           ..sort((a, b) => a.nom.toLowerCase().compareTo(b.nom.toLowerCase()));
@@ -334,7 +336,7 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
               child: TextField(
                 controller: _rechercheCtrl,
-                onChanged: (v) => setState(() => _recherche = v.trim().toLowerCase()),
+                onChanged: (v) => differer(() => setState(() => _recherche = v.trim().toLowerCase())),
                 decoration: InputDecoration(
                   hintText: AppLocalizations.of(context).searchProduct,
                   prefixIcon: const Icon(Icons.search_rounded),
@@ -548,7 +550,7 @@ class _TransfertsScreenState extends ConsumerState<TransfertsScreen> {
           .snapshots(),
       builder: (context, snap) {
         if (snap.hasError) return _message(Icons.error_outline, 'Erreur', '${snap.error}');
-        if (!snap.hasData) return const Center(child: CircularProgressIndicator());
+        if (!snap.hasData) return const ChargementSquelette();
         final docs = snap.data!.docs;
         if (docs.isEmpty) {
           return _message(Icons.history_rounded, AppLocalizations.of(context).trfNone, AppLocalizations.of(context).trfNoneInfo);

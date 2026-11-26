@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'package:stockly_saas/core/services/journal_service.dart';
+import 'package:stockly_saas/core/widgets/chargement_squelette.dart';
 
 /// Carte des Paramètres qui ouvre le journal (propriétaire).
 class JournalCard extends StatelessWidget {
@@ -257,7 +258,7 @@ class _JournalScreenState extends State<JournalScreen> {
                   );
                 }
                 if (!snap.hasData) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const ChargementSquelette();
                 }
 
                 final toutes = snap.data!.docs.map((d) => d.data()).toList();

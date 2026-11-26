@@ -13,6 +13,8 @@ import 'package:stockly_saas/core/providers/currency_provider.dart';
 import 'package:stockly_saas/features/accounting/services/accounting_journal_service.dart';
 import 'package:stockly_saas/features/accounting/services/soldes_mensuels_service.dart';
 import 'package:stockly_saas/features/accounting/screens/ecriture_form_screen.dart';
+import 'package:stockly_saas/core/widgets/recherche_differee.dart';
+import 'package:stockly_saas/core/widgets/chargement_squelette.dart';
 // ============================================================================
 // 1. PROVIDERS & STREAMS (RIVERPOD - ISOLATION MULTI-TENANT)
 // ============================================================================
@@ -293,7 +295,7 @@ class ComptabiliteScreen extends ConsumerStatefulWidget {
 }
 
 class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, RechercheDifferee<ComptabiliteScreen> {
   late TabController _tabController;
   String _searchQuery = '';
   String? _selectedAccountFilter;
@@ -523,7 +525,7 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
         ),
       ),
       body: ecrituresAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const ChargementSquelette(),
         error: (err, stack) => Center(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -617,7 +619,7 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8)),
                   ),
-                  onChanged: (val) => setState(() => _searchQuery = val),
+                  onChanged: (val) => differer(() => setState(() => _searchQuery = val)),
                 ),
               ),
               const SizedBox(width: 8),
@@ -797,7 +799,7 @@ class _ComptabiliteScreenState extends ConsumerState<ComptabiliteScreen>
     final courant = ref.watch(ecrituresDuMoisProvider((entrepriseId: widget.entrepriseId, mois: cleMois)));
 
     if (avant.isLoading || courant.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const ChargementSquelette();
     }
     if (avant.hasError || courant.hasError) {
       return Center(

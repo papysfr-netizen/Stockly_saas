@@ -26,6 +26,7 @@ import 'services/financial_calculation_service.dart';
 import 'widgets/details_bottom_sheet.dart';
 import 'widgets/recherche_client_sheet.dart';
 import 'widgets/details_rapport_sheet.dart';
+import 'package:stockly_saas/core/widgets/chargement_squelette.dart';
 
 class FinancialAnalysisScreen extends ConsumerStatefulWidget {
   const FinancialAnalysisScreen({super.key});
@@ -339,7 +340,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
         ],
       ),
       body: entrepriseId.isEmpty
-          ? const Center(child: CircularProgressIndicator())
+          ? const ChargementSquelette()
           : Column(
               children: [
                 // 1. SÉLECTEUR DE PÉRIODE
@@ -402,7 +403,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                 // 2. CALCUL EN TEMPS RÉEL
                 Expanded(
                   child: depensesAsync.when(
-                    loading: () => const Center(child: CircularProgressIndicator()),
+                    loading: () => const ChargementSquelette(),
                     error: (err, _) => Center(
                       child: Text(AppLocalizations.of(context).repExpError('$err'), style: const TextStyle(color: Colors.grey)),
                     ),
@@ -426,7 +427,7 @@ class _FinancialAnalysisScreenState extends ConsumerState<FinancialAnalysisScree
                           }
                           if (snapVentes.connectionState == ConnectionState.waiting ||
                               snapProduits.connectionState == ConnectionState.waiting) {
-                            return const Center(child: CircularProgressIndicator());
+                            return const ChargementSquelette();
                           }
 
                           final produits = snapProduits.data?.docs ?? [];
