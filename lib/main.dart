@@ -17,6 +17,7 @@ import 'features/shell/main_shell.dart';
 import 'features/debts/screens/login_screen.dart';
 import 'core/widgets/app_initializer.dart';
 import 'core/services/rapport_erreurs.dart';
+import 'package:stockly_saas/core/services/protection_app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -64,6 +65,9 @@ void main() async {
     runApp(_ErreurDemarrage(erreur: '${erreurFirebase ?? 'Firebase absent'}'));
     return;
   }
+
+  // 🛡️ App Check (éteint tant que Nguli n'est pas sur le Play Store)
+  await ProtectionApp.demarrer();
 
   try {
     // (Firebase est déjà démarré juste au-dessus)

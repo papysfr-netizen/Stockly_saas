@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:stockly_saas/core/services/protection_app.dart';
 
 /// 📷🤖 Lecture d'une photo de packing list / facture par l'IA (Gemini, via Firebase AI Logic) — version 2.
 /// Renvoie les produits au même format que l'import Excel :
@@ -235,7 +236,7 @@ Règles :
       optionalProperties: ['fournisseur', 'numero', 'date', 'devise', 'frais'],
     );
 
-    final reponse = await avecSecours((nom) => FirebaseAI.googleAI()
+    final reponse = await avecSecours((nom) => ProtectionApp.ia()
         .generativeModel(
           model: nom,
           generationConfig: GenerationConfig(

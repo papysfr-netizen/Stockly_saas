@@ -16,6 +16,7 @@ import 'package:firebase_ai/src/api.dart' show ThinkingConfig;
 import '../../core/models/produit.dart';
 import '../../core/services/argent_vente.dart';
 import '../../core/services/photo_ia_service.dart';
+import 'package:stockly_saas/core/services/protection_app.dart';
 
 class AssistantService {
   AssistantService._();
@@ -280,7 +281,7 @@ ${jsonEncode(resume)}
     required String langue,
     List<(String, String)> historique = const [],
   }) async {
-    GenerativeModel modelePour(String nom, bool sansReflexion) => FirebaseAI.googleAI().generativeModel(
+    GenerativeModel modelePour(String nom, bool sansReflexion) => ProtectionApp.ia().generativeModel(
       model: nom,
       systemInstruction: Content.system(_consigne(resume, langue)),
       generationConfig: GenerationConfig(
@@ -335,7 +336,7 @@ ${jsonEncode(resume)}
     Object? derniere;
     for (final (nom, sansReflexion, attendre) in _tentatives()) {
       if (attendre) await Future<void>.delayed(const Duration(milliseconds: 1500));
-      final model = FirebaseAI.googleAI().generativeModel(
+      final model = ProtectionApp.ia().generativeModel(
         model: nom,
         systemInstruction: Content.system(_consigne(resume, langue)),
         generationConfig: GenerationConfig(
