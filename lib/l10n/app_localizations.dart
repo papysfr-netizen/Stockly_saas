@@ -7362,7 +7362,7 @@ abstract class AppLocalizations {
   /// No description provided for @astTitle.
   ///
   /// In fr, this message translates to:
-  /// **'✨ Demandez à Nguli'**
+  /// **'Demandez à Nguli'**
   String get astTitle;
 
   /// No description provided for @astIntro.

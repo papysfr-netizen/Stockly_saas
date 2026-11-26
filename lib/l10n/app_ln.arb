@@ -1209,7 +1209,7 @@
   "arrFees": "Ba frais (fret, transport…): {montant}",
   "arrProfitAfterFees": "Litomba sima ya ba frais: {montant}",
   "arrInvoiceDate": "Facture ya {date}",
-  "astTitle": "✨ Tuna Nguli",
+  "astTitle": "Tuna Nguli",
   "astIntro": "Mbote! Nayebi ba chiffres ya butiki na yo ya mikolo 30 eleki: ba ventes, stock, ba crédits, ba dépenses. Tuna ngai motuna.",
   "astLoading": "Nazali kotanga ba chiffres ya butiki…",
   "astLoadError": "Ekoki te kotanga ba chiffres. Tala internet mpe meka lisusu.",

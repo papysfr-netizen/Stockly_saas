@@ -4393,7 +4393,7 @@ class AppLocalizationsSw extends AppLocalizations {
   }
 
   @override
-  String get astTitle => '✨ Uliza Nguli';
+  String get astTitle => 'Uliza Nguli';
 
   @override
   String get astIntro =>

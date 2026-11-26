@@ -4402,7 +4402,7 @@ class AppLocalizationsLn extends AppLocalizations {
   }
 
   @override
-  String get astTitle => '✨ Tuna Nguli';
+  String get astTitle => 'Tuna Nguli';
 
   @override
   String get astIntro =>

@@ -354,7 +354,7 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
         title: Row(children: [
           const AvatarNguli(taille: 34),
           const SizedBox(width: 10),
-          Flexible(child: Text(t.astTitle, overflow: TextOverflow.ellipsis)),
+          const Flexible(child: Text('Nguli', overflow: TextOverflow.ellipsis)),
         ]),
         actions: [
           // 🕘 Discussions passées et ➕ nouvelle discussion

@@ -1209,7 +1209,7 @@
   "arrFees": "Costs (freight, transport…): {montant}",
   "arrProfitAfterFees": "Profit after costs: {montant}",
   "arrInvoiceDate": "Invoice of {date}",
-  "astTitle": "✨ Ask Nguli",
+  "astTitle": "Ask Nguli",
   "astIntro": "Hello! I know your shop's figures for the last 30 days: sales, stock, credit, expenses. Ask me a question.",
   "astLoading": "Reading the shop's figures…",
   "astLoadError": "Could not read the figures. Check the internet and try again.",

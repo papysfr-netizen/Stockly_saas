@@ -4396,7 +4396,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get astTitle => '✨ Ask Nguli';
+  String get astTitle => 'Ask Nguli';
 
   @override
   String get astIntro =>

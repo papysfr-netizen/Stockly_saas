@@ -51,6 +51,7 @@ class AssistantService {
     required List<Produit> produits,
     Map<String, String> nomsBoutiques = const {},
     double tauxCDF = 0,
+    String nomEntreprise = '',
   }) {
     double ca = 0, cout = 0, encaisse = 0, credit = 0;
     final parJour = <String, double>{};
@@ -170,6 +171,7 @@ class AssistantService {
 
     return {
       'aujourdhui': _jour(maintenant),
+      if (nomEntreprise.isNotEmpty) 'entreprise': nomEntreprise,
       'periode': 'les $jours derniers jours',
       'parPeriode': periodes,
       'devise': 'USD',
@@ -229,6 +231,10 @@ class AssistantService {
           .get()
           .then<QuerySnapshot<Map<String, dynamic>>?>((s) => s, onError: (_) => null),
     ]);
+    // Nom de l'entreprise (une seule lecture, souvent déjà dans le cache du téléphone)
+    final nomEntreprise = await ent
+        .get()
+        .then((d) => (d.data()?['nom'] ?? '').toString(), onError: (_) => '');
     List<Map<String, dynamic>> donnees(QuerySnapshot<Map<String, dynamic>>? s) =>
         s == null ? const [] : [for (final d in s.docs) d.data()];
     return resumer(
@@ -240,6 +246,7 @@ class AssistantService {
       produits: produits,
       nomsBoutiques: nomsBoutiques,
       tauxCDF: tauxCDF,
+      nomEntreprise: nomEntreprise,
     );
   }
 
@@ -253,6 +260,7 @@ class AssistantService {
   /// Consigne donnée à l'IA : langue, règles, et les données de la boutique
   static String _consigne(Map<String, dynamic> resume, String langue) => '''
 Tu es l'assistant de gestion de Nguli, une application de caisse et de stock pour une boutique en RD Congo.
+Nguli est le nom de l'APPLICATION ; ${resume['entreprise'] == null ? 'le nom de l\'entreprise n\'est pas connu' : 'l\'entreprise du patron s\'appelle « ${resume['entreprise']} » : utilise ce nom pour parler de sa boutique'}.
 Tu réponds au patron, en ${_langue(langue)}, de façon courte, claire et polie (5 phrases au plus,
 ou une petite liste). Les montants sont en dollars (\$) ; donne l'équivalent en francs si le taux est fourni
 et que c'est utile.

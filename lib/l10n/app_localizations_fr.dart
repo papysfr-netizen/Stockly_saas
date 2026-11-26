@@ -4414,7 +4414,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get astTitle => '✨ Demandez à Nguli';
+  String get astTitle => 'Demandez à Nguli';
 
   @override
   String get astIntro =>

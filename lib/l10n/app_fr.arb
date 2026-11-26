@@ -2703,7 +2703,7 @@
   "@arrProfitAfterFees": {"placeholders": {"montant": {"type": "String"}}},
   "arrInvoiceDate": "Facture du {date}",
   "@arrInvoiceDate": {"placeholders": {"date": {"type": "String"}}},
-  "astTitle": "✨ Demandez à Nguli",
+  "astTitle": "Demandez à Nguli",
   "astIntro": "Bonjour ! Je connais les chiffres de votre boutique des 30 derniers jours : ventes, stock, crédits, dépenses. Posez-moi une question.",
   "astLoading": "Je lis les chiffres de la boutique…",
   "astLoadError": "Impossible de lire les chiffres. Vérifiez internet et réessayez.",
