@@ -81,6 +81,11 @@ service cloud.firestore {
         allow read: if memberOf(ecoleId);
         allow write: if isAdmin(ecoleId);
       }
+      // Emploi du temps : visible par toute l'école (parents compris), modifié par la direction.
+      match /creneaux/{id} {
+        allow read: if memberOf(ecoleId);
+        allow write: if isAdmin(ecoleId);
+      }
       match /enseignants/{id} {
         allow read: if isStaff(ecoleId);
         allow write: if isAdmin(ecoleId);

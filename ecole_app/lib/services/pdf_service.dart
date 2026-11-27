@@ -10,8 +10,10 @@ import '../core/format.dart';
 import '../models/classe.dart';
 import '../models/ecole.dart';
 import '../models/eleve.dart';
+import '../models/emploi_du_temps.dart';
 import '../models/scolarite.dart';
 import 'calculs.dart';
+import 'emploi_du_temps.dart' show nomsJours;
 
 class PdfService {
   /// Police Roboto embarquée : accents, tirets et symboles s'affichent quel que
@@ -238,6 +240,65 @@ class PdfService {
           ]),
         ],
       ),
+    ));
+    return doc.save();
+  }
+
+  /// Emploi du temps imprimable (A4 paysage) : jours en colonnes, heures en lignes.
+  static Future<Uint8List> emploiDuTemps({
+    required Ecole ecole,
+    required String titre,
+    required List<Creneau> creneaux,
+    required ({String titre, String detail}) Function(Creneau c) contenu,
+  }) async {
+    final doc = pw.Document(theme: await _chargerTheme());
+    const petit = pw.TextStyle(fontSize: 8);
+    final gras = pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold);
+    pw.Widget cellule(int jour, String plage) {
+      final c = creneaux.where((x) => x.jour == jour && x.plage == plage).firstOrNull;
+      if (c == null) return pw.SizedBox(height: 46);
+      final t = contenu(c);
+      return pw.Container(
+        height: 46,
+        padding: const pw.EdgeInsets.all(4),
+        color: PdfColors.blue50,
+        child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+          pw.Text(t.titre, style: gras, maxLines: 1),
+          if (t.detail.isNotEmpty) pw.Text(t.detail, style: petit, maxLines: 2),
+        ]),
+      );
+    }
+
+    doc.addPage(pw.Page(
+      pageFormat: PdfPageFormat.a4.landscape,
+      margin: const pw.EdgeInsets.all(24),
+      build: (_) => pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+        pw.Text(ecole.nom, style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold)),
+        if (ecole.anneeScolaire.isNotEmpty) pw.Text('Année scolaire ${ecole.anneeScolaire}', style: petit),
+        pw.SizedBox(height: 8),
+        pw.Center(child: pw.Text(titre, style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold))),
+        pw.SizedBox(height: 10),
+        pw.Table(
+          border: pw.TableBorder.all(color: PdfColors.grey600, width: 0.5),
+          columnWidths: {
+            0: const pw.FixedColumnWidth(60),
+            for (var i = 1; i <= ecole.jours.length; i++) i: const pw.FlexColumnWidth(1),
+          },
+          defaultVerticalAlignment: pw.TableCellVerticalAlignment.middle,
+          children: [
+            pw.TableRow(decoration: const pw.BoxDecoration(color: PdfColors.grey300), children: [
+              pw.Padding(padding: const pw.EdgeInsets.all(4), child: pw.Text('Heure', style: gras)),
+              for (final j in ecole.jours)
+                pw.Padding(padding: const pw.EdgeInsets.all(4), child: pw.Text(nomsJours[j - 1], style: gras)),
+            ]),
+            for (final p in ecole.plagesHoraires)
+              pw.TableRow(children: [
+                pw.Padding(padding: const pw.EdgeInsets.all(4), child: pw.Text(p.replaceAll('-', ' - '), style: petit)),
+                for (final j in ecole.jours) pw.Padding(padding: const pw.EdgeInsets.all(1), child: cellule(j, p)),
+              ]),
+          ],
+        ),
+      ]),
     ));
     return doc.save();
   }

@@ -7,6 +7,7 @@ import '../../core/telephone.dart';
 import '../../models/app_user.dart';
 import '../../models/ecole.dart';
 import '../../providers/providers.dart';
+import '../../services/emploi_du_temps.dart';
 import '../../services/rappels.dart';
 import '../../widgets/common.dart';
 
@@ -55,6 +56,8 @@ class _EcoleCardState extends ConsumerState<_EcoleCard> {
       text: widget.ecole.modeleRappel.isEmpty ? modeleRappelParDefaut : widget.ecole.modeleRappel);
   late String _indicatif = widget.ecole.indicatif;
   late SystemeEvaluation _systeme = widget.ecole.systeme;
+  late final _plages = TextEditingController(text: widget.ecole.plagesHoraires.join('\n'));
+  late bool _samedi = widget.ecole.samedi;
 
   @override
   Widget build(BuildContext context) {
@@ -99,6 +102,24 @@ class _EcoleCardState extends ConsumerState<_EcoleCard> {
             onChanged: (v) => setState(() => _systeme = v!),
           ),
           const SizedBox(height: 24),
+          Text('Grille horaire (emploi du temps)', style: Theme.of(context).textTheme.titleSmall),
+          gap,
+          TextField(
+            controller: _plages,
+            maxLines: 8,
+            minLines: 4,
+            decoration: const InputDecoration(
+              helperText: 'Une heure de cours par ligne, ex. 07:30-08:20. La récréation est simplement omise.',
+              helperMaxLines: 2,
+            ),
+          ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Cours le samedi'),
+            value: _samedi,
+            onChanged: (v) => setState(() => _samedi = v),
+          ),
+          const SizedBox(height: 24),
           Text("Message de rappel d'impayé", style: Theme.of(context).textTheme.titleSmall),
           gap,
           TextField(
@@ -113,20 +134,30 @@ class _EcoleCardState extends ConsumerState<_EcoleCard> {
           Align(
             alignment: Alignment.centerRight,
             child: FilledButton(
-              onPressed: () => run(
-                context,
-                () => ref.read(schoolRepoProvider).majEcole(widget.ecole.copyWith(
-                      nom: _nom.text.trim(),
-                      adresse: _adresse.text.trim(),
-                      telephone: _tel.text.trim(),
-                      devise: _devise.text.trim(),
-                      anneeScolaire: _annee.text.trim(),
-                      indicatif: _indicatif,
-                      systeme: _systeme,
-                      modeleRappel: _modele.text.trim() == modeleRappelParDefaut ? '' : _modele.text.trim(),
-                    )),
-                succes: 'Enregistré',
-              ),
+              onPressed: () {
+                final grille = validerGrille(_plages.text.split('\n'));
+                if (grille.erreur != null) {
+                  showMessage(context, grille.erreur!, erreur: true);
+                  return;
+                }
+                _plages.text = grille.plages.join('\n');
+                run(
+                  context,
+                  () => ref.read(schoolRepoProvider).majEcole(widget.ecole.copyWith(
+                        nom: _nom.text.trim(),
+                        adresse: _adresse.text.trim(),
+                        telephone: _tel.text.trim(),
+                        devise: _devise.text.trim(),
+                        anneeScolaire: _annee.text.trim(),
+                        indicatif: _indicatif,
+                        systeme: _systeme,
+                        modeleRappel: _modele.text.trim() == modeleRappelParDefaut ? '' : _modele.text.trim(),
+                        plagesHoraires: grille.plages,
+                        samedi: _samedi,
+                      )),
+                  succes: 'Enregistré',
+                );
+              },
               child: const Text('Enregistrer'),
             ),
           ),
@@ -156,7 +187,10 @@ class _ComptesCard extends ConsumerWidget {
           ),
         ),
         for (final u in users)
-          ListTile(dense: true, leading: const Icon(Icons.verified_user_outlined), title: Text(u.nom),
+          ListTile(
+              dense: true,
+              leading: const Icon(Icons.verified_user_outlined),
+              title: Text(u.nom),
               subtitle: Text('${u.identifiant} · ${u.role.label}')),
         if (invitations.isNotEmpty) const ListTile(dense: true, title: Text('Invitations en attente')),
         for (final i in invitations)

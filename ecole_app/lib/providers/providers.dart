@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/evaluation.dart';
+import '../core/telephone.dart';
 import '../data/auth_repository.dart';
 import '../data/rappel_repository.dart';
 import '../data/school_repository.dart';
@@ -11,6 +12,7 @@ import '../models/app_user.dart';
 import '../models/classe.dart';
 import '../models/ecole.dart';
 import '../models/eleve.dart';
+import '../models/emploi_du_temps.dart';
 import '../models/scolarite.dart';
 
 final authRepoProvider = Provider(
@@ -86,3 +88,19 @@ final rappelRepoProvider = Provider(
 
 final derniersRappelsProvider =
     StreamProvider<Map<String, DateTime>>((ref) => ref.watch(schoolRepoProvider).derniersRappels());
+
+final creneauxProvider =
+    StreamProvider<List<Creneau>>((ref) => ref.watch(schoolRepoProvider).creneaux());
+
+/// Fiche enseignant correspondant au compte connecté (même e-mail ou même téléphone).
+final monEnseignantProvider = Provider<Enseignant?>((ref) {
+  final me = ref.watch(meProvider);
+  if (me.role != Role.enseignant) return null;
+  final indicatif = ref.watch(ecoleProvider).valueOrNull?.indicatif ?? '+243';
+  final liste = ref.watch(enseignantsProvider).valueOrNull ?? const <Enseignant>[];
+  return liste.where((e) {
+    final mail = e.email.trim().toLowerCase();
+    final tel = normaliserTelephone(e.telephone, indicatif: indicatif);
+    return (mail.isNotEmpty && mail == me.email) || (tel != null && tel == me.telephone);
+  }).firstOrNull;
+});

@@ -10,6 +10,7 @@ import '../../providers/providers.dart';
 import '../../services/calculs.dart';
 import '../../widgets/common.dart';
 import '../paiements/encaisser_dialog.dart';
+import '../emploi_du_temps/emploi_du_temps_screen.dart';
 import '../paiements/rappels_actions.dart';
 import 'eleve_form_screen.dart';
 
@@ -26,7 +27,7 @@ class EleveDetailScreen extends ConsumerWidget {
         return Scaffold(appBar: AppBar(), body: const EmptyState('Élève introuvable.'));
       }
       return DefaultTabController(
-        length: 3,
+        length: 4,
         child: Scaffold(
           appBar: AppBar(
             title: Text(eleve.nomComplet),
@@ -53,10 +54,11 @@ class EleveDetailScreen extends ConsumerWidget {
                 ),
               ],
             ],
-            bottom: const TabBar(tabs: [
+            bottom: const TabBar(isScrollable: true, tabs: [
               Tab(text: 'Infos & frais'),
               Tab(text: 'Notes'),
               Tab(text: 'Absences'),
+              Tab(text: 'Emploi du temps'),
             ]),
           ),
           floatingActionButton: me.canManagePaiements
@@ -70,6 +72,7 @@ class EleveDetailScreen extends ConsumerWidget {
             _InfosTab(eleve),
             _NotesTab(eleve),
             _AbsencesTab(eleve),
+            _EmploiDuTempsTab(eleve),
           ]),
         ),
       );
@@ -255,5 +258,18 @@ class _AbsencesTab extends ConsumerWidget {
           ),
       ]);
     });
+  }
+}
+
+class _EmploiDuTempsTab extends ConsumerWidget {
+  const _EmploiDuTempsTab(this.eleve);
+  final Eleve eleve;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final classes = ref.watch(toutesClassesProvider).valueOrNull ?? const [];
+    final classe = classes.where((c) => c.id == eleve.classeId).firstOrNull;
+    if (classe == null) return const EmptyState('Classe inconnue.');
+    return ListView(padding: const EdgeInsets.all(12), children: [EmploiDuTempsClasse(classe: classe)]);
   }
 }

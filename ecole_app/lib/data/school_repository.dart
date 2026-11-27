@@ -3,6 +3,7 @@ import '../core/format.dart';
 import '../models/app_user.dart';
 import '../models/classe.dart';
 import '../models/ecole.dart';
+import '../models/emploi_du_temps.dart';
 import '../models/eleve.dart';
 import '../models/scolarite.dart';
 
@@ -264,6 +265,17 @@ class SchoolRepository {
     });
     await batch.commit();
   }
+
+  // ---------------- Emploi du temps ----------------
+  /// Tous les créneaux de l'école (nécessaire pour détecter les conflits
+  /// d'enseignants et de salles entre classes).
+  Stream<List<Creneau>> creneaux() =>
+      _col('creneaux').snapshots().map((s) => s.docs.map(Creneau.fromDoc).toList());
+
+  Future<void> enregistrerCreneau(Creneau c) =>
+      _col('creneaux').doc(Creneau.docId(c.classeId, c.jour, c.plage)).set(c.toMap());
+
+  Future<void> supprimerCreneau(String id) => _col('creneaux').doc(id).delete();
 
   // ---------------- Présences ----------------
   Stream<FeuillePresence?> feuillePresence(String classeId, DateTime date) => _col('presences')

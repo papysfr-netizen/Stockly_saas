@@ -110,10 +110,19 @@ await t('secrétariat : rattache un élève à un parent', assertSucceeds(update
 await t('secrétariat : ne peut pas changer un rôle', assertFails(updateDoc(doc(secr, 'users/parent'), { role: 'admin' })));
 await t('secrétariat : ne peut pas créer de classe', assertFails(setDoc(doc(secr, `ecoles/${E}/classes/c9`), { nom: 'X' })));
 
+// Emploi du temps
+const creneau = { classeId: 'c1', jour: 1, plage: '07:30-08:20', matiereId: 'm', enseignantId: 'ens1', enseignantNom: 'M. Prof', salle: '' };
+await t('admin : crée un créneau', assertSucceeds(setDoc(doc(admin, `ecoles/${E}/creneaux/c1_1_0730-0820`), creneau)));
+await t('enseignant : lit les emplois du temps', assertSucceeds(getDocs(collection(prof, `ecoles/${E}/creneaux`))));
+await t('parent : lit les emplois du temps', assertSucceeds(getDocs(collection(parent, `ecoles/${E}/creneaux`))));
+await t('enseignant : ne modifie pas un créneau', assertFails(setDoc(doc(prof, `ecoles/${E}/creneaux/c1_1_0730-0820`), { ...creneau, salle: 'X' })));
+await t('secrétariat : ne modifie pas un créneau', assertFails(deleteDoc(doc(secr, `ecoles/${E}/creneaux/c1_1_0730-0820`))));
+
 // Direction & isolation entre écoles
 await t('admin : crée une classe', assertSucceeds(setDoc(doc(admin, `ecoles/${E}/classes/c9`), { nom: 'CM2' })));
 await t('admin : invite un enseignant', assertSucceeds(setDoc(doc(admin, 'invitations/prof2@x.fr'), { identifiant: 'prof2@x.fr', role: 'enseignant', ecoleId: E, classeIds: ['c1'] })));
 await t("admin d'une autre école : aucun accès", assertFails(q(fondateur, 'eleves', 'actif', true)));
+await t("autre école : pas d'accès aux emplois du temps", assertFails(getDocs(collection(fondateur, `ecoles/${E}/creneaux`))));
 await t("autre école : ne peut pas écraser une invitation", assertFails(setDoc(doc(fondateur, 'invitations/p2@x.fr'), { identifiant: 'p2@x.fr', role: 'parent', ecoleId: 'ecole2' })));
 
 console.log(`\n${ok} réussis, ${ko} échoués`);

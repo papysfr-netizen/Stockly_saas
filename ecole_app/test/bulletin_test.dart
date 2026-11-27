@@ -4,6 +4,7 @@ import 'package:ecole_app/core/evaluation.dart';
 import 'package:ecole_app/models/classe.dart';
 import 'package:ecole_app/models/ecole.dart';
 import 'package:ecole_app/models/eleve.dart';
+import 'package:ecole_app/models/emploi_du_temps.dart';
 import 'package:ecole_app/models/scolarite.dart';
 import 'package:ecole_app/services/calculs.dart';
 import 'package:ecole_app/services/pdf_service.dart';
@@ -72,6 +73,24 @@ void main() {
     await ecrire('bulletin_maternelle', PdfService.bulletin(
       ecole: ecole, eleve: eleve, classe: classe, matieres: branches, eleveIds: ['a'],
       ev: Evaluations(notes), absences: 0, comportements: const [],
+    ));
+  });
+
+  test("emploi du temps d'une classe", () async {
+    final noms = {'fr': 'Français', 'ca': 'Calcul', 'li': 'Lingala', 'ec': 'Éducation civique'};
+    final creneaux = [
+      for (final (j, p, m) in [
+        (1, '07:30-08:20', 'fr'), (1, '08:20-09:10', 'ca'), (2, '07:30-08:20', 'ca'), (2, '10:15-11:05', 'li'),
+        (3, '07:30-08:20', 'fr'), (4, '09:10-10:00', 'ec'), (5, '11:55-12:45', 'li'),
+      ])
+        Creneau(id: '', classeId: 'c', jour: j, plage: p, matiereId: m, enseignantNom: m == 'li' ? 'M. Ilunga' : 'Mme Kasongo',
+            salle: m == 'ca' ? 'B2' : ''),
+    ];
+    await ecrire('emploi_du_temps', PdfService.emploiDuTemps(
+      ecole: ecole,
+      titre: 'Emploi du temps — 5e A',
+      creneaux: creneaux,
+      contenu: (c) => (titre: noms[c.matiereId]!, detail: [c.enseignantNom, if (c.salle.isNotEmpty) 'Salle ${c.salle}'].join(' · ')),
     ));
   });
 }

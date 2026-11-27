@@ -13,6 +13,7 @@ conçue pour le système scolaire de la **RD Congo** (maternelle, primaire, seco
 | **Exports Excel** | Palmarès et notes d'une classe ; impayés, recouvrement par classe et journal des encaissements |
 | **Rappels d'impayés** | SMS ou WhatsApp, un par un depuis le téléphone ou en masse via Twilio, avec historique |
 | **Notes & bulletins** | Saisie par période et examen, totaux, pourcentages, places, application et conduite, bulletins PDF |
+| **Emplois du temps** | Grille par classe (branche, enseignant, salle), vue par enseignant, conflits bloqués, volume horaire, impression PDF |
 | **Présences** | Appel quotidien (présent / retard / absent), historique par élève |
 | **Enseignants** | Fiches, classes confiées, création de compte |
 | **Espace parents** | Notes, absences et paiements de leurs enfants |
@@ -34,6 +35,17 @@ puis maxima généraux, totaux, pourcentage, place, application et conduite.
 
 Un système « trimestres, notes sur 20 avec coefficients » reste disponible dans **Paramètres** pour d'autres pays.
 Valeurs par défaut d'une nouvelle école : devise USD (modifiable en CDF), indicatif +243.
+
+## Emplois du temps
+
+- **Grille horaire** : Paramètres → une heure de cours par ligne (`07:30-08:20`…), récréation omise ; option samedi.
+- **Saisie** (direction) : Emploi du temps → Par classe → toucher une case → branche, enseignant, salle.
+  L'enseignant habituel de la branche est proposé par défaut.
+- **Conflits bloqués** : un enseignant ou une salle déjà occupés au même moment dans une autre classe.
+- **Consultation** : l'enseignant voit « Mon emploi du temps » (son compte est relié à sa fiche par l'e-mail
+  ou le téléphone), le parent voit celui de la classe sur la fiche de son enfant, le secrétariat voit tout.
+- **Volume horaire** hebdomadaire par branche (classe) et total par enseignant ; **impression PDF** A4 paysage.
+- Sur téléphone, affichage jour par jour ; sur grand écran, grille complète.
 
 ## Exports Excel
 
@@ -153,6 +165,7 @@ ecoles/{ecoleId}                    nom, adresse, devise, année scolaire
   ├─ paiements                      non modifiables, annulables par la direction
   ├─ notes                          id = {eleve}_{branche}_{période} : points ou cote
   ├─ comportements                  application et conduite par élève et par période
+  ├─ creneaux                       emploi du temps : id = {classe}_{jour}_{heure}
   ├─ presences                      une feuille d'appel par classe et par jour
   ├─ absences                       une fiche par absence/retard (lue par les parents)
   ├─ rappels                        historique des rappels d'impayés (manuels et automatiques)
