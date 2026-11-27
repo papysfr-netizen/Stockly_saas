@@ -1,0 +1,111 @@
+rules_version = '2';
+
+// Règles de sécurité — Gestion École
+// Chaque utilisateur (users/{uid}) appartient à une école (ecoleId) avec un rôle :
+// admin (direction), secretariat, enseignant, parent.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function me() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function hasProfile() { return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
+    function memberOf(ecoleId) { return hasProfile() && me().ecoleId == ecoleId; }
+    function hasRole(ecoleId, roles) { return memberOf(ecoleId) && me().role in roles; }
+    function isAdmin(ecoleId) { return hasRole(ecoleId, ['admin']); }
+    function isGestion(ecoleId) { return hasRole(ecoleId, ['admin', 'secretariat']); }
+    function isStaff(ecoleId) { return hasRole(ecoleId, ['admin', 'secretariat', 'enseignant']); }
+    function isParentOf(ecoleId, eleveId) { return hasRole(ecoleId, ['parent']) && eleveId in me().eleveIds; }
+    function teaches(ecoleId, classeId) {
+      return isAdmin(ecoleId) || (hasRole(ecoleId, ['enseignant']) && classeId in me().classeIds);
+    }
+    function myEmail() { return request.auth.token.email.lower(); }
+
+    // ---------- Profils ----------
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isGestion(resource.data.ecoleId));
+
+      // Création à l'inscription : soit fondateur d'une nouvelle école,
+      // soit via une invitation correspondant exactement au profil créé.
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.email == myEmail()
+        && (
+          (request.resource.data.role == 'admin'
+            && getAfter(/databases/$(database)/documents/ecoles/$(request.resource.data.ecoleId)).data.proprietaire == uid)
+          ||
+          (exists(/databases/$(database)/documents/invitations/$(myEmail()))
+            && get(/databases/$(database)/documents/invitations/$(myEmail())).data.role == request.resource.data.role
+            && get(/databases/$(database)/documents/invitations/$(myEmail())).data.ecoleId == request.resource.data.ecoleId)
+        );
+
+      // L'utilisateur peut changer son nom ; la gestion peut rattacher des
+      // élèves (parents) et la direction des classes (enseignants).
+      allow update: if signedIn() && (
+        (request.auth.uid == uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nom']))
+        || (isGestion(resource.data.ecoleId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['eleveIds']))
+        || (isAdmin(resource.data.ecoleId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['classeIds', 'eleveIds']))
+      );
+      allow delete: if false;
+    }
+
+    // ---------- Invitations (id = e-mail en minuscules) ----------
+    match /invitations/{email} {
+      allow get: if signedIn() && (myEmail() == email || isGestion(resource.data.ecoleId));
+      allow list: if isGestion(resource.data.ecoleId);
+      // La direction invite tout le monde ; le secrétariat seulement des parents.
+      allow create, update: if signedIn() && request.resource.data.email == email
+        && (resource == null || isGestion(resource.data.ecoleId))
+        && (isAdmin(request.resource.data.ecoleId)
+            || (isGestion(request.resource.data.ecoleId) && request.resource.data.role == 'parent'));
+      allow delete: if signedIn() && (myEmail() == email || isGestion(resource.data.ecoleId));
+    }
+
+    // ---------- Écoles ----------
+    match /ecoles/{ecoleId} {
+      allow read: if memberOf(ecoleId);
+      allow create: if signedIn() && request.resource.data.proprietaire == request.auth.uid;
+      allow update: if isAdmin(ecoleId) && request.resource.data.proprietaire == resource.data.proprietaire;
+
+      match /classes/{id} {
+        allow read: if memberOf(ecoleId);
+        allow write: if isAdmin(ecoleId);
+      }
+      match /matieres/{id} {
+        allow read: if memberOf(ecoleId);
+        allow write: if isAdmin(ecoleId);
+      }
+      match /enseignants/{id} {
+        allow read: if isStaff(ecoleId);
+        allow write: if isAdmin(ecoleId);
+      }
+      match /eleves/{eleveId} {
+        allow read: if isStaff(ecoleId) || isParentOf(ecoleId, eleveId);
+        allow create, update: if isGestion(ecoleId);
+        allow delete: if isAdmin(ecoleId);
+      }
+      match /paiements/{id} {
+        allow read: if isGestion(ecoleId) || isParentOf(ecoleId, resource.data.eleveId);
+        allow create: if isGestion(ecoleId) && request.resource.data.montant > 0;
+        allow update: if false; // un paiement ne se modifie pas : on l'annule
+        allow delete: if isAdmin(ecoleId);
+      }
+      match /notes/{id} {
+        allow read: if isStaff(ecoleId) || isParentOf(ecoleId, resource.data.eleveId);
+        allow create, update: if teaches(ecoleId, request.resource.data.classeId)
+          && request.resource.data.valeur >= 0 && request.resource.data.valeur <= request.resource.data.sur;
+        allow delete: if teaches(ecoleId, resource.data.classeId);
+      }
+      match /presences/{id} {
+        allow read: if isStaff(ecoleId);
+        allow create, update: if teaches(ecoleId, request.resource.data.classeId);
+      }
+      match /absences/{id} {
+        allow read: if isStaff(ecoleId) || isParentOf(ecoleId, resource.data.eleveId);
+        allow create, update: if teaches(ecoleId, request.resource.data.classeId);
+        allow delete: if teaches(ecoleId, resource.data.classeId);
+      }
+      match /meta/{doc} {
+        allow read, write: if isGestion(ecoleId);
+      }
+    }
+  }
+}
