@@ -17,6 +17,7 @@ extension RoleX on Role {
 class AppUser {
   final String uid;
   final String email;
+  final String telephone; // E.164, pour les comptes créés par numéro de téléphone
   final String nom;
   final Role role;
   final String ecoleId;
@@ -29,13 +30,16 @@ class AppUser {
 
   const AppUser({
     required this.uid,
-    required this.email,
     required this.nom,
     required this.role,
     required this.ecoleId,
+    this.email = '',
+    this.telephone = '',
     this.classeIds = const [],
     this.eleveIds = const [],
   });
+
+  String get identifiant => email.isNotEmpty ? email : telephone;
 
   bool get isAdmin => role == Role.admin;
   bool get canManageEleves => role == Role.admin || role == Role.secretariat;
@@ -52,6 +56,7 @@ class AppUser {
     return AppUser(
       uid: doc.id,
       email: m['email'] ?? '',
+      telephone: m['telephone'] ?? '',
       nom: m['nom'] ?? '',
       role: RoleX.parse(m['role']),
       ecoleId: m['ecoleId'] ?? '',
@@ -62,6 +67,7 @@ class AppUser {
 
   Map<String, dynamic> toMap() => {
         'email': email,
+        'telephone': telephone,
         'nom': nom,
         'role': role.name,
         'ecoleId': ecoleId,
@@ -70,10 +76,11 @@ class AppUser {
       };
 }
 
-/// Invitation créée par la direction : quand la personne crée son compte
-/// avec cet e-mail, elle rejoint l'école avec le rôle prévu.
+/// Invitation créée par l'école. Identifiée par l'e-mail (en minuscules) ou
+/// le numéro de téléphone (E.164) de la personne : quand elle crée son compte
+/// avec cet identifiant, elle rejoint l'école avec le rôle prévu.
 class Invitation {
-  final String email;
+  final String identifiant;
   final String nom;
   final Role role;
   final String ecoleId;
@@ -81,7 +88,7 @@ class Invitation {
   final List<String> eleveIds;
 
   const Invitation({
-    required this.email,
+    required this.identifiant,
     required this.nom,
     required this.role,
     required this.ecoleId,
@@ -89,8 +96,10 @@ class Invitation {
     this.eleveIds = const [],
   });
 
-  factory Invitation.fromMap(Map<String, dynamic> m) => Invitation(
-        email: m['email'] ?? '',
+  bool get parTelephone => identifiant.startsWith('+');
+
+  factory Invitation.fromMap(String id, Map<String, dynamic> m) => Invitation(
+        identifiant: id,
         nom: m['nom'] ?? '',
         role: RoleX.parse(m['role']),
         ecoleId: m['ecoleId'] ?? '',
@@ -99,7 +108,7 @@ class Invitation {
       );
 
   Map<String, dynamic> toMap() => {
-        'email': email,
+        'identifiant': identifiant,
         'nom': nom,
         'role': role.name,
         'ecoleId': ecoleId,

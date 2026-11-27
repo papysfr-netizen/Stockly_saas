@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format.dart';
+import '../../core/telephone.dart';
 import '../../models/eleve.dart';
 import '../../providers/providers.dart';
 import '../../widgets/common.dart';
@@ -43,10 +44,20 @@ class _EleveFormScreenState extends ConsumerState<EleveFormScreen> {
       parentEmail: _parentEmail.text.trim(),
       dateInscription: widget.eleve?.dateInscription,
     );
+    final indicatif = ref.read(ecoleProvider).valueOrNull?.indicatif ?? '+225';
+    String? tel(String brut) => normaliserTelephone(brut, indicatif: indicatif);
     final ok = await run(context, () async {
       final id = await repo.enregistrerEleve(e);
-      if (e.parentEmail.isNotEmpty && e.parentEmail != widget.eleve?.parentEmail) {
-        await repo.lierParent(email: e.parentEmail, nom: e.parentNom, eleveId: id);
+      // Le parent pourra se connecter avec son e-mail ou son numéro de téléphone.
+      final nouveaux = [
+        if (e.parentEmail.isNotEmpty && e.parentEmail.toLowerCase() != widget.eleve?.parentEmail)
+          e.parentEmail.toLowerCase(),
+        if (tel(e.parentTelephone) != null &&
+            tel(e.parentTelephone) != tel(widget.eleve?.parentTelephone ?? ''))
+          tel(e.parentTelephone)!,
+      ];
+      if (nouveaux.isNotEmpty) {
+        await repo.lierParent(identifiants: nouveaux, nom: e.parentNom, eleveId: id);
       }
     }, succes: widget.eleve == null ? 'Élève inscrit' : 'Fiche mise à jour');
     if (!mounted) return;
@@ -114,7 +125,13 @@ class _EleveFormScreenState extends ConsumerState<EleveFormScreen> {
           TextFormField(
               controller: _parentTel,
               keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(labelText: 'Téléphone')),
+              decoration: const InputDecoration(
+                  labelText: 'Téléphone',
+                  helperText: 'Sert aux rappels SMS/WhatsApp et à la connexion du parent par code SMS'),
+              validator: (v) => (v ?? '').trim().isEmpty ||
+                      normaliserTelephone(v!, indicatif: ref.read(ecoleProvider).valueOrNull?.indicatif ?? '+225') != null
+                  ? null
+                  : 'Numéro invalide'),
           gap,
           TextFormField(
             controller: _parentEmail,

@@ -18,23 +18,31 @@ service cloud.firestore {
     function teaches(ecoleId, classeId) {
       return isAdmin(ecoleId) || (hasRole(ecoleId, ['enseignant']) && classeId in me().classeIds);
     }
-    function myEmail() { return request.auth.token.email.lower(); }
+    function myEmail() { return request.auth.token.get('email', '').lower(); }
+    function myPhone() { return request.auth.token.get('phone_number', ''); }
+    function isMe(identifiant) { return identifiant != '' && (identifiant == myEmail() || identifiant == myPhone()); }
+    function invitation(id) { return get(/databases/$(database)/documents/invitations/$(id)).data; }
 
     // ---------- Profils ----------
     match /users/{uid} {
       allow read: if signedIn() && (request.auth.uid == uid || isGestion(resource.data.ecoleId));
 
-      // Création à l'inscription : soit fondateur d'une nouvelle école,
-      // soit via une invitation correspondant exactement au profil créé.
+      // Création à l'inscription (compte e-mail ou téléphone) : soit fondateur
+      // d'une nouvelle école, soit via une invitation adressée à cet e-mail /
+      // ce numéro et correspondant exactement au profil créé.
       allow create: if signedIn() && request.auth.uid == uid
         && request.resource.data.email == myEmail()
+        && request.resource.data.telephone == myPhone()
         && (
           (request.resource.data.role == 'admin'
             && getAfter(/databases/$(database)/documents/ecoles/$(request.resource.data.ecoleId)).data.proprietaire == uid)
           ||
-          (exists(/databases/$(database)/documents/invitations/$(myEmail()))
-            && get(/databases/$(database)/documents/invitations/$(myEmail())).data.role == request.resource.data.role
-            && get(/databases/$(database)/documents/invitations/$(myEmail())).data.ecoleId == request.resource.data.ecoleId)
+          (isMe(request.resource.data.get('invitation', ''))
+            && exists(/databases/$(database)/documents/invitations/$(request.resource.data.invitation))
+            && invitation(request.resource.data.invitation).role == request.resource.data.role
+            && invitation(request.resource.data.invitation).ecoleId == request.resource.data.ecoleId
+            && invitation(request.resource.data.invitation).get('eleveIds', []) == request.resource.data.eleveIds
+            && invitation(request.resource.data.invitation).get('classeIds', []) == request.resource.data.classeIds)
         );
 
       // L'utilisateur peut changer son nom ; la gestion peut rattacher des
@@ -47,16 +55,16 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // ---------- Invitations (id = e-mail en minuscules) ----------
-    match /invitations/{email} {
-      allow get: if signedIn() && (myEmail() == email || isGestion(resource.data.ecoleId));
+    // ---------- Invitations (id = e-mail en minuscules ou téléphone E.164) ----------
+    match /invitations/{id} {
+      allow get: if signedIn() && (isMe(id) || isGestion(resource.data.ecoleId));
       allow list: if isGestion(resource.data.ecoleId);
       // La direction invite tout le monde ; le secrétariat seulement des parents.
-      allow create, update: if signedIn() && request.resource.data.email == email
+      allow create, update: if signedIn() && request.resource.data.identifiant == id
         && (resource == null || isGestion(resource.data.ecoleId))
         && (isAdmin(request.resource.data.ecoleId)
             || (isGestion(request.resource.data.ecoleId) && request.resource.data.role == 'parent'));
-      allow delete: if signedIn() && (myEmail() == email || isGestion(resource.data.ecoleId));
+      allow delete: if signedIn() && (isMe(id) || isGestion(resource.data.ecoleId));
     }
 
     // ---------- Écoles ----------
@@ -102,6 +110,12 @@ service cloud.firestore {
         allow read: if isStaff(ecoleId) || isParentOf(ecoleId, resource.data.eleveId);
         allow create, update: if teaches(ecoleId, request.resource.data.classeId);
         allow delete: if teaches(ecoleId, resource.data.classeId);
+      }
+      // Historique des rappels d'impayés. Les envois automatiques sont écrits
+      // par la Cloud Function (Admin SDK) ; l'application ne trace que les manuels.
+      match /rappels/{id} {
+        allow read: if isGestion(ecoleId);
+        allow create: if isGestion(ecoleId) && request.resource.data.mode == 'manuel';
       }
       match /meta/{doc} {
         allow read, write: if isGestion(ecoleId);

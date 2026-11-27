@@ -8,6 +8,12 @@ class Ecole {
   final String devise;
   final String anneeScolaire;
 
+  /// Indicatif téléphonique du pays (ex. +225), pour les numéros saisis en local.
+  final String indicatif;
+
+  /// Modèle du message de rappel d'impayé ({parent}, {eleve}, {classe}, {montant}, {ecole}).
+  final String modeleRappel;
+
   const Ecole({
     required this.id,
     required this.nom,
@@ -15,6 +21,8 @@ class Ecole {
     this.telephone = '',
     this.devise = 'FCFA',
     this.anneeScolaire = '',
+    this.indicatif = '+225',
+    this.modeleRappel = '',
   });
 
   factory Ecole.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -26,6 +34,8 @@ class Ecole {
       telephone: m['telephone'] ?? '',
       devise: m['devise'] ?? 'FCFA',
       anneeScolaire: m['anneeScolaire'] ?? '',
+      indicatif: m['indicatif'] ?? '+225',
+      modeleRappel: m['modeleRappel'] ?? '',
     );
   }
 
@@ -35,9 +45,11 @@ class Ecole {
         'telephone': telephone,
         'devise': devise,
         'anneeScolaire': anneeScolaire,
+        'indicatif': indicatif,
+        'modeleRappel': modeleRappel,
       };
 
-  Ecole copyWith({String? nom, String? adresse, String? telephone, String? devise, String? anneeScolaire}) =>
+  Ecole copyWith({String? nom, String? adresse, String? telephone, String? devise, String? anneeScolaire, String? indicatif, String? modeleRappel}) =>
       Ecole(
         id: id,
         nom: nom ?? this.nom,
@@ -45,5 +57,7 @@ class Ecole {
         telephone: telephone ?? this.telephone,
         devise: devise ?? this.devise,
         anneeScolaire: anneeScolaire ?? this.anneeScolaire,
+        indicatif: indicatif ?? this.indicatif,
+        modeleRappel: modeleRappel ?? this.modeleRappel,
       );
 }

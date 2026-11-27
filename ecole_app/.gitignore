@@ -47,3 +47,5 @@ app.*.map.json
 # Widget Preview related
 .widget_preview/
 test_rules/node_modules/
+functions/node_modules/
+functions/.env*

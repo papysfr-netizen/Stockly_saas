@@ -4,24 +4,56 @@
       "collectionGroup": "eleves",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "actif", "order": "ASCENDING" },
-        { "fieldPath": "classeId", "order": "ASCENDING" }
+        {
+          "fieldPath": "actif",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "classeId",
+          "order": "ASCENDING"
+        }
       ]
     },
     {
       "collectionGroup": "notes",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "classeId", "order": "ASCENDING" },
-        { "fieldPath": "trimestre", "order": "ASCENDING" }
+        {
+          "fieldPath": "classeId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "trimestre",
+          "order": "ASCENDING"
+        }
       ]
     },
     {
       "collectionGroup": "users",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "ecoleId", "order": "ASCENDING" },
-        { "fieldPath": "email", "order": "ASCENDING" }
+        {
+          "fieldPath": "ecoleId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "email",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "ecoleId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "telephone",
+          "order": "ASCENDING"
+        }
       ]
     }
   ],

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/providers.dart';
 import '../home_shell.dart';
+import 'finaliser_profil_screen.dart';
 import 'login_screen.dart';
 
 class AuthGate extends ConsumerWidget {
@@ -19,11 +20,8 @@ class AuthGate extends ConsumerWidget {
     return profil.when(
       loading: () => loading,
       error: (e, _) => Scaffold(body: Center(child: Text('Erreur : $e'))),
-      data: (u) {
-        // Juste après l'inscription, le profil peut mettre un instant à apparaître.
-        if (u == null) return loading;
-        return const HomeShell();
-      },
+      // Compte authentifié sans profil : rejoindre son école ou en créer une.
+      data: (u) => u == null ? const FinaliserProfilScreen() : const HomeShell(),
     );
   }
 }

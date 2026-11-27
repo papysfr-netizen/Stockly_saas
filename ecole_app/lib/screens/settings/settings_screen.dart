@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/pays.dart';
+import '../../core/telephone.dart';
 import '../../models/app_user.dart';
 import '../../models/ecole.dart';
 import '../../providers/providers.dart';
+import '../../services/rappels.dart';
 import '../../widgets/common.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -18,7 +21,7 @@ class SettingsScreen extends ConsumerWidget {
         child: ListTile(
           leading: const Icon(Icons.person),
           title: Text(me.nom),
-          subtitle: Text('${me.email} · ${me.role.label}'),
+          subtitle: Text('${me.identifiant} · ${me.role.label}'),
           trailing: TextButton.icon(
             icon: const Icon(Icons.logout),
             label: const Text('Déconnexion'),
@@ -47,6 +50,9 @@ class _EcoleCardState extends ConsumerState<_EcoleCard> {
   late final _tel = TextEditingController(text: widget.ecole.telephone);
   late final _devise = TextEditingController(text: widget.ecole.devise);
   late final _annee = TextEditingController(text: widget.ecole.anneeScolaire);
+  late final _modele = TextEditingController(
+      text: widget.ecole.modeleRappel.isEmpty ? modeleRappelParDefaut : widget.ecole.modeleRappel);
+  late String _indicatif = widget.ecole.indicatif;
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +77,27 @@ class _EcoleCardState extends ConsumerState<_EcoleCard> {
                 child: TextField(controller: _annee, decoration: const InputDecoration(labelText: 'Année scolaire'))),
           ]),
           gap,
+          DropdownButtonFormField<String>(
+            value: indicatifsPays.any((p) => p.$1 == _indicatif) ? _indicatif : null,
+            isExpanded: true,
+            decoration: const InputDecoration(
+                labelText: 'Pays (indicatif téléphonique)',
+                helperText: 'Utilisé pour les numéros saisis sans indicatif'),
+            items: [for (final p in indicatifsPays) DropdownMenuItem(value: p.$1, child: Text('${p.$2} (${p.$1})'))],
+            onChanged: (v) => setState(() => _indicatif = v!),
+          ),
+          const SizedBox(height: 24),
+          Text("Message de rappel d'impayé", style: Theme.of(context).textTheme.titleSmall),
+          gap,
+          TextField(
+            controller: _modele,
+            maxLines: 4,
+            decoration: const InputDecoration(
+              helperText: 'Variables : {parent} {eleve} {classe} {montant} {ecole}',
+              helperMaxLines: 2,
+            ),
+          ),
+          gap,
           Align(
             alignment: Alignment.centerRight,
             child: FilledButton(
@@ -82,6 +109,8 @@ class _EcoleCardState extends ConsumerState<_EcoleCard> {
                       telephone: _tel.text.trim(),
                       devise: _devise.text.trim(),
                       anneeScolaire: _annee.text.trim(),
+                      indicatif: _indicatif,
+                      modeleRappel: _modele.text.trim() == modeleRappelParDefaut ? '' : _modele.text.trim(),
                     )),
                 succes: 'Enregistré',
               ),
@@ -115,18 +144,18 @@ class _ComptesCard extends ConsumerWidget {
         ),
         for (final u in users)
           ListTile(dense: true, leading: const Icon(Icons.verified_user_outlined), title: Text(u.nom),
-              subtitle: Text('${u.email} · ${u.role.label}')),
+              subtitle: Text('${u.identifiant} · ${u.role.label}')),
         if (invitations.isNotEmpty) const ListTile(dense: true, title: Text('Invitations en attente')),
         for (final i in invitations)
           ListTile(
             dense: true,
-            leading: const Icon(Icons.mail_outline),
-            title: Text(i.email),
+            leading: Icon(i.parTelephone ? Icons.phone_outlined : Icons.mail_outline),
+            title: Text(i.identifiant),
             subtitle: Text(i.role.label),
             trailing: IconButton(
               icon: const Icon(Icons.close),
               tooltip: "Annuler l'invitation",
-              onPressed: () => run(context, () => repo.annulerInvitation(i.email)),
+              onPressed: () => run(context, () => repo.annulerInvitation(i.identifiant)),
             ),
           ),
       ]),
@@ -134,7 +163,7 @@ class _ComptesCard extends ConsumerWidget {
   }
 
   Future<void> _inviter(BuildContext context, WidgetRef ref) async {
-    final email = TextEditingController();
+    final identifiant = TextEditingController();
     final nom = TextEditingController();
     var role = Role.secretariat;
     final ok = await showDialog<bool>(
@@ -146,9 +175,9 @@ class _ComptesCard extends ConsumerWidget {
             TextField(controller: nom, decoration: const InputDecoration(labelText: 'Nom')),
             const SizedBox(height: 12),
             TextField(
-                controller: email,
+                controller: identifiant,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(labelText: 'E-mail')),
+                decoration: const InputDecoration(labelText: 'E-mail ou numéro de téléphone')),
             const SizedBox(height: 12),
             DropdownButtonFormField<Role>(
               value: role,
@@ -160,7 +189,7 @@ class _ComptesCard extends ConsumerWidget {
               onChanged: (v) => setState(() => role = v!),
             ),
             const SizedBox(height: 12),
-            const Text("La personne crée ensuite son compte dans l'application avec cet e-mail."),
+            const Text("La personne se connecte ensuite avec cet e-mail (mot de passe) ou ce numéro (code SMS)."),
           ]),
           actions: [
             TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Annuler')),
@@ -169,11 +198,19 @@ class _ComptesCard extends ConsumerWidget {
         ),
       ),
     );
-    if (ok != true || email.text.trim().isEmpty || !context.mounted) return;
+    if (ok != true || identifiant.text.trim().isEmpty || !context.mounted) return;
+    final saisie = identifiant.text.trim();
+    final id = saisie.contains('@')
+        ? saisie.toLowerCase()
+        : normaliserTelephone(saisie, indicatif: ref.read(ecoleProvider).valueOrNull?.indicatif ?? '+225');
+    if (id == null) {
+      showMessage(context, 'E-mail ou numéro invalide.', erreur: true);
+      return;
+    }
     await run(
       context,
       () => ref.read(schoolRepoProvider).inviter(Invitation(
-            email: email.text.trim().toLowerCase(),
+            identifiant: id,
             nom: nom.text.trim(),
             role: role,
             ecoleId: ref.read(meProvider).ecoleId,

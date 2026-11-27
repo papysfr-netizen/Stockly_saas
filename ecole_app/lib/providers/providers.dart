@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/auth_repository.dart';
+import '../data/rappel_repository.dart';
 import '../data/school_repository.dart';
 import '../models/app_user.dart';
 import '../models/classe.dart';
@@ -67,3 +69,9 @@ final enseignantsProvider =
 
 final presencesDuJourProvider = StreamProvider<List<FeuillePresence>>(
     (ref) => ref.watch(schoolRepoProvider).presencesDuJour(DateTime.now()));
+
+final rappelRepoProvider = Provider(
+    (ref) => RappelRepository(FirebaseFunctions.instanceFor(region: 'europe-west1')));
+
+final derniersRappelsProvider =
+    StreamProvider<Map<String, DateTime>>((ref) => ref.watch(schoolRepoProvider).derniersRappels());

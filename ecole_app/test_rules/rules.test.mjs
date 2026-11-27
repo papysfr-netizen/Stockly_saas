@@ -20,10 +20,12 @@ await env.withSecurityRulesDisabled(async (c) => {
     await setDoc(doc(db, `ecoles/${E}/paiements/p${id}`), { eleveId: id, classeId: c, montant: 1000 });
     await setDoc(doc(db, `ecoles/${E}/absences/a${id}`), { eleveId: id, classeId: c, statut: 'absent' });
   }
-  await setDoc(doc(db, 'invitations/nouveau@x.fr'), { email: 'nouveau@x.fr', role: 'parent', ecoleId: E, eleveIds: ['e2'] });
+  await setDoc(doc(db, 'invitations/nouveau@x.fr'), { identifiant: 'nouveau@x.fr', role: 'parent', ecoleId: E, eleveIds: ['e2'] });
+  await setDoc(doc(db, 'invitations/+2250707123456'), { identifiant: '+2250707123456', role: 'enseignant', ecoleId: E, classeIds: ['c1'], eleveIds: [] });
 });
 
 const as = (uid, email) => env.authenticatedContext(uid, { email }).firestore();
+const asPhone = (uid, phone_number) => env.authenticatedContext(uid, { phone_number }).firestore();
 const admin = as('admin', 'admin@x.fr'), secr = as('secr', 'secr@x.fr'), prof = as('prof', 'prof@x.fr'), parent = as('parent', 'parent@x.fr');
 let ok = 0, ko = 0;
 async function t(nom, p) { try { await p; ok++; console.log('✓', nom); } catch (e) { ko++; console.log('✗', nom, '-', e.message.split('\n')[0]); } }
@@ -33,18 +35,36 @@ const q = (db, col, f, v) => getDocs(query(collection(db, `ecoles/${E}/${col}`),
 const fondateur = as('fond', 'fond@x.fr');
 await t('fondateur crée son école', assertSucceeds((() => { const b = writeBatch(fondateur);
   b.set(doc(fondateur, 'ecoles/ecole2'), { nom: 'B', proprietaire: 'fond' });
-  b.set(doc(fondateur, 'users/fond'), { email: 'fond@x.fr', role: 'admin', ecoleId: 'ecole2', classeIds: [], eleveIds: [] });
+  b.set(doc(fondateur, 'users/fond'), { email: 'fond@x.fr', telephone: '', role: 'admin', ecoleId: 'ecole2', classeIds: [], eleveIds: [] });
   return b.commit(); })()));
 const pirate = as('pirate', 'pirate@x.fr');
-await t("un inconnu ne peut pas se déclarer admin d'une école", assertFails(setDoc(doc(pirate, 'users/pirate'), { email: 'pirate@x.fr', role: 'admin', ecoleId: E })));
+await t("un inconnu ne peut pas se déclarer admin d'une école", assertFails(setDoc(doc(pirate, 'users/pirate'), { email: 'pirate@x.fr', telephone: '', role: 'admin', ecoleId: E, classeIds: [], eleveIds: [] })));
 // Inscription par invitation
 const nouveau = as('nouveau', 'nouveau@x.fr');
 await t('invité lit son invitation', assertSucceeds(getDoc(doc(nouveau, 'invitations/nouveau@x.fr'))));
 await t("invité crée son profil et consomme l'invitation", assertSucceeds((() => { const b = writeBatch(nouveau);
-  b.set(doc(nouveau, 'users/nouveau'), { email: 'nouveau@x.fr', role: 'parent', ecoleId: E, classeIds: [], eleveIds: ['e2'] });
+  b.set(doc(nouveau, 'users/nouveau'), { email: 'nouveau@x.fr', telephone: '', role: 'parent', ecoleId: E, classeIds: [], eleveIds: ['e2'], invitation: 'nouveau@x.fr' });
   b.delete(doc(nouveau, 'invitations/nouveau@x.fr'));
   return b.commit(); })()));
-await t("l'invité ne peut pas s'attribuer un autre rôle", assertFails(setDoc(doc(as('x', 'x@x.fr'), 'users/x'), { email: 'x@x.fr', role: 'admin', ecoleId: E })));
+await t("l'invité ne peut pas s'attribuer un autre rôle", assertFails(setDoc(doc(as('x', 'x@x.fr'), 'users/x'), { email: 'x@x.fr', telephone: '', role: 'admin', ecoleId: E, classeIds: [], eleveIds: [] })));
+
+// Inscription par téléphone
+const telInvite = asPhone('tel1', '+2250707123456');
+const profilTel = { email: '', telephone: '+2250707123456', nom: 'Prof', role: 'enseignant', ecoleId: E, classeIds: ['c1'], eleveIds: [], invitation: '+2250707123456' };
+await t('compte téléphone : lit son invitation', assertSucceeds(getDoc(doc(telInvite, 'invitations/+2250707123456'))));
+await t("compte téléphone : ne lit pas l'invitation d'un autre", assertFails(getDoc(doc(asPhone('tel2', '+2250101010101'), 'invitations/+2250707123456'))));
+await t("compte téléphone : ne peut pas s'ajouter des classes", assertFails(setDoc(doc(telInvite, 'users/tel1'), { ...profilTel, classeIds: ['c1', 'c2'] })));
+await t("autre numéro : ne peut pas utiliser l'invitation", assertFails(setDoc(doc(asPhone('tel2', '+2250101010101'), 'users/tel2'), { ...profilTel, telephone: '+2250101010101' })));
+await t('compte téléphone : rejoint son école par invitation', assertSucceeds((() => { const b = writeBatch(telInvite);
+  b.set(doc(telInvite, 'users/tel1'), profilTel);
+  b.delete(doc(telInvite, 'invitations/+2250707123456'));
+  return b.commit(); })()));
+const telFondateur = asPhone('tel3', '+221771234567');
+await t('compte téléphone : crée une école', assertSucceeds((() => { const b = writeBatch(telFondateur);
+  b.set(doc(telFondateur, 'ecoles/ecole3'), { nom: 'C', proprietaire: 'tel3' });
+  b.set(doc(telFondateur, 'users/tel3'), { email: '', telephone: '+221771234567', role: 'admin', ecoleId: 'ecole3', classeIds: [], eleveIds: [] });
+  return b.commit(); })()));
+await t('compte téléphone : ne peut pas déclarer un autre numéro', assertFails(setDoc(doc(asPhone('tel4', '+22501'), 'users/tel4'), { email: '', telephone: '+2259999', role: 'admin', ecoleId: 'ecole3', classeIds: [], eleveIds: [] })));
 
 // Parents
 await t('parent : notes de son enfant (requête)', assertSucceeds(q(parent, 'notes', 'eleveId', 'e1')));
@@ -69,18 +89,25 @@ await t('secrétariat : encaisse un paiement', assertSucceeds(setDoc(doc(secr, `
 await t('secrétariat : ne peut pas modifier un paiement', assertFails(updateDoc(doc(secr, `ecoles/${E}/paiements/p9`), { montant: 1 })));
 await t('secrétariat : ne peut pas supprimer un paiement', assertFails(deleteDoc(doc(secr, `ecoles/${E}/paiements/p9`))));
 await t('secrétariat : numérotation des reçus', assertSucceeds(runTransaction(secr, async (tx) => { const r = doc(secr, `ecoles/${E}/meta/compteurs`); await tx.get(r); tx.set(r, { recu: 1 }, { merge: true }); })));
-await t('secrétariat : invite un parent', assertSucceeds(setDoc(doc(secr, 'invitations/p2@x.fr'), { email: 'p2@x.fr', role: 'parent', ecoleId: E, eleveIds: ['e1'] }, { merge: true })));
-await t('secrétariat : ne peut pas inviter un admin', assertFails(setDoc(doc(secr, 'invitations/a2@x.fr'), { email: 'a2@x.fr', role: 'admin', ecoleId: E })));
+await t('secrétariat : invite un parent', assertSucceeds(setDoc(doc(secr, 'invitations/p2@x.fr'), { identifiant: 'p2@x.fr', role: 'parent', ecoleId: E, eleveIds: ['e1'] }, { merge: true })));
+await t('secrétariat : ne peut pas inviter un admin', assertFails(setDoc(doc(secr, 'invitations/a2@x.fr'), { identifiant: 'a2@x.fr', role: 'admin', ecoleId: E })));
 await t('secrétariat : cherche un compte parent par e-mail', assertSucceeds(getDocs(query(collection(secr, 'users'), where('ecoleId', '==', E), where('email', '==', 'parent@x.fr')))));
+await t('secrétariat : invite un parent par téléphone', assertSucceeds(setDoc(doc(secr, 'invitations/+2250505050505'), { identifiant: '+2250505050505', role: 'parent', ecoleId: E, eleveIds: ['e1'] }, { merge: true })));
+await t('secrétariat : cherche un compte parent par téléphone', assertSucceeds(getDocs(query(collection(secr, 'users'), where('ecoleId', '==', E), where('telephone', '==', '+2250505050505')))));
+await t('secrétariat : trace un rappel manuel', assertSucceeds(setDoc(doc(secr, `ecoles/${E}/rappels/r1`), { eleveId: 'e1', canal: 'whatsapp', mode: 'manuel', montant: 1000 })));
+await t('secrétariat : ne peut pas forger un rappel automatique', assertFails(setDoc(doc(secr, `ecoles/${E}/rappels/r2`), { eleveId: 'e1', canal: 'sms', mode: 'auto', statut: 'envoye' })));
+await t("secrétariat : lit l'historique des rappels", assertSucceeds(getDocs(collection(secr, `ecoles/${E}/rappels`))));
+await t("enseignant : pas accès aux rappels", assertFails(getDocs(collection(prof, `ecoles/${E}/rappels`))));
+await t('parent : pas accès aux rappels', assertFails(getDocs(collection(parent, `ecoles/${E}/rappels`))));
 await t('secrétariat : rattache un élève à un parent', assertSucceeds(updateDoc(doc(secr, 'users/parent'), { eleveIds: ['e1', 'e2'] })));
 await t('secrétariat : ne peut pas changer un rôle', assertFails(updateDoc(doc(secr, 'users/parent'), { role: 'admin' })));
 await t('secrétariat : ne peut pas créer de classe', assertFails(setDoc(doc(secr, `ecoles/${E}/classes/c9`), { nom: 'X' })));
 
 // Direction & isolation entre écoles
 await t('admin : crée une classe', assertSucceeds(setDoc(doc(admin, `ecoles/${E}/classes/c9`), { nom: 'CM2' })));
-await t('admin : invite un enseignant', assertSucceeds(setDoc(doc(admin, 'invitations/prof2@x.fr'), { email: 'prof2@x.fr', role: 'enseignant', ecoleId: E, classeIds: ['c1'] })));
+await t('admin : invite un enseignant', assertSucceeds(setDoc(doc(admin, 'invitations/prof2@x.fr'), { identifiant: 'prof2@x.fr', role: 'enseignant', ecoleId: E, classeIds: ['c1'] })));
 await t("admin d'une autre école : aucun accès", assertFails(q(fondateur, 'eleves', 'actif', true)));
-await t("autre école : ne peut pas écraser une invitation", assertFails(setDoc(doc(fondateur, 'invitations/p2@x.fr'), { email: 'p2@x.fr', role: 'parent', ecoleId: 'ecole2' })));
+await t("autre école : ne peut pas écraser une invitation", assertFails(setDoc(doc(fondateur, 'invitations/p2@x.fr'), { identifiant: 'p2@x.fr', role: 'parent', ecoleId: 'ecole2' })));
 
 console.log(`\n${ok} réussis, ${ko} échoués`);
 await env.cleanup();

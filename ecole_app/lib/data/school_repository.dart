@@ -76,30 +76,41 @@ class SchoolRepository {
   /// Retire l'élève des listes sans effacer son historique.
   Future<void> archiverEleve(String id) => _col('eleves').doc(id).update({'actif': false});
 
-  /// Donne au parent (par e-mail) l'accès à la fiche de l'élève : met à jour
-  /// son compte s'il existe déjà, sinon crée/complète une invitation.
-  Future<void> lierParent({required String email, required String nom, required String eleveId}) async {
-    final clean = email.trim().toLowerCase();
-    final existant = await _db
+  /// Donne au parent l'accès à la fiche de l'élève, pour chacun de ses
+  /// identifiants (e-mail en minuscules, téléphone en E.164) : met à jour son
+  /// compte s'il existe déjà, sinon crée/complète une invitation.
+  Future<void> lierParent({
+    required List<String> identifiants,
+    required String nom,
+    required String eleveId,
+  }) async {
+    for (final id in identifiants.where((i) => i.isNotEmpty)) {
+      final compte = await _compte(id);
+      if (compte != null) {
+        await compte.update({'eleveIds': FieldValue.arrayUnion([eleveId])});
+        continue;
+      }
+      await _db.collection('invitations').doc(id).set({
+        'identifiant': id,
+        'nom': nom,
+        'role': Role.parent.name,
+        'ecoleId': ecoleId,
+        'eleveIds': FieldValue.arrayUnion([eleveId]),
+        'creeLe': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    }
+  }
+
+  /// Compte de l'école dont l'e-mail ou le téléphone vaut [identifiant].
+  Future<DocumentReference<Map<String, dynamic>>?> _compte(String identifiant) async {
+    final champ = identifiant.startsWith('+') ? 'telephone' : 'email';
+    final r = await _db
         .collection('users')
         .where('ecoleId', isEqualTo: ecoleId)
-        .where('email', isEqualTo: clean)
+        .where(champ, isEqualTo: identifiant)
         .limit(1)
         .get();
-    if (existant.docs.isNotEmpty) {
-      await existant.docs.first.reference.update({
-        'eleveIds': FieldValue.arrayUnion([eleveId]),
-      });
-      return;
-    }
-    await _db.collection('invitations').doc(clean).set({
-      'email': clean,
-      'nom': nom,
-      'role': Role.parent.name,
-      'ecoleId': ecoleId,
-      'eleveIds': FieldValue.arrayUnion([eleveId]),
-      'creeLe': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
+    return r.docs.isEmpty ? null : r.docs.first.reference;
   }
 
   // ---------------- Enseignants & comptes ----------------
@@ -108,45 +119,40 @@ class SchoolRepository {
       .snapshots()
       .map((s) => s.docs.map(Enseignant.fromDoc).toList());
 
-  /// Enregistre l'enseignant et, s'il a un e-mail, lui donne un compte
-  /// (ou met à jour ses classes s'il en a déjà un).
-  Future<void> enregistrerEnseignant(Enseignant e) async {
+  /// Enregistre l'enseignant et, pour son e-mail et/ou son téléphone, lui
+  /// donne un compte (ou met à jour ses classes s'il en a déjà un).
+  Future<void> enregistrerEnseignant(Enseignant e, {required List<String> identifiants}) async {
     final ref = e.id.isEmpty ? _col('enseignants').doc() : _col('enseignants').doc(e.id);
     await ref.set(e.toMap(), SetOptions(merge: true));
-    if (e.email.trim().isEmpty) return;
-    final clean = e.email.trim().toLowerCase();
-    final existant = await _db
-        .collection('users')
-        .where('ecoleId', isEqualTo: ecoleId)
-        .where('email', isEqualTo: clean)
-        .limit(1)
-        .get();
-    if (existant.docs.isNotEmpty) {
-      await existant.docs.first.reference.update({'classeIds': e.classeIds});
-    } else {
-      await inviter(Invitation(
-        email: clean,
-        nom: e.nomComplet,
-        role: Role.enseignant,
-        ecoleId: ecoleId,
-        classeIds: e.classeIds,
-      ));
+    for (final id in identifiants.where((i) => i.isNotEmpty)) {
+      final compte = await _compte(id);
+      if (compte != null) {
+        await compte.update({'classeIds': e.classeIds});
+      } else {
+        await inviter(Invitation(
+          identifiant: id,
+          nom: e.nomComplet,
+          role: Role.enseignant,
+          ecoleId: ecoleId,
+          classeIds: e.classeIds,
+        ));
+      }
     }
   }
 
   Future<void> supprimerEnseignant(String id) => _col('enseignants').doc(id).delete();
 
   Future<void> inviter(Invitation inv) =>
-      _db.collection('invitations').doc(inv.email.trim().toLowerCase()).set(inv.toMap());
+      _db.collection('invitations').doc(inv.identifiant).set(inv.toMap());
 
   Stream<List<Invitation>> invitations() => _db
       .collection('invitations')
       .where('ecoleId', isEqualTo: ecoleId)
       .snapshots()
-      .map((s) => s.docs.map((d) => Invitation.fromMap(d.data())).toList());
+      .map((s) => s.docs.map((d) => Invitation.fromMap(d.id, d.data())).toList());
 
-  Future<void> annulerInvitation(String email) =>
-      _db.collection('invitations').doc(email).delete();
+  Future<void> annulerInvitation(String identifiant) =>
+      _db.collection('invitations').doc(identifiant).delete();
 
   Stream<List<AppUser>> utilisateurs() => _db
       .collection('users')
@@ -263,6 +269,40 @@ class SchoolRepository {
               ))
           .toList()
         ..sort((a, b) => b.date.compareTo(a.date)));
+
+  // ---------------- Rappels d'impayés ----------------
+  /// Date du dernier rappel envoyé à chaque élève.
+  Stream<Map<String, DateTime>> derniersRappels() => _col('rappels')
+      .orderBy('date', descending: true)
+      .limit(500)
+      .snapshots()
+      .map((s) {
+        final r = <String, DateTime>{};
+        for (final d in s.docs) {
+          final date = readDate(d['date']);
+          if (date != null) r.putIfAbsent(d['eleveId'] as String, () => date);
+        }
+        return r;
+      });
+
+  /// Trace un rappel envoyé depuis le téléphone (SMS / WhatsApp manuel).
+  Future<void> noterRappelManuel({
+    required String eleveId,
+    required String canal,
+    required String telephone,
+    required double montant,
+    required String par,
+  }) =>
+      _col('rappels').add({
+        'eleveId': eleveId,
+        'canal': canal,
+        'mode': 'manuel',
+        'telephone': telephone,
+        'montant': montant,
+        'statut': 'ouvert',
+        'par': par,
+        'date': FieldValue.serverTimestamp(),
+      });
 
   // ---------------- Utilitaires ----------------
   Future<String> _prochainNumero(String compteur, String prefixe) async {

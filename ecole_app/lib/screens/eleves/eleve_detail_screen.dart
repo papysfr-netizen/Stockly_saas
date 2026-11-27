@@ -8,6 +8,7 @@ import '../../providers/providers.dart';
 import '../../services/calculs.dart';
 import '../../widgets/common.dart';
 import '../paiements/encaisser_dialog.dart';
+import '../paiements/rappels_actions.dart';
 import 'eleve_form_screen.dart';
 
 /// Fiche élève : utilisée par le personnel et par les parents (lecture seule).
@@ -115,9 +116,14 @@ class _InfosTab extends ConsumerWidget {
                 LinearProgressIndicator(value: frais == 0 ? 0 : (paye / frais).clamp(0, 1), minHeight: 8),
                 const SizedBox(height: 8),
                 Text('Payé : ${m(paye)} / ${m(frais)}'),
-                Text('Reste : ${m(reste)}',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold, color: reste > 0 ? Colors.orange.shade800 : Colors.green)),
+                Row(children: [
+                  Expanded(
+                    child: Text('Reste : ${m(reste)}',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, color: reste > 0 ? Colors.orange.shade800 : Colors.green)),
+                  ),
+                  if (reste > 0 && me.canManagePaiements) MenuRelance(eleve: eleve, reste: reste),
+                ]),
               ]),
             ),
           ),

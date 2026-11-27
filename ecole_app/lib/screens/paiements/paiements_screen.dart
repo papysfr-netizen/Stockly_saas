@@ -8,7 +8,9 @@ import '../../providers/providers.dart';
 import '../../services/calculs.dart';
 import '../../widgets/common.dart';
 import '../eleves/eleve_detail_screen.dart';
+import '../../services/rappels.dart';
 import 'encaisser_dialog.dart';
+import 'rappels_actions.dart';
 
 class PaiementsScreen extends ConsumerWidget {
   const PaiementsScreen({super.key});
@@ -125,6 +127,7 @@ class _ImpayesTabState extends ConsumerState<_ImpayesTab> {
     for (final p in paiements) {
       parEleve.putIfAbsent(p.eleveId, () => []).add(p);
     }
+    final rappels = ref.watch(derniersRappelsProvider).valueOrNull ?? const <String, DateTime>{};
 
     return AsyncView(ref.watch(elevesProvider(_classeId)), (List<Eleve> eleves) {
       final lignes = [
@@ -149,6 +152,19 @@ class _ImpayesTabState extends ConsumerState<_ImpayesTab> {
         ),
         Text('${lignes.length} élève(s) · ${formatMontant(total, devise: devise)} à recouvrer',
             style: Theme.of(context).textTheme.titleMedium),
+        if (lignes.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Wrap(spacing: 8, runSpacing: 8, alignment: WrapAlignment.center, children: [
+              for (final canal in CanalRappel.values)
+                FilledButton.tonalIcon(
+                  icon: Icon(canal == CanalRappel.sms ? Icons.sms_outlined : Icons.chat_outlined),
+                  label: Text('Relancer tous par ${canal.label}'),
+                  onPressed: () => relancerAutomatiquement(
+                      context, ref, [for (final l in lignes) l.eleve.id], canal),
+                ),
+            ]),
+          ),
         Expanded(
           child: lignes.isEmpty
               ? const EmptyState('Tous les frais sont réglés.', icon: Icons.check_circle_outline)
@@ -160,10 +176,12 @@ class _ImpayesTabState extends ConsumerState<_ImpayesTab> {
                         subtitle: Text([
                           nomsClasses[l.eleve.classeId] ?? '',
                           if (l.eleve.parentTelephone.isNotEmpty) 'Tél. ${l.eleve.parentTelephone}',
+                          if (rappels[l.eleve.id] != null) 'Relancé le ${formatDate(rappels[l.eleve.id])}',
                         ].join(' · ')),
                         trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                           Text(formatMontant(l.reste, devise: devise),
                               style: TextStyle(color: Colors.orange.shade800, fontWeight: FontWeight.bold)),
+                          MenuRelance(eleve: l.eleve, reste: l.reste),
                           IconButton(
                             tooltip: 'Encaisser',
                             icon: const Icon(Icons.payments_outlined),

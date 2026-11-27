@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/telephone.dart';
 import '../../models/classe.dart';
 import '../../models/scolarite.dart';
 import '../../providers/providers.dart';
@@ -76,7 +77,9 @@ class EnseignantsScreen extends ConsumerWidget {
                 TextFormField(
                     controller: tel,
                     keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(labelText: 'Téléphone')),
+                    decoration: const InputDecoration(
+                        labelText: 'Téléphone',
+                        helperText: "Permet à l'enseignant de se connecter par code SMS")),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: email,
@@ -110,9 +113,16 @@ class EnseignantsScreen extends ConsumerWidget {
       ),
     );
     if (ok != true || !context.mounted) return;
+    final indicatif = ref.read(ecoleProvider).valueOrNull?.indicatif ?? '+225';
     await run(
       context,
-      () => ref.read(schoolRepoProvider).enregistrerEnseignant(Enseignant(
+      () => ref.read(schoolRepoProvider).enregistrerEnseignant(
+          identifiants: [
+            if (email.text.trim().isNotEmpty) email.text.trim().toLowerCase(),
+            if (normaliserTelephone(tel.text, indicatif: indicatif) != null)
+              normaliserTelephone(tel.text, indicatif: indicatif)!,
+          ],
+          Enseignant(
             id: e?.id ?? '',
             nom: nom.text.trim().toUpperCase(),
             prenom: prenom.text.trim(),
