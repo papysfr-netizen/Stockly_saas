@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/app_user.dart';
 import '../../models/classe.dart';
 import '../../models/ecole.dart';
+import '../../core/format.dart';
 import '../../models/emploi_du_temps.dart';
+import '../../models/remplacement.dart';
 import '../../models/scolarite.dart';
 import '../../providers/providers.dart';
 import '../../services/emploi_du_temps.dart';
@@ -113,7 +115,14 @@ class EmploiDuTempsClasse extends ConsumerWidget {
     String texte(Creneau c) =>
         [c.enseignantNom, if (c.salle.isNotEmpty) 'Salle ${c.salle}'].where((s) => s.isNotEmpty).join(' · ');
 
+    final changements = ref.watch(remplacementsClasseProvider(classe.id)).valueOrNull ?? const <Remplacement>[];
+
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      ChangementsAVenir(
+        titre: 'Changements à venir',
+        remplacements: changements,
+        libelle: (r) => '${nomMatiere[r.matiereId] ?? '?'} : ${r.resume}',
+      ),
       Row(children: [
         Expanded(child: Text('Emploi du temps — ${classe.nom}', style: Theme.of(context).textTheme.titleMedium)),
         IconButton(
@@ -179,7 +188,8 @@ class EmploiDuTempsClasse extends ConsumerWidget {
 
   Future<void> _editer(BuildContext context, WidgetRef ref, Ecole ecole, List<Matiere> matieres, List<Creneau> tous,
       int jour, String plage, Creneau? existant) async {
-    final enseignants = ref.read(enseignantsProvider).valueOrNull ?? const <Enseignant>[];
+    final enseignants = await ref.read(enseignantsProvider.future);
+    if (!context.mounted) return;
     // Enseignants de la classe d'abord.
     final tries = [...enseignants]..sort((a, b) {
         final x = a.classeIds.contains(classe.id) ? 0 : 1, y = b.classeIds.contains(classe.id) ? 0 : 1;
@@ -299,8 +309,15 @@ class _EmploiDuTempsEnseignant extends ConsumerWidget {
           detail: [noms[c.matiereId] ?? '', if (c.salle.isNotEmpty) 'Salle ${c.salle}'].join(' · '),
         );
     final total = volumeHoraire(siens, (_) => 'total')['total'] ?? 0;
+    final assures = ref.watch(remplacementsAssuresProvider(enseignant.id)).valueOrNull ?? const <Remplacement>[];
+    final tousNoms = ref.watch(nomsMatieresProvider).valueOrNull ?? const <String, String>{};
 
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      ChangementsAVenir(
+        titre: 'Remplacements à assurer',
+        remplacements: assures.where((r) => r.statut == StatutRemplacement.remplace).toList(),
+        libelle: (r) => '${classes[r.classeId]?.nom ?? '?'} · ${tousNoms[r.matiereId] ?? '?'} (pour ${r.enseignantAbsentNom})',
+      ),
       Row(children: [
         Expanded(
           child: Text('${enseignant.nomComplet} — ${formatDuree(total)} de cours par semaine',
@@ -321,5 +338,34 @@ class _EmploiDuTempsEnseignant extends ConsumerWidget {
       else
         GrilleEmploiDuTemps(jours: ecole.jours, plages: ecole.plagesHoraires, creneaux: siens, contenu: contenu),
     ]);
+  }
+}
+
+/// Changements des 14 prochains jours (absences, remplacements, cours annulés).
+class ChangementsAVenir extends ConsumerWidget {
+  const ChangementsAVenir({super.key, required this.titre, required this.remplacements, required this.libelle});
+  final String titre;
+  final List<Remplacement> remplacements;
+  final String Function(Remplacement r) libelle;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final aujourdhui = isoDay(DateTime.now());
+    final limite = isoDay(DateTime.now().add(const Duration(days: 14)));
+    final list = remplacements.where((r) => r.date.compareTo(aujourdhui) >= 0 && r.date.compareTo(limite) <= 0).toList()
+      ..sort((a, b) => a.date != b.date ? a.date.compareTo(b.date) : a.plage.compareTo(b.plage));
+    if (list.isEmpty) return const SizedBox.shrink();
+    return Card(
+      color: Theme.of(context).colorScheme.tertiaryContainer.withValues(alpha: 0.4),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        ListTile(leading: const Icon(Icons.campaign_outlined), title: Text(titre)),
+        for (final r in list)
+          ListTile(
+            dense: true,
+            title: Text('${nomsJours[r.jour - 1]} ${formatDate(DateTime.parse(r.date))} · ${r.plage}'),
+            subtitle: Text(libelle(r)),
+          ),
+      ]),
+    );
   }
 }

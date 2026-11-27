@@ -4,6 +4,7 @@ import '../models/app_user.dart';
 import '../models/classe.dart';
 import '../models/ecole.dart';
 import '../models/emploi_du_temps.dart';
+import '../models/remplacement.dart';
 import '../models/eleve.dart';
 import '../models/scolarite.dart';
 
@@ -38,6 +39,11 @@ class SchoolRepository {
   Future<void> enregistrerMatiere(Matiere m) => m.id.isEmpty
       ? _col('matieres').add(m.toMap())
       : _col('matieres').doc(m.id).set(m.toMap(), SetOptions(merge: true));
+
+  /// Noms de toutes les branches de l'école (id → nom).
+  Stream<Map<String, String>> nomsMatieres() => _col('matieres')
+      .snapshots()
+      .map((s) => {for (final d in s.docs) d.id: (d.data()['nom'] ?? '') as String});
 
   Future<void> supprimerMatiere(String id) => _col('matieres').doc(id).delete();
 
@@ -276,6 +282,66 @@ class SchoolRepository {
       _col('creneaux').doc(Creneau.docId(c.classeId, c.jour, c.plage)).set(c.toMap());
 
   Future<void> supprimerCreneau(String id) => _col('creneaux').doc(id).delete();
+
+  // ---------------- Absences d'enseignants & remplacements ----------------
+  Stream<List<AbsenceEnseignant>> absencesEnseignants() => _col('absencesEnseignants')
+      .snapshots()
+      .map((s) => s.docs.map(AbsenceEnseignant.fromDoc).toList()..sort((a, b) => b.debut.compareTo(a.debut)));
+
+  /// Enregistre l'absence et un remplacement « à pourvoir » par cours touché.
+  /// Un cours déjà traité (par une absence qui se chevauche) n'est pas écrasé.
+  Future<int> declarerAbsence(AbsenceEnseignant a, List<Remplacement> Function(String absenceId) cours) async {
+    final ref = a.id.isEmpty ? _col('absencesEnseignants').doc() : _col('absencesEnseignants').doc(a.id);
+    final touches = cours(ref.id);
+    final existants = (await _col('remplacements').where('enseignantAbsentId', isEqualTo: a.enseignantId).get())
+        .docs
+        .map((d) => d.id)
+        .toSet();
+    final batch = _db.batch()..set(ref, {...a.toMap(), 'creeLe': FieldValue.serverTimestamp()});
+    var n = 0;
+    for (final r in touches.where((r) => !existants.contains(r.id))) {
+      batch.set(_col('remplacements').doc(r.id), r.toMap());
+      n++;
+    }
+    await batch.commit();
+    return n;
+  }
+
+  /// Supprime l'absence et les remplacements qui en découlent.
+  Future<void> supprimerAbsence(String id) async {
+    final lies = await _col('remplacements').where('absenceId', isEqualTo: id).get();
+    final batch = _db.batch()..delete(_col('absencesEnseignants').doc(id));
+    for (final d in lies.docs) {
+      batch.delete(d.reference);
+    }
+    await batch.commit();
+  }
+
+  Stream<List<Remplacement>> remplacementsDuJour(String jourIso) => _col('remplacements')
+      .where('date', isEqualTo: jourIso)
+      .snapshots()
+      .map((s) => s.docs.map(Remplacement.fromDoc).toList()..sort((a, b) => a.plage.compareTo(b.plage)));
+
+  /// Remplacements de toute l'année (bilans, compteurs).
+  Stream<List<Remplacement>> remplacements() =>
+      _col('remplacements').snapshots().map((s) => s.docs.map(Remplacement.fromDoc).toList());
+
+  Stream<List<Remplacement>> remplacementsClasse(String classeId) => _col('remplacements')
+      .where('classeId', isEqualTo: classeId)
+      .snapshots()
+      .map((s) => s.docs.map(Remplacement.fromDoc).toList());
+
+  Stream<List<Remplacement>> remplacementsAssures(String enseignantId) => _col('remplacements')
+      .where('remplacantId', isEqualTo: enseignantId)
+      .snapshots()
+      .map((s) => s.docs.map(Remplacement.fromDoc).toList());
+
+  Future<void> deciderRemplacement(String id, StatutRemplacement statut, {Enseignant? remplacant}) =>
+      _col('remplacements').doc(id).update({
+        'statut': statut.name,
+        'remplacantId': statut == StatutRemplacement.remplace ? remplacant!.id : null,
+        'remplacantNom': statut == StatutRemplacement.remplace ? remplacant!.nomComplet : '',
+      });
 
   // ---------------- Présences ----------------
   Stream<FeuillePresence?> feuillePresence(String classeId, DateTime date) => _col('presences')

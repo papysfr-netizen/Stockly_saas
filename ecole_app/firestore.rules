@@ -86,6 +86,16 @@ service cloud.firestore {
         allow read: if memberOf(ecoleId);
         allow write: if isAdmin(ecoleId);
       }
+      // Absences d'enseignants : personnel en lecture ; direction et secrétariat les déclarent.
+      match /absencesEnseignants/{id} {
+        allow read: if isStaff(ecoleId);
+        allow write: if isGestion(ecoleId);
+      }
+      // Remplacements : visibles par toute l'école (les parents voient les changements de cours).
+      match /remplacements/{id} {
+        allow read: if memberOf(ecoleId);
+        allow write: if isGestion(ecoleId);
+      }
       match /enseignants/{id} {
         allow read: if isStaff(ecoleId);
         allow write: if isAdmin(ecoleId);

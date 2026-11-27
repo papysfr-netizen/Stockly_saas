@@ -13,6 +13,7 @@ import '../models/classe.dart';
 import '../models/ecole.dart';
 import '../models/eleve.dart';
 import '../models/emploi_du_temps.dart';
+import '../models/remplacement.dart';
 import '../models/scolarite.dart';
 
 final authRepoProvider = Provider(
@@ -104,3 +105,25 @@ final monEnseignantProvider = Provider<Enseignant?>((ref) {
     return (mail.isNotEmpty && mail == me.email) || (tel != null && tel == me.telephone);
   }).firstOrNull;
 });
+
+final absencesEnseignantsProvider = StreamProvider<List<AbsenceEnseignant>>(
+    (ref) => ref.watch(schoolRepoProvider).absencesEnseignants());
+
+final remplacementsDuJourProvider = StreamProvider.family<List<Remplacement>, String>(
+    (ref, jourIso) => ref.watch(schoolRepoProvider).remplacementsDuJour(jourIso));
+
+final tousRemplacementsProvider =
+    StreamProvider<List<Remplacement>>((ref) => ref.watch(schoolRepoProvider).remplacements());
+
+final remplacementsClasseProvider = StreamProvider.family<List<Remplacement>, String>(
+    (ref, classeId) => ref.watch(schoolRepoProvider).remplacementsClasse(classeId));
+
+final remplacementsAssuresProvider = StreamProvider.family<List<Remplacement>, String>(
+    (ref, enseignantId) => ref.watch(schoolRepoProvider).remplacementsAssures(enseignantId));
+
+/// Noms de toutes les branches de l'école (id → nom), pour les écrans transversaux.
+final nomsMatieresProvider =
+    StreamProvider<Map<String, String>>((ref) => ref.watch(schoolRepoProvider).nomsMatieres());
+
+/// Horloge (remplaçable dans les tests).
+final horlogeProvider = Provider<DateTime Function()>((ref) => DateTime.now);

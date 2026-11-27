@@ -118,6 +118,22 @@ await t('parent : lit les emplois du temps', assertSucceeds(getDocs(collection(p
 await t('enseignant : ne modifie pas un créneau', assertFails(setDoc(doc(prof, `ecoles/${E}/creneaux/c1_1_0730-0820`), { ...creneau, salle: 'X' })));
 await t('secrétariat : ne modifie pas un créneau', assertFails(deleteDoc(doc(secr, `ecoles/${E}/creneaux/c1_1_0730-0820`))));
 
+// Absences d'enseignants et remplacements
+const remp = { absenceId: 'abs1', date: '2026-11-30', creneauId: 'c1_1_0730-0820', classeId: 'c1', jour: 1, plage: '07:30-08:20',
+  matiereId: 'm', enseignantAbsentId: 'ens1', statut: 'aPourvoir' };
+await t('secrétariat : déclare une absence et ses cours', assertSucceeds((() => { const b = writeBatch(secr);
+  b.set(doc(secr, `ecoles/${E}/absencesEnseignants/abs1`), { enseignantId: 'ens1', debut: '2026-11-30', fin: '2026-11-30', motif: 'Maladie' });
+  b.set(doc(secr, `ecoles/${E}/remplacements/2026-11-30_c1_1_0730-0820`), remp);
+  return b.commit(); })()));
+await t('secrétariat : désigne un remplaçant', assertSucceeds(updateDoc(doc(secr, `ecoles/${E}/remplacements/2026-11-30_c1_1_0730-0820`), { statut: 'remplace', remplacantId: 'ens2', remplacantNom: 'Mme X' })));
+await t("enseignant : lit les absences d'enseignants", assertSucceeds(getDocs(collection(prof, `ecoles/${E}/absencesEnseignants`))));
+await t("enseignant : ne déclare pas d'absence", assertFails(setDoc(doc(prof, `ecoles/${E}/absencesEnseignants/abs2`), { enseignantId: 'ens1' })));
+await t('enseignant : ne se désigne pas remplaçant', assertFails(updateDoc(doc(prof, `ecoles/${E}/remplacements/2026-11-30_c1_1_0730-0820`), { remplacantId: 'prof' })));
+await t('enseignant : voit ses remplacements', assertSucceeds(getDocs(query(collection(prof, `ecoles/${E}/remplacements`), where('remplacantId', '==', 'ens2')))));
+await t('parent : voit les changements de la classe', assertSucceeds(getDocs(query(collection(parent, `ecoles/${E}/remplacements`), where('classeId', '==', 'c1')))));
+await t("parent : pas accès aux absences d'enseignants", assertFails(getDocs(collection(parent, `ecoles/${E}/absencesEnseignants`))));
+await t('secrétariat : supprime une absence', assertSucceeds(deleteDoc(doc(secr, `ecoles/${E}/absencesEnseignants/abs1`))));
+
 // Direction & isolation entre écoles
 await t('admin : crée une classe', assertSucceeds(setDoc(doc(admin, `ecoles/${E}/classes/c9`), { nom: 'CM2' })));
 await t('admin : invite un enseignant', assertSucceeds(setDoc(doc(admin, 'invitations/prof2@x.fr'), { identifiant: 'prof2@x.fr', role: 'enseignant', ecoleId: E, classeIds: ['c1'] })));

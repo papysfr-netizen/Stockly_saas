@@ -8,6 +8,7 @@ import 'dashboard/dashboard_screen.dart';
 import 'eleves/eleves_screen.dart';
 import 'emploi_du_temps/emploi_du_temps_screen.dart';
 import 'enseignants/enseignants_screen.dart';
+import 'remplacements/remplacements_screen.dart';
 import 'notes/notes_screen.dart';
 import 'paiements/paiements_screen.dart';
 import 'parents/parent_screen.dart';
@@ -32,6 +33,8 @@ List<_Section> _sectionsPour(AppUser u) => [
       if (u.canSaisirNotes) const _Section('Notes & bulletins', Icons.grading, NotesScreen()),
       if (u.role != Role.parent)
         const _Section('Emploi du temps', Icons.calendar_view_week_outlined, EmploiDuTempsScreen()),
+      if (u.canManageEleves)
+        const _Section('Absences & remplacements', Icons.swap_horiz, RemplacementsScreen()),
       if (u.canFairePresences) const _Section('Présences', Icons.fact_check_outlined, PresencesScreen()),
       if (u.isAdmin) const _Section('Enseignants', Icons.co_present_outlined, EnseignantsScreen()),
       const _Section('Paramètres', Icons.settings_outlined, SettingsScreen()),

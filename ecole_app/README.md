@@ -14,6 +14,7 @@ conçue pour le système scolaire de la **RD Congo** (maternelle, primaire, seco
 | **Rappels d'impayés** | SMS ou WhatsApp, un par un depuis le téléphone ou en masse via Twilio, avec historique |
 | **Notes & bulletins** | Saisie par période et examen, totaux, pourcentages, places, application et conduite, bulletins PDF |
 | **Emplois du temps** | Grille par classe (branche, enseignant, salle), vue par enseignant, conflits bloqués, volume horaire, impression PDF |
+| **Absences & remplacements** | Absences d'enseignants, cours touchés calculés, remplaçants libres proposés, étude ou annulation, bilan par enseignant |
 | **Présences** | Appel quotidien (présent / retard / absent), historique par élève |
 | **Enseignants** | Fiches, classes confiées, création de compte |
 | **Espace parents** | Notes, absences et paiements de leurs enfants |
@@ -46,6 +47,23 @@ Valeurs par défaut d'une nouvelle école : devise USD (modifiable en CDF), indi
   ou le téléphone), le parent voit celui de la classe sur la fiche de son enfant, le secrétariat voit tout.
 - **Volume horaire** hebdomadaire par branche (classe) et total par enseignant ; **impression PDF** A4 paysage.
 - Sur téléphone, affichage jour par jour ; sur grand écran, grille complète.
+
+## Absences d'enseignants et remplacements
+
+1. **Déclarer** (direction ou secrétariat) : Absences & remplacements → Absences déclarées → *Déclarer une absence*
+   (enseignant, du… au…, motif, justifiée). Les cours touchés sont calculés à partir de l'emploi du temps
+   et enregistrés « à pourvoir ».
+2. **Traiter, jour par jour** : onglet *Remplacements du jour* → toucher un cours → choisir :
+   - un **remplaçant** parmi les enseignants **libres à cette heure** (ni en cours, ni absents, ni déjà en remplacement),
+     les plus pertinents d'abord : enseigne la même branche, connaît la classe, puis le moins chargé ce jour ;
+   - **étude surveillée** ou **cours annulé**.
+3. **Informer** : le remplaçant voit « Remplacements à assurer » dans son emploi du temps ; les parents voient
+   « Changements à venir » dans l'emploi du temps de la classe ; le tableau de bord affiche les enseignants absents
+   et les cours à pourvoir du jour.
+4. **Bilan** par enseignant : jours d'absence, cours touchés, cours non assurés.
+
+Supprimer une absence supprime aussi ses remplacements. Si l'emploi du temps change après la déclaration,
+supprimez puis redéclarez l'absence pour recalculer les cours touchés.
 
 ## Exports Excel
 
@@ -166,6 +184,8 @@ ecoles/{ecoleId}                    nom, adresse, devise, année scolaire
   ├─ notes                          id = {eleve}_{branche}_{période} : points ou cote
   ├─ comportements                  application et conduite par élève et par période
   ├─ creneaux                       emploi du temps : id = {classe}_{jour}_{heure}
+  ├─ absencesEnseignants            absences déclarées (du… au…, motif)
+  ├─ remplacements                  un cours touché par date : à pourvoir, remplacé, étude, annulé
   ├─ presences                      une feuille d'appel par classe et par jour
   ├─ absences                       une fiche par absence/retard (lue par les parents)
   ├─ rappels                        historique des rappels d'impayés (manuels et automatiques)

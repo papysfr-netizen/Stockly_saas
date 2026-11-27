@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format.dart';
+import '../../models/remplacement.dart';
 import '../../models/scolarite.dart';
 import '../../providers/providers.dart';
 import '../../services/calculs.dart';
@@ -17,6 +18,9 @@ class DashboardScreen extends ConsumerWidget {
     final paiements = ref.watch(paiementsProvider(null)).valueOrNull ?? const [];
     final enseignants = ref.watch(enseignantsProvider).valueOrNull ?? const [];
     final presences = ref.watch(presencesDuJourProvider).valueOrNull ?? const [];
+    final remplacementsJour = ref.watch(remplacementsDuJourProvider(isoDay(DateTime.now()))).valueOrNull ?? const [];
+    final absentsJour = remplacementsJour.map((r) => r.enseignantAbsentId).toSet().length;
+    final aPourvoir = remplacementsJour.where((r) => r.statut == StatutRemplacement.aPourvoir).length;
     final devise = ref.watch(ecoleProvider).valueOrNull?.devise ?? 'USD';
 
     final fraisParClasse = {for (final c in classes) c.id: c.fraisScolarite};
@@ -67,6 +71,11 @@ class DashboardScreen extends ConsumerWidget {
               valeur: tauxPresence == null ? 'Appel non fait' : '${tauxPresence.toStringAsFixed(0)} %',
               icon: Icons.fact_check,
               couleur: Colors.teal),
+          StatCard(
+              titre: "Enseignants absents aujourd'hui",
+              valeur: absentsJour == 0 ? 'Aucun' : '$absentsJour · $aPourvoir cours à pourvoir',
+              icon: Icons.swap_horiz,
+              couleur: aPourvoir > 0 ? Colors.red : Colors.blueGrey),
         ];
         return GridView.count(
           crossAxisCount: cols,
