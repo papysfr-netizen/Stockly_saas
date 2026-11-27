@@ -26,7 +26,7 @@ class _PresencesScreenState extends ConsumerState<PresencesScreen> {
     final classes = ref.watch(classesProvider).valueOrNull ?? const <Classe>[];
     final classe = classes.where((c) => c.id == _classeId).firstOrNull;
 
-    return Column(children: [
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       Padding(
         padding: const EdgeInsets.all(12),
         child: Wrap(spacing: 12, runSpacing: 12, crossAxisAlignment: WrapCrossAlignment.center, children: [

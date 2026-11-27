@@ -32,7 +32,7 @@ class _ElevesScreenState extends ConsumerState<ElevesScreen> {
               label: const Text('Inscrire'),
             )
           : null,
-      body: Column(children: [
+      body: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
           child: Wrap(spacing: 12, runSpacing: 12, children: [

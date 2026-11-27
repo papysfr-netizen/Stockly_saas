@@ -86,7 +86,8 @@ List<int> exporterNotes({
   final alpha = [...eleves]..sort((a, b) => a.nomComplet.compareTo(b.nomComplet));
   final comp = {for (final c in comportements) '${c.eleveId}|${c.periode}': c};
   final x = _classeur();
-  final intitule = '${ecole.nom} — ${classe.nom}${classe.section.isEmpty ? '' : ' (${classe.section})'} — ${ecole.anneeScolaire}';
+  final section = classe.section.isEmpty || classe.nom.contains(classe.section) ? '' : ' (${classe.section})';
+  final intitule = '${ecole.nom} — ${classe.nom}$section — ${ecole.anneeScolaire}';
 
   bool aDesNotes(List<String> codes) => eleves.any((e) => matieres.any((m) => codes.any((c) => ev.de(e.id, m.id, c) != null)));
   final utiles = colonnes.where((c) => aDesNotes(c.codes)).toList();

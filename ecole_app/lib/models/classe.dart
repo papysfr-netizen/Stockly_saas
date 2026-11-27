@@ -45,7 +45,7 @@ class Classe {
 
   String get description => [
         if (niveau.isNotEmpty) niveau,
-        if (section.isNotEmpty) section,
+        if (section.isNotEmpty && !niveau.contains(section)) section,
       ].join(' · ');
 }
 

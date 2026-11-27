@@ -35,7 +35,11 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
           decoration: const InputDecoration(labelText: 'Classe'),
           items: [
             for (final c in classes)
-              DropdownMenuItem(value: c.id, child: Text([c.nom, if (c.section.isNotEmpty) c.section].join(' · '))),
+              DropdownMenuItem(
+                value: c.id,
+                // La section n'est ajoutée que si le nom de la classe ne la contient pas déjà.
+                child: Text([c.nom, if (c.section.isNotEmpty && !c.nom.contains(c.section)) c.section].join(' · ')),
+              ),
           ],
           onChanged: (v) => setState(() => _classeId = v),
         ),
@@ -111,10 +115,10 @@ class _SaisieTabState extends ConsumerState<_SaisieTab> {
     final repo = ref.read(schoolRepoProvider);
     Future<void> Function() action;
     if (_matiereId == _comportement) {
-      action = () => repo.enregistrerComportements(
-          classeId: widget.classe.id,
-          periode: _periode!,
-          valeurs: {for (final e in eleves) if (_comport[e.id] != null) e.id: _comport[e.id]!});
+      action = () => repo.enregistrerComportements(classeId: widget.classe.id, periode: _periode!, valeurs: {
+            for (final e in eleves)
+              if (_comport[e.id] != null) e.id: _comport[e.id]!
+          });
     } else if (_maternelle) {
       action = () => repo.enregistrerCotes(
           classeId: widget.classe.id,
@@ -162,13 +166,15 @@ class _SaisieTabState extends ConsumerState<_SaisieTab> {
     if (_matiereId != _comportement && !matieres.any((m) => m.id == _matiereId)) _matiereId = null;
     if (_matiereId == _comportement && (periode?.examen ?? false)) _matiereId = null;
     final matiere = matieres.where((m) => m.id == _matiereId).firstOrNull;
-    final max = systeme == SystemeEvaluation.rdc && matiere != null && periode != null ? matiere.maximaPour(periode) : 20.0;
+    final max =
+        systeme == SystemeEvaluation.rdc && matiere != null && periode != null ? matiere.maximaPour(periode) : 20.0;
     if (_periode != null && _matiereId != null) _charger(eleves, Evaluations(notes), comps);
 
-    return Column(children: [
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       Padding(
         padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-        child: Wrap(spacing: 12, runSpacing: 12, children: [
+        // Pleine largeur pour que les listes s'alignent à gauche sur téléphone.
+        child: Wrap(spacing: 12, runSpacing: 12, alignment: WrapAlignment.start, children: [
           SizedBox(
             width: 260,
             child: DropdownButtonFormField<String>(
@@ -321,8 +327,8 @@ class _ResultatsTabState extends ConsumerState<_ResultatsTab> {
 
     Future<void> exporter() async {
       final ecole = ref.read(ecoleProvider).value!;
-      final octets = exporterNotes(
-          ecole: ecole, classe: classe, matieres: matieres, eleves: eleves, ev: ev, comportements: comps);
+      final octets =
+          exporterNotes(ecole: ecole, classe: classe, matieres: matieres, eleves: eleves, ev: ev, comportements: comps);
       await remettreFichier(octets, nomFichier('notes_${classe.nom}_${ecole.anneeScolaire}.xlsx'), mimeExcel);
     }
 

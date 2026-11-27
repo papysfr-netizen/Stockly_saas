@@ -5,6 +5,7 @@ ThemeData buildTheme() {
   return ThemeData(
     colorScheme: scheme,
     useMaterial3: true,
+    fontFamily: 'Roboto',
     inputDecorationTheme: const InputDecorationTheme(border: OutlineInputBorder()),
     cardTheme: const CardThemeData(margin: EdgeInsets.symmetric(vertical: 4)),
   );

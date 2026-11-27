@@ -156,6 +156,21 @@ Pour vos essais, le *WhatsApp Sandbox* de Twilio fonctionne sans modèle.
 
 L'envoi des codes SMS de connexion est facturé par Firebase au-delà du quota gratuit (forfait Blaze).
 
+## Démonstration (sans Firebase)
+
+`lib/main_demo.dart` lance l'application réelle avec une **école fictive en mémoire**
+(classes, élèves, notes, paiements, emplois du temps, absences d'enseignants) et un choix de rôle
+à l'ouverture. Rien n'est enregistré ni envoyé.
+
+```bash
+flutter run -d chrome -t lib/main_demo.dart                       # en local
+flutter build web -t lib/main_demo.dart --no-web-resources-cdn --pwa-strategy=none -o build/demo
+```
+
+La version web est autonome (moteur graphique et polices inclus). `demo_web/page.html` est la page
+d'accueil utilisée pour la publier. La base en mémoire vient d'une copie corrigée de
+`fake_cloud_firestore` (`third_party/`, voir `MODIFICATIONS.md`).
+
 ## Mise en route
 
 ```bash

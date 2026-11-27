@@ -131,7 +131,8 @@ class EmploiDuTempsClasse extends ConsumerWidget {
           onPressed: () => run(context, () async {
             final bytes = await PdfService.emploiDuTemps(
               ecole: ecole,
-              titre: 'Emploi du temps — ${classe.nom}${classe.section.isEmpty ? '' : ' (${classe.section})'}',
+              titre: 'Emploi du temps — ${classe.nom}'
+                  '${classe.section.isEmpty || classe.nom.contains(classe.section) ? '' : ' (${classe.section})'}',
               creneaux: siens,
               contenu: (c) => (titre: nomMatiere[c.matiereId] ?? '?', detail: texte(c)),
             );
@@ -316,7 +317,8 @@ class _EmploiDuTempsEnseignant extends ConsumerWidget {
       ChangementsAVenir(
         titre: 'Remplacements à assurer',
         remplacements: assures.where((r) => r.statut == StatutRemplacement.remplace).toList(),
-        libelle: (r) => '${classes[r.classeId]?.nom ?? '?'} · ${tousNoms[r.matiereId] ?? '?'} (pour ${r.enseignantAbsentNom})',
+        libelle: (r) =>
+            '${classes[r.classeId]?.nom ?? '?'} · ${tousNoms[r.matiereId] ?? '?'} (pour ${r.enseignantAbsentNom})',
       ),
       Row(children: [
         Expanded(
