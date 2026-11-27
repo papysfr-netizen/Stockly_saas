@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/evaluation.dart';
 import '../../core/pays.dart';
 import '../../core/telephone.dart';
 import '../../models/app_user.dart';
@@ -53,6 +54,7 @@ class _EcoleCardState extends ConsumerState<_EcoleCard> {
   late final _modele = TextEditingController(
       text: widget.ecole.modeleRappel.isEmpty ? modeleRappelParDefaut : widget.ecole.modeleRappel);
   late String _indicatif = widget.ecole.indicatif;
+  late SystemeEvaluation _systeme = widget.ecole.systeme;
 
   @override
   Widget build(BuildContext context) {
@@ -86,6 +88,16 @@ class _EcoleCardState extends ConsumerState<_EcoleCard> {
             items: [for (final p in indicatifsPays) DropdownMenuItem(value: p.$1, child: Text('${p.$2} (${p.$1})'))],
             onChanged: (v) => setState(() => _indicatif = v!),
           ),
+          gap,
+          DropdownButtonFormField<SystemeEvaluation>(
+            value: _systeme,
+            isExpanded: true,
+            decoration: const InputDecoration(labelText: "Système d'évaluation"),
+            items: [
+              for (final s in SystemeEvaluation.values) DropdownMenuItem(value: s, child: Text(s.label)),
+            ],
+            onChanged: (v) => setState(() => _systeme = v!),
+          ),
           const SizedBox(height: 24),
           Text("Message de rappel d'impayé", style: Theme.of(context).textTheme.titleSmall),
           gap,
@@ -110,6 +122,7 @@ class _EcoleCardState extends ConsumerState<_EcoleCard> {
                       devise: _devise.text.trim(),
                       anneeScolaire: _annee.text.trim(),
                       indicatif: _indicatif,
+                      systeme: _systeme,
                       modeleRappel: _modele.text.trim() == modeleRappelParDefaut ? '' : _modele.text.trim(),
                     )),
                 succes: 'Enregistré',
@@ -202,7 +215,7 @@ class _ComptesCard extends ConsumerWidget {
     final saisie = identifiant.text.trim();
     final id = saisie.contains('@')
         ? saisie.toLowerCase()
-        : normaliserTelephone(saisie, indicatif: ref.read(ecoleProvider).valueOrNull?.indicatif ?? '+225');
+        : normaliserTelephone(saisie, indicatif: ref.read(ecoleProvider).valueOrNull?.indicatif ?? '+243');
     if (id == null) {
       showMessage(context, 'E-mail ou numéro invalide.', erreur: true);
       return;

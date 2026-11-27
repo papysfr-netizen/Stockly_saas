@@ -9,8 +9,19 @@ import '../../services/calculs.dart';
 import '../../services/pdf_service.dart';
 import '../../widgets/common.dart';
 
-const modesPaiement = ['Espèces', 'Mobile Money', 'Virement', 'Chèque'];
-const motifsPaiement = ['Frais de scolarité', "Frais d'inscription", 'Tenue', 'Fournitures', 'Cantine', 'Transport', 'Autre'];
+const modesPaiement = ['Espèces', 'M-Pesa', 'Airtel Money', 'Orange Money', 'Virement bancaire', 'Autre'];
+const motifsPaiement = [
+  'Minerval — 1re tranche',
+  'Minerval — 2e tranche',
+  'Minerval — 3e tranche',
+  "Frais d'inscription",
+  'Frais connexes',
+  "Frais d'examen (ENAFEP, TENASOSP, Exetat)",
+  'Uniforme',
+  'Fournitures',
+  'Transport',
+  'Autre',
+];
 
 /// Saisit un paiement pour [eleve], l'enregistre et propose d'imprimer le reçu.
 Future<void> encaisserPaiement(BuildContext context, WidgetRef ref, Eleve eleve) async {

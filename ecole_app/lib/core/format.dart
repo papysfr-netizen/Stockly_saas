@@ -7,8 +7,8 @@ final _isoDay = DateFormat('yyyy-MM-dd');
 String formatDate(DateTime? d) => d == null ? '-' : _dateFmt.format(d);
 String isoDay(DateTime d) => _isoDay.format(d);
 
-String formatMontant(num montant, {String devise = 'FCFA'}) {
-  final f = NumberFormat.decimalPattern('fr_FR');
+String formatMontant(num montant, {String devise = 'USD'}) {
+  final f = NumberFormat('#,##0.##', 'fr_FR');
   return '${f.format(montant)} $devise';
 }
 

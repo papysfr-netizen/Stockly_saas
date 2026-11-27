@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/evaluation.dart';
 import '../../core/format.dart';
+import '../../services/calculs.dart';
 import '../../models/classe.dart';
 import '../../providers/providers.dart';
 import '../../widgets/common.dart';
@@ -13,7 +15,7 @@ class ClassesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final me = ref.watch(meProvider);
-    final devise = ref.watch(ecoleProvider).valueOrNull?.devise ?? 'FCFA';
+    final devise = ref.watch(ecoleProvider).valueOrNull?.devise ?? 'USD';
     return Scaffold(
       floatingActionButton: me.isAdmin
           ? FloatingActionButton.extended(
@@ -31,7 +33,8 @@ class ClassesScreen extends ConsumerWidget {
                 leading: const CircleAvatar(child: Icon(Icons.class_)),
                 title: Text(c.nom),
                 subtitle: Text([
-                  if (c.niveau.isNotEmpty) c.niveau,
+                  c.cycle.label,
+                  if (c.description.isNotEmpty) c.description,
                   'Frais : ${formatMontant(c.fraisScolarite, devise: devise)}',
                 ].join(' · ')),
                 trailing: const Icon(Icons.chevron_right),
@@ -49,38 +52,69 @@ Future<void> editerClasse(BuildContext context, WidgetRef ref, [Classe? classe])
   final form = GlobalKey<FormState>();
   final nom = TextEditingController(text: classe?.nom);
   final niveau = TextEditingController(text: classe?.niveau);
-  final frais = TextEditingController(text: classe == null ? '' : classe.fraisScolarite.toStringAsFixed(0));
+  final section = TextEditingController(text: classe?.section);
+  final frais = TextEditingController(text: classe == null ? '' : formatPoints(classe.fraisScolarite));
+  var cycle = classe?.cycle ?? Cycle.primaire;
   final ok = await showDialog<bool>(
     context: context,
-    builder: (c) => AlertDialog(
-      title: Text(classe == null ? 'Nouvelle classe' : 'Modifier la classe'),
-      content: Form(
-        key: form,
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          TextFormField(
-              controller: nom,
-              decoration: const InputDecoration(labelText: 'Nom (ex. CM2 A)'),
-              validator: requis),
-          const SizedBox(height: 12),
-          TextFormField(
-              controller: niveau, decoration: const InputDecoration(labelText: 'Niveau / cycle')),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: frais,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'Frais de scolarité annuels'),
-            validator: (v) => double.tryParse(v ?? '') == null ? 'Montant invalide' : null,
+    builder: (c) => StatefulBuilder(
+      builder: (c, setState) => AlertDialog(
+        title: Text(classe == null ? 'Nouvelle classe' : 'Modifier la classe'),
+        content: SizedBox(
+          width: 420,
+          child: Form(
+            key: form,
+            child: ListView(shrinkWrap: true, children: [
+              SegmentedButton<Cycle>(
+                segments: [for (final x in Cycle.values) ButtonSegment(value: x, label: Text(x.label))],
+                selected: {cycle},
+                onSelectionChanged: (v) => setState(() => cycle = v.first),
+              ),
+              const SizedBox(height: 12),
+              Wrap(spacing: 6, children: [
+                for (final n in cycle.niveauxRdc)
+                  ActionChip(
+                    label: Text(n),
+                    onPressed: () => setState(() {
+                      niveau.text = n;
+                      if (nom.text.trim().isEmpty) nom.text = n;
+                    }),
+                  ),
+              ]),
+              const SizedBox(height: 12),
+              TextFormField(
+                  controller: niveau, decoration: const InputDecoration(labelText: 'Niveau (ex. 5e année)')),
+              const SizedBox(height: 12),
+              TextFormField(
+                  controller: nom,
+                  decoration: const InputDecoration(labelText: 'Nom de la classe (ex. 5e A)'),
+                  validator: requis),
+              if (cycle == Cycle.secondaire) ...[
+                const SizedBox(height: 12),
+                TextFormField(
+                    controller: section,
+                    decoration: const InputDecoration(
+                        labelText: 'Section / option', hintText: 'Scientifique, Commerciale, Pédagogique…')),
+              ],
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: frais,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(labelText: 'Frais scolaires annuels (minerval et frais connexes)'),
+                validator: (v) => double.tryParse((v ?? '').replaceAll(',', '.')) == null ? 'Montant invalide' : null,
+              ),
+            ]),
           ),
-        ]),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Annuler')),
+          FilledButton(
+              onPressed: () {
+                if (form.currentState!.validate()) Navigator.pop(c, true);
+              },
+              child: const Text('Enregistrer')),
+        ],
       ),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Annuler')),
-        FilledButton(
-            onPressed: () {
-              if (form.currentState!.validate()) Navigator.pop(c, true);
-            },
-            child: const Text('Enregistrer')),
-      ],
     ),
   );
   if (ok != true || !context.mounted) return;
@@ -89,8 +123,10 @@ Future<void> editerClasse(BuildContext context, WidgetRef ref, [Classe? classe])
     () => ref.read(schoolRepoProvider).enregistrerClasse(Classe(
           id: classe?.id ?? '',
           nom: nom.text.trim(),
+          cycle: cycle,
           niveau: niveau.text.trim(),
-          fraisScolarite: double.parse(frais.text),
+          section: cycle == Cycle.secondaire ? section.text.trim() : '',
+          fraisScolarite: double.parse(frais.text.replaceAll(',', '.')),
           enseignantPrincipalId: classe?.enseignantPrincipalId,
         )),
     succes: 'Classe enregistrée',
@@ -104,6 +140,7 @@ class ClasseDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final me = ref.watch(meProvider);
+    final systeme = ref.watch(systemeProvider);
     final matieres = ref.watch(matieresProvider(classe.id));
     final eleves = ref.watch(elevesProvider(classe.id));
     return Scaffold(
@@ -130,7 +167,7 @@ class ClasseDetailScreen extends ConsumerWidget {
       ]),
       body: ListView(padding: const EdgeInsets.all(12), children: [
         Row(children: [
-          Text('Matières', style: Theme.of(context).textTheme.titleMedium),
+          Text('Branches', style: Theme.of(context).textTheme.titleMedium),
           const Spacer(),
           if (me.isAdmin)
             TextButton.icon(
@@ -142,7 +179,7 @@ class ClasseDetailScreen extends ConsumerWidget {
         AsyncView(matieres, (list) {
           if (list.isEmpty) {
             return const Padding(
-                padding: EdgeInsets.all(8), child: Text('Aucune matière pour cette classe.'));
+                padding: EdgeInsets.all(8), child: Text('Aucune branche pour cette classe.'));
           }
           return Card(
             child: Column(children: [
@@ -150,7 +187,11 @@ class ClasseDetailScreen extends ConsumerWidget {
                 ListTile(
                   dense: true,
                   title: Text(m.nom),
-                  subtitle: Text('Coefficient ${m.coefficient.toStringAsFixed(0)}'),
+                  subtitle: Text(classe.cycle == Cycle.maternelle
+                      ? 'Évaluée en cotes (A, ECA, NA)'
+                      : systeme == SystemeEvaluation.rdc
+                          ? 'Maxima ${formatPoints(m.maxima)} par période · ${formatPoints(m.maxima * 2)} à l\'examen'
+                          : 'Coefficient ${formatPoints(m.coefficient)}'),
                   trailing: me.isAdmin
                       ? IconButton(
                           icon: const Icon(Icons.delete_outline),
@@ -187,19 +228,32 @@ class ClasseDetailScreen extends ConsumerWidget {
   }
 
   Future<void> _editerMatiere(BuildContext context, WidgetRef ref, [Matiere? m]) async {
+    final systeme = ref.read(systemeProvider);
     final nom = TextEditingController(text: m?.nom);
-    final coef = TextEditingController(text: m == null ? '1' : m.coefficient.toStringAsFixed(0));
+    final maxima = TextEditingController(text: formatPoints(m?.maxima ?? 10));
+    final coef = TextEditingController(text: formatPoints(m?.coefficient ?? 1));
+    final maternelle = classe.cycle == Cycle.maternelle;
     final ok = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
-        title: Text(m == null ? 'Nouvelle matière' : 'Modifier la matière'),
+        title: Text(m == null ? 'Nouvelle branche' : 'Modifier la branche'),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
-          TextField(controller: nom, decoration: const InputDecoration(labelText: 'Matière')),
-          const SizedBox(height: 12),
-          TextField(
-              controller: coef,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Coefficient')),
+          TextField(controller: nom, decoration: const InputDecoration(labelText: 'Branche (ex. Français, Calcul)')),
+          if (!maternelle && systeme == SystemeEvaluation.rdc) ...[
+            const SizedBox(height: 12),
+            TextField(
+                controller: maxima,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                    labelText: 'Maxima par période', helperText: "L'examen est noté sur le double")),
+          ],
+          if (!maternelle && systeme == SystemeEvaluation.trimestres) ...[
+            const SizedBox(height: 12),
+            TextField(
+                controller: coef,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'Coefficient')),
+          ],
         ]),
         actions: [
           TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Annuler')),
@@ -214,7 +268,8 @@ class ClasseDetailScreen extends ConsumerWidget {
               id: m?.id ?? '',
               classeId: classe.id,
               nom: nom.text.trim(),
-              coefficient: double.tryParse(coef.text) ?? 1,
+              maxima: double.tryParse(maxima.text.replaceAll(',', '.')) ?? 10,
+              coefficient: double.tryParse(coef.text.replaceAll(',', '.')) ?? 1,
               enseignantId: m?.enseignantId,
             )));
   }

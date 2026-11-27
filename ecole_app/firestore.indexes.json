@@ -15,20 +15,6 @@
       ]
     },
     {
-      "collectionGroup": "notes",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "classeId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "trimestre",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
       "collectionGroup": "users",
       "queryScope": "COLLECTION",
       "fields": [

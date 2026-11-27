@@ -113,7 +113,7 @@ class EnseignantsScreen extends ConsumerWidget {
       ),
     );
     if (ok != true || !context.mounted) return;
-    final indicatif = ref.read(ecoleProvider).valueOrNull?.indicatif ?? '+225';
+    final indicatif = ref.read(ecoleProvider).valueOrNull?.indicatif ?? '+243';
     await run(
       context,
       () => ref.read(schoolRepoProvider).enregistrerEnseignant(

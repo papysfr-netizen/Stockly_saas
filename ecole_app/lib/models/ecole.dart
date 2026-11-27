@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../core/evaluation.dart';
 
 class Ecole {
   final String id;
@@ -7,6 +8,7 @@ class Ecole {
   final String telephone;
   final String devise;
   final String anneeScolaire;
+  final SystemeEvaluation systeme;
 
   /// Indicatif téléphonique du pays (ex. +225), pour les numéros saisis en local.
   final String indicatif;
@@ -19,9 +21,10 @@ class Ecole {
     required this.nom,
     this.adresse = '',
     this.telephone = '',
-    this.devise = 'FCFA',
+    this.devise = 'USD',
     this.anneeScolaire = '',
-    this.indicatif = '+225',
+    this.systeme = SystemeEvaluation.rdc,
+    this.indicatif = '+243',
     this.modeleRappel = '',
   });
 
@@ -32,9 +35,10 @@ class Ecole {
       nom: m['nom'] ?? '',
       adresse: m['adresse'] ?? '',
       telephone: m['telephone'] ?? '',
-      devise: m['devise'] ?? 'FCFA',
+      devise: m['devise'] ?? 'USD',
       anneeScolaire: m['anneeScolaire'] ?? '',
-      indicatif: m['indicatif'] ?? '+225',
+      systeme: SystemeEvaluationX.parse(m['systeme']),
+      indicatif: m['indicatif'] ?? '+243',
       modeleRappel: m['modeleRappel'] ?? '',
     );
   }
@@ -45,11 +49,12 @@ class Ecole {
         'telephone': telephone,
         'devise': devise,
         'anneeScolaire': anneeScolaire,
+        'systeme': systeme.name,
         'indicatif': indicatif,
         'modeleRappel': modeleRappel,
       };
 
-  Ecole copyWith({String? nom, String? adresse, String? telephone, String? devise, String? anneeScolaire, String? indicatif, String? modeleRappel}) =>
+  Ecole copyWith({String? nom, String? adresse, String? telephone, String? devise, String? anneeScolaire, SystemeEvaluation? systeme, String? indicatif, String? modeleRappel}) =>
       Ecole(
         id: id,
         nom: nom ?? this.nom,
@@ -57,6 +62,7 @@ class Ecole {
         telephone: telephone ?? this.telephone,
         devise: devise ?? this.devise,
         anneeScolaire: anneeScolaire ?? this.anneeScolaire,
+        systeme: systeme ?? this.systeme,
         indicatif: indicatif ?? this.indicatif,
         modeleRappel: modeleRappel ?? this.modeleRappel,
       );

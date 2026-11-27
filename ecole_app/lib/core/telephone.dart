@@ -1,9 +1,9 @@
 // Outils de numéros de téléphone (format international E.164 : +225XXXXXXXXXX).
 
 /// Normalise un numéro saisi librement. [indicatif] est l'indicatif du pays
-/// de l'école (ex. "+225") utilisé quand le numéro est saisi en format local.
+/// de l'école (ex. "+243") utilisé quand le numéro est saisi en format local.
 /// Retourne `null` si le numéro est inexploitable.
-String? normaliserTelephone(String brut, {String indicatif = '+225'}) {
+String? normaliserTelephone(String brut, {String indicatif = '+243'}) {
   var t = brut.trim().replaceAll(RegExp(r'[\s.\-()/]'), '');
   if (t.isEmpty) return null;
   if (t.startsWith('00')) t = '+${t.substring(2)}';

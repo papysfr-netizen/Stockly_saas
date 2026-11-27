@@ -1,19 +1,38 @@
 # Gestion École
 
-Application Flutter + Firebase de gestion d'établissement scolaire (Android, iOS, Web).
+Application Flutter + Firebase de gestion d'établissement scolaire (Android, iOS, Web),
+conçue pour le système scolaire de la **RD Congo** (maternelle, primaire, secondaire).
 
 ## Fonctionnalités
 
 | Module | Contenu |
 |---|---|
 | **Tableau de bord** | Effectifs, encaissements du mois, reste à recouvrer, taux de présence du jour |
-| **Élèves & classes** | Inscriptions (matricule automatique), fiches élèves, classes, matières et coefficients |
+| **Élèves & classes** | Inscriptions (matricule automatique), fiches élèves, classes par cycle, niveau et section/option, branches et maxima |
 | **Frais de scolarité** | Encaissement, reçus PDF numérotés, journal par période, liste des impayés |
 | **Rappels d'impayés** | SMS ou WhatsApp, un par un depuis le téléphone ou en masse via Twilio, avec historique |
-| **Notes & bulletins** | Saisie par matière et trimestre, moyennes pondérées, rangs, bulletins PDF |
+| **Notes & bulletins** | Saisie par période et examen, totaux, pourcentages, places, application et conduite, bulletins PDF |
 | **Présences** | Appel quotidien (présent / retard / absent), historique par élève |
 | **Enseignants** | Fiches, classes confiées, création de compte |
 | **Espace parents** | Notes, absences et paiements de leurs enfants |
+
+## Système d'évaluation (RD Congo)
+
+| Élément | Fonctionnement |
+|---|---|
+| Périodes | 1re et 2e période + examen du 1er semestre ; 3e et 4e période + examen du 2e semestre |
+| Points | Chaque branche a un **maxima** par période ; l'examen est noté sur **le double** |
+| Résultats | Totaux par période, par semestre (TOT. S1, TOT. S2) et total général (T.G.), en pourcentage |
+| Place | Rang dans la classe pour chaque colonne ; les ex æquo partagent la même place |
+| Application / conduite | Élite, Très bon, Bon, Assez bon, Médiocre, Mauvais, saisies par période |
+| Maternelle | Pas de points : cotes A (acquis), ECA (en cours d'acquisition), NA (non acquis), par période |
+| Décision proposée | ≥ 50 % sans branche en échec : admis(e) ; ≥ 50 % avec branche(s) < 50 % : seconde session ; < 50 % : ajourné(e). À valider par le conseil de classe |
+
+Le bulletin PDF reprend la présentation congolaise : branches, maxima, P1, P2, EX1, TOT. S1, P3, P4, EX2, TOT. S2, T.G.,
+puis maxima généraux, totaux, pourcentage, place, application et conduite.
+
+Un système « trimestres, notes sur 20 avec coefficients » reste disponible dans **Paramètres** pour d'autres pays.
+Valeurs par défaut d'une nouvelle école : devise USD (modifiable en CDF), indicatif +243.
 
 ## Rôles
 
@@ -36,7 +55,7 @@ On se connecte **par numéro de téléphone** (code reçu par SMS) ou **par e-ma
 3. Le parent est invité automatiquement quand son téléphone ou son e-mail est saisi sur la fiche de l'élève.
 4. Chaque invité se connecte avec **ce numéro ou cet e-mail** et rejoint l'école avec le bon rôle.
 
-Les numéros saisis sans indicatif utilisent celui du pays de l'école (Paramètres, +225 par défaut).
+Les numéros saisis sans indicatif utilisent celui du pays de l'école (Paramètres, +243 par défaut) : `081 234 5678` devient `+243812345678`.
 
 ## Rappels d'impayés
 
@@ -106,7 +125,7 @@ flutter run -d chrome  # web
 ## Tests
 
 ```bash
-flutter test                      # calculs (moyennes, rangs, impayés)
+flutter test                      # calculs (pourcentages, places, décisions, impayés), bulletins PDF, rappels
 cd test_rules && npm install && npm test   # règles de sécurité Firestore (émulateur, Java requis)
 cd functions && npm test                    # logique des rappels (numéros, messages, appel Twilio simulé)
 cd functions && npm run test:emulateur      # Cloud Function de bout en bout (émulateur, CLI firebase requise)
@@ -121,7 +140,8 @@ ecoles/{ecoleId}                    nom, adresse, devise, année scolaire
   ├─ classes, matieres, enseignants
   ├─ eleves                         élèves (archivés avec actif = false)
   ├─ paiements                      non modifiables, annulables par la direction
-  ├─ notes                          id = {eleve}_{matiere}_T{trimestre}
+  ├─ notes                          id = {eleve}_{branche}_{période} : points ou cote
+  ├─ comportements                  application et conduite par élève et par période
   ├─ presences                      une feuille d'appel par classe et par jour
   ├─ absences                       une fiche par absence/retard (lue par les parents)
   ├─ rappels                        historique des rappels d'impayés (manuels et automatiques)

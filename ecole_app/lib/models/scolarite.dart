@@ -51,31 +51,34 @@ class Paiement {
       };
 }
 
+/// Évaluation d'un élève dans une branche pour une période :
+/// des points ([valeur] sur [sur]) ou, en maternelle, une [cote] (A, ECA, NA).
 class Note {
   final String id;
   final String eleveId;
   final String classeId;
   final String matiereId;
-  final int trimestre;
-  final double valeur;
+  final String periode; // P1, P2, EX1… ou T1, T2, T3
+  final double? valeur;
   final double sur;
+  final String? cote;
 
   const Note({
     required this.id,
     required this.eleveId,
     required this.classeId,
     required this.matiereId,
-    required this.trimestre,
-    required this.valeur,
+    required this.periode,
+    this.valeur,
     this.sur = 20,
+    this.cote,
   });
 
-  /// Note ramenée sur 20.
-  double get sur20 => sur == 0 ? 0 : valeur * 20 / sur;
+  /// Note ramenée sur 20 (système trimestres).
+  double? get sur20 => valeur == null || sur == 0 ? null : valeur! * 20 / sur;
 
-  /// Identifiant déterministe : une note par élève / matière / trimestre.
-  static String docId(String eleveId, String matiereId, int trimestre) =>
-      '${eleveId}_${matiereId}_T$trimestre';
+  /// Identifiant déterministe : une évaluation par élève / branche / période.
+  static String docId(String eleveId, String matiereId, String periode) => '${eleveId}_${matiereId}_$periode';
 
   factory Note.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
     final m = doc.data() ?? {};
@@ -84,9 +87,10 @@ class Note {
       eleveId: m['eleveId'] ?? '',
       classeId: m['classeId'] ?? '',
       matiereId: m['matiereId'] ?? '',
-      trimestre: (m['trimestre'] as num?)?.toInt() ?? 1,
-      valeur: readDouble(m['valeur']),
+      periode: m['periode'] ?? 'T${m['trimestre'] ?? 1}',
+      valeur: m['valeur'] == null ? null : readDouble(m['valeur']),
       sur: readDouble(m['sur'], 20),
+      cote: m['cote'] as String?,
     );
   }
 
@@ -94,11 +98,28 @@ class Note {
         'eleveId': eleveId,
         'classeId': classeId,
         'matiereId': matiereId,
-        'trimestre': trimestre,
-        'valeur': valeur,
+        'periode': periode,
+        if (valeur != null) 'valeur': valeur,
         'sur': sur,
+        if (cote != null) 'cote': cote,
         'modifieLe': FieldValue.serverTimestamp(),
       };
+}
+
+/// Application et conduite d'un élève pour une période.
+class Comportement {
+  final String eleveId;
+  final String periode;
+  final String application;
+  final String conduite;
+  const Comportement(this.eleveId, this.periode, this.application, this.conduite);
+
+  static String docId(String eleveId, String periode) => '${eleveId}_$periode';
+
+  factory Comportement.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
+    final m = doc.data() ?? {};
+    return Comportement(m['eleveId'] ?? '', m['periode'] ?? '', m['application'] ?? '', m['conduite'] ?? '');
+  }
 }
 
 enum StatutPresence { present, absent, retard }

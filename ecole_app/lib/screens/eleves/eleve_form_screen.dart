@@ -44,7 +44,7 @@ class _EleveFormScreenState extends ConsumerState<EleveFormScreen> {
       parentEmail: _parentEmail.text.trim(),
       dateInscription: widget.eleve?.dateInscription,
     );
-    final indicatif = ref.read(ecoleProvider).valueOrNull?.indicatif ?? '+225';
+    final indicatif = ref.read(ecoleProvider).valueOrNull?.indicatif ?? '+243';
     String? tel(String brut) => normaliserTelephone(brut, indicatif: indicatif);
     final ok = await run(context, () async {
       final id = await repo.enregistrerEleve(e);
@@ -129,7 +129,7 @@ class _EleveFormScreenState extends ConsumerState<EleveFormScreen> {
                   labelText: 'Téléphone',
                   helperText: 'Sert aux rappels SMS/WhatsApp et à la connexion du parent par code SMS'),
               validator: (v) => (v ?? '').trim().isEmpty ||
-                      normaliserTelephone(v!, indicatif: ref.read(ecoleProvider).valueOrNull?.indicatif ?? '+225') != null
+                      normaliserTelephone(v!, indicatif: ref.read(ecoleProvider).valueOrNull?.indicatif ?? '+243') != null
                   ? null
                   : 'Numéro invalide'),
           gap,

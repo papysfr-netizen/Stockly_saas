@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/evaluation.dart';
 import '../../core/format.dart';
+import '../../models/classe.dart';
 import '../../models/eleve.dart';
 import '../../models/scolarite.dart';
 import '../../providers/providers.dart';
@@ -82,7 +84,7 @@ class _InfosTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final me = ref.watch(meProvider);
-    final devise = ref.watch(ecoleProvider).valueOrNull?.devise ?? 'FCFA';
+    final devise = ref.watch(ecoleProvider).valueOrNull?.devise ?? 'USD';
     final classes = ref.watch(toutesClassesProvider).valueOrNull ?? const [];
     final classe = classes.where((c) => c.id == eleve.classeId).firstOrNull;
     final paiements = ref.watch(paiementsProvider(eleve.id));
@@ -172,42 +174,60 @@ class _NotesTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final systeme = ref.watch(systemeProvider);
+    final classes = ref.watch(toutesClassesProvider).valueOrNull ?? const [];
+    final classe = classes.where((c) => c.id == eleve.classeId).firstOrNull;
     final matieres = ref.watch(matieresProvider(eleve.classeId)).valueOrNull ?? const [];
+    final comps = ref.watch(comportementsEleveProvider(eleve.id)).valueOrNull ?? const <Comportement>[];
+    if (classe == null) return const EmptyState('Classe inconnue.');
     return AsyncView(ref.watch(notesEleveProvider(eleve.id)), (List<Note> notes) {
-      if (matieres.isEmpty) return const EmptyState('Aucune matière définie pour la classe.');
+      if (matieres.isEmpty) return const EmptyState('Aucune branche définie pour la classe.');
+      // Seulement les notes de la classe actuelle (un élève peut avoir changé de classe).
+      final ev = Evaluations(notes.where((n) => n.classeId == eleve.classeId));
+      final maternelle = classe.cycle == Cycle.maternelle;
+      final vues = vuesPour(systeme, classe.cycle);
       return ListView(padding: const EdgeInsets.all(12), children: [
-        for (final t in [1, 2, 3])
-          Builder(builder: (context) {
-            final lignes = [
-              for (final mat in matieres)
-                LigneBulletin(
-                  mat,
-                  notes
-                      .where((n) => n.trimestre == t && n.matiereId == mat.id && n.classeId == eleve.classeId)
-                      .firstOrNull
-                      ?.sur20,
-                ),
-            ];
-            final moy = moyennePonderee(lignes);
-            return Card(
+        for (final (i, vue) in vues.indexed)
+          if (vue.codes.length == 1 || !maternelle)
+            Card(
               child: ExpansionTile(
-                initiallyExpanded: t == 1,
-                title: Text('Trimestre $t'),
-                subtitle: Text('Moyenne : ${formatNote(moy)} / 20 · ${appreciation(moy)}'),
+                initiallyExpanded: i == 0,
+                title: Text(vue.label),
+                subtitle: maternelle
+                    ? null
+                    : Text(formatScore(systeme,
+                        scoreEleve(systeme: systeme, eleveId: eleve.id, matieres: matieres, codes: vue.codes, ev: ev))),
                 children: [
-                  for (final l in lignes)
+                  for (final m in matieres)
                     ListTile(
                       dense: true,
-                      title: Text(l.matiere.nom),
-                      subtitle: Text('Coef. ${l.matiere.coefficient.toStringAsFixed(0)}'),
-                      trailing: Text(formatNote(l.note)),
+                      title: Text(m.nom),
+                      trailing: Text(_valeur(systeme, maternelle, ev, m, vue.codes)),
                     ),
+                  if (vue.codes.length == 1)
+                    for (final c in comps.where((c) => c.periode == vue.codes.single))
+                      ListTile(
+                        dense: true,
+                        title: const Text('Application / conduite'),
+                        trailing: Text('${c.application} / ${c.conduite}'),
+                      ),
                 ],
               ),
-            );
-          }),
+            ),
       ]);
     });
+  }
+
+  String _valeur(SystemeEvaluation s, bool maternelle, Evaluations ev, Matiere m, List<String> codes) {
+    if (maternelle) {
+      final cote = ev.de(eleve.id, m.id, codes.single)?.cote;
+      return cote == null ? '-' : cotesMaternelle.firstWhere((c) => c.$1 == cote).$2;
+    }
+    if (s == SystemeEvaluation.trimestres) {
+      return formatNote(scoreEleve(systeme: s, eleveId: eleve.id, matieres: [m], codes: codes, ev: ev));
+    }
+    final t = ev.total(eleve.id, m.id, codes);
+    return t == null ? '-' : '${formatPoints(t.points)} / ${formatPoints(t.maxima)}';
   }
 }
 

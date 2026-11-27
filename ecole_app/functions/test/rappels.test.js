@@ -16,13 +16,16 @@ test('message avec variables', () => {
   const m = messageRappel({ modele: 'Bonjour {parent}, reste {montant} pour {eleve} ({classe}) — {ecole} {inconnu}',
     parent: '', eleve: 'Awa KONE', classe: 'CM2', montant: 125000, devise: 'FCFA', ecole: 'Les Lauriers' });
   assert.equal(m, 'Bonjour cher parent, reste 125 000 FCFA pour Awa KONE (CM2) — Les Lauriers {inconnu}');
-  assert.equal(formatMontant(1500000), '1 500 000 FCFA');
+  assert.equal(formatMontant(1500000, 'CDF'), '1 500 000 CDF');
+  assert.equal(formatMontant(150.5), '150,50 USD');
+  assert.equal(normaliserTelephone('081 234 5678'), '+243812345678');
+  assert.equal(normaliserTelephone('0991234567', '+243'), '+243991234567');
 });
 
 test('calcul des relances', () => {
   const now = new Date('2026-11-27T10:00:00Z');
   const r = calculerRelances({
-    ecole: { nom: 'E', indicatif: '+225' },
+    ecole: { nom: 'E', indicatif: '+225', devise: 'FCFA' },
     classes: [{ id: 'c', nom: 'CM2', fraisScolarite: 100000 }],
     eleves: [
       { id: 'a', nom: 'A', prenom: 'x', classeId: 'c', parentTelephone: '0707123456' },

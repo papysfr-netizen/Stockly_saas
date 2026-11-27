@@ -98,8 +98,17 @@ service cloud.firestore {
       }
       match /notes/{id} {
         allow read: if isStaff(ecoleId) || isParentOf(ecoleId, resource.data.eleveId);
+        // Des points (0 ≤ valeur ≤ sur) ou, en maternelle, une cote A / ECA / NA.
         allow create, update: if teaches(ecoleId, request.resource.data.classeId)
-          && request.resource.data.valeur >= 0 && request.resource.data.valeur <= request.resource.data.sur;
+          && (request.resource.data.keys().hasAny(['valeur'])
+                ? request.resource.data.valeur >= 0 && request.resource.data.valeur <= request.resource.data.sur
+                : request.resource.data.get('cote', '') in ['A', 'ECA', 'NA']);
+        allow delete: if teaches(ecoleId, resource.data.classeId);
+      }
+      // Application et conduite par période.
+      match /comportements/{id} {
+        allow read: if isStaff(ecoleId) || isParentOf(ecoleId, resource.data.eleveId);
+        allow create, update: if teaches(ecoleId, request.resource.data.classeId);
         allow delete: if teaches(ecoleId, resource.data.classeId);
       }
       match /presences/{id} {

@@ -48,7 +48,7 @@ class _JournalTabState extends ConsumerState<_JournalTab> {
 
   @override
   Widget build(BuildContext context) {
-    final devise = ref.watch(ecoleProvider).valueOrNull?.devise ?? 'FCFA';
+    final devise = ref.watch(ecoleProvider).valueOrNull?.devise ?? 'USD';
     final eleves = ref.watch(elevesProvider(null)).valueOrNull ?? const <Eleve>[];
     final parId = {for (final e in eleves) e.id: e};
 
@@ -118,7 +118,7 @@ class _ImpayesTabState extends ConsumerState<_ImpayesTab> {
 
   @override
   Widget build(BuildContext context) {
-    final devise = ref.watch(ecoleProvider).valueOrNull?.devise ?? 'FCFA';
+    final devise = ref.watch(ecoleProvider).valueOrNull?.devise ?? 'USD';
     final classes = ref.watch(toutesClassesProvider).valueOrNull ?? const [];
     final frais = {for (final c in classes) c.id: c.fraisScolarite};
     final nomsClasses = {for (final c in classes) c.id: c.nom};

@@ -189,9 +189,9 @@ class SchoolRepository {
   Future<void> annulerPaiement(String id) => _col('paiements').doc(id).delete();
 
   // ---------------- Notes ----------------
-  Stream<List<Note>> notesClasse(String classeId, int trimestre) => _col('notes')
+  /// Toutes les évaluations d'une classe (toutes périodes).
+  Stream<List<Note>> notesClasse(String classeId) => _col('notes')
       .where('classeId', isEqualTo: classeId)
-      .where('trimestre', isEqualTo: trimestre)
       .snapshots()
       .map((s) => s.docs.map(Note.fromDoc).toList());
 
@@ -200,30 +200,67 @@ class SchoolRepository {
       .snapshots()
       .map((s) => s.docs.map(Note.fromDoc).toList());
 
-  /// Enregistre les notes d'une matière ; `null` efface la note.
+  /// Enregistre les points d'une branche pour une période ; `null` efface.
   Future<void> enregistrerNotes({
     required String classeId,
     required String matiereId,
-    required int trimestre,
+    required String periode,
+    required double sur,
     required Map<String, double?> valeurs,
-    double sur = 20,
+  }) =>
+      _ecrireNotes(matiereId, periode, valeurs.map((eleveId, v) => MapEntry(
+          eleveId,
+          v == null
+              ? null
+              : Note(id: '', eleveId: eleveId, classeId: classeId, matiereId: matiereId, periode: periode, valeur: v, sur: sur))));
+
+  /// Enregistre les cotes (maternelle) d'une branche pour une période.
+  Future<void> enregistrerCotes({
+    required String classeId,
+    required String matiereId,
+    required String periode,
+    required Map<String, String?> cotes,
+  }) =>
+      _ecrireNotes(matiereId, periode, cotes.map((eleveId, c) => MapEntry(
+          eleveId,
+          c == null
+              ? null
+              : Note(id: '', eleveId: eleveId, classeId: classeId, matiereId: matiereId, periode: periode, cote: c, sur: 0))));
+
+  Future<void> _ecrireNotes(String matiereId, String periode, Map<String, Note?> notes) async {
+    final batch = _db.batch();
+    notes.forEach((eleveId, n) {
+      final ref = _col('notes').doc(Note.docId(eleveId, matiereId, periode));
+      n == null ? batch.delete(ref) : batch.set(ref, n.toMap());
+    });
+    await batch.commit();
+  }
+
+  // ---------------- Application & conduite ----------------
+  Stream<List<Comportement>> comportementsClasse(String classeId) => _col('comportements')
+      .where('classeId', isEqualTo: classeId)
+      .snapshots()
+      .map((s) => s.docs.map(Comportement.fromDoc).toList());
+
+  Stream<List<Comportement>> comportementsEleve(String eleveId) => _col('comportements')
+      .where('eleveId', isEqualTo: eleveId)
+      .snapshots()
+      .map((s) => s.docs.map(Comportement.fromDoc).toList());
+
+  Future<void> enregistrerComportements({
+    required String classeId,
+    required String periode,
+    required Map<String, ({String application, String conduite})> valeurs,
   }) async {
     final batch = _db.batch();
     valeurs.forEach((eleveId, v) {
-      final ref = _col('notes').doc(Note.docId(eleveId, matiereId, trimestre));
-      if (v == null) {
-        batch.delete(ref);
-      } else {
-        batch.set(ref, Note(
-          id: ref.id,
-          eleveId: eleveId,
-          classeId: classeId,
-          matiereId: matiereId,
-          trimestre: trimestre,
-          valeur: v,
-          sur: sur,
-        ).toMap());
-      }
+      batch.set(_col('comportements').doc(Comportement.docId(eleveId, periode)), {
+        'eleveId': eleveId,
+        'classeId': classeId,
+        'periode': periode,
+        'application': v.application,
+        'conduite': v.conduite,
+      });
     });
     await batch.commit();
   }

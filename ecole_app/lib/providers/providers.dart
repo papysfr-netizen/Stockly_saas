@@ -3,6 +3,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/evaluation.dart';
 import '../data/auth_repository.dart';
 import '../data/rappel_repository.dart';
 import '../data/school_repository.dart';
@@ -58,8 +59,18 @@ final paiementsProvider = StreamProvider.family<List<Paiement>, String?>(
 final notesEleveProvider = StreamProvider.family<List<Note>, String>(
     (ref, eleveId) => ref.watch(schoolRepoProvider).notesEleve(eleveId));
 
-final notesClasseProvider = StreamProvider.family<List<Note>, (String, int)>(
-    (ref, k) => ref.watch(schoolRepoProvider).notesClasse(k.$1, k.$2));
+final notesClasseProvider = StreamProvider.family<List<Note>, String>(
+    (ref, classeId) => ref.watch(schoolRepoProvider).notesClasse(classeId));
+
+final comportementsClasseProvider = StreamProvider.family<List<Comportement>, String>(
+    (ref, classeId) => ref.watch(schoolRepoProvider).comportementsClasse(classeId));
+
+final comportementsEleveProvider = StreamProvider.family<List<Comportement>, String>(
+    (ref, eleveId) => ref.watch(schoolRepoProvider).comportementsEleve(eleveId));
+
+/// Système d'évaluation de l'école (RD Congo par défaut).
+final systemeProvider = Provider<SystemeEvaluation>(
+    (ref) => ref.watch(ecoleProvider).valueOrNull?.systeme ?? SystemeEvaluation.rdc);
 
 final absencesEleveProvider = StreamProvider.family(
     (ref, String eleveId) => ref.watch(schoolRepoProvider).absencesEleve(eleveId));

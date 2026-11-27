@@ -9,7 +9,7 @@ const MODELE_PAR_DEFAUT =
 /** Pays où le 0 initial fait partie du numéro national. */
 const GARDE_0 = new Set(['225', '39']);
 
-function normaliserTelephone(brut, indicatif = '+225') {
+function normaliserTelephone(brut, indicatif = '+243') {
   let t = String(brut || '').trim().replace(/[\s.\-()/]/g, '');
   if (!t) return null;
   if (t.startsWith('00')) t = '+' + t.slice(2);
@@ -21,10 +21,12 @@ function normaliserTelephone(brut, indicatif = '+225') {
   return /^\+[1-9][0-9]{7,14}$/.test(t) ? t : null;
 }
 
-function formatMontant(montant, devise = 'FCFA') {
+function formatMontant(montant, devise = 'USD') {
   // Espace simple comme séparateur : les espaces insécables passent mal en SMS (GSM-7).
-  const n = Math.round(montant).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-  return `${n} ${devise}`;
+  const arrondi = Math.round(montant * 100) / 100;
+  const [entier, dec] = arrondi.toFixed(2).split('.');
+  const n = entier.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  return `${n}${dec === '00' ? '' : ',' + dec} ${devise}`;
 }
 
 function messageRappel({ modele, parent, eleve, classe, montant, devise, ecole }) {
@@ -55,7 +57,7 @@ function calculerRelances({ eleves, classes, paiements, derniersRappels = {}, ec
     const classe = classeParId[e.classeId];
     const reste = Math.max(0, Number(classe?.fraisScolarite || 0) - (paye[e.id] || 0));
     if (reste <= 0) continue;
-    const telephone = normaliserTelephone(e.parentTelephone, ecole.indicatif || '+225');
+    const telephone = normaliserTelephone(e.parentTelephone, ecole.indicatif || '+243');
     const ligne = { eleveId: e.id, telephone, reste };
     if (!telephone) { res.sansTelephone.push(ligne); continue; }
     const dernier = derniersRappels[e.id];
@@ -66,13 +68,13 @@ function calculerRelances({ eleves, classes, paiements, derniersRappels = {}, ec
       eleve: `${e.prenom || ''} ${e.nom || ''}`.trim(),
       classe: classe?.nom || '',
       montant: reste,
-      devise: ecole.devise || 'FCFA',
+      devise: ecole.devise || 'USD',
       ecole: ecole.nom || '',
     });
     ligne.variables = {
       1: String(e.parentNom || '').trim() || 'cher parent',
       2: `${e.prenom || ''} ${e.nom || ''}`.trim(),
-      3: formatMontant(reste, ecole.devise || 'FCFA'),
+      3: formatMontant(reste, ecole.devise || 'USD'),
       4: ecole.nom || '',
     };
     res.aRelancer.push(ligne);

@@ -137,8 +137,9 @@ class AuthRepository {
     final batch = _db.batch()
       ..set(ecoleRef, {
         'nom': nomEcole.trim(),
-        'devise': 'FCFA',
-        'indicatif': '+225',
+        'devise': 'USD',
+        'indicatif': '+243',
+        'systeme': 'rdc',
         'anneeScolaire': _anneeScolaireCourante(),
         'proprietaire': user.uid,
         'creeLe': FieldValue.serverTimestamp(),

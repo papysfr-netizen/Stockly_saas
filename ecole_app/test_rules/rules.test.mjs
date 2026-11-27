@@ -80,6 +80,13 @@ await t('parent ne peut pas écrire de note', assertFails(setDoc(doc(parent, `ec
 await t('enseignant : liste des élèves', assertSucceeds(q(prof, 'eleves', 'actif', true)));
 await t('enseignant : note dans sa classe', assertSucceeds(setDoc(doc(prof, `ecoles/${E}/notes/n1`), { eleveId: 'e1', classeId: 'c1', matiereId: 'm', trimestre: 1, valeur: 15, sur: 20 })));
 await t('enseignant : note hors de sa classe refusée', assertFails(setDoc(doc(prof, `ecoles/${E}/notes/n2`), { eleveId: 'e2', classeId: 'c2', matiereId: 'm', trimestre: 1, valeur: 15, sur: 20 })));
+await t('enseignant : cote de maternelle', assertSucceeds(setDoc(doc(prof, `ecoles/${E}/notes/n4`), { eleveId: 'e1', classeId: 'c1', matiereId: 'm', periode: 'P1', cote: 'ECA', sur: 0 })));
+await t('enseignant : cote inconnue refusée', assertFails(setDoc(doc(prof, `ecoles/${E}/notes/n5`), { eleveId: 'e1', classeId: 'c1', matiereId: 'm', periode: 'P1', cote: 'XYZ', sur: 0 })));
+await t('enseignant : examen noté sur le double', assertSucceeds(setDoc(doc(prof, `ecoles/${E}/notes/n6`), { eleveId: 'e1', classeId: 'c1', matiereId: 'm', periode: 'EX1', valeur: 35, sur: 40 })));
+await t('enseignant : application et conduite de sa classe', assertSucceeds(setDoc(doc(prof, `ecoles/${E}/comportements/e1_P1`), { eleveId: 'e1', classeId: 'c1', periode: 'P1', application: 'Bon', conduite: 'Élite' })));
+await t('enseignant : conduite hors de sa classe refusée', assertFails(setDoc(doc(prof, `ecoles/${E}/comportements/e2_P1`), { eleveId: 'e2', classeId: 'c2', periode: 'P1', application: 'Bon', conduite: 'Bon' })));
+await t('parent : conduite de son enfant', assertSucceeds(getDocs(query(collection(parent, `ecoles/${E}/comportements`), where('eleveId', '==', 'e1')))));
+await t("parent : conduite d'un autre élève refusée", assertFails(getDocs(query(collection(parent, `ecoles/${E}/comportements`), where('eleveId', '==', 'e2')))));
 await t('enseignant : note > 20 refusée', assertFails(setDoc(doc(prof, `ecoles/${E}/notes/n3`), { eleveId: 'e1', classeId: 'c1', matiereId: 'm', trimestre: 1, valeur: 25, sur: 20 })));
 await t("enseignant : appel dans sa classe", assertSucceeds(setDoc(doc(prof, `ecoles/${E}/presences/c1_2026-11-27`), { classeId: 'c1', statuts: {} })));
 await t('enseignant : pas accès aux paiements', assertFails(q(prof, 'paiements', 'eleveId', 'e1')));

@@ -40,7 +40,7 @@ class _CarteEnfant extends ConsumerWidget {
     final classe = classes.where((c) => c.id == eleve.classeId).firstOrNull;
     final paiements = ref.watch(paiementsProvider(eleveId)).valueOrNull ?? const [];
     final absences = ref.watch(absencesEleveProvider(eleveId)).valueOrNull ?? const [];
-    final devise = ref.watch(ecoleProvider).valueOrNull?.devise ?? 'FCFA';
+    final devise = ref.watch(ecoleProvider).valueOrNull?.devise ?? 'USD';
     final reste = resteAPayer(classe?.fraisScolarite ?? 0, paiements);
 
     return Card(

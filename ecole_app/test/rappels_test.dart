@@ -12,6 +12,7 @@ void main() {
     expect(normaliserTelephone('06 12 34 56 78', indicatif: '+33'), '+33612345678');
     expect(normaliserTelephone('00225 0707123456'), '+2250707123456');
     expect(normaliserTelephone('+229 97 00 00 00'), '+22997000000');
+    expect(normaliserTelephone('081 234 5678'), '+243812345678'); // RD Congo par défaut
     expect(normaliserTelephone('abc'), isNull);
     expect(normaliserTelephone(''), isNull);
   });
@@ -23,10 +24,10 @@ void main() {
       eleve: 'KONE Awa',
       classe: 'CM2',
       montant: 125000,
-      devise: 'FCFA',
+      devise: 'CDF',
       ecole: 'Les Lauriers',
     );
-    expect(m, 'Bonjour cher parent, KONE Awa (CM2) : 125 000 FCFA. Les Lauriers {inconnu}');
+    expect(m, 'Bonjour cher parent, KONE Awa (CM2) : 125 000 CDF. Les Lauriers {inconnu}');
     expect(messageRappel(modele: '', parent: 'M. Kone', eleve: 'A', classe: 'B', montant: 1, devise: 'F', ecole: 'E'),
         startsWith('Bonjour M. Kone'));
   });

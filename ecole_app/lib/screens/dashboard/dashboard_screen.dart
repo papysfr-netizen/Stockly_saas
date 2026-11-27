@@ -17,7 +17,7 @@ class DashboardScreen extends ConsumerWidget {
     final paiements = ref.watch(paiementsProvider(null)).valueOrNull ?? const [];
     final enseignants = ref.watch(enseignantsProvider).valueOrNull ?? const [];
     final presences = ref.watch(presencesDuJourProvider).valueOrNull ?? const [];
-    final devise = ref.watch(ecoleProvider).valueOrNull?.devise ?? 'FCFA';
+    final devise = ref.watch(ecoleProvider).valueOrNull?.devise ?? 'USD';
 
     final fraisParClasse = {for (final c in classes) c.id: c.fraisScolarite};
     final paiementsParEleve = <String, List<Paiement>>{};
@@ -103,7 +103,7 @@ class DashboardScreen extends ConsumerWidget {
             ListTile(
               dense: true,
               title: Text(c.nom),
-              subtitle: c.niveau.isEmpty ? null : Text(c.niveau),
+              subtitle: c.description.isEmpty ? null : Text(c.description),
               trailing: Text('${effectifs[c.id] ?? 0} élèves'),
             ),
           if (classes.isEmpty)

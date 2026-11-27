@@ -1,5 +1,6 @@
 /// Indicatifs proposés à la connexion par téléphone et dans les paramètres.
 const indicatifsPays = <(String, String)>[
+  ('+243', 'RD Congo'),
   ('+225', "Côte d'Ivoire"),
   ('+221', 'Sénégal'),
   ('+223', 'Mali'),
@@ -11,7 +12,6 @@ const indicatifsPays = <(String, String)>[
   ('+237', 'Cameroun'),
   ('+241', 'Gabon'),
   ('+242', 'Congo'),
-  ('+243', 'RD Congo'),
   ('+236', 'Centrafrique'),
   ('+235', 'Tchad'),
   ('+261', 'Madagascar'),
