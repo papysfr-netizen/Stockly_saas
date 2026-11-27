@@ -85,6 +85,24 @@ ResultatsClasse resultatsClasse({
         id: scoreEleve(systeme: systeme, eleveId: id, matieres: matieres, codes: codes, ev: ev),
     });
 
+/// Colonnes de résultats d'une classe, dans l'ordre du bulletin :
+/// une par période ; en RD Congo un total par semestre ; puis le total de l'année.
+typedef Colonne = ({String titre, List<String> codes, bool total});
+
+List<Colonne> colonnesResultats(SystemeEvaluation s, Cycle c) {
+  final periodes = periodesPour(s, c);
+  final maternelle = c == Cycle.maternelle;
+  return [
+    for (final p in periodes) ...[
+      (titre: p.code, codes: [p.code], total: false),
+      if (s == SystemeEvaluation.rdc && !maternelle && p.examen)
+        (titre: 'TOT. S${p.semestre}', codes: [for (final x in periodes) if (x.semestre == p.semestre) x.code], total: true),
+    ],
+    if (!maternelle)
+      (titre: s == SystemeEvaluation.rdc ? 'T.G.' : 'Année', codes: [for (final p in periodes) p.code], total: true),
+  ];
+}
+
 /// Seuil de réussite : 50 % en RD Congo, 10/20 sinon.
 double seuilReussite(SystemeEvaluation s) => s == SystemeEvaluation.rdc ? 50 : 10;
 

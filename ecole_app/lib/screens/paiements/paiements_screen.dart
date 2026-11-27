@@ -6,9 +6,11 @@ import '../../models/eleve.dart';
 import '../../models/scolarite.dart';
 import '../../providers/providers.dart';
 import '../../services/calculs.dart';
+import '../../services/excel_export.dart';
+import '../../services/fichier.dart';
+import '../../services/rappels.dart';
 import '../../widgets/common.dart';
 import '../eleves/eleve_detail_screen.dart';
-import '../../services/rappels.dart';
 import 'encaisser_dialog.dart';
 import 'rappels_actions.dart';
 
@@ -152,6 +154,28 @@ class _ImpayesTabState extends ConsumerState<_ImpayesTab> {
         ),
         Text('${lignes.length} élève(s) · ${formatMontant(total, devise: devise)} à recouvrer',
             style: Theme.of(context).textTheme.titleMedium),
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Wrap(spacing: 8, runSpacing: 8, alignment: WrapAlignment.center, children: [
+            OutlinedButton.icon(
+              icon: const Icon(Icons.table_view_outlined),
+              label: const Text('Exporter (Excel)'),
+              // Toujours toute l'école : impayés, situation par classe, encaissements.
+              onPressed: () => run(context, () async {
+                final ecole = ref.read(ecoleProvider).value!;
+                final tous = await ref.read(schoolRepoProvider).eleves().first;
+                final octets = exporterFinances(
+                  ecole: ecole,
+                  classes: classes,
+                  eleves: tous,
+                  paiements: paiements,
+                  derniersRappels: rappels,
+                );
+                await remettreFichier(octets, nomFichier('impayes_${isoDay(DateTime.now())}.xlsx'), mimeExcel);
+              }),
+            ),
+          ]),
+        ),
         if (lignes.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 8),

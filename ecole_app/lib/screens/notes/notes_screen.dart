@@ -7,6 +7,8 @@ import '../../models/eleve.dart';
 import '../../models/scolarite.dart';
 import '../../providers/providers.dart';
 import '../../services/calculs.dart';
+import '../../services/excel_export.dart';
+import '../../services/fichier.dart';
 import '../../services/pdf_service.dart';
 import '../../widgets/common.dart';
 
@@ -317,7 +319,23 @@ class _ResultatsTabState extends ConsumerState<_ResultatsTab> {
       await PdfService.afficher(bytes, 'bulletin_${e.matricule}.pdf');
     }
 
+    Future<void> exporter() async {
+      final ecole = ref.read(ecoleProvider).value!;
+      final octets = exporterNotes(
+          ecole: ecole, classe: classe, matieres: matieres, eleves: eleves, ev: ev, comportements: comps);
+      await remettreFichier(octets, nomFichier('notes_${classe.nom}_${ecole.anneeScolaire}.xlsx'), mimeExcel);
+    }
+
     return ListView(padding: const EdgeInsets.all(12), children: [
+      Align(
+        alignment: Alignment.centerRight,
+        child: FilledButton.tonalIcon(
+          onPressed: eleves.isEmpty ? null : () => run(context, exporter),
+          icon: const Icon(Icons.table_view_outlined),
+          label: Text(maternelle ? 'Exporter les cotes (Excel)' : 'Exporter le palmarès et les notes (Excel)'),
+        ),
+      ),
+      const SizedBox(height: 8),
       if (!maternelle) ...[
         DropdownButtonFormField<int>(
           value: vues.indexOf(vue),

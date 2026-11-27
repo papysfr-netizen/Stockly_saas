@@ -10,6 +10,7 @@ conçue pour le système scolaire de la **RD Congo** (maternelle, primaire, seco
 | **Tableau de bord** | Effectifs, encaissements du mois, reste à recouvrer, taux de présence du jour |
 | **Élèves & classes** | Inscriptions (matricule automatique), fiches élèves, classes par cycle, niveau et section/option, branches et maxima |
 | **Frais de scolarité** | Encaissement, reçus PDF numérotés, journal par période, liste des impayés |
+| **Exports Excel** | Palmarès et notes d'une classe ; impayés, recouvrement par classe et journal des encaissements |
 | **Rappels d'impayés** | SMS ou WhatsApp, un par un depuis le téléphone ou en masse via Twilio, avec historique |
 | **Notes & bulletins** | Saisie par période et examen, totaux, pourcentages, places, application et conduite, bulletins PDF |
 | **Présences** | Appel quotidien (présent / retard / absent), historique par élève |
@@ -33,6 +34,16 @@ puis maxima généraux, totaux, pourcentage, place, application et conduite.
 
 Un système « trimestres, notes sur 20 avec coefficients » reste disponible dans **Paramètres** pour d'autres pays.
 Valeurs par défaut d'une nouvelle école : devise USD (modifiable en CDF), indicatif +243.
+
+## Exports Excel
+
+| Export | Où | Contenu (une feuille par onglet) |
+|---|---|---|
+| **Palmarès et notes** | Notes & bulletins → Résultats → *Exporter* | **Palmarès** : place, matricule, élève, pourcentage par colonne (P1… T.G.), décision proposée, moyenne de la classe ; puis une feuille par période, semestre et total général : points par branche (avec maxima), total, maxima, pourcentage, place, application et conduite. Maternelle : une feuille de cotes par période |
+| **Impayés** | Frais de scolarité → Impayés → *Exporter (Excel)* | **Impayés** : classe, élève, parent, téléphone, frais, payé, reste, dernier rappel ; **Par classe** : effectif, attendu, encaissé, reste, taux de recouvrement ; **Encaissements** : journal complet des reçus |
+
+Les nombres sont de vraies valeurs (tri, filtres, formules possibles). Seules les périodes déjà notées ont leur feuille.
+Sur le web, le fichier se télécharge ; sur téléphone, le menu de partage s'ouvre (WhatsApp, e-mail, Drive, Fichiers…).
 
 ## Rôles
 
@@ -125,7 +136,7 @@ flutter run -d chrome  # web
 ## Tests
 
 ```bash
-flutter test                      # calculs (pourcentages, places, décisions, impayés), bulletins PDF, rappels
+flutter test                      # calculs, bulletins PDF, exports Excel (relus après génération), rappels
 cd test_rules && npm install && npm test   # règles de sécurité Firestore (émulateur, Java requis)
 cd functions && npm test                    # logique des rappels (numéros, messages, appel Twilio simulé)
 cd functions && npm run test:emulateur      # Cloud Function de bout en bout (émulateur, CLI firebase requise)

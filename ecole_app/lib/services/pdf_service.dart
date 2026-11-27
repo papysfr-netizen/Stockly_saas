@@ -26,13 +26,13 @@ class PdfService {
   static pw.Widget _entete(Ecole ecole, String titre) => pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Text(ecole.nom, style: const pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+          pw.Text(ecole.nom, style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
           if (ecole.adresse.isNotEmpty) pw.Text(ecole.adresse),
           if (ecole.telephone.isNotEmpty) pw.Text('Tél. : ${ecole.telephone}'),
           pw.SizedBox(height: 12),
           pw.Center(
             child: pw.Text(titre,
-                style: const pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+                style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
           ),
           if (ecole.anneeScolaire.isNotEmpty)
             pw.Center(child: pw.Text('Année scolaire ${ecole.anneeScolaire}')),
@@ -90,21 +90,7 @@ class PdfService {
     final comp = {for (final c in comportements) c.periode: c};
     final maternelle = classe.cycle == Cycle.maternelle;
 
-    // Colonnes : une par période ; en RD Congo, un total par semestre + le total général.
-    final colonnes = <({String titre, List<String> codes, bool total})>[];
-    for (final p in periodes) {
-      colonnes.add((titre: p.code, codes: [p.code], total: false));
-      if (systeme == SystemeEvaluation.rdc && !maternelle && p.examen) {
-        colonnes.add((titre: 'TOT. S${p.semestre}', codes: [for (final x in periodes) if (x.semestre == p.semestre) x.code], total: true));
-      }
-    }
-    if (!maternelle) {
-      colonnes.add((
-        titre: systeme == SystemeEvaluation.rdc ? 'T.G.' : 'Année',
-        codes: [for (final p in periodes) p.code],
-        total: true
-      ));
-    }
+    final colonnes = colonnesResultats(systeme, classe.cycle);
 
     final resultats = {
       for (final c in colonnes)
@@ -135,7 +121,7 @@ class PdfService {
         ],
     ];
     final vide = systeme == SystemeEvaluation.trimestres || (systeme == SystemeEvaluation.rdc && !maternelle);
-    List<String> pied(String label, String Function(({String titre, List<String> codes, bool total}) c) f) =>
+    List<String> pied(String label, String Function(Colonne c) f) =>
         [label, if (vide) '', for (final c in colonnes) f(c)];
 
     double? sommeDe(List<String> codes, bool maxima) {
@@ -188,7 +174,7 @@ class PdfService {
 
     final doc = pw.Document(theme: await _chargerTheme());
     const petit = pw.TextStyle(fontSize: 8);
-    const gras = pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold);
+    final gras = pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold);
     doc.addPage(pw.Page(
       pageFormat: maternelle ? PdfPageFormat.a4 : PdfPageFormat.a4.landscape,
       margin: const pw.EdgeInsets.all(24),
@@ -199,7 +185,7 @@ class PdfService {
             pw.Expanded(
               child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
                 if (systeme == SystemeEvaluation.rdc) pw.Text('RÉPUBLIQUE DÉMOCRATIQUE DU CONGO', style: gras),
-                pw.Text(ecole.nom, style: const pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold)),
+                pw.Text(ecole.nom, style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold)),
                 if (ecole.adresse.isNotEmpty) pw.Text(ecole.adresse, style: petit),
                 if (ecole.telephone.isNotEmpty) pw.Text('Tél. : ${ecole.telephone}', style: petit),
               ]),
@@ -215,7 +201,7 @@ class PdfService {
           pw.Center(
             child: pw.Text(
               'BULLETIN ${maternelle ? 'D\'ÉVALUATION' : 'DE L\'ÉLÈVE'} — ANNÉE SCOLAIRE ${ecole.anneeScolaire}',
-              style: const pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+              style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
             ),
           ),
           pw.SizedBox(height: 8),
@@ -262,7 +248,7 @@ class PdfService {
           pw.SizedBox(width: 150, child: pw.Text('$label :')),
           pw.Expanded(
             child: pw.Text(valeur,
-                style: gras ? const pw.TextStyle(fontWeight: pw.FontWeight.bold) : null),
+                style: gras ? pw.TextStyle(fontWeight: pw.FontWeight.bold) : null),
           ),
         ]),
       );
