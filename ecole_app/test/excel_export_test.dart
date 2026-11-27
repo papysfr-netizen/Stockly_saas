@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:ecole_app/core/evaluation.dart';
+import 'package:ecole_app/models/absence_eleve.dart';
 import 'package:ecole_app/models/classe.dart';
 import 'package:ecole_app/models/ecole.dart';
 import 'package:ecole_app/models/eleve.dart';
@@ -109,5 +110,33 @@ void main() {
     final enc = x.tables['Encaissements']!;
     expect(ligne(enc, 3)[1], 'R2026-00001'); // le plus récent d'abord
     expect(ligne(enc, 6)[7], '400');
+  });
+
+  test('export des absences', () {
+    AbsenceEleve a(String id, String eleve, DateTime d, {bool j = false, StatutPresence s = StatutPresence.absent}) =>
+        AbsenceEleve(id: id, eleveId: eleve, classeId: 'c', date: d, statut: s, justifiee: j, motif: j ? 'Maladie' : '');
+    final octets = exporterAbsences(
+      ecole: ecole,
+      classes: const [classe],
+      eleves: eleves,
+      absences: [
+        a('1', 'a', DateTime(2026, 11, 3)),
+        a('2', 'a', DateTime(2026, 11, 10), j: true),
+        a('3', 'a', DateTime(2026, 11, 12), s: StatutPresence.retard),
+      ],
+      periode: 'novembre 2026',
+    );
+    ecrire('absences', octets);
+    final x = Excel.decodeBytes(octets);
+    expect(x.tables.keys, containsAll(['Par élève', 'Par classe', 'Détail']));
+    final pe = x.tables['Par élève']!;
+    expect(ligne(pe, 2).take(6), ['Classe', 'Matricule', 'Élève', 'Absences', 'Dont non justifiées', 'Retards']);
+    expect(ligne(pe, 3).take(6), ['5e A', 'EL-2', 'KABEYA Jean', '0', '0', '0']); // tri alphabétique
+    expect(ligne(pe, 4).take(6), ['5e A', 'EL-1', 'MBUYI Grâce', '2', '1', '1']);
+    expect(ligne(pe, 4)[6], startsWith('2026-11-10'));
+    expect(ligne(x.tables['Par classe']!, 3), ['5e A', '2', '2', '1', '1', '1']);
+    final det = x.tables['Détail']!;
+    expect(ligne(det, 3).take(7), ['12/11/2026', '5e A', 'EL-1', 'MBUYI Grâce', 'Retard', '', '']);
+    expect(ligne(det, 4).take(7), ['10/11/2026', '5e A', 'EL-1', 'MBUYI Grâce', 'Absent', 'Oui', 'Maladie']);
   });
 }

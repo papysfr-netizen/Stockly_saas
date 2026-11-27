@@ -53,7 +53,7 @@ void main() {
     }
     await ecrire('bulletin_primaire', PdfService.bulletin(
       ecole: ecole, eleve: eleve, classe: classe, matieres: branches, eleveIds: ['a', 'b', 'c'],
-      ev: Evaluations(notes), absences: 2,
+      ev: Evaluations(notes), absences: (absences: 3, nonJustifiees: 1, retards: 2),
       comportements: const [Comportement('a', 'P1', 'Très bon', 'Élite'), Comportement('a', 'P2', 'Bon', 'Très bon')],
     ));
   });
@@ -72,7 +72,7 @@ void main() {
     ];
     await ecrire('bulletin_maternelle', PdfService.bulletin(
       ecole: ecole, eleve: eleve, classe: classe, matieres: branches, eleveIds: ['a'],
-      ev: Evaluations(notes), absences: 0, comportements: const [],
+      ev: Evaluations(notes), absences: (absences: 0, nonJustifiees: 0, retards: 0), comportements: const [],
     ));
   });
 

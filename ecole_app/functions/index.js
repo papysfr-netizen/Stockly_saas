@@ -5,6 +5,7 @@ const { initializeApp } = require('firebase-admin/app');
 const { getFirestore, FieldValue, Timestamp } = require('firebase-admin/firestore');
 const { calculerRelances, envoyerTwilio, normaliserTelephone } = require('./rappels');
 const { notificationsAEnvoyer, messageRemplacement, variablesRemplacement } = require('./remplacements');
+const { doitAlerter, messageAbsence, variablesAbsence } = require('./absences');
 
 initializeApp();
 const db = getFirestore();
@@ -18,6 +19,8 @@ const TWILIO_WHATSAPP_FROM = defineString('TWILIO_WHATSAPP_FROM', { default: '',
 const TWILIO_WHATSAPP_CONTENT_SID = defineString('TWILIO_WHATSAPP_CONTENT_SID', { default: '', description: 'Modèle WhatsApp approuvé (HX…), variables {{1}} parent, {{2}} élève, {{3}} montant, {{4}} école' });
 const TWILIO_WHATSAPP_REMPLACEMENT_SID = defineString('TWILIO_WHATSAPP_REMPLACEMENT_SID', { default: '', description: 'Modèle WhatsApp « remplacement » (HX…), variables {{1}} enseignant, {{2}} date, {{3}} heure, {{4}} classe, {{5}} branche, {{6}} école' });
 const TWILIO_WHATSAPP_ANNULATION_SID = defineString('TWILIO_WHATSAPP_ANNULATION_SID', { default: '', description: 'Modèle WhatsApp « remplacement annulé » (HX…), mêmes variables' });
+
+const TWILIO_WHATSAPP_ABSENCE_SID = defineString('TWILIO_WHATSAPP_ABSENCE_SID', { default: '', description: 'Modèle WhatsApp « absence » (HX…), variables {{1}} parent, {{2}} élève, {{3}} classe, {{4}} date, {{5}} école' });
 
 function configTwilio(whatsappContentSid) {
   return {
@@ -173,5 +176,58 @@ exports.notifierRemplacant = onDocumentWritten(
         });
       }
     }
+  },
+);
+
+/**
+ * Prévient le parent dès que son enfant est noté absent à l'appel (réglage
+ * `alerteAbsence` de l'école : 'sms' ou 'whatsapp'). Le résultat de l'envoi
+ * est écrit sur la fiche d'absence (champ `alerte`).
+ */
+exports.alerterParentAbsence = onDocumentWritten(
+  { document: 'ecoles/{ecoleId}/absences/{id}', region: 'europe-west1', secrets: [TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN] },
+  async (event) => {
+    const avant = event.data.before.exists ? event.data.before.data() : null;
+    const apres = event.data.after.exists ? event.data.after.data() : null;
+    if (!doitAlerter(avant, apres)) return;
+
+    const ecoleRef = db.doc(`ecoles/${event.params.ecoleId}`);
+    const ecole = (await ecoleRef.get()).data() || {};
+    const canal = ecole.alerteAbsence;
+    if (!['sms', 'whatsapp'].includes(canal)) return;
+
+    const [eleveSnap, classeSnap] = await Promise.all([
+      ecoleRef.collection('eleves').doc(apres.eleveId).get(),
+      ecoleRef.collection('classes').doc(apres.classeId).get(),
+    ]);
+    const eleve = eleveSnap.data() || {};
+    const date = apres.date && apres.date.toDate ? apres.date.toDate().toISOString().slice(0, 10) : String(apres.jour || '');
+    const infos = {
+      parent: eleve.parentNom,
+      eleve: `${eleve.nom || ''} ${eleve.prenom || ''}`.trim(),
+      classe: (classeSnap.data() || {}).nom || '',
+      date,
+      ecole: ecole.nom || '',
+    };
+    const telephone = normaliserTelephone(eleve.parentTelephone, ecole.indicatif || '+243');
+    let resultat;
+    if (!telephone) {
+      resultat = { statut: 'sans_telephone' };
+    } else {
+      try {
+        const sid = await envoyerTwilio({
+          canal, to: telephone, body: messageAbsence(infos), variables: variablesAbsence(infos),
+          config: configTwilio(TWILIO_WHATSAPP_ABSENCE_SID.value()),
+        });
+        resultat = { statut: 'envoye', sid };
+      } catch (e) {
+        resultat = { statut: 'echec', erreur: e.message };
+      }
+    }
+    await ecoleRef.collection('notifications').add({
+      type: 'absence', eleveId: apres.eleveId, absenceId: event.params.id, canal, telephone: telephone || '',
+      ...resultat, date: FieldValue.serverTimestamp(),
+    });
+    await event.data.after.ref.update({ alerte: { ...resultat, canal, date: FieldValue.serverTimestamp() } });
   },
 );

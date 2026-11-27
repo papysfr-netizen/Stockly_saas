@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../core/format.dart';
+import '../models/absence_eleve.dart';
 import '../models/app_user.dart';
 import '../models/classe.dart';
 import '../models/ecole.dart';
@@ -366,25 +367,60 @@ class SchoolRepository {
       if (statut == StatutPresence.present) {
         batch.delete(ref);
       } else {
-        batch.set(ref, {
-          'eleveId': eleveId,
-          'classeId': f.classeId,
-          'date': Timestamp.fromDate(DateTime(f.date.year, f.date.month, f.date.day)),
-          'statut': statut.name,
-        });
+        // merge : refaire l'appel ne doit pas effacer une justification déjà saisie.
+        batch.set(
+          ref,
+          {
+            'eleveId': eleveId,
+            'classeId': f.classeId,
+            'date': Timestamp.fromDate(DateTime(f.date.year, f.date.month, f.date.day)),
+            'jour': isoDay(f.date),
+            'statut': statut.name,
+          },
+          SetOptions(merge: true),
+        );
       }
     });
     await batch.commit();
   }
 
-  Stream<List<({DateTime date, StatutPresence statut})>> absencesEleve(String eleveId) =>
-      _col('absences').where('eleveId', isEqualTo: eleveId).snapshots().map((s) => s.docs
-          .map((d) => (
-                date: (d['date'] as Timestamp).toDate(),
-                statut: StatutPresenceX.parse(d['statut'] as String?),
-              ))
-          .toList()
-        ..sort((a, b) => b.date.compareTo(a.date)));
+  Stream<List<AbsenceEleve>> absencesEleve(String eleveId) =>
+      _col('absences').where('eleveId', isEqualTo: eleveId).snapshots().map((s) =>
+          s.docs.map(AbsenceEleve.fromDoc).toList()..sort((a, b) => b.date.compareTo(a.date)));
+
+  /// Absences et retards de toute l'école depuis une date (suivi, bilans).
+  Stream<List<AbsenceEleve>> absencesDepuis(DateTime debut) => _col('absences')
+      .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(DateTime(debut.year, debut.month, debut.day)))
+      .snapshots()
+      .map((s) => s.docs.map(AbsenceEleve.fromDoc).toList()..sort((a, b) => b.date.compareTo(a.date)));
+
+  /// Justifie une absence (direction, secrétariat) ; valide aussi celle envoyée par le parent.
+  Future<void> justifierAbsence(String id, {required String motif, String note = '', required String par}) =>
+      _col('absences').doc(id).update({
+        'justifiee': true,
+        'motif': motif,
+        'note': note,
+        'justifiePar': par,
+        'dateJustification': FieldValue.serverTimestamp(),
+        'justificationParent': FieldValue.delete(),
+      });
+
+  Future<void> annulerJustification(String id) => _col('absences').doc(id).update({
+        'justifiee': false,
+        'motif': '',
+        'note': '',
+        'justifiePar': FieldValue.delete(),
+        'dateJustification': FieldValue.delete(),
+      });
+
+  /// Le parent propose une justification ; l'école la valide ou la refuse.
+  Future<void> proposerJustification(String id, {required String motif, required String message}) =>
+      _col('absences').doc(id).update({
+        'justificationParent': {'motif': motif, 'message': message, 'date': FieldValue.serverTimestamp()},
+      });
+
+  Future<void> refuserJustification(String id) =>
+      _col('absences').doc(id).update({'justificationParent': FieldValue.delete()});
 
   // ---------------- Rappels d'impayés ----------------
   /// Date du dernier rappel envoyé à chaque élève.

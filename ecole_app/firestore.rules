@@ -135,9 +135,22 @@ service cloud.firestore {
         allow read: if isStaff(ecoleId);
         allow create, update: if teaches(ecoleId, request.resource.data.classeId);
       }
+      // Fiches d'absence issues de l'appel.
       match /absences/{id} {
+        function changes() { return request.resource.data.diff(resource.data).affectedKeys(); }
         allow read: if isStaff(ecoleId) || isParentOf(ecoleId, resource.data.eleveId);
-        allow create, update: if teaches(ecoleId, request.resource.data.classeId);
+        allow create: if teaches(ecoleId, request.resource.data.classeId);
+        allow update: if
+          // l'appel : l'enseignant ne touche qu'aux données d'appel
+          (teaches(ecoleId, request.resource.data.classeId)
+            && changes().hasOnly(['eleveId', 'classeId', 'date', 'jour', 'statut']))
+          // la direction et le secrétariat justifient, valident ou refusent
+          || (isGestion(ecoleId)
+            && changes().hasOnly(['justifiee', 'motif', 'note', 'justifiePar', 'dateJustification', 'justificationParent']))
+          // le parent propose une justification pour son enfant, si l'absence n'est pas déjà justifiée
+          || (isParentOf(ecoleId, resource.data.eleveId)
+            && changes().hasOnly(['justificationParent'])
+            && resource.data.get('justifiee', false) == false);
         allow delete: if teaches(ecoleId, resource.data.classeId);
       }
       // Historique des rappels d'impayés. Les envois automatiques sont écrits

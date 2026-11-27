@@ -15,6 +15,7 @@ conçue pour le système scolaire de la **RD Congo** (maternelle, primaire, seco
 | **Notes & bulletins** | Saisie par période et examen, totaux, pourcentages, places, application et conduite, bulletins PDF |
 | **Emplois du temps** | Grille par classe (branche, enseignant, salle), vue par enseignant, conflits bloqués, volume horaire, impression PDF |
 | **Absences & remplacements** | Absences d'enseignants, cours touchés calculés, remplaçants libres proposés, étude ou annulation, bilan par enseignant |
+| **Suivi des absences** | Alerte immédiate au parent (SMS / WhatsApp), justifications (école ou parent), élèves à suivre, bilan Excel |
 | **Présences** | Appel quotidien (présent / retard / absent), historique par élève |
 | **Enseignants** | Fiches, classes confiées, création de compte |
 | **Espace parents** | Notes, absences et paiements de leurs enfants |
@@ -75,6 +76,24 @@ approuvés et renseignez `TWILIO_WHATSAPP_REMPLACEMENT_SID` et `TWILIO_WHATSAPP_
 
 Supprimer une absence supprime aussi ses remplacements. Si l'emploi du temps change après la déclaration,
 supprimez puis redéclarez l'absence pour recalculer les cours touchés.
+
+## Absences des élèves (école buissonnière)
+
+1. **Alerte immédiate au parent** : Paramètres → « Prévenir le parent dès que son enfant est noté absent » (SMS ou
+   WhatsApp). Dès l'enregistrement de l'appel, la Cloud Function `alerterParentAbsence` envoie au parent :
+   « Bonjour M. Kabeya, KABEYA Jean (5e année A) est noté(e) absent(e) le lundi 30/11. Merci de contacter l'école
+   ou de justifier l'absence. » Le résultat (prévenu, échec, pas de numéro) s'affiche sur l'écran d'appel.
+   Les retards ne déclenchent pas d'alerte. Sans Twilio : bouton d'envoi sur l'écran d'appel (SMS / WhatsApp du téléphone).
+2. **Justification** : la direction ou le secrétariat justifie une absence (motif, remarque) depuis la fiche de
+   l'élève. Le parent peut proposer une justification depuis son espace ; l'école l'accepte ou la refuse
+   (Suivi des absences → Justificatifs). Refaire l'appel n'efface pas une justification.
+3. **Élèves à suivre** : au-delà d'un seuil (3 par défaut, réglable) d'absences **non justifiées** sur 30 jours,
+   l'élève apparaît dans Suivi des absences → Élèves à suivre, avec le contact du parent, et au tableau de bord.
+4. **Bilan** : par mois ou sur l'année, par classe ; export Excel (par élève, par classe, détail).
+   Le bulletin indique « Absences : X (dont Y non justifiées) · Retards : Z ».
+
+Modèle WhatsApp facultatif : `TWILIO_WHATSAPP_ABSENCE_SID` (variables `{{1}}` parent, `{{2}}` élève,
+`{{3}}` classe, `{{4}}` date, `{{5}}` école).
 
 ## Exports Excel
 

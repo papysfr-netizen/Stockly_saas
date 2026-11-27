@@ -6,7 +6,12 @@ import '../../models/classe.dart';
 import '../../models/eleve.dart';
 import '../../models/scolarite.dart';
 import '../../providers/providers.dart';
+import '../../core/telephone.dart';
+import '../../models/absence_eleve.dart';
+import '../../services/rappels.dart' show CanalRappel, CanalRappelX, lienRappel;
+import '../../services/suivi_absences.dart';
 import '../../widgets/common.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PresencesScreen extends ConsumerStatefulWidget {
   const PresencesScreen({super.key});
@@ -76,6 +81,11 @@ class _PresencesScreenState extends ConsumerState<PresencesScreen> {
       }
       if (list.isEmpty) return const EmptyState('Aucun élève dans cette classe.');
       final absents = _statuts.values.where((s) => s == StatutPresence.absent).length;
+      // Fiches d'absence déjà enregistrées ce jour (état de l'alerte au parent).
+      final enregistrees = {
+        for (final a in ref.watch(absencesAnneeProvider).valueOrNull ?? const <AbsenceEleve>[])
+          if (a.classeId == classe.id && isoDay(a.date) == isoDay(_date)) a.eleveId: a,
+      };
       final retards = _statuts.values.where((s) => s == StatutPresence.retard).length;
 
       return ListView(padding: const EdgeInsets.symmetric(horizontal: 12), children: [
@@ -89,6 +99,22 @@ class _PresencesScreenState extends ConsumerState<PresencesScreen> {
           Card(
             child: ListTile(
               title: Text(e.nomComplet),
+              subtitle: enregistrees[e.id]?.estAbsence == true
+                  ? Text(enregistrees[e.id]!.justifiee
+                      ? 'Justifiée : ${enregistrees[e.id]!.motif}'
+                      : enregistrees[e.id]!.etatAlerte ?? 'Absence enregistrée')
+                  : null,
+              leading: enregistrees[e.id]?.estAbsence == true
+                  ? PopupMenuButton<CanalRappel>(
+                      tooltip: 'Prévenir le parent',
+                      icon: const Icon(Icons.send_to_mobile_outlined),
+                      onSelected: (canal) => _prevenirParent(e, classe, canal),
+                      itemBuilder: (_) => [
+                        for (final canal in CanalRappel.values)
+                          PopupMenuItem(value: canal, child: Text('Prévenir le parent par ${canal.label}')),
+                      ],
+                    )
+                  : null,
               trailing: SegmentedButton<StatutPresence>(
                 showSelectedIcon: false,
                 segments: const [
@@ -127,6 +153,22 @@ class _PresencesScreenState extends ConsumerState<PresencesScreen> {
         const SizedBox(height: 24),
       ]);
     });
+  }
+
+  /// Ouvre SMS ou WhatsApp avec le message d'absence prérempli pour le parent.
+  Future<void> _prevenirParent(Eleve e, Classe classe, CanalRappel canal) async {
+    final ecole = await ref.read(ecoleProvider.future);
+    if (!mounted) return;
+    final tel = normaliserTelephone(e.parentTelephone, indicatif: ecole.indicatif);
+    if (tel == null) {
+      showMessage(context, 'Pas de numéro valide pour le parent de ${e.nomComplet}.', erreur: true);
+      return;
+    }
+    final message = messageAbsenceParent(
+        parent: e.parentNom, eleve: e.nomComplet, classe: classe.nom, date: _date, ecole: ecole.nom);
+    if (!await launchUrl(lienRappel(canal, tel, message), mode: LaunchMode.externalApplication) && mounted) {
+      showMessage(context, "Impossible d'ouvrir ${canal.label} sur cet appareil.", erreur: true);
+    }
   }
 }
 

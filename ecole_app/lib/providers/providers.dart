@@ -8,6 +8,7 @@ import '../core/telephone.dart';
 import '../data/auth_repository.dart';
 import '../data/rappel_repository.dart';
 import '../data/school_repository.dart';
+import '../models/absence_eleve.dart';
 import '../models/app_user.dart';
 import '../models/classe.dart';
 import '../models/ecole.dart';
@@ -75,8 +76,15 @@ final comportementsEleveProvider = StreamProvider.family<List<Comportement>, Str
 final systemeProvider = Provider<SystemeEvaluation>(
     (ref) => ref.watch(ecoleProvider).valueOrNull?.systeme ?? SystemeEvaluation.rdc);
 
-final absencesEleveProvider = StreamProvider.family(
-    (ref, String eleveId) => ref.watch(schoolRepoProvider).absencesEleve(eleveId));
+final absencesEleveProvider = StreamProvider.family<List<AbsenceEleve>, String>(
+    (ref, eleveId) => ref.watch(schoolRepoProvider).absencesEleve(eleveId));
+
+/// Absences de l'année scolaire en cours (depuis le 1er septembre).
+final absencesAnneeProvider = StreamProvider<List<AbsenceEleve>>((ref) {
+  final now = ref.watch(horlogeProvider)();
+  final rentree = DateTime(now.month >= 9 ? now.year : now.year - 1, 9, 1);
+  return ref.watch(schoolRepoProvider).absencesDepuis(rentree);
+});
 
 final enseignantsProvider =
     StreamProvider<List<Enseignant>>((ref) => ref.watch(schoolRepoProvider).enseignants());

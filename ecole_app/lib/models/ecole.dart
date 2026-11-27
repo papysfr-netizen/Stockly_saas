@@ -26,6 +26,12 @@ class Ecole {
   /// Prévenir automatiquement les remplaçants : 'aucune', 'sms' ou 'whatsapp'.
   final String notificationRemplacement;
 
+  /// Alerter le parent dès qu'un élève est noté absent : 'aucune', 'sms' ou 'whatsapp'.
+  final String alerteAbsence;
+
+  /// Nombre d'absences non justifiées sur 30 jours à partir duquel un élève est « à suivre ».
+  final int seuilAbsences;
+
   const Ecole({
     required this.id,
     required this.nom,
@@ -39,6 +45,8 @@ class Ecole {
     this.plagesHoraires = plagesParDefaut,
     this.samedi = false,
     this.notificationRemplacement = 'aucune',
+    this.alerteAbsence = 'aucune',
+    this.seuilAbsences = 3,
   });
 
   /// Jours de cours : 1 = lundi … 5 ou 6.
@@ -59,6 +67,8 @@ class Ecole {
       plagesHoraires: m['plagesHoraires'] == null ? plagesParDefaut : List<String>.from(m['plagesHoraires']),
       samedi: m['samedi'] ?? false,
       notificationRemplacement: m['notificationRemplacement'] ?? 'aucune',
+      alerteAbsence: m['alerteAbsence'] ?? 'aucune',
+      seuilAbsences: (m['seuilAbsences'] as num?)?.toInt() ?? 3,
     );
   }
 
@@ -74,9 +84,11 @@ class Ecole {
         'plagesHoraires': plagesHoraires,
         'samedi': samedi,
         'notificationRemplacement': notificationRemplacement,
+        'alerteAbsence': alerteAbsence,
+        'seuilAbsences': seuilAbsences,
       };
 
-  Ecole copyWith({String? nom, String? adresse, String? telephone, String? devise, String? anneeScolaire, SystemeEvaluation? systeme, String? indicatif, String? modeleRappel, List<String>? plagesHoraires, bool? samedi, String? notificationRemplacement}) =>
+  Ecole copyWith({String? nom, String? adresse, String? telephone, String? devise, String? anneeScolaire, SystemeEvaluation? systeme, String? indicatif, String? modeleRappel, List<String>? plagesHoraires, bool? samedi, String? notificationRemplacement, String? alerteAbsence, int? seuilAbsences}) =>
       Ecole(
         id: id,
         nom: nom ?? this.nom,
@@ -90,5 +102,7 @@ class Ecole {
         plagesHoraires: plagesHoraires ?? this.plagesHoraires,
         samedi: samedi ?? this.samedi,
         notificationRemplacement: notificationRemplacement ?? this.notificationRemplacement,
+        alerteAbsence: alerteAbsence ?? this.alerteAbsence,
+        seuilAbsences: seuilAbsences ?? this.seuilAbsences,
       );
 }

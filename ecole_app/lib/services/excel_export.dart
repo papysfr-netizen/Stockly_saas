@@ -1,11 +1,13 @@
 import 'package:excel/excel.dart';
 
 import '../core/evaluation.dart';
+import '../models/absence_eleve.dart';
 import '../models/classe.dart';
 import '../models/ecole.dart';
 import '../models/eleve.dart';
 import '../models/scolarite.dart';
 import 'calculs.dart';
+import 'suivi_absences.dart';
 
 /// Construction des classeurs Excel (.xlsx). Les nombres sont de vraies
 /// valeurs numériques : on peut trier, filtrer et calculer dans Excel.
@@ -330,4 +332,95 @@ List<int> exporterFinances({
       _n(paiements.fold<double>(0, (s, p) => s + p.montant))], gras: true);
 
   return _encoder(x, 'Impayés');
+}
+
+// ===================================================================
+// Absences : par élève, par classe, détail
+// ===================================================================
+List<int> exporterAbsences({
+  required Ecole ecole,
+  required List<Classe> classes,
+  required List<Eleve> eleves,
+  required List<AbsenceEleve> absences,
+  required String periode, // ex. « novembre 2026 » ou « année 2026-2027 »
+}) {
+  final x = _classeur();
+  final classeParId = {for (final c in classes) c.id: c};
+  final eleveParId = {for (final e in eleves) e.id: e};
+  final parEleve = <String, List<AbsenceEleve>>{};
+  for (final a in absences) {
+    parEleve.putIfAbsent(a.eleveId, () => []).add(a);
+  }
+  String jj(DateTime d) => '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+
+  // ---- Par élève (tous les élèves, même sans absence)
+  final f = _Feuille(x['Par élève']);
+  f.titre('Absences — ${ecole.nom} — $periode');
+  f.vide();
+  f.entete(['Classe', 'Matricule', 'Élève', 'Absences', 'Dont non justifiées', 'Retards', 'Dernière absence', 'Parent', 'Téléphone'],
+      largeurs: [16, 16, 28, 11, 18, 10, 16, 22, 16]);
+  final tries = [...eleves]..sort((a, b) {
+      final c = (classeParId[a.classeId]?.nom ?? '').compareTo(classeParId[b.classeId]?.nom ?? '');
+      return c != 0 ? c : a.nomComplet.compareTo(b.nomComplet);
+    });
+  for (final e in tries) {
+    final liste = parEleve[e.id] ?? const <AbsenceEleve>[];
+    final b = bilan(liste);
+    final dates = liste.where((a) => a.estAbsence).map((a) => a.date).toList()..sort();
+    f.ligne([
+      _t(classeParId[e.classeId]?.nom ?? ''),
+      _t(e.matricule),
+      _t(e.nomComplet),
+      IntCellValue(b.absences),
+      IntCellValue(b.nonJustifiees),
+      IntCellValue(b.retards),
+      dates.isEmpty ? null : DateCellValue.fromDateTime(dates.last),
+      _t(e.parentNom),
+      _t(e.parentTelephone),
+    ]);
+  }
+
+  // ---- Par classe
+  final g = _Feuille(x['Par classe']);
+  g.titre('Absences par classe — $periode');
+  g.vide();
+  g.entete(['Classe', 'Effectif', 'Absences', 'Dont non justifiées', 'Retards', 'Élèves jamais absents'],
+      largeurs: [20, 10, 11, 18, 10, 20]);
+  for (final c in [...classes]..sort((a, b) => a.nom.compareTo(b.nom))) {
+    final dans = eleves.where((e) => e.classeId == c.id).toList();
+    final b = bilan(dans.expand((e) => parEleve[e.id] ?? const <AbsenceEleve>[]));
+    g.ligne([
+      _t(c.nom),
+      IntCellValue(dans.length),
+      IntCellValue(b.absences),
+      IntCellValue(b.nonJustifiees),
+      IntCellValue(b.retards),
+      IntCellValue(dans.where((e) => (parEleve[e.id] ?? const <AbsenceEleve>[]).every((a) => !a.estAbsence)).length),
+    ]);
+  }
+  final total = bilan(absences);
+  g.vide();
+  g.ligne([_t('TOTAL'), IntCellValue(eleves.length), IntCellValue(total.absences), IntCellValue(total.nonJustifiees),
+      IntCellValue(total.retards)], gras: true);
+
+  // ---- Détail
+  final h = _Feuille(x['Détail']);
+  h.titre('Détail des absences et retards — $periode');
+  h.vide();
+  h.entete(['Date', 'Classe', 'Matricule', 'Élève', 'Type', 'Justifiée', 'Motif', 'Remarque'],
+      largeurs: [12, 16, 16, 28, 10, 10, 22, 30]);
+  for (final a in [...absences]..sort((a, b) => b.date.compareTo(a.date))) {
+    final e = eleveParId[a.eleveId];
+    h.ligne([
+      _t(jj(a.date)),
+      _t(classeParId[a.classeId]?.nom ?? ''),
+      _t(e?.matricule ?? ''),
+      _t(e?.nomComplet ?? 'Élève retiré'),
+      _t(a.statut.label),
+      _t(a.estAbsence ? (a.justifiee ? 'Oui' : 'Non') : ''),
+      _t(a.motif),
+      _t(a.note),
+    ]);
+  }
+  return _encoder(x, 'Par élève');
 }

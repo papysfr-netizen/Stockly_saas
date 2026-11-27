@@ -55,6 +55,8 @@ Future<void> remplirEcoleDemo(FirebaseFirestore db, {DateTime? maintenant}) asyn
     'plagesHoraires': plagesParDefaut,
     'samedi': false,
     'notificationRemplacement': 'sms',
+    'alerteAbsence': 'sms',
+    'seuilAbsences': 3,
     'proprietaire': 'u-direction',
   });
   for (final u in utilisateursDemo.values) {
@@ -235,6 +237,37 @@ Future<void> remplirEcoleDemo(FirebaseFirestore db, {DateTime? maintenant}) asyn
       'Marie KASONGO',
     );
   }
+
+  // ---- Historique d'absences d'élèves (30 derniers jours de cours)
+  final joursPasses = <DateTime>[];
+  for (var d = DateTime(now.year, now.month, now.day).subtract(const Duration(days: 1)); joursPasses.length < 20;
+      d = d.subtract(const Duration(days: 1))) {
+    if (d.weekday <= 5) joursPasses.add(d);
+  }
+  Future<void> absenceEleve(String eleve, String classe, int ilYA,
+      {bool justifiee = false, String motif = '', Map<String, dynamic>? parent, String statut = 'absent'}) async {
+    final d = joursPasses[ilYA];
+    await e.collection('absences').doc('${FeuillePresence.docId(classe, d)}_$eleve').set({
+      'eleveId': eleve, 'classeId': classe, 'date': Timestamp.fromDate(d), 'jour': isoDay(d), 'statut': statut,
+      if (justifiee) ...{'justifiee': true, 'motif': motif, 'justifiePar': 'M. Kalala'},
+      if (parent != null) 'justificationParent': parent,
+      if (statut == 'absent') 'alerte': {'statut': 'envoye', 'canal': 'sms'},
+    });
+  }
+  // Deux élèves à suivre (absences répétées non justifiées).
+  for (final j in [1, 4, 6, 11]) {
+    await absenceEleve('p6A-3', 'p6A', j);
+  }
+  for (final j in [2, 3, 9]) {
+    await absenceEleve('h2S-4', 'h2S', j);
+  }
+  // Absences justifiées, retards, justification de parent en attente.
+  await absenceEleve('p5A-2', 'p5A', 5, justifiee: true, motif: 'Maladie');
+  await absenceEleve('p5A-2', 'p5A', 6, justifiee: true, motif: 'Maladie');
+  await absenceEleve('p6A-1', 'p6A', 2, statut: 'retard');
+  await absenceEleve('p5A-6', 'p5A', 3, statut: 'retard');
+  await absenceEleve('h2S-2', 'h2S', 2, parent: {'motif': 'Rendez-vous médical', 'message': 'Consultation à la clinique Ngaliema.'});
+  await absenceEleve('p5A-1', 'p5A', 7); // le parent de démo peut la justifier lui-même
 
   // ---- Absence d'un enseignant le prochain jour de cours, avec remplacements
   var jourAbsence = DateTime(now.year, now.month, now.day);

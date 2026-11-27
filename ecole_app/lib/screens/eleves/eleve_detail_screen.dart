@@ -3,11 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/evaluation.dart';
 import '../../core/format.dart';
+import '../../models/absence_eleve.dart';
+import '../../models/app_user.dart';
 import '../../models/classe.dart';
 import '../../models/eleve.dart';
 import '../../models/scolarite.dart';
 import '../../providers/providers.dart';
 import '../../services/calculs.dart';
+import '../../services/suivi_absences.dart';
 import '../../widgets/common.dart';
 import '../paiements/encaisser_dialog.dart';
 import '../emploi_du_temps/emploi_du_temps_screen.dart';
@@ -240,24 +243,129 @@ class _AbsencesTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return AsyncView(ref.watch(absencesEleveProvider(eleve.id)), (list) {
+    final me = ref.watch(meProvider);
+    final gestion = me.canManageEleves;
+    final parent = me.role == Role.parent;
+    return AsyncView(ref.watch(absencesEleveProvider(eleve.id)), (List<AbsenceEleve> list) {
       if (list.isEmpty) return const EmptyState('Aucune absence ni retard.', icon: Icons.check_circle_outline);
-      final absences = list.where((a) => a.statut == StatutPresence.absent).length;
+      final b = bilan(list);
       return ListView(padding: const EdgeInsets.all(12), children: [
-        Text('$absences absence(s), ${list.length - absences} retard(s)',
-            style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          '${b.absences} absence(s) dont ${b.nonJustifiees} non justifiée(s) · ${b.retards} retard(s)',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         const SizedBox(height: 8),
         for (final a in list)
           Card(
-            child: ListTile(
-              leading: Icon(a.statut == StatutPresence.absent ? Icons.cancel : Icons.schedule,
-                  color: a.statut == StatutPresence.absent ? Colors.red : Colors.orange),
-              title: Text(a.statut.label),
-              subtitle: Text(formatDate(a.date)),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                ListTile(
+                  leading: Icon(a.estAbsence ? Icons.cancel : Icons.schedule,
+                      color: !a.estAbsence
+                          ? Colors.orange
+                          : a.justifiee
+                              ? Colors.blueGrey
+                              : Colors.red),
+                  title: Text('${a.statut.label} · ${formatDate(a.date)}'),
+                  subtitle: Text([
+                    if (a.justifiee) 'Justifiée : ${a.motif}${a.note.isEmpty ? '' : ' (${a.note})'}',
+                    if (!a.justifiee && a.estAbsence && a.justificationParent == null) 'Non justifiée',
+                    if (a.enAttente)
+                      'Justification du parent en attente : ${a.justificationParent!.motif}'
+                          '${a.justificationParent!.message.isEmpty ? '' : ' — « ${a.justificationParent!.message} »'}',
+                    if (gestion && a.etatAlerte != null) a.etatAlerte!,
+                  ].join('\n')),
+                ),
+                if (a.estAbsence && (gestion || (parent && !a.justifiee)))
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                    child: Wrap(spacing: 8, runSpacing: 4, alignment: WrapAlignment.end, children: [
+                      if (gestion && a.enAttente) ...[
+                        FilledButton.tonal(
+                          onPressed: () => run(
+                            context,
+                            () => ref.read(schoolRepoProvider).justifierAbsence(a.id,
+                                motif: a.justificationParent!.motif, note: a.justificationParent!.message, par: me.nom),
+                            succes: 'Justification acceptée',
+                          ),
+                          child: const Text('Accepter'),
+                        ),
+                        TextButton(
+                          onPressed: () => run(context, () => ref.read(schoolRepoProvider).refuserJustification(a.id),
+                              succes: 'Justification refusée'),
+                          child: const Text('Refuser'),
+                        ),
+                      ],
+                      if (gestion && !a.justifiee && !a.enAttente)
+                        OutlinedButton(
+                          onPressed: () => _justifier(context, ref, a, parParent: false),
+                          child: const Text('Justifier'),
+                        ),
+                      if (gestion && a.justifiee)
+                        TextButton(
+                          onPressed: () => run(context, () => ref.read(schoolRepoProvider).annulerJustification(a.id)),
+                          child: const Text('Annuler la justification'),
+                        ),
+                      if (parent && !a.justifiee)
+                        OutlinedButton(
+                          onPressed: () => _justifier(context, ref, a, parParent: true),
+                          child: Text(a.enAttente ? 'Modifier ma justification' : 'Justifier cette absence'),
+                        ),
+                    ]),
+                  ),
+              ]),
             ),
           ),
       ]);
     });
+  }
+
+  Future<void> _justifier(BuildContext context, WidgetRef ref, AbsenceEleve a, {required bool parParent}) async {
+    var motif = a.justificationParent?.motif ?? motifsJustification.first;
+    if (!motifsJustification.contains(motif)) motif = 'Autre';
+    final note = TextEditingController(text: a.justificationParent?.message);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => StatefulBuilder(
+        builder: (c, setState) => AlertDialog(
+          title: Text('Absence du ${formatDate(a.date)}'),
+          content: Column(mainAxisSize: MainAxisSize.min, children: [
+            DropdownButtonFormField<String>(
+              value: motif,
+              decoration: const InputDecoration(labelText: 'Motif'),
+              items: [for (final m in motifsJustification) DropdownMenuItem(value: m, child: Text(m))],
+              onChanged: (v) => setState(() => motif = v!),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: note,
+              maxLines: 3,
+              decoration: InputDecoration(
+                  labelText: parParent ? 'Message (facultatif)' : 'Remarque (facultatif)'),
+            ),
+            if (parParent) ...[
+              const SizedBox(height: 8),
+              const Text("L'école validera votre justification.", style: TextStyle(fontSize: 12)),
+            ],
+          ]),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Annuler')),
+            FilledButton(
+                onPressed: () => Navigator.pop(c, true), child: Text(parParent ? 'Envoyer' : 'Justifier')),
+          ],
+        ),
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    final repo = ref.read(schoolRepoProvider);
+    await run(
+      context,
+      () => parParent
+          ? repo.proposerJustification(a.id, motif: motif, message: note.text.trim())
+          : repo.justifierAbsence(a.id, motif: motif, note: note.text.trim(), par: ref.read(meProvider).nom),
+      succes: parParent ? "Justification envoyée à l'école" : 'Absence justifiée',
+    );
   }
 }
 

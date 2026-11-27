@@ -6,6 +6,7 @@ import '../../models/remplacement.dart';
 import '../../models/scolarite.dart';
 import '../../providers/providers.dart';
 import '../../services/calculs.dart';
+import '../../services/suivi_absences.dart';
 import '../../widgets/common.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -21,6 +22,11 @@ class DashboardScreen extends ConsumerWidget {
     final remplacementsJour = ref.watch(remplacementsDuJourProvider(isoDay(DateTime.now()))).valueOrNull ?? const [];
     final absentsJour = remplacementsJour.map((r) => r.enseignantAbsentId).toSet().length;
     final aPourvoir = remplacementsJour.where((r) => r.statut == StatutRemplacement.aPourvoir).length;
+    final absencesAnnee = ref.watch(absencesAnneeProvider).valueOrNull ?? const [];
+    final aSuivre = elevesASuivre(absencesAnnee,
+            seuil: ref.watch(ecoleProvider).valueOrNull?.seuilAbsences ?? 3, maintenant: DateTime.now())
+        .length;
+    final justificatifs = absencesAnnee.where((a) => a.enAttente).length;
     final devise = ref.watch(ecoleProvider).valueOrNull?.devise ?? 'USD';
 
     final fraisParClasse = {for (final c in classes) c.id: c.fraisScolarite};
@@ -31,9 +37,7 @@ class DashboardScreen extends ConsumerWidget {
     final totalEncaisse = paiements.fold<double>(0, (s, p) => s + p.montant);
     final totalAttendu = eleves.fold<double>(0, (s, e) => s + (fraisParClasse[e.classeId] ?? 0));
     final impayes = eleves.fold<double>(
-        0,
-        (s, e) =>
-            s + resteAPayer(fraisParClasse[e.classeId] ?? 0, paiementsParEleve[e.id] ?? const []));
+        0, (s, e) => s + resteAPayer(fraisParClasse[e.classeId] ?? 0, paiementsParEleve[e.id] ?? const []));
 
     final now = DateTime.now();
     final moisEncaisse = paiements
@@ -76,6 +80,13 @@ class DashboardScreen extends ConsumerWidget {
               valeur: absentsJour == 0 ? 'Aucun' : '$absentsJour · $aPourvoir cours à pourvoir',
               icon: Icons.swap_horiz,
               couleur: aPourvoir > 0 ? Colors.red : Colors.blueGrey),
+          StatCard(
+              titre: 'Élèves à suivre (absences répétées)',
+              valeur: aSuivre == 0 && justificatifs == 0
+                  ? 'Aucun'
+                  : '$aSuivre${justificatifs > 0 ? ' · $justificatifs justificatif(s) à valider' : ''}',
+              icon: Icons.person_search,
+              couleur: aSuivre > 0 ? Colors.deepOrange : Colors.blueGrey),
         ];
         return GridView.count(
           crossAxisCount: cols,

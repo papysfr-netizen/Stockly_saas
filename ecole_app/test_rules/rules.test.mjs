@@ -20,6 +20,9 @@ await env.withSecurityRulesDisabled(async (c) => {
     await setDoc(doc(db, `ecoles/${E}/paiements/p${id}`), { eleveId: id, classeId: c, montant: 1000 });
     await setDoc(doc(db, `ecoles/${E}/absences/a${id}`), { eleveId: id, classeId: c, statut: 'absent' });
   }
+  for (const [id, el, cl] of [['a-e1', 'e1', 'c1'], ['a-e2', 'e2', 'c2'], ['a-e3', 'e3', 'c2']]) {
+    await setDoc(doc(db, `ecoles/${E}/absences/${id}`), { eleveId: el, classeId: cl, statut: 'absent', jour: '2026-11-30' });
+  }
   await setDoc(doc(db, 'invitations/nouveau@x.fr'), { identifiant: 'nouveau@x.fr', role: 'parent', ecoleId: E, eleveIds: ['e2'] });
   await setDoc(doc(db, 'invitations/+2250707123456'), { identifiant: '+2250707123456', role: 'enseignant', ecoleId: E, classeIds: ['c1'], eleveIds: [] });
 });
@@ -117,6 +120,17 @@ await t('enseignant : lit les emplois du temps', assertSucceeds(getDocs(collecti
 await t('parent : lit les emplois du temps', assertSucceeds(getDocs(collection(parent, `ecoles/${E}/creneaux`))));
 await t('enseignant : ne modifie pas un créneau', assertFails(setDoc(doc(prof, `ecoles/${E}/creneaux/c1_1_0730-0820`), { ...creneau, salle: 'X' })));
 await t('secrétariat : ne modifie pas un créneau', assertFails(deleteDoc(doc(secr, `ecoles/${E}/creneaux/c1_1_0730-0820`))));
+
+// Absences d'élèves : justification
+await t('parent : propose une justification pour son enfant', assertSucceeds(updateDoc(doc(parent, `ecoles/${E}/absences/a-e1`), { justificationParent: { motif: 'Maladie', message: 'Fièvre' } })));
+await t('parent : ne se justifie pas lui-même', assertFails(updateDoc(doc(parent, `ecoles/${E}/absences/a-e1`), { justifiee: true })));
+await t("parent : rien sur l'absence d'un autre élève", assertFails(updateDoc(doc(parent, `ecoles/${E}/absences/a-e3`), { justificationParent: { motif: 'Maladie' } })));
+await t('enseignant : ne justifie pas', assertFails(updateDoc(doc(prof, `ecoles/${E}/absences/a-e1`), { justifiee: true, motif: 'Maladie' })));
+await t("enseignant : refait l'appel (retard)", assertSucceeds(updateDoc(doc(prof, `ecoles/${E}/absences/a-e1`), { statut: 'retard' })));
+await t('secrétariat : justifie une absence', assertSucceeds(updateDoc(doc(secr, `ecoles/${E}/absences/a-e1`), { justifiee: true, motif: 'Maladie', justifiePar: 'M. Kalala' })));
+await t("secrétariat : ne change pas le type d'absence", assertFails(updateDoc(doc(secr, `ecoles/${E}/absences/a-e2`), { statut: 'retard' })));
+await t('parent : plus de proposition une fois justifiée', assertFails(updateDoc(doc(parent, `ecoles/${E}/absences/a-e1`), { justificationParent: { motif: 'Autre' } })));
+await t('parent : lit les absences de son enfant', assertSucceeds(getDocs(query(collection(parent, `ecoles/${E}/absences`), where('eleveId', '==', 'e1')))));
 
 // Absences d'enseignants et remplacements
 const remp = { absenceId: 'abs1', date: '2026-11-30', creneauId: 'c1_1_0730-0820', classeId: 'c1', jour: 1, plage: '07:30-08:20',

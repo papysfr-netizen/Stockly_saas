@@ -14,6 +14,7 @@ import '../models/emploi_du_temps.dart';
 import '../models/scolarite.dart';
 import 'calculs.dart';
 import 'emploi_du_temps.dart' show nomsJours;
+import 'suivi_absences.dart' show BilanAbsences;
 
 class PdfService {
   /// Police Roboto embarquée : accents, tirets et symboles s'affichent quel que
@@ -85,7 +86,7 @@ class PdfService {
     required List<String> eleveIds,
     required Evaluations ev,
     required List<Comportement> comportements,
-    required int absences,
+    required BilanAbsences absences,
   }) async {
     final systeme = ecole.systeme;
     final periodes = periodesPour(systeme, classe.cycle);
@@ -223,7 +224,11 @@ class PdfService {
           pw.SizedBox(height: 8),
           if (maternelle)
             pw.Text('Légende : ${cotesMaternelle.map((c) => '${c.$1} = ${c.$2}').join(' · ')}', style: petit),
-          pw.Text('Absences et retards : $absences', style: petit),
+          pw.Text(
+            'Absences : ${absences.absences} (dont ${absences.nonJustifiees} non justifiée${absences.nonJustifiees > 1 ? 's' : ''})'
+            ' · Retards : ${absences.retards}',
+            style: petit,
+          ),
           if (!maternelle && anneeComplete && annuel != null) ...[
             pw.Text(
               'Décision proposée : ${decisionProposee(systeme, resultats[annuel.titre]!.scores[eleve.id], echecs.length)}',

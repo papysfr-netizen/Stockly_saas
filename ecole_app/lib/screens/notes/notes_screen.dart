@@ -10,6 +10,7 @@ import '../../services/calculs.dart';
 import '../../services/excel_export.dart';
 import '../../services/fichier.dart';
 import '../../services/pdf_service.dart';
+import '../../services/suivi_absences.dart';
 import '../../widgets/common.dart';
 
 class NotesScreen extends ConsumerStatefulWidget {
@@ -320,7 +321,7 @@ class _ResultatsTabState extends ConsumerState<_ResultatsTab> {
         eleveIds: [for (final x in eleves) x.id],
         ev: ev,
         comportements: comps.where((c) => c.eleveId == e.id).toList(),
-        absences: absences.length,
+        absences: bilan(absences),
       );
       await PdfService.afficher(bytes, 'bulletin_${e.matricule}.pdf');
     }

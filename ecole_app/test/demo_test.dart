@@ -1,6 +1,7 @@
 import 'package:ecole_app/data/school_repository.dart';
 import 'package:ecole_app/demo/donnees_demo.dart';
 import 'package:ecole_app/models/remplacement.dart';
+import 'package:ecole_app/services/suivi_absences.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -20,5 +21,9 @@ void main() {
     expect(remp, isNotEmpty);
     expect(remp.where((r) => r.statut == StatutRemplacement.remplace), hasLength(1));
     expect(remp.where((r) => r.statut == StatutRemplacement.aPourvoir), isNotEmpty);
+    final absences = await repo.absencesDepuis(DateTime(2026, 9, 1)).first;
+    final suivre = elevesASuivre(absences, seuil: 3, maintenant: DateTime(2026, 11, 30));
+    expect(suivre.map((x) => x.eleveId), ['p6A-3', 'h2S-4']);
+    expect(absences.where((a) => a.enAttente), hasLength(1));
   });
 }

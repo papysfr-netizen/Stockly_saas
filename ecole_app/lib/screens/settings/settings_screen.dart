@@ -59,6 +59,8 @@ class _EcoleCardState extends ConsumerState<_EcoleCard> {
   late final _plages = TextEditingController(text: widget.ecole.plagesHoraires.join('\n'));
   late bool _samedi = widget.ecole.samedi;
   late String _notifRemplacement = widget.ecole.notificationRemplacement;
+  late String _alerteAbsence = widget.ecole.alerteAbsence;
+  late final _seuil = TextEditingController(text: '${widget.ecole.seuilAbsences}');
 
   @override
   Widget build(BuildContext context) {
@@ -137,6 +139,32 @@ class _EcoleCardState extends ConsumerState<_EcoleCard> {
             onChanged: (v) => setState(() => _notifRemplacement = v!),
           ),
           const SizedBox(height: 24),
+          Text('Absences des élèves', style: Theme.of(context).textTheme.titleSmall),
+          gap,
+          DropdownButtonFormField<String>(
+            value: _alerteAbsence,
+            isExpanded: true,
+            decoration: const InputDecoration(
+              labelText: 'Prévenir le parent dès que son enfant est noté absent',
+              helperText: "Envoi automatique à l'appel (Cloud Functions et Twilio requis).",
+              helperMaxLines: 2,
+            ),
+            items: const [
+              DropdownMenuItem(value: 'aucune', child: Text('Non')),
+              DropdownMenuItem(value: 'sms', child: Text('Par SMS')),
+              DropdownMenuItem(value: 'whatsapp', child: Text('Par WhatsApp')),
+            ],
+            onChanged: (v) => setState(() => _alerteAbsence = v!),
+          ),
+          gap,
+          TextField(
+            controller: _seuil,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: 'Élève « à suivre » à partir de… absences non justifiées sur 30 jours',
+            ),
+          ),
+          const SizedBox(height: 24),
           Text("Message de rappel d'impayé", style: Theme.of(context).textTheme.titleSmall),
           gap,
           TextField(
@@ -172,6 +200,8 @@ class _EcoleCardState extends ConsumerState<_EcoleCard> {
                         plagesHoraires: grille.plages,
                         samedi: _samedi,
                         notificationRemplacement: _notifRemplacement,
+                        alerteAbsence: _alerteAbsence,
+                        seuilAbsences: (int.tryParse(_seuil.text.trim()) ?? 3).clamp(1, 60),
                       )),
                   succes: 'Enregistré',
                 );

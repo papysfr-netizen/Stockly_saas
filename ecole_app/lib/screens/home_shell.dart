@@ -14,6 +14,7 @@ import 'paiements/paiements_screen.dart';
 import 'parents/parent_screen.dart';
 import 'presences/presences_screen.dart';
 import 'settings/settings_screen.dart';
+import 'suivi/suivi_absences_screen.dart';
 
 class _Section {
   const _Section(this.titre, this.icon, this.page);
@@ -36,6 +37,8 @@ List<_Section> _sectionsPour(AppUser u) => [
       if (u.canManageEleves)
         const _Section('Absences & remplacements', Icons.swap_horiz, RemplacementsScreen()),
       if (u.canFairePresences) const _Section('Présences', Icons.fact_check_outlined, PresencesScreen()),
+      if (u.canManageEleves)
+        const _Section('Suivi des absences', Icons.person_search_outlined, SuiviAbsencesScreen()),
       if (u.isAdmin) const _Section('Enseignants', Icons.co_present_outlined, EnseignantsScreen()),
       const _Section('Paramètres', Icons.settings_outlined, SettingsScreen()),
     ];
