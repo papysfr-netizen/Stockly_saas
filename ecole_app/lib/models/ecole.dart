@@ -23,6 +23,9 @@ class Ecole {
   /// Cours le samedi.
   final bool samedi;
 
+  /// Prévenir automatiquement les remplaçants : 'aucune', 'sms' ou 'whatsapp'.
+  final String notificationRemplacement;
+
   const Ecole({
     required this.id,
     required this.nom,
@@ -35,6 +38,7 @@ class Ecole {
     this.modeleRappel = '',
     this.plagesHoraires = plagesParDefaut,
     this.samedi = false,
+    this.notificationRemplacement = 'aucune',
   });
 
   /// Jours de cours : 1 = lundi … 5 ou 6.
@@ -54,6 +58,7 @@ class Ecole {
       modeleRappel: m['modeleRappel'] ?? '',
       plagesHoraires: m['plagesHoraires'] == null ? plagesParDefaut : List<String>.from(m['plagesHoraires']),
       samedi: m['samedi'] ?? false,
+      notificationRemplacement: m['notificationRemplacement'] ?? 'aucune',
     );
   }
 
@@ -68,9 +73,10 @@ class Ecole {
         'modeleRappel': modeleRappel,
         'plagesHoraires': plagesHoraires,
         'samedi': samedi,
+        'notificationRemplacement': notificationRemplacement,
       };
 
-  Ecole copyWith({String? nom, String? adresse, String? telephone, String? devise, String? anneeScolaire, SystemeEvaluation? systeme, String? indicatif, String? modeleRappel, List<String>? plagesHoraires, bool? samedi}) =>
+  Ecole copyWith({String? nom, String? adresse, String? telephone, String? devise, String? anneeScolaire, SystemeEvaluation? systeme, String? indicatif, String? modeleRappel, List<String>? plagesHoraires, bool? samedi, String? notificationRemplacement}) =>
       Ecole(
         id: id,
         nom: nom ?? this.nom,
@@ -83,5 +89,6 @@ class Ecole {
         modeleRappel: modeleRappel ?? this.modeleRappel,
         plagesHoraires: plagesHoraires ?? this.plagesHoraires,
         samedi: samedi ?? this.samedi,
+        notificationRemplacement: notificationRemplacement ?? this.notificationRemplacement,
       );
 }

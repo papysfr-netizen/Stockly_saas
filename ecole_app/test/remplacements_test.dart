@@ -91,4 +91,28 @@ void main() {
     final b = bilanAbsences('kas', const [absence], t, [1, 2, 3, 4, 5]);
     expect(b, (jours: 2, cours: 3, coursNonAssures: 3));
   });
+
+  test('message au remplaçant (identique à la fonction serveur)', () {
+    expect(
+      messageRemplacement(annulation: false, remplacant: 'Paul MBUYI', absent: 'Marie KASONGO', date: '2026-11-30',
+          plage: '07:30-08:20', classe: '5e A', branche: 'Français', ecole: 'CS Les Bâtisseurs'),
+      'Bonjour Paul MBUYI, vous êtes désigné(e) pour remplacer Marie KASONGO le lundi 30/11 de 07:30 à 08:20 en 5e A (Français). Merci. — CS Les Bâtisseurs',
+    );
+    expect(
+      messageRemplacement(annulation: true, remplacant: 'P', absent: 'M', date: '2026-12-05', plage: '07:30-08:20',
+          classe: 'C', branche: 'B', ecole: 'E'),
+      contains('le samedi 05/12 de 07:30 à 08:20 en C (B) est annulé'),
+    );
+  });
+
+  test("statut d'envoi affiché", () {
+    Remplacement r(String remplacant, String statut, {String erreur = ''}) => Remplacement(
+        id: 'x', absenceId: 'a', date: '2026-11-30', creneauId: 'k', classeId: 'c', jour: 1, plage: '07:30-08:20',
+        matiereId: 'm', enseignantAbsentId: 'kas', statut: StatutRemplacement.remplace, remplacantId: remplacant,
+        notification: (statut: statut, canal: 'sms', enseignantId: 'mbu', erreur: erreur));
+    expect(r('mbu', 'envoye').etatNotification, 'SMS envoyé au remplaçant');
+    expect(r('mbu', 'echec', erreur: 'Numéro invalide').etatNotification, "Échec de l'envoi SMS : Numéro invalide");
+    expect(r('mbu', 'sans_telephone').etatNotification, contains('pas de numéro'));
+    expect(r('tsh', 'envoye').etatNotification, isNull); // concerne l'ancien remplaçant
+  });
 }

@@ -126,3 +126,24 @@ List<Candidat> remplacantsDisponibles({
     coursNonAssures: siens.where((r) => r.statut == StatutRemplacement.annule || r.statut == StatutRemplacement.aPourvoir).length,
   );
 }
+
+const _jours = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+
+/// Message envoyé au remplaçant. Même texte que `functions/remplacements.js`.
+String messageRemplacement({
+  required bool annulation,
+  required String remplacant,
+  required String absent,
+  required String date,
+  required String plage,
+  required String classe,
+  required String branche,
+  required String ecole,
+}) {
+  final d = DateTime.parse(date);
+  final quand = 'le ${_jours[d.weekday - 1]} ${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')} '
+      'de ${plage.replaceAll('-', ' à ')}';
+  return annulation
+      ? 'Bonjour $remplacant, le remplacement prévu $quand en $classe ($branche) est annulé. Merci. — $ecole'
+      : 'Bonjour $remplacant, vous êtes désigné(e) pour remplacer $absent $quand en $classe ($branche). Merci. — $ecole';
+}

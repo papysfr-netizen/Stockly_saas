@@ -78,6 +78,29 @@ void main() {
     final doc = await e.collection('remplacements').doc('2026-11-30_k1').get();
     expect(doc.data()?['statut'], 'remplace');
     expect(doc.data()?['remplacantId'], 'mbu');
+
+    // 4. La fonction serveur écrit le résultat de l'envoi : il s'affiche.
+    await e.collection('remplacements').doc('2026-11-30_k1').update({
+      'notification': {'statut': 'envoye', 'canal': 'sms', 'enseignantId': 'mbu'},
+    });
+    await tester.pumpAndSettle();
+    expect(find.textContaining('SMS envoyé au remplaçant'), findsOneWidget);
+
+    // 5. Prévenir manuellement est proposé.
+    await tester.tap(find.byTooltip('Prévenir le remplaçant'));
+    await tester.pumpAndSettle();
+    expect(find.text('Prévenir par SMS (depuis ce téléphone)'), findsOneWidget);
+    expect(find.text('Prévenir par WhatsApp (depuis ce téléphone)'), findsOneWidget);
+    await tester.tapAt(const Offset(5, 5));
+    await tester.pumpAndSettle();
+
+    // 6. Changer d'avis efface le statut d'envoi (il concernait l'ancienne décision).
+    await tester.tap(find.text('07:30-08:20 · 5e A · Français'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Étude surveillée'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('SMS envoyé'), findsNothing);
+    expect((await e.collection('remplacements').doc('2026-11-30_k1').get()).data()!.containsKey('notification'), isFalse);
     expect(tester.takeException(), isNull);
   });
 }

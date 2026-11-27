@@ -132,6 +132,10 @@ await t('enseignant : ne se désigne pas remplaçant', assertFails(updateDoc(doc
 await t('enseignant : voit ses remplacements', assertSucceeds(getDocs(query(collection(prof, `ecoles/${E}/remplacements`), where('remplacantId', '==', 'ens2')))));
 await t('parent : voit les changements de la classe', assertSucceeds(getDocs(query(collection(parent, `ecoles/${E}/remplacements`), where('classeId', '==', 'c1')))));
 await t("parent : pas accès aux absences d'enseignants", assertFails(getDocs(collection(parent, `ecoles/${E}/absencesEnseignants`))));
+await t("secrétariat : lit l'historique des notifications", assertSucceeds(getDocs(collection(secr, `ecoles/${E}/notifications`))));
+await t('secrétariat : ne forge pas de notification', assertFails(setDoc(doc(secr, `ecoles/${E}/notifications/n1`), { statut: 'envoye' })));
+await t('enseignant : pas accès aux notifications', assertFails(getDocs(collection(prof, `ecoles/${E}/notifications`))));
+await t('secrétariat : efface le statut d\'envoi en changeant la décision', assertSucceeds(updateDoc(doc(secr, `ecoles/${E}/remplacements/2026-11-30_c1_1_0730-0820`), { statut: 'etude', remplacantId: null, notification: null })));
 await t('secrétariat : supprime une absence', assertSucceeds(deleteDoc(doc(secr, `ecoles/${E}/absencesEnseignants/abs1`))));
 
 // Direction & isolation entre écoles

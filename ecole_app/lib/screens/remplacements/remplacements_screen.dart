@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/format.dart';
+import '../../core/telephone.dart';
 import '../../models/classe.dart';
 import '../../models/remplacement.dart';
 import '../../models/scolarite.dart';
 import '../../providers/providers.dart';
+import '../../services/rappels.dart' show CanalRappel, CanalRappelX, lienRappel;
 import '../../services/remplacements.dart';
 import '../../widgets/common.dart';
 
@@ -50,7 +53,8 @@ class _JourTabState extends ConsumerState<_JourTab> {
     final classes = {for (final c in ref.watch(toutesClassesProvider).valueOrNull ?? const <Classe>[]) c.id: c.nom};
     final noms = ref.watch(nomsMatieresProvider).valueOrNull ?? const <String, String>{};
     final aVenir = (ref.watch(tousRemplacementsProvider).valueOrNull ?? const <Remplacement>[])
-        .where((r) => r.statut == StatutRemplacement.aPourvoir && r.date.compareTo(isoDay(ref.read(horlogeProvider)())) >= 0)
+        .where((r) =>
+            r.statut == StatutRemplacement.aPourvoir && r.date.compareTo(isoDay(ref.read(horlogeProvider)())) >= 0)
         .toList();
 
     return Column(children: [
@@ -103,10 +107,24 @@ class _JourTabState extends ConsumerState<_JourTab> {
                     ),
                   ),
                   title: Text('${r.plage} · ${classes[r.classeId] ?? '?'} · ${noms[r.matiereId] ?? '?'}'),
-                  subtitle: Text('Absent : ${r.enseignantAbsentNom}\n'
-                      '${r.statut == StatutRemplacement.remplace ? 'Remplacé par ${r.remplacantNom}' : r.statut.label}'),
+                  subtitle: Text([
+                    'Absent : ${r.enseignantAbsentNom}',
+                    r.statut == StatutRemplacement.remplace ? 'Remplacé par ${r.remplacantNom}' : r.statut.label,
+                    if (r.etatNotification != null) r.etatNotification!,
+                  ].join('\n')),
                   isThreeLine: true,
-                  trailing: const Icon(Icons.edit_outlined),
+                  trailing: r.statut == StatutRemplacement.remplace
+                      ? PopupMenuButton<CanalRappel>(
+                          tooltip: 'Prévenir le remplaçant',
+                          icon: const Icon(Icons.send_to_mobile_outlined),
+                          onSelected: (canal) => _prevenir(context, r, canal, noms, classes),
+                          itemBuilder: (_) => [
+                            for (final canal in CanalRappel.values)
+                              PopupMenuItem(
+                                  value: canal, child: Text('Prévenir par ${canal.label} (depuis ce téléphone)')),
+                          ],
+                        )
+                      : const Icon(Icons.edit_outlined),
                   onTap: () => _decider(context, r, list, noms, classes),
                 ),
               ),
@@ -114,6 +132,33 @@ class _JourTabState extends ConsumerState<_JourTab> {
         }),
       ),
     ]);
+  }
+
+  /// Ouvre SMS ou WhatsApp avec le message déjà rédigé pour le remplaçant.
+  Future<void> _prevenir(BuildContext context, Remplacement r, CanalRappel canal, Map<String, String> noms,
+      Map<String, String> classes) async {
+    final enseignants = await ref.read(enseignantsProvider.future);
+    final ecole = await ref.read(ecoleProvider.future);
+    if (!context.mounted) return;
+    final e = enseignants.where((x) => x.id == r.remplacantId).firstOrNull;
+    final tel = e == null ? null : normaliserTelephone(e.telephone, indicatif: ecole.indicatif);
+    if (tel == null) {
+      showMessage(context, "Pas de numéro valide sur la fiche de ${r.remplacantNom}.", erreur: true);
+      return;
+    }
+    final message = messageRemplacement(
+      annulation: false,
+      remplacant: r.remplacantNom,
+      absent: r.enseignantAbsentNom,
+      date: r.date,
+      plage: r.plage,
+      classe: classes[r.classeId] ?? '',
+      branche: noms[r.matiereId] ?? '',
+      ecole: ecole.nom,
+    );
+    if (!await launchUrl(lienRappel(canal, tel, message), mode: LaunchMode.externalApplication) && context.mounted) {
+      showMessage(context, "Impossible d'ouvrir ${canal.label} sur cet appareil.", erreur: true);
+    }
   }
 
   Future<void> _decider(BuildContext context, Remplacement r, List<Remplacement> duJour, Map<String, String> noms,
@@ -144,7 +189,8 @@ class _JourTabState extends ConsumerState<_JourTab> {
             const Divider(),
             ListTile(
               dense: true,
-              title: Text(candidats.isEmpty ? 'Aucun enseignant libre à cette heure' : 'Enseignants libres à cette heure'),
+              title:
+                  Text(candidats.isEmpty ? 'Aucun enseignant libre à cette heure' : 'Enseignants libres à cette heure'),
             ),
             for (final x in candidats)
               ListTile(
@@ -152,7 +198,9 @@ class _JourTabState extends ConsumerState<_JourTab> {
                 title: Text(x.enseignant.nomComplet),
                 subtitle: Text([
                   ...x.raisons,
-                  x.minutesCeJour == 0 ? 'Libre toute la journée' : '${x.minutesCeJour ~/ 60} h ${(x.minutesCeJour % 60).toString().padLeft(2, '0')} de cours ce jour',
+                  x.minutesCeJour == 0
+                      ? 'Libre toute la journée'
+                      : '${x.minutesCeJour ~/ 60} h ${(x.minutesCeJour % 60).toString().padLeft(2, '0')} de cours ce jour',
                 ].join(' · ')),
                 onTap: () => Navigator.pop(c, (StatutRemplacement.remplace, x.enseignant)),
               ),
@@ -377,7 +425,11 @@ class _AbsencesTab extends ConsumerWidget {
             absence,
             (absenceId) => coursTouches(
               absence: AbsenceEnseignant(
-                  id: absenceId, enseignantId: e.id, enseignantNom: e.nomComplet, debut: absence.debut, fin: absence.fin),
+                  id: absenceId,
+                  enseignantId: e.id,
+                  enseignantNom: e.nomComplet,
+                  debut: absence.debut,
+                  fin: absence.fin),
               creneaux: creneaux,
               jours: jours,
             ),

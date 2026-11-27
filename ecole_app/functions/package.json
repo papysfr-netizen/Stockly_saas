@@ -8,10 +8,13 @@
   "scripts": {
     "test": "node --test test/*.test.js",
     "deploy": "firebase deploy --only functions",
-    "test:emulateur": "firebase emulators:exec --only firestore --project demo-ecole --config ../firebase.json 'node --test test_emulateur/*.test.js'"
+    "test:emulateur": "firebase emulators:exec --only firestore --project demo-ecole --config ../firebase.json 'node --test test_emulateur/envoyerRappels.test.js test_emulateur/notifierRemplacant.test.js'"
   },
   "dependencies": {
     "firebase-admin": "^12.6.0",
     "firebase-functions": "^6.1.0"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^3.5.0"
   }
 }

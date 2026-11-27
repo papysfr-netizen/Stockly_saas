@@ -62,6 +62,17 @@ Valeurs par défaut d'une nouvelle école : devise USD (modifiable en CDF), indi
    et les cours à pourvoir du jour.
 4. **Bilan** par enseignant : jours d'absence, cours touchés, cours non assurés.
 
+**Prévenir le remplaçant** :
+- *automatiquement* (Paramètres → « Prévenir automatiquement les remplaçants » : SMS ou WhatsApp) : dès qu'un
+  remplaçant est désigné, la Cloud Function `notifierRemplacant` lui envoie le message ; s'il perd le cours
+  (autre remplaçant, étude, annulation, absence supprimée), il reçoit une annulation. Le résultat
+  (envoyé, échec, pas de numéro) s'affiche sous le cours ; l'historique est dans `notifications` ;
+- *manuellement* : icône d'envoi sur un cours remplacé → SMS ou WhatsApp s'ouvre avec le message rédigé.
+
+Le numéro utilisé est celui de la fiche enseignant. Pour WhatsApp hors fenêtre de 24 h, créez deux modèles
+approuvés et renseignez `TWILIO_WHATSAPP_REMPLACEMENT_SID` et `TWILIO_WHATSAPP_ANNULATION_SID`
+(variables `{{1}}` enseignant, `{{2}}` date, `{{3}}` heure, `{{4}}` classe, `{{5}}` branche, `{{6}}` école).
+
 Supprimer une absence supprime aussi ses remplacements. Si l'emploi du temps change après la déclaration,
 supprimez puis redéclarez l'absence pour recalculer les cours touchés.
 
@@ -169,7 +180,7 @@ flutter run -d chrome  # web
 flutter test                      # calculs, bulletins PDF, exports Excel (relus après génération), rappels
 cd test_rules && npm install && npm test   # règles de sécurité Firestore (émulateur, Java requis)
 cd functions && npm test                    # logique des rappels (numéros, messages, appel Twilio simulé)
-cd functions && npm run test:emulateur      # Cloud Function de bout en bout (émulateur, CLI firebase requise)
+cd functions && npm run test:emulateur      # Cloud Functions de bout en bout : rappels, notifications de remplacement
 ```
 
 ## Structure des données (Firestore)
@@ -186,6 +197,7 @@ ecoles/{ecoleId}                    nom, adresse, devise, année scolaire
   ├─ creneaux                       emploi du temps : id = {classe}_{jour}_{heure}
   ├─ absencesEnseignants            absences déclarées (du… au…, motif)
   ├─ remplacements                  un cours touché par date : à pourvoir, remplacé, étude, annulé
+  ├─ notifications                  SMS / WhatsApp envoyés aux remplaçants (écrit par le serveur)
   ├─ presences                      une feuille d'appel par classe et par jour
   ├─ absences                       une fiche par absence/retard (lue par les parents)
   ├─ rappels                        historique des rappels d'impayés (manuels et automatiques)

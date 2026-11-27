@@ -80,6 +80,9 @@ class Remplacement {
   final String? remplacantId;
   final String remplacantNom;
 
+  /// Résultat de l'envoi automatique au remplaçant (écrit par la fonction serveur).
+  final ({String statut, String canal, String enseignantId, String erreur})? notification;
+
   const Remplacement({
     required this.id,
     required this.absenceId,
@@ -94,7 +97,21 @@ class Remplacement {
     this.statut = StatutRemplacement.aPourvoir,
     this.remplacantId,
     this.remplacantNom = '',
+    this.notification,
   });
+
+  /// Texte du statut d'envoi pour le remplaçant actuel (null s'il n'y a rien à dire).
+  String? get etatNotification {
+    final n = notification;
+    if (n == null || n.enseignantId != remplacantId || statut != StatutRemplacement.remplace) return null;
+    final canal = n.canal == 'whatsapp' ? 'WhatsApp' : 'SMS';
+    return switch (n.statut) {
+      'envoye' => '$canal envoyé au remplaçant',
+      'sans_telephone' => 'Remplaçant prévenu : non (pas de numéro sur sa fiche)',
+      'echec' => 'Échec de l\'envoi $canal${n.erreur.isEmpty ? '' : ' : ${n.erreur}'}',
+      _ => null,
+    };
+  }
 
   static String docId(String date, String creneauId) => '${date}_$creneauId';
 
@@ -121,6 +138,14 @@ class Remplacement {
       statut: StatutRemplacementX.parse(m['statut']),
       remplacantId: m['remplacantId'],
       remplacantNom: m['remplacantNom'] ?? '',
+      notification: m['notification'] is Map
+          ? (
+              statut: '${m['notification']['statut'] ?? ''}',
+              canal: '${m['notification']['canal'] ?? ''}',
+              enseignantId: '${m['notification']['enseignantId'] ?? ''}',
+              erreur: '${m['notification']['erreur'] ?? ''}',
+            )
+          : null,
     );
   }
 

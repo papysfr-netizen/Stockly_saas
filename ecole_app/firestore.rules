@@ -96,6 +96,11 @@ service cloud.firestore {
         allow read: if memberOf(ecoleId);
         allow write: if isGestion(ecoleId);
       }
+      // Historique des SMS / WhatsApp envoyés aux remplaçants (écrit par la Cloud Function).
+      match /notifications/{id} {
+        allow read: if isGestion(ecoleId);
+        allow write: if false;
+      }
       match /enseignants/{id} {
         allow read: if isStaff(ecoleId);
         allow write: if isAdmin(ecoleId);

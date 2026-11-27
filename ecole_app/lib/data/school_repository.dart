@@ -341,6 +341,7 @@ class SchoolRepository {
         'statut': statut.name,
         'remplacantId': statut == StatutRemplacement.remplace ? remplacant!.id : null,
         'remplacantNom': statut == StatutRemplacement.remplace ? remplacant!.nomComplet : '',
+        'notification': FieldValue.delete(),
       });
 
   // ---------------- Présences ----------------

@@ -58,6 +58,7 @@ class _EcoleCardState extends ConsumerState<_EcoleCard> {
   late SystemeEvaluation _systeme = widget.ecole.systeme;
   late final _plages = TextEditingController(text: widget.ecole.plagesHoraires.join('\n'));
   late bool _samedi = widget.ecole.samedi;
+  late String _notifRemplacement = widget.ecole.notificationRemplacement;
 
   @override
   Widget build(BuildContext context) {
@@ -119,6 +120,22 @@ class _EcoleCardState extends ConsumerState<_EcoleCard> {
             value: _samedi,
             onChanged: (v) => setState(() => _samedi = v),
           ),
+          gap,
+          DropdownButtonFormField<String>(
+            value: _notifRemplacement,
+            isExpanded: true,
+            decoration: const InputDecoration(
+              labelText: 'Prévenir automatiquement les remplaçants',
+              helperText: 'Envoi par Twilio (Cloud Functions requises). Le remplaçant retiré reçoit une annulation.',
+              helperMaxLines: 2,
+            ),
+            items: const [
+              DropdownMenuItem(value: 'aucune', child: Text('Non')),
+              DropdownMenuItem(value: 'sms', child: Text('Par SMS')),
+              DropdownMenuItem(value: 'whatsapp', child: Text('Par WhatsApp')),
+            ],
+            onChanged: (v) => setState(() => _notifRemplacement = v!),
+          ),
           const SizedBox(height: 24),
           Text("Message de rappel d'impayé", style: Theme.of(context).textTheme.titleSmall),
           gap,
@@ -154,6 +171,7 @@ class _EcoleCardState extends ConsumerState<_EcoleCard> {
                         modeleRappel: _modele.text.trim() == modeleRappelParDefaut ? '' : _modele.text.trim(),
                         plagesHoraires: grille.plages,
                         samedi: _samedi,
+                        notificationRemplacement: _notifRemplacement,
                       )),
                   succes: 'Enregistré',
                 );
