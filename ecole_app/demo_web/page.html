@@ -1,0 +1,28 @@
+<title>Démo Gestion École</title>
+<link rel="artifact-thumbnail" href="thumb.png">
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  :root { --fond: #f7f8fd; --texte: #1d2433; --accent: #1e5aa8; }
+  html, body { height: 100%; }
+  body { background: var(--fond); color: var(--texte); font-family: Roboto, system-ui, sans-serif;
+         padding-left: max(0px, env(safe-area-inset-left, 0px)); padding-right: max(0px, env(safe-area-inset-right, 0px)); }
+  #chargement { position: fixed; inset: 0; display: grid; place-content: center; gap: 12px; text-align: center; padding: 16px; }
+  #chargement strong { color: var(--accent); font-size: 1.25rem; }
+  .barre { width: 180px; height: 4px; margin: 0 auto; border-radius: 2px; background: #dfe5f3; overflow: hidden; }
+  .barre::after { content: ""; display: block; width: 40%; height: 100%; background: var(--accent); animation: aller 1.2s ease-in-out infinite; }
+  @keyframes aller { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+  @media (prefers-reduced-motion: reduce) { .barre::after { animation: none; width: 100%; } }
+</style>
+<div id="chargement" role="status">
+  <strong>Gestion École</strong>
+  <span>Chargement de la démonstration…</span>
+  <div class="barre"></div>
+  <small>Premier chargement : environ 15 Mo.</small>
+</div>
+<script>
+  // Masque l'écran de chargement dès que Flutter affiche sa première image.
+  window.addEventListener('flutter-first-frame', function () {
+    var c = document.getElementById('chargement'); if (c) c.hidden = true;
+  });
+</script>
+<script src="flutter_bootstrap.js" async></script>

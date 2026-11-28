@@ -1,0 +1,427 @@
+import 'dart:convert';
+
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../core/evaluation.dart';
+import '../../core/pays.dart';
+import '../../core/telephone.dart';
+import '../../models/app_user.dart';
+import '../../models/ecole.dart';
+import '../../providers/apparence.dart';
+import '../../providers/providers.dart';
+import '../../services/emploi_du_temps.dart';
+import '../../services/logo.dart';
+import '../../services/rappels.dart';
+import '../../widgets/common.dart';
+import 'import_card.dart';
+
+class SettingsScreen extends ConsumerWidget {
+  const SettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final me = ref.watch(meProvider);
+    final ecole = ref.watch(ecoleProvider).valueOrNull;
+    return ListView(padding: const EdgeInsets.all(12), children: [
+      Card(
+        child: ListTile(
+          leading: const Icon(Icons.person),
+          title: Text(me.nom),
+          subtitle: Text('${me.identifiant} · ${me.role.label}'),
+          trailing: TextButton.icon(
+            icon: const Icon(Icons.logout),
+            label: const Text('Déconnexion'),
+            onPressed: () => ref.read(authRepoProvider).deconnexion(),
+          ),
+        ),
+      ),
+      Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('Apparence', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 4),
+            const Text('Mémorisée sur cet appareil.'),
+            const SizedBox(height: 12),
+            SegmentedButton<ThemeMode>(
+              segments: const [
+                ButtonSegment(value: ThemeMode.system, icon: Icon(Icons.brightness_auto), label: Text('Auto')),
+                ButtonSegment(value: ThemeMode.light, icon: Icon(Icons.light_mode_outlined), label: Text('Clair')),
+                ButtonSegment(value: ThemeMode.dark, icon: Icon(Icons.dark_mode_outlined), label: Text('Sombre')),
+              ],
+              selected: {ref.watch(apparenceProvider)},
+              onSelectionChanged: (s) => ref.read(apparenceProvider.notifier).choisir(s.first),
+            ),
+          ]),
+        ),
+      ),
+      if (me.isAdmin && ecole != null) ...[
+        const ImportCard(),
+        _EcoleCard(ecole: ecole),
+        const _ComptesCard(),
+      ],
+    ]);
+  }
+}
+
+class _EcoleCard extends ConsumerStatefulWidget {
+  const _EcoleCard({required this.ecole});
+  final Ecole ecole;
+  @override
+  ConsumerState<_EcoleCard> createState() => _EcoleCardState();
+}
+
+class _EcoleCardState extends ConsumerState<_EcoleCard> {
+  late final _nom = TextEditingController(text: widget.ecole.nom);
+  late final _adresse = TextEditingController(text: widget.ecole.adresse);
+  late final _tel = TextEditingController(text: widget.ecole.telephone);
+  late final _devise = TextEditingController(text: widget.ecole.devise);
+  late final _annee = TextEditingController(text: widget.ecole.anneeScolaire);
+  late final _enTete = TextEditingController(text: widget.ecole.enTete);
+  late final _code = TextEditingController(text: widget.ecole.codeEcole);
+  late final _modele = TextEditingController(
+      text: widget.ecole.modeleRappel.isEmpty ? modeleRappelParDefaut : widget.ecole.modeleRappel);
+  late String _indicatif = widget.ecole.indicatif;
+  late SystemeEvaluation _systeme = widget.ecole.systeme;
+  late final _plages = TextEditingController(text: widget.ecole.plagesHoraires.join('\n'));
+  late bool _samedi = widget.ecole.samedi;
+  late String _notifRemplacement = widget.ecole.notificationRemplacement;
+  late String _alerteAbsence = widget.ecole.alerteAbsence;
+  late final _seuil = TextEditingController(text: '${widget.ecole.seuilAbsences}');
+
+  @override
+  Widget build(BuildContext context) {
+    const gap = SizedBox(height: 12);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Text("Informations de l'école", style: Theme.of(context).textTheme.titleMedium),
+          const Text('Elles apparaissent sur les bulletins, les reçus et les emplois du temps.'),
+          gap,
+          const _LogoEcole(),
+          gap,
+          TextField(controller: _nom, decoration: const InputDecoration(labelText: 'Nom')),
+          gap,
+          TextField(
+            controller: _enTete,
+            minLines: 2,
+            maxLines: 5,
+            decoration: const InputDecoration(
+              labelText: "Lignes d'en-tête officielles (une par ligne)",
+              hintText: 'Ministère…\nProvince éducationnelle…\nSous-division…',
+              helperText: 'Imprimées en majuscules sous « République démocratique du Congo ».',
+              helperMaxLines: 2,
+            ),
+          ),
+          gap,
+          TextField(controller: _code, decoration: const InputDecoration(labelText: "Code de l'école (facultatif)")),
+          gap,
+          TextField(controller: _adresse, decoration: const InputDecoration(labelText: 'Adresse')),
+          gap,
+          TextField(controller: _tel, decoration: const InputDecoration(labelText: 'Téléphone')),
+          gap,
+          Row(children: [
+            Expanded(child: TextField(controller: _devise, decoration: const InputDecoration(labelText: 'Devise'))),
+            const SizedBox(width: 12),
+            Expanded(
+                child: TextField(controller: _annee, decoration: const InputDecoration(labelText: 'Année scolaire'))),
+          ]),
+          gap,
+          DropdownButtonFormField<String>(
+            value: indicatifsPays.any((p) => p.$1 == _indicatif) ? _indicatif : null,
+            isExpanded: true,
+            decoration: const InputDecoration(
+                labelText: 'Pays (indicatif téléphonique)',
+                helperText: 'Utilisé pour les numéros saisis sans indicatif'),
+            items: [for (final p in indicatifsPays) DropdownMenuItem(value: p.$1, child: Text('${p.$2} (${p.$1})'))],
+            onChanged: (v) => setState(() => _indicatif = v!),
+          ),
+          gap,
+          DropdownButtonFormField<SystemeEvaluation>(
+            value: _systeme,
+            isExpanded: true,
+            decoration: const InputDecoration(labelText: "Système d'évaluation"),
+            items: [
+              for (final s in SystemeEvaluation.values) DropdownMenuItem(value: s, child: Text(s.label)),
+            ],
+            onChanged: (v) => setState(() => _systeme = v!),
+          ),
+          const SizedBox(height: 24),
+          Text('Grille horaire (emploi du temps)', style: Theme.of(context).textTheme.titleSmall),
+          gap,
+          TextField(
+            controller: _plages,
+            maxLines: 8,
+            minLines: 4,
+            decoration: const InputDecoration(
+              helperText: 'Une heure de cours par ligne, ex. 07:30-08:20. La récréation est simplement omise.',
+              helperMaxLines: 2,
+            ),
+          ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Cours le samedi'),
+            value: _samedi,
+            onChanged: (v) => setState(() => _samedi = v),
+          ),
+          gap,
+          DropdownButtonFormField<String>(
+            value: _notifRemplacement,
+            isExpanded: true,
+            decoration: const InputDecoration(
+              labelText: 'Prévenir automatiquement les remplaçants',
+              helperText: 'Envoi par Twilio (Cloud Functions requises). Le remplaçant retiré reçoit une annulation.',
+              helperMaxLines: 2,
+            ),
+            items: const [
+              DropdownMenuItem(value: 'aucune', child: Text('Non')),
+              DropdownMenuItem(value: 'sms', child: Text('Par SMS')),
+              DropdownMenuItem(value: 'whatsapp', child: Text('Par WhatsApp')),
+            ],
+            onChanged: (v) => setState(() => _notifRemplacement = v!),
+          ),
+          const SizedBox(height: 24),
+          Text('Absences des élèves', style: Theme.of(context).textTheme.titleSmall),
+          gap,
+          DropdownButtonFormField<String>(
+            value: _alerteAbsence,
+            isExpanded: true,
+            decoration: const InputDecoration(
+              labelText: 'Prévenir le parent dès que son enfant est noté absent',
+              helperText: "Envoi automatique à l'appel (Cloud Functions et Twilio requis).",
+              helperMaxLines: 2,
+            ),
+            items: const [
+              DropdownMenuItem(value: 'aucune', child: Text('Non')),
+              DropdownMenuItem(value: 'sms', child: Text('Par SMS')),
+              DropdownMenuItem(value: 'whatsapp', child: Text('Par WhatsApp')),
+            ],
+            onChanged: (v) => setState(() => _alerteAbsence = v!),
+          ),
+          gap,
+          TextField(
+            controller: _seuil,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: 'Élève « à suivre » à partir de… absences non justifiées sur 30 jours',
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text("Message de rappel d'impayé", style: Theme.of(context).textTheme.titleSmall),
+          gap,
+          TextField(
+            controller: _modele,
+            maxLines: 4,
+            decoration: const InputDecoration(
+              helperText: 'Variables : {parent} {eleve} {classe} {montant} {ecole}',
+              helperMaxLines: 2,
+            ),
+          ),
+          gap,
+          Align(
+            alignment: Alignment.centerRight,
+            child: FilledButton(
+              onPressed: () {
+                final grille = validerGrille(_plages.text.split('\n'));
+                if (grille.erreur != null) {
+                  showMessage(context, grille.erreur!, erreur: true);
+                  return;
+                }
+                _plages.text = grille.plages.join('\n');
+                run(
+                  context,
+                  () => ref.read(schoolRepoProvider).majEcole(widget.ecole.copyWith(
+                        nom: _nom.text.trim(),
+                        adresse: _adresse.text.trim(),
+                        telephone: _tel.text.trim(),
+                        devise: _devise.text.trim(),
+                        anneeScolaire: _annee.text.trim(),
+                        enTete: _enTete.text.trim(),
+                        codeEcole: _code.text.trim(),
+                        indicatif: _indicatif,
+                        systeme: _systeme,
+                        modeleRappel: _modele.text.trim() == modeleRappelParDefaut ? '' : _modele.text.trim(),
+                        plagesHoraires: grille.plages,
+                        samedi: _samedi,
+                        notificationRemplacement: _notifRemplacement,
+                        alerteAbsence: _alerteAbsence,
+                        seuilAbsences: (int.tryParse(_seuil.text.trim()) ?? 3).clamp(1, 60),
+                      )),
+                  succes: 'Enregistré',
+                );
+              },
+              child: const Text('Enregistrer'),
+            ),
+          ),
+        ]),
+      ),
+    );
+  }
+}
+
+class _ComptesCard extends ConsumerWidget {
+  const _ComptesCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final repo = ref.watch(schoolRepoProvider);
+    final users = ref.watch(_usersProvider).valueOrNull ?? const <AppUser>[];
+    final invitations = ref.watch(_invitationsProvider).valueOrNull ?? const <Invitation>[];
+    return Card(
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        ListTile(
+          title: const Text('Comptes utilisateurs'),
+          subtitle: const Text('Enseignants et parents sont invités depuis leurs fiches.'),
+          trailing: FilledButton.tonalIcon(
+            icon: const Icon(Icons.person_add),
+            label: const Text('Inviter'),
+            onPressed: () => _inviter(context, ref),
+          ),
+        ),
+        for (final u in users)
+          ListTile(
+              dense: true,
+              leading: const Icon(Icons.verified_user_outlined),
+              title: Text(u.nom),
+              subtitle: Text('${u.identifiant} · ${u.role.label}')),
+        if (invitations.isNotEmpty) const ListTile(dense: true, title: Text('Invitations en attente')),
+        for (final i in invitations)
+          ListTile(
+            dense: true,
+            leading: Icon(i.parTelephone ? Icons.phone_outlined : Icons.mail_outline),
+            title: Text(i.identifiant),
+            subtitle: Text(i.role.label),
+            trailing: IconButton(
+              icon: const Icon(Icons.close),
+              tooltip: "Annuler l'invitation",
+              onPressed: () => run(context, () => repo.annulerInvitation(i.identifiant)),
+            ),
+          ),
+      ]),
+    );
+  }
+
+  Future<void> _inviter(BuildContext context, WidgetRef ref) async {
+    final identifiant = TextEditingController();
+    final nom = TextEditingController();
+    var role = Role.secretariat;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => StatefulBuilder(
+        builder: (c, setState) => AlertDialog(
+          title: const Text('Inviter un membre du personnel'),
+          content: Column(mainAxisSize: MainAxisSize.min, children: [
+            TextField(controller: nom, decoration: const InputDecoration(labelText: 'Nom')),
+            const SizedBox(height: 12),
+            TextField(
+                controller: identifiant,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(labelText: 'E-mail ou numéro de téléphone')),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<Role>(
+              value: role,
+              decoration: const InputDecoration(labelText: 'Rôle'),
+              items: const [
+                DropdownMenuItem(value: Role.secretariat, child: Text('Secrétariat / comptable')),
+                DropdownMenuItem(value: Role.admin, child: Text('Direction')),
+              ],
+              onChanged: (v) => setState(() => role = v!),
+            ),
+            const SizedBox(height: 12),
+            const Text("La personne se connecte ensuite avec cet e-mail (mot de passe) ou ce numéro (code SMS)."),
+          ]),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Annuler')),
+            FilledButton(onPressed: () => Navigator.pop(c, true), child: const Text('Inviter')),
+          ],
+        ),
+      ),
+    );
+    if (ok != true || identifiant.text.trim().isEmpty || !context.mounted) return;
+    final saisie = identifiant.text.trim();
+    final id = saisie.contains('@')
+        ? saisie.toLowerCase()
+        : normaliserTelephone(saisie, indicatif: ref.read(ecoleProvider).valueOrNull?.indicatif ?? '+243');
+    if (id == null) {
+      showMessage(context, 'E-mail ou numéro invalide.', erreur: true);
+      return;
+    }
+    await run(
+      context,
+      () => ref.read(schoolRepoProvider).inviter(Invitation(
+            identifiant: id,
+            nom: nom.text.trim(),
+            role: role,
+            ecoleId: ref.read(meProvider).ecoleId,
+          )),
+      succes: 'Invitation créée',
+    );
+  }
+}
+
+final _usersProvider = StreamProvider.autoDispose((ref) => ref.watch(schoolRepoProvider).utilisateurs());
+final _invitationsProvider = StreamProvider.autoDispose((ref) => ref.watch(schoolRepoProvider).invitations());
+
+/// Logo de l'école : aperçu, choix d'une image, retrait.
+class _LogoEcole extends ConsumerStatefulWidget {
+  const _LogoEcole();
+  @override
+  ConsumerState<_LogoEcole> createState() => _LogoEcoleState();
+}
+
+class _LogoEcoleState extends ConsumerState<_LogoEcole> {
+  bool _busy = false;
+
+  Future<void> _choisir() async {
+    final choix = await FilePicker.platform.pickFiles(type: FileType.image, withData: true);
+    final brut = choix?.files.single.bytes;
+    if (brut == null || !mounted) return;
+    setState(() => _busy = true);
+    await run(context, () async {
+      final logo = preparerLogo(brut);
+      await ref.read(schoolRepoProvider).majLogo(base64Encode(logo));
+    }, succes: 'Logo enregistré');
+    if (mounted) setState(() => _busy = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final octets = ref.watch(ecoleProvider).valueOrNull?.logoOctets;
+    final scheme = Theme.of(context).colorScheme;
+    return Row(children: [
+      Container(
+        width: 72,
+        height: 72,
+        decoration: BoxDecoration(
+          color: Colors.white, // fond blanc : le logo s'affiche comme sur le papier
+          border: Border.all(color: scheme.outlineVariant),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: const EdgeInsets.all(4),
+        child: octets == null
+            ? Icon(Icons.image_outlined, color: scheme.outline)
+            : Image.memory(octets, fit: BoxFit.contain, gaplessPlayback: true),
+      ),
+      const SizedBox(width: 12),
+      Expanded(
+        child: Wrap(spacing: 8, runSpacing: 4, children: [
+          OutlinedButton.icon(
+            icon: _busy
+                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                : const Icon(Icons.upload_outlined),
+            label: Text(octets == null ? 'Choisir le logo' : 'Changer le logo'),
+            onPressed: _busy ? null : _choisir,
+          ),
+          if (octets != null)
+            TextButton(
+              onPressed: () => run(context, () => ref.read(schoolRepoProvider).majLogo(''), succes: 'Logo retiré'),
+              child: const Text('Retirer'),
+            ),
+        ]),
+      ),
+    ]);
+  }
+}

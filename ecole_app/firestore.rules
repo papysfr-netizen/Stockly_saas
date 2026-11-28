@@ -1,0 +1,167 @@
+rules_version = '2';
+
+// Règles de sécurité — Gestion École
+// Chaque utilisateur (users/{uid}) appartient à une école (ecoleId) avec un rôle :
+// admin (direction), secretariat, enseignant, parent.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function me() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function hasProfile() { return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
+    function memberOf(ecoleId) { return hasProfile() && me().ecoleId == ecoleId; }
+    function hasRole(ecoleId, roles) { return memberOf(ecoleId) && me().role in roles; }
+    function isAdmin(ecoleId) { return hasRole(ecoleId, ['admin']); }
+    function isGestion(ecoleId) { return hasRole(ecoleId, ['admin', 'secretariat']); }
+    function isStaff(ecoleId) { return hasRole(ecoleId, ['admin', 'secretariat', 'enseignant']); }
+    function isParentOf(ecoleId, eleveId) { return hasRole(ecoleId, ['parent']) && eleveId in me().eleveIds; }
+    function teaches(ecoleId, classeId) {
+      return isAdmin(ecoleId) || (hasRole(ecoleId, ['enseignant']) && classeId in me().classeIds);
+    }
+    function myEmail() { return request.auth.token.get('email', '').lower(); }
+    function myPhone() { return request.auth.token.get('phone_number', ''); }
+    function isMe(identifiant) { return identifiant != '' && (identifiant == myEmail() || identifiant == myPhone()); }
+    function invitation(id) { return get(/databases/$(database)/documents/invitations/$(id)).data; }
+
+    // ---------- Profils ----------
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isGestion(resource.data.ecoleId));
+
+      // Création à l'inscription (compte e-mail ou téléphone) : soit fondateur
+      // d'une nouvelle école, soit via une invitation adressée à cet e-mail /
+      // ce numéro et correspondant exactement au profil créé.
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.email == myEmail()
+        && request.resource.data.telephone == myPhone()
+        && (
+          (request.resource.data.role == 'admin'
+            && getAfter(/databases/$(database)/documents/ecoles/$(request.resource.data.ecoleId)).data.proprietaire == uid)
+          ||
+          (isMe(request.resource.data.get('invitation', ''))
+            && exists(/databases/$(database)/documents/invitations/$(request.resource.data.invitation))
+            && invitation(request.resource.data.invitation).role == request.resource.data.role
+            && invitation(request.resource.data.invitation).ecoleId == request.resource.data.ecoleId
+            && invitation(request.resource.data.invitation).get('eleveIds', []) == request.resource.data.eleveIds
+            && invitation(request.resource.data.invitation).get('classeIds', []) == request.resource.data.classeIds)
+        );
+
+      // L'utilisateur peut changer son nom ; la gestion peut rattacher des
+      // élèves (parents) et la direction des classes (enseignants).
+      allow update: if signedIn() && (
+        (request.auth.uid == uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nom']))
+        || (isGestion(resource.data.ecoleId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['eleveIds']))
+        || (isAdmin(resource.data.ecoleId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['classeIds', 'eleveIds']))
+      );
+      allow delete: if false;
+    }
+
+    // ---------- Invitations (id = e-mail en minuscules ou téléphone E.164) ----------
+    match /invitations/{id} {
+      allow get: if signedIn() && (isMe(id) || isGestion(resource.data.ecoleId));
+      allow list: if isGestion(resource.data.ecoleId);
+      // La direction invite tout le monde ; le secrétariat seulement des parents.
+      allow create, update: if signedIn() && request.resource.data.identifiant == id
+        && (resource == null || isGestion(resource.data.ecoleId))
+        && (isAdmin(request.resource.data.ecoleId)
+            || (isGestion(request.resource.data.ecoleId) && request.resource.data.role == 'parent'));
+      allow delete: if signedIn() && (isMe(id) || isGestion(resource.data.ecoleId));
+    }
+
+    // ---------- Écoles ----------
+    match /ecoles/{ecoleId} {
+      allow read: if memberOf(ecoleId);
+      allow create: if signedIn() && request.resource.data.proprietaire == request.auth.uid;
+      allow update: if isAdmin(ecoleId) && request.resource.data.proprietaire == resource.data.proprietaire;
+
+      match /classes/{id} {
+        allow read: if memberOf(ecoleId);
+        allow write: if isAdmin(ecoleId);
+      }
+      match /matieres/{id} {
+        allow read: if memberOf(ecoleId);
+        allow write: if isAdmin(ecoleId);
+      }
+      // Emploi du temps : visible par toute l'école (parents compris), modifié par la direction.
+      match /creneaux/{id} {
+        allow read: if memberOf(ecoleId);
+        allow write: if isAdmin(ecoleId);
+      }
+      // Absences d'enseignants : personnel en lecture ; direction et secrétariat les déclarent.
+      match /absencesEnseignants/{id} {
+        allow read: if isStaff(ecoleId);
+        allow write: if isGestion(ecoleId);
+      }
+      // Remplacements : visibles par toute l'école (les parents voient les changements de cours).
+      match /remplacements/{id} {
+        allow read: if memberOf(ecoleId);
+        allow write: if isGestion(ecoleId);
+      }
+      // Historique des SMS / WhatsApp envoyés aux remplaçants (écrit par la Cloud Function).
+      match /notifications/{id} {
+        allow read: if isGestion(ecoleId);
+        allow write: if false;
+      }
+      match /enseignants/{id} {
+        allow read: if isStaff(ecoleId);
+        allow write: if isAdmin(ecoleId);
+      }
+      match /eleves/{eleveId} {
+        allow read: if isStaff(ecoleId) || isParentOf(ecoleId, eleveId);
+        allow create, update: if isGestion(ecoleId);
+        allow delete: if isAdmin(ecoleId);
+      }
+      match /paiements/{id} {
+        allow read: if isGestion(ecoleId) || isParentOf(ecoleId, resource.data.eleveId);
+        allow create: if isGestion(ecoleId) && request.resource.data.montant > 0;
+        allow update: if false; // un paiement ne se modifie pas : on l'annule
+        allow delete: if isAdmin(ecoleId);
+      }
+      match /notes/{id} {
+        allow read: if isStaff(ecoleId) || isParentOf(ecoleId, resource.data.eleveId);
+        // Des points (0 ≤ valeur ≤ sur) ou, en maternelle, une cote A / ECA / NA.
+        allow create, update: if teaches(ecoleId, request.resource.data.classeId)
+          && (request.resource.data.keys().hasAny(['valeur'])
+                ? request.resource.data.valeur >= 0 && request.resource.data.valeur <= request.resource.data.sur
+                : request.resource.data.get('cote', '') in ['A', 'ECA', 'NA']);
+        allow delete: if teaches(ecoleId, resource.data.classeId);
+      }
+      // Application et conduite par période.
+      match /comportements/{id} {
+        allow read: if isStaff(ecoleId) || isParentOf(ecoleId, resource.data.eleveId);
+        allow create, update: if teaches(ecoleId, request.resource.data.classeId);
+        allow delete: if teaches(ecoleId, resource.data.classeId);
+      }
+      match /presences/{id} {
+        allow read: if isStaff(ecoleId);
+        allow create, update: if teaches(ecoleId, request.resource.data.classeId);
+      }
+      // Fiches d'absence issues de l'appel.
+      match /absences/{id} {
+        function changes() { return request.resource.data.diff(resource.data).affectedKeys(); }
+        allow read: if isStaff(ecoleId) || isParentOf(ecoleId, resource.data.eleveId);
+        allow create: if teaches(ecoleId, request.resource.data.classeId);
+        allow update: if
+          // l'appel : l'enseignant ne touche qu'aux données d'appel
+          (teaches(ecoleId, request.resource.data.classeId)
+            && changes().hasOnly(['eleveId', 'classeId', 'date', 'jour', 'statut']))
+          // la direction et le secrétariat justifient, valident ou refusent
+          || (isGestion(ecoleId)
+            && changes().hasOnly(['justifiee', 'motif', 'note', 'justifiePar', 'dateJustification', 'justificationParent']))
+          // le parent propose une justification pour son enfant, si l'absence n'est pas déjà justifiée
+          || (isParentOf(ecoleId, resource.data.eleveId)
+            && changes().hasOnly(['justificationParent'])
+            && resource.data.get('justifiee', false) == false);
+        allow delete: if teaches(ecoleId, resource.data.classeId);
+      }
+      // Historique des rappels d'impayés. Les envois automatiques sont écrits
+      // par la Cloud Function (Admin SDK) ; l'application ne trace que les manuels.
+      match /rappels/{id} {
+        allow read: if isGestion(ecoleId);
+        allow create: if isGestion(ecoleId) && request.resource.data.mode == 'manuel';
+      }
+      match /meta/{doc} {
+        allow read, write: if isGestion(ecoleId);
+      }
+    }
+  }
+}
