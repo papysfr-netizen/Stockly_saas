@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../core/evaluation.dart';
 import '../services/emploi_du_temps.dart' show plagesParDefaut;
@@ -32,6 +35,27 @@ class Ecole {
   /// Nombre d'absences non justifiées sur 30 jours à partir duquel un élève est « à suivre ».
   final int seuilAbsences;
 
+  /// Logo de l'école (image PNG ou JPEG encodée en base64), vide si aucun.
+  final String logo;
+
+  /// Lignes d'en-tête officielles des documents (ministère, province éducationnelle…), une par ligne.
+  final String enTete;
+
+  /// Code ou numéro d'identification de l'école.
+  final String codeEcole;
+
+  Uint8List? get logoOctets {
+    if (logo.isEmpty) return null;
+    try {
+      return base64Decode(logo);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  List<String> get lignesEnTete =>
+      enTete.split('\n').map((l) => l.trim()).where((l) => l.isNotEmpty).toList();
+
   const Ecole({
     required this.id,
     required this.nom,
@@ -47,6 +71,9 @@ class Ecole {
     this.notificationRemplacement = 'aucune',
     this.alerteAbsence = 'aucune',
     this.seuilAbsences = 3,
+    this.logo = '',
+    this.enTete = '',
+    this.codeEcole = '',
   });
 
   /// Jours de cours : 1 = lundi … 5 ou 6.
@@ -69,6 +96,9 @@ class Ecole {
       notificationRemplacement: m['notificationRemplacement'] ?? 'aucune',
       alerteAbsence: m['alerteAbsence'] ?? 'aucune',
       seuilAbsences: (m['seuilAbsences'] as num?)?.toInt() ?? 3,
+      logo: m['logo'] ?? '',
+      enTete: m['enTete'] ?? '',
+      codeEcole: m['codeEcole'] ?? '',
     );
   }
 
@@ -86,9 +116,12 @@ class Ecole {
         'notificationRemplacement': notificationRemplacement,
         'alerteAbsence': alerteAbsence,
         'seuilAbsences': seuilAbsences,
+        'logo': logo,
+        'enTete': enTete,
+        'codeEcole': codeEcole,
       };
 
-  Ecole copyWith({String? nom, String? adresse, String? telephone, String? devise, String? anneeScolaire, SystemeEvaluation? systeme, String? indicatif, String? modeleRappel, List<String>? plagesHoraires, bool? samedi, String? notificationRemplacement, String? alerteAbsence, int? seuilAbsences}) =>
+  Ecole copyWith({String? nom, String? adresse, String? telephone, String? devise, String? anneeScolaire, SystemeEvaluation? systeme, String? indicatif, String? modeleRappel, List<String>? plagesHoraires, bool? samedi, String? notificationRemplacement, String? alerteAbsence, int? seuilAbsences, String? logo, String? enTete, String? codeEcole}) =>
       Ecole(
         id: id,
         nom: nom ?? this.nom,
@@ -104,5 +137,8 @@ class Ecole {
         notificationRemplacement: notificationRemplacement ?? this.notificationRemplacement,
         alerteAbsence: alerteAbsence ?? this.alerteAbsence,
         seuilAbsences: seuilAbsences ?? this.seuilAbsences,
+        logo: logo ?? this.logo,
+        enTete: enTete ?? this.enTete,
+        codeEcole: codeEcole ?? this.codeEcole,
       );
 }

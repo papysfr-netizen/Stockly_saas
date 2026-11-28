@@ -26,12 +26,44 @@ class PdfService {
         return pw.ThemeData.withFont(base: pw.Font.ttf(regular), bold: pw.Font.ttf(bold));
       }();
 
+  /// Bloc d'identité de l'école, commun à tous les documents : logo, lignes
+  /// d'en-tête officielles (propres à chaque école), nom, coordonnées, code.
+  static pw.Widget _blocEcole(Ecole ecole, {double taille = 9, double logo = 52}) {
+    final octets = ecole.logoOctets;
+    final petit = pw.TextStyle(fontSize: taille);
+    final gras = pw.TextStyle(fontSize: taille, fontWeight: pw.FontWeight.bold);
+    return pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+      if (octets != null) ...[
+        pw.SizedBox(
+          width: logo,
+          height: logo,
+          child: pw.Image(pw.MemoryImage(octets), fit: pw.BoxFit.contain),
+        ),
+        pw.SizedBox(width: 10),
+      ],
+      pw.Expanded(
+        child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+          if (ecole.systeme == SystemeEvaluation.rdc) pw.Text('RÉPUBLIQUE DÉMOCRATIQUE DU CONGO', style: gras),
+          for (final l in ecole.lignesEnTete) pw.Text(l.toUpperCase(), style: gras),
+          pw.Text(ecole.nom, style: pw.TextStyle(fontSize: taille + 4, fontWeight: pw.FontWeight.bold)),
+          if (ecole.adresse.isNotEmpty) pw.Text(ecole.adresse, style: petit),
+          if (ecole.telephone.isNotEmpty || ecole.codeEcole.isNotEmpty)
+            pw.Text(
+              [
+                if (ecole.telephone.isNotEmpty) 'Tél. : ${ecole.telephone}',
+                if (ecole.codeEcole.isNotEmpty) 'Code : ${ecole.codeEcole}',
+              ].join('   '),
+              style: petit,
+            ),
+        ]),
+      ),
+    ]);
+  }
+
   static pw.Widget _entete(Ecole ecole, String titre) => pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Text(ecole.nom, style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
-          if (ecole.adresse.isNotEmpty) pw.Text(ecole.adresse),
-          if (ecole.telephone.isNotEmpty) pw.Text('Tél. : ${ecole.telephone}'),
+          _blocEcole(ecole, taille: 9, logo: 48),
           pw.SizedBox(height: 12),
           pw.Center(
             child: pw.Text(titre,
@@ -185,14 +217,7 @@ class PdfService {
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-            pw.Expanded(
-              child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-                if (systeme == SystemeEvaluation.rdc) pw.Text('RÉPUBLIQUE DÉMOCRATIQUE DU CONGO', style: gras),
-                pw.Text(ecole.nom, style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold)),
-                if (ecole.adresse.isNotEmpty) pw.Text(ecole.adresse, style: petit),
-                if (ecole.telephone.isNotEmpty) pw.Text('Tél. : ${ecole.telephone}', style: petit),
-              ]),
-            ),
+            pw.Expanded(child: _blocEcole(ecole, taille: 8, logo: 56)),
             pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
               pw.Text('Élève : ${eleve.nomComplet}', style: gras),
               pw.Text('Sexe : ${eleve.sexe}   Né(e) le : ${formatDate(eleve.dateNaissance)}', style: petit),
@@ -278,7 +303,7 @@ class PdfService {
       pageFormat: PdfPageFormat.a4.landscape,
       margin: const pw.EdgeInsets.all(24),
       build: (_) => pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-        pw.Text(ecole.nom, style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold)),
+        _blocEcole(ecole, taille: 8, logo: 44),
         if (ecole.anneeScolaire.isNotEmpty) pw.Text('Année scolaire ${ecole.anneeScolaire}', style: petit),
         pw.SizedBox(height: 8),
         pw.Center(child: pw.Text(titre, style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold))),

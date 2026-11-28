@@ -143,7 +143,8 @@ class _ImportCardState extends ConsumerState<ImportCard> {
               OutlinedButton.icon(
                 icon: const Icon(Icons.download_outlined),
                 label: const Text('Télécharger le modèle'),
-                onPressed: () => run(context, () => remettreFichier(modeleImport(), 'modele_import_ecole.xlsx', mimeExcel)),
+                onPressed: () =>
+                    run(context, () => remettreFichier(modeleImport(), 'modele_import_ecole.xlsx', mimeExcel)),
               ),
               FilledButton.icon(
                 icon: _busy

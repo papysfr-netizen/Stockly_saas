@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -9,6 +12,7 @@ import '../../models/ecole.dart';
 import '../../providers/apparence.dart';
 import '../../providers/providers.dart';
 import '../../services/emploi_du_temps.dart';
+import '../../services/logo.dart';
 import '../../services/rappels.dart';
 import '../../widgets/common.dart';
 import 'import_card.dart';
@@ -75,6 +79,8 @@ class _EcoleCardState extends ConsumerState<_EcoleCard> {
   late final _tel = TextEditingController(text: widget.ecole.telephone);
   late final _devise = TextEditingController(text: widget.ecole.devise);
   late final _annee = TextEditingController(text: widget.ecole.anneeScolaire);
+  late final _enTete = TextEditingController(text: widget.ecole.enTete);
+  late final _code = TextEditingController(text: widget.ecole.codeEcole);
   late final _modele = TextEditingController(
       text: widget.ecole.modeleRappel.isEmpty ? modeleRappelParDefaut : widget.ecole.modeleRappel);
   late String _indicatif = widget.ecole.indicatif;
@@ -93,9 +99,25 @@ class _EcoleCardState extends ConsumerState<_EcoleCard> {
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Text("Informations de l'école", style: Theme.of(context).textTheme.titleMedium),
-          const Text('Elles apparaissent sur les reçus et les bulletins.'),
+          const Text('Elles apparaissent sur les bulletins, les reçus et les emplois du temps.'),
+          gap,
+          const _LogoEcole(),
           gap,
           TextField(controller: _nom, decoration: const InputDecoration(labelText: 'Nom')),
+          gap,
+          TextField(
+            controller: _enTete,
+            minLines: 2,
+            maxLines: 5,
+            decoration: const InputDecoration(
+              labelText: "Lignes d'en-tête officielles (une par ligne)",
+              hintText: 'Ministère…\nProvince éducationnelle…\nSous-division…',
+              helperText: 'Imprimées en majuscules sous « République démocratique du Congo ».',
+              helperMaxLines: 2,
+            ),
+          ),
+          gap,
+          TextField(controller: _code, decoration: const InputDecoration(labelText: "Code de l'école (facultatif)")),
           gap,
           TextField(controller: _adresse, decoration: const InputDecoration(labelText: 'Adresse')),
           gap,
@@ -217,6 +239,8 @@ class _EcoleCardState extends ConsumerState<_EcoleCard> {
                         telephone: _tel.text.trim(),
                         devise: _devise.text.trim(),
                         anneeScolaire: _annee.text.trim(),
+                        enTete: _enTete.text.trim(),
+                        codeEcole: _code.text.trim(),
                         indicatif: _indicatif,
                         systeme: _systeme,
                         modeleRappel: _modele.text.trim() == modeleRappelParDefaut ? '' : _modele.text.trim(),
@@ -340,3 +364,64 @@ class _ComptesCard extends ConsumerWidget {
 
 final _usersProvider = StreamProvider.autoDispose((ref) => ref.watch(schoolRepoProvider).utilisateurs());
 final _invitationsProvider = StreamProvider.autoDispose((ref) => ref.watch(schoolRepoProvider).invitations());
+
+/// Logo de l'école : aperçu, choix d'une image, retrait.
+class _LogoEcole extends ConsumerStatefulWidget {
+  const _LogoEcole();
+  @override
+  ConsumerState<_LogoEcole> createState() => _LogoEcoleState();
+}
+
+class _LogoEcoleState extends ConsumerState<_LogoEcole> {
+  bool _busy = false;
+
+  Future<void> _choisir() async {
+    final choix = await FilePicker.platform.pickFiles(type: FileType.image, withData: true);
+    final brut = choix?.files.single.bytes;
+    if (brut == null || !mounted) return;
+    setState(() => _busy = true);
+    await run(context, () async {
+      final logo = preparerLogo(brut);
+      await ref.read(schoolRepoProvider).majLogo(base64Encode(logo));
+    }, succes: 'Logo enregistré');
+    if (mounted) setState(() => _busy = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final octets = ref.watch(ecoleProvider).valueOrNull?.logoOctets;
+    final scheme = Theme.of(context).colorScheme;
+    return Row(children: [
+      Container(
+        width: 72,
+        height: 72,
+        decoration: BoxDecoration(
+          color: Colors.white, // fond blanc : le logo s'affiche comme sur le papier
+          border: Border.all(color: scheme.outlineVariant),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: const EdgeInsets.all(4),
+        child: octets == null
+            ? Icon(Icons.image_outlined, color: scheme.outline)
+            : Image.memory(octets, fit: BoxFit.contain, gaplessPlayback: true),
+      ),
+      const SizedBox(width: 12),
+      Expanded(
+        child: Wrap(spacing: 8, runSpacing: 4, children: [
+          OutlinedButton.icon(
+            icon: _busy
+                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                : const Icon(Icons.upload_outlined),
+            label: Text(octets == null ? 'Choisir le logo' : 'Changer le logo'),
+            onPressed: _busy ? null : _choisir,
+          ),
+          if (octets != null)
+            TextButton(
+              onPressed: () => run(context, () => ref.read(schoolRepoProvider).majLogo(''), succes: 'Logo retiré'),
+              child: const Text('Retirer'),
+            ),
+        ]),
+      ),
+    ]);
+  }
+}

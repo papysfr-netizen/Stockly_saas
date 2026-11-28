@@ -29,16 +29,13 @@ List<_Section> _sectionsPour(AppUser u) => [
       if (u.role == Role.parent) const _Section('Mes enfants', Icons.family_restroom, ParentScreen()),
       if (u.role != Role.parent) const _Section('Élèves', Icons.groups_outlined, ElevesScreen()),
       if (u.role != Role.parent) const _Section('Classes', Icons.class_outlined, ClassesScreen()),
-      if (u.canManagePaiements)
-        const _Section('Frais de scolarité', Icons.payments_outlined, PaiementsScreen()),
+      if (u.canManagePaiements) const _Section('Frais de scolarité', Icons.payments_outlined, PaiementsScreen()),
       if (u.canSaisirNotes) const _Section('Notes & bulletins', Icons.grading, NotesScreen()),
       if (u.role != Role.parent)
         const _Section('Emploi du temps', Icons.calendar_view_week_outlined, EmploiDuTempsScreen()),
-      if (u.canManageEleves)
-        const _Section('Absences & remplacements', Icons.swap_horiz, RemplacementsScreen()),
+      if (u.canManageEleves) const _Section('Absences & remplacements', Icons.swap_horiz, RemplacementsScreen()),
       if (u.canFairePresences) const _Section('Présences', Icons.fact_check_outlined, PresencesScreen()),
-      if (u.canManageEleves)
-        const _Section('Suivi des absences', Icons.person_search_outlined, SuiviAbsencesScreen()),
+      if (u.canManageEleves) const _Section('Suivi des absences', Icons.person_search_outlined, SuiviAbsencesScreen()),
       if (u.isAdmin) const _Section('Enseignants', Icons.co_present_outlined, EnseignantsScreen()),
       const _Section('Paramètres', Icons.settings_outlined, SettingsScreen()),
     ];
@@ -69,7 +66,19 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(28, 20, 16, 4),
-          child: Text(ecole?.nom ?? '', style: Theme.of(context).textTheme.titleMedium),
+          child: Row(children: [
+            if (ecole?.logoOctets != null) ...[
+              Container(
+                width: 40,
+                height: 40,
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(6)),
+                child: Image.memory(ecole!.logoOctets!, fit: BoxFit.contain, gaplessPlayback: true),
+              ),
+              const SizedBox(width: 12),
+            ],
+            Expanded(child: Text(ecole?.nom ?? '', style: Theme.of(context).textTheme.titleMedium)),
+          ]),
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(28, 0, 16, 12),

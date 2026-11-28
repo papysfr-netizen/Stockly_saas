@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image/image.dart' as img;
 
 import '../core/evaluation.dart';
 import '../core/format.dart';
@@ -58,6 +61,9 @@ Future<void> remplirEcoleDemo(FirebaseFirestore db, {DateTime? maintenant}) asyn
     'alerteAbsence': 'sms',
     'seuilAbsences': 3,
     'proprietaire': 'u-direction',
+    'enTete': "Ministère de l'Éducation\nProvince éducationnelle Kinshasa-Lukunga",
+    'codeEcole': 'KIN-LUK-0457',
+    'logo': base64Encode(logoDemo()),
   });
   for (final u in utilisateursDemo.values) {
     await db.collection('users').doc(u.uid).set(u.toMap());
@@ -296,4 +302,23 @@ Future<void> remplirEcoleDemo(FirebaseFirestore db, {DateTime? maintenant}) asyn
   if (touches.length > 1) {
     await e.collection('remplacements').doc(touches[1].id).update({'statut': 'etude'});
   }
+}
+
+/// Écusson fictif pour la démonstration : cercle bleu, livre ouvert, initiales.
+List<int> logoDemo() {
+  final im = img.Image(width: 200, height: 200, numChannels: 4);
+  final bleu = img.ColorRgba8(30, 90, 168, 255);
+  final or = img.ColorRgba8(232, 180, 40, 255);
+  final blanc = img.ColorRgba8(255, 255, 255, 255);
+  img.fillCircle(im, x: 100, y: 100, radius: 96, color: or);
+  img.fillCircle(im, x: 100, y: 100, radius: 88, color: bleu);
+  // Livre ouvert
+  img.fillRect(im, x1: 52, y1: 58, x2: 98, y2: 112, color: blanc);
+  img.fillRect(im, x1: 102, y1: 58, x2: 148, y2: 112, color: blanc);
+  for (var y = 68; y <= 102; y += 9) {
+    img.drawLine(im, x1: 58, y1: y, x2: 92, y2: y, color: bleu);
+    img.drawLine(im, x1: 108, y1: y, x2: 142, y2: y, color: bleu);
+  }
+  img.drawString(im, 'LR', font: img.arial48, x: 72, y: 120, color: or);
+  return img.encodePng(im);
 }

@@ -21,7 +21,12 @@ class SchoolRepository {
 
   // ---------------- École ----------------
   Stream<Ecole> ecole() => _ecole.snapshots().map(Ecole.fromDoc);
-  Future<void> majEcole(Ecole e) => _ecole.set(e.toMap(), SetOptions(merge: true));
+  /// Le logo n'est jamais écrit ici (voir [majLogo]) : un enregistrement des
+  /// informations ne doit pas écraser un logo changé entre-temps.
+  Future<void> majEcole(Ecole e) => _ecole.set(e.toMap()..remove('logo'), SetOptions(merge: true));
+
+  /// Remplace (ou retire, avec une chaîne vide) le logo de l'école, seul.
+  Future<void> majLogo(String base64) => _ecole.update({'logo': base64});
 
   // ---------------- Classes & matières ----------------
   Stream<List<Classe>> classes() =>

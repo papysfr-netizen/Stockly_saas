@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:ecole_app/core/evaluation.dart';
+import 'package:ecole_app/demo/donnees_demo.dart';
 import 'package:ecole_app/models/classe.dart';
 import 'package:ecole_app/models/ecole.dart';
 import 'package:ecole_app/models/eleve.dart';
@@ -16,8 +18,9 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(() => initializeDateFormatting('fr_FR'));
 
-  const ecole = Ecole(id: 'e', nom: 'Complexe scolaire Les Bâtisseurs', adresse: 'Av. Kasa-Vubu 12, Kinshasa/Kalamu',
-      telephone: '+243 81 234 5678', anneeScolaire: '2026-2027');
+  final ecole = Ecole(id: 'e', nom: 'Complexe scolaire Les Bâtisseurs', adresse: 'Av. Kasa-Vubu 12, Kinshasa/Kalamu',
+      telephone: '+243 81 234 5678', anneeScolaire: '2026-2027', codeEcole: 'KIN-LUK-0457',
+      enTete: "Ministère de l'Éducation\nProvince éducationnelle Kinshasa-Lukunga", logo: base64Encode(logoDemo()));
   final eleve = Eleve(id: 'a', matricule: 'EL2026-00012', nom: 'MBUYI', prenom: 'Grâce', classeId: 'c', sexe: 'F',
       dateNaissance: DateTime(2015, 3, 14));
 

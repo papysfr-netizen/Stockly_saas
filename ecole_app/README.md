@@ -107,6 +107,14 @@ Paramètres → **Importer depuis Excel** (direction) :
 4. Après confirmation : matricules attribués automatiquement (sauf s'ils sont fournis), comptes des enseignants
    et invitations des parents créés ; frères et sœurs regroupés sous une même invitation.
 
+## Logo et en-tête de chaque école
+
+Chaque école configure les siens, sans intervention technique : Paramètres → Informations de l'école.
+- **Logo** : *Choisir le logo* (PNG, JPEG, WebP…) ; l'image est réduite à 300 px et enregistrée dans la fiche de
+  l'école. Il apparaît sur les bulletins, les reçus, les emplois du temps et en haut du menu.
+- **Lignes d'en-tête officielles** (une par ligne : ministère, province éducationnelle, sous-division…) et
+  **code de l'école**, imprimés sous « République démocratique du Congo ».
+
 ## Apparence
 
 Paramètres → Apparence : Automatique (selon le téléphone), Clair ou Sombre, mémorisé sur l'appareil.
