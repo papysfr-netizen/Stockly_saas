@@ -11,8 +11,8 @@ enum SystemeEvaluation { rdc, trimestres }
 
 extension SystemeEvaluationX on SystemeEvaluation {
   String get label => switch (this) {
-        SystemeEvaluation.rdc => 'RD Congo (périodes, examens, pourcentages)',
-        SystemeEvaluation.trimestres => 'Trimestres, notes sur 20 avec coefficients',
+        SystemeEvaluation.rdc => 'RD Congo (périodes et examens)',
+        SystemeEvaluation.trimestres => 'Trimestres, notes sur 20',
       };
   static SystemeEvaluation parse(String? v) =>
       SystemeEvaluation.values.firstWhere((s) => s.name == v, orElse: () => SystemeEvaluation.rdc);

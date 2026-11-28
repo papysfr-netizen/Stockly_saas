@@ -10,6 +10,7 @@ conçue pour le système scolaire de la **RD Congo** (maternelle, primaire, seco
 | **Tableau de bord** | Effectifs, encaissements du mois, reste à recouvrer, taux de présence du jour |
 | **Élèves & classes** | Inscriptions (matricule automatique), fiches élèves, classes par cycle, niveau et section/option, branches et maxima |
 | **Frais de scolarité** | Encaissement, reçus PDF numérotés, journal par période, liste des impayés |
+| **Import Excel** | Classes, branches, enseignants et élèves depuis un modèle, vérifiés avant tout enregistrement ; parents invités automatiquement |
 | **Exports Excel** | Palmarès et notes d'une classe ; impayés, recouvrement par classe et journal des encaissements |
 | **Rappels d'impayés** | SMS ou WhatsApp, un par un depuis le téléphone ou en masse via Twilio, avec historique |
 | **Notes & bulletins** | Saisie par période et examen, totaux, pourcentages, places, application et conduite, bulletins PDF |
@@ -94,6 +95,21 @@ supprimez puis redéclarez l'absence pour recalculer les cours touchés.
 
 Modèle WhatsApp facultatif : `TWILIO_WHATSAPP_ABSENCE_SID` (variables `{{1}}` parent, `{{2}}` élève,
 `{{3}}` classe, `{{4}}` date, `{{5}}` école).
+
+## Import depuis Excel
+
+Paramètres → **Importer depuis Excel** (direction) :
+1. *Télécharger le modèle* : feuilles Mode d'emploi, Classes, Branches, Enseignants, Élèves.
+2. Le remplir (Excel, Google Sheets, WPS, LibreOffice…), une ligne par élément ; colonnes * obligatoires.
+3. *Importer un fichier* : tout est vérifié **avant** d'écrire (champs obligatoires, classe inconnue, cycle,
+   maxima, téléphone, e-mail, date, sexe, doublons). Les erreurs sont listées avec leur ligne Excel et rien n'est
+   importé tant qu'il en reste ; les éléments déjà présents sont signalés et ignorés.
+4. Après confirmation : matricules attribués automatiquement (sauf s'ils sont fournis), comptes des enseignants
+   et invitations des parents créés ; frères et sœurs regroupés sous une même invitation.
+
+## Apparence
+
+Paramètres → Apparence : Automatique (selon le téléphone), Clair ou Sombre, mémorisé sur l'appareil.
 
 ## Exports Excel
 

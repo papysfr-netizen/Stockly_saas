@@ -27,6 +27,8 @@ dependencies:
   # Base en mémoire pour la démonstration (lib/main_demo.dart)
   fake_cloud_firestore: ^3.1.0
   shared_preferences: ^2.3.0
+  file_picker: ^8.1.2
+  archive: ^3.6.1
 
 dev_dependencies:
   flutter_test:

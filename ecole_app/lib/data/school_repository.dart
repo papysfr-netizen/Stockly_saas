@@ -8,6 +8,7 @@ import '../models/emploi_du_temps.dart';
 import '../models/remplacement.dart';
 import '../models/eleve.dart';
 import '../models/scolarite.dart';
+import '../services/import_excel.dart';
 
 /// Accès aux données d'une école : `ecoles/{ecoleId}/...`
 class SchoolRepository {
@@ -40,6 +41,10 @@ class SchoolRepository {
   Future<void> enregistrerMatiere(Matiere m) => m.id.isEmpty
       ? _col('matieres').add(m.toMap())
       : _col('matieres').doc(m.id).set(m.toMap(), SetOptions(merge: true));
+
+  /// Toutes les branches de l'école.
+  Future<List<Matiere>> toutesMatieres() async =>
+      (await _col('matieres').get()).docs.map(Matiere.fromDoc).toList();
 
   /// Noms de toutes les branches de l'école (id → nom).
   Stream<Map<String, String>> nomsMatieres() => _col('matieres')
@@ -93,20 +98,122 @@ class SchoolRepository {
     required String eleveId,
   }) async {
     for (final id in identifiants.where((i) => i.isNotEmpty)) {
-      final compte = await _compte(id);
-      if (compte != null) {
-        await compte.update({'eleveIds': FieldValue.arrayUnion([eleveId])});
-        continue;
-      }
-      await _db.collection('invitations').doc(id).set({
-        'identifiant': id,
-        'nom': nom,
-        'role': Role.parent.name,
-        'ecoleId': ecoleId,
-        'eleveIds': FieldValue.arrayUnion([eleveId]),
-        'creeLe': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+      await _lierParentEleves(id, nom, [eleveId]);
     }
+  }
+
+  Future<void> _lierParentEleves(String identifiant, String nom, List<String> eleveIds) async {
+    final compte = await _compte(identifiant);
+    if (compte != null) {
+      await compte.update({'eleveIds': FieldValue.arrayUnion(eleveIds)});
+      return;
+    }
+    await _db.collection('invitations').doc(identifiant).set({
+      'identifiant': identifiant,
+      'nom': nom,
+      'role': Role.parent.name,
+      'ecoleId': ecoleId,
+      'eleveIds': FieldValue.arrayUnion(eleveIds),
+      'creeLe': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+  }
+
+  // ---------------- Import Excel ----------------
+  /// Écrit un import déjà vérifié ([PlanImport.importable]).
+  Future<({int classes, int branches, int enseignants, int eleves, int parents})> appliquerImport(
+    PlanImport plan, {
+    void Function(String etape)? progression,
+  }) async {
+    Future<void> parLots(List<void Function(WriteBatch)> ops) async {
+      for (var i = 0; i < ops.length; i += 400) {
+        final b = _db.batch();
+        for (final op in ops.skip(i).take(400)) {
+          op(b);
+        }
+        await b.commit();
+      }
+    }
+
+    String cle(String s) => s.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+
+    // 1. Classes
+    progression?.call('Classes…');
+    final idsClasses = {for (final c in await classes().first) cle(c.nom): c.id};
+    final nouvelles = <void Function(WriteBatch)>[];
+    for (final c in plan.classes) {
+      final ref = _col('classes').doc();
+      idsClasses[cle(c.nom)] = ref.id;
+      nouvelles.add((b) => b.set(ref, c.toMap()));
+    }
+    await parLots(nouvelles);
+
+    // 2. Branches
+    progression?.call('Branches…');
+    await parLots([
+      for (final (classe, m) in plan.branches)
+        (b) => b.set(_col('matieres').doc(), {...m.toMap(), 'classeId': idsClasses[cle(classe)]}),
+    ]);
+
+    // 3. Enseignants (avec leurs comptes / invitations)
+    for (final (i, e) in plan.enseignants.indexed) {
+      progression?.call('Enseignants ${i + 1}/${plan.enseignants.length}…');
+      await enregistrerEnseignant(
+        Enseignant(
+          id: '',
+          nom: e.enseignant.nom,
+          prenom: e.enseignant.prenom,
+          telephone: e.enseignant.telephone,
+          email: e.enseignant.email,
+          specialite: e.enseignant.specialite,
+          classeIds: [for (final n in e.classesNoms) idsClasses[cle(n)]!],
+        ),
+        identifiants: e.identifiants,
+      );
+    }
+
+    // 4. Élèves (matricules réservés en une fois)
+    progression?.call('Élèves…');
+    final sansMatricule = plan.eleves.where((e) => e.eleve.matricule.isEmpty).length;
+    final numeros = await _reserverNumeros('matricule', 'EL', sansMatricule);
+    var n = 0;
+    final parParent = <String, ({String nom, List<String> eleveIds})>{};
+    final ecritures = <void Function(WriteBatch)>[];
+    for (final ei in plan.eleves) {
+      final ref = _col('eleves').doc();
+      final e = ei.eleve;
+      final complet = Eleve(
+        id: ref.id,
+        matricule: e.matricule.isNotEmpty ? e.matricule : numeros[n++],
+        nom: e.nom,
+        prenom: e.prenom,
+        classeId: idsClasses[cle(ei.classeNom)]!,
+        dateNaissance: e.dateNaissance,
+        sexe: e.sexe,
+        parentNom: e.parentNom,
+        parentTelephone: e.parentTelephone,
+        parentEmail: e.parentEmail,
+      );
+      ecritures.add((b) => b.set(ref, complet.toMap()));
+      for (final id in ei.identifiantsParent) {
+        final p = parParent[id];
+        parParent[id] = (nom: p?.nom ?? e.parentNom, eleveIds: [...?p?.eleveIds, ref.id]);
+      }
+    }
+    await parLots(ecritures);
+
+    // 5. Parents : une invitation par numéro / e-mail, frères et sœurs regroupés
+    var i = 0;
+    for (final p in parParent.entries) {
+      progression?.call('Parents ${++i}/${parParent.length}…');
+      await _lierParentEleves(p.key, p.value.nom, p.value.eleveIds);
+    }
+    return (
+      classes: plan.classes.length,
+      branches: plan.branches.length,
+      enseignants: plan.enseignants.length,
+      eleves: plan.eleves.length,
+      parents: parParent.length,
+    );
   }
 
   /// Compte de l'école dont l'e-mail ou le téléphone vaut [identifiant].
@@ -457,6 +564,20 @@ class SchoolRepository {
       });
 
   // ---------------- Utilitaires ----------------
+  /// Réserve [n] numéros consécutifs en une seule transaction.
+  Future<List<String>> _reserverNumeros(String compteur, String prefixe, int n) async {
+    if (n == 0) return const [];
+    final ref = _ecole.collection('meta').doc('compteurs');
+    final debut = await _db.runTransaction<int>((tx) async {
+      final snap = await tx.get(ref);
+      final courant = ((snap.data() ?? const {})[compteur] as num?)?.toInt() ?? 0;
+      tx.set(ref, {compteur: courant + n}, SetOptions(merge: true));
+      return courant + 1;
+    });
+    final annee = DateTime.now().year;
+    return [for (var k = 0; k < n; k++) '$prefixe$annee-${(debut + k).toString().padLeft(5, '0')}'];
+  }
+
   Future<String> _prochainNumero(String compteur, String prefixe) async {
     final ref = _ecole.collection('meta').doc('compteurs');
     final n = await _db.runTransaction<int>((tx) async {

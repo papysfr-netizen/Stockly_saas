@@ -11,6 +11,7 @@ import '../../providers/providers.dart';
 import '../../services/emploi_du_temps.dart';
 import '../../services/rappels.dart';
 import '../../widgets/common.dart';
+import 'import_card.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -53,6 +54,7 @@ class SettingsScreen extends ConsumerWidget {
         ),
       ),
       if (me.isAdmin && ecole != null) ...[
+        const ImportCard(),
         _EcoleCard(ecole: ecole),
         const _ComptesCard(),
       ],
