@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format.dart';
+import '../../core/theme.dart';
 import '../../models/eleve.dart';
 import '../../models/scolarite.dart';
 import '../../providers/providers.dart';
@@ -204,7 +205,7 @@ class _ImpayesTabState extends ConsumerState<_ImpayesTab> {
                         ].join(' · ')),
                         trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                           Text(formatMontant(l.reste, devise: devise),
-                              style: TextStyle(color: Colors.orange.shade800, fontWeight: FontWeight.bold)),
+                              style: TextStyle(color: context.etat.attention, fontWeight: FontWeight.bold)),
                           MenuRelance(eleve: l.eleve, reste: l.reste),
                           IconButton(
                             tooltip: 'Encaisser',

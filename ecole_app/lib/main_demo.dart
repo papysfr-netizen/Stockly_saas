@@ -11,6 +11,7 @@ import 'data/rappel_repository.dart';
 import 'data/school_repository.dart';
 import 'demo/donnees_demo.dart';
 import 'models/app_user.dart';
+import 'providers/apparence.dart';
 import 'providers/providers.dart';
 import 'screens/home_shell.dart';
 import 'services/rappels.dart';
@@ -47,6 +48,8 @@ class _AppDemo extends ConsumerWidget {
       title: 'Gestion École — démo',
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
+      darkTheme: buildTheme(Brightness.dark),
+      themeMode: ref.watch(apparenceProvider),
       locale: const Locale('fr', 'FR'),
       supportedLocales: const [Locale('fr', 'FR')],
       localizationsDelegates: const [
@@ -56,18 +59,19 @@ class _AppDemo extends ConsumerWidget {
       ],
       builder: (context, child) => Column(children: [
         Material(
-          color: Colors.amber.shade100,
+          color: context.etat.bandeau,
+          textStyle: TextStyle(color: context.etat.surBandeau),
           child: SafeArea(
             bottom: false,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               child: Row(children: [
-                const Icon(Icons.science_outlined, size: 18),
+                Icon(Icons.science_outlined, size: 18, color: context.etat.surBandeau),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     user == null ? 'Démonstration — données fictives' : 'Démo · ${user.role.label}',
-                    style: const TextStyle(fontSize: 13),
+                    style: TextStyle(fontSize: 13, color: context.etat.surBandeau),
                   ),
                 ),
                 if (user != null)

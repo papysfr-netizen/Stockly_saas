@@ -6,6 +6,7 @@ import '../../core/pays.dart';
 import '../../core/telephone.dart';
 import '../../models/app_user.dart';
 import '../../models/ecole.dart';
+import '../../providers/apparence.dart';
 import '../../providers/providers.dart';
 import '../../services/emploi_du_temps.dart';
 import '../../services/rappels.dart';
@@ -29,6 +30,26 @@ class SettingsScreen extends ConsumerWidget {
             label: const Text('Déconnexion'),
             onPressed: () => ref.read(authRepoProvider).deconnexion(),
           ),
+        ),
+      ),
+      Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('Apparence', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 4),
+            const Text('Mémorisée sur cet appareil.'),
+            const SizedBox(height: 12),
+            SegmentedButton<ThemeMode>(
+              segments: const [
+                ButtonSegment(value: ThemeMode.system, icon: Icon(Icons.brightness_auto), label: Text('Auto')),
+                ButtonSegment(value: ThemeMode.light, icon: Icon(Icons.light_mode_outlined), label: Text('Clair')),
+                ButtonSegment(value: ThemeMode.dark, icon: Icon(Icons.dark_mode_outlined), label: Text('Sombre')),
+              ],
+              selected: {ref.watch(apparenceProvider)},
+              onSelectionChanged: (s) => ref.read(apparenceProvider.notifier).choisir(s.first),
+            ),
+          ]),
         ),
       ),
       if (me.isAdmin && ecole != null) ...[

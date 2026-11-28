@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/evaluation.dart';
 import '../../core/format.dart';
+import '../../core/theme.dart';
 import '../../models/absence_eleve.dart';
 import '../../models/app_user.dart';
 import '../../models/classe.dart';
@@ -128,7 +129,7 @@ class _InfosTab extends ConsumerWidget {
                   Expanded(
                     child: Text('Reste : ${m(reste)}',
                         style: TextStyle(
-                            fontWeight: FontWeight.bold, color: reste > 0 ? Colors.orange.shade800 : Colors.green)),
+                            fontWeight: FontWeight.bold, color: reste > 0 ? context.etat.attention : context.etat.succes)),
                   ),
                   if (reste > 0 && me.canManagePaiements) MenuRelance(eleve: eleve, reste: reste),
                 ]),
@@ -263,10 +264,10 @@ class _AbsencesTab extends ConsumerWidget {
                 ListTile(
                   leading: Icon(a.estAbsence ? Icons.cancel : Icons.schedule,
                       color: !a.estAbsence
-                          ? Colors.orange
+                          ? context.etat.attention
                           : a.justifiee
-                              ? Colors.blueGrey
-                              : Colors.red),
+                              ? context.etat.neutre
+                              : context.etat.danger),
                   title: Text('${a.statut.label} · ${formatDate(a.date)}'),
                   subtitle: Text([
                     if (a.justifiee) 'Justifiée : ${a.motif}${a.note.isEmpty ? '' : ' (${a.note})'}',

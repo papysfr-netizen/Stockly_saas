@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format.dart';
+import '../../core/theme.dart';
 import '../../models/remplacement.dart';
 import '../../models/scolarite.dart';
 import '../../providers/providers.dart';
@@ -64,29 +65,29 @@ class DashboardScreen extends ConsumerWidget {
               titre: 'Encaissé ce mois',
               valeur: formatMontant(moisEncaisse, devise: devise),
               icon: Icons.payments,
-              couleur: Colors.green),
+              couleur: context.etat.succes),
           StatCard(
               titre: 'Reste à recouvrer',
               valeur: formatMontant(impayes, devise: devise),
               icon: Icons.warning_amber,
-              couleur: Colors.orange),
+              couleur: context.etat.attention),
           StatCard(
               titre: "Présence aujourd'hui",
               valeur: tauxPresence == null ? 'Appel non fait' : '${tauxPresence.toStringAsFixed(0)} %',
               icon: Icons.fact_check,
-              couleur: Colors.teal),
+              couleur: context.etat.info),
           StatCard(
               titre: "Enseignants absents aujourd'hui",
               valeur: absentsJour == 0 ? 'Aucun' : '$absentsJour · $aPourvoir cours à pourvoir',
               icon: Icons.swap_horiz,
-              couleur: aPourvoir > 0 ? Colors.red : Colors.blueGrey),
+              couleur: aPourvoir > 0 ? context.etat.danger : context.etat.neutre),
           StatCard(
               titre: 'Élèves à suivre (absences répétées)',
               valeur: aSuivre == 0 && justificatifs == 0
                   ? 'Aucun'
                   : '$aSuivre${justificatifs > 0 ? ' · $justificatifs justificatif(s) à valider' : ''}',
               icon: Icons.person_search,
-              couleur: aSuivre > 0 ? Colors.deepOrange : Colors.blueGrey),
+              couleur: aSuivre > 0 ? context.etat.attention : context.etat.neutre),
         ];
         return GridView.count(
           crossAxisCount: cols,

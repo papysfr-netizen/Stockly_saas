@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/format.dart';
+import '../../core/theme.dart';
 import '../../core/telephone.dart';
 import '../../models/classe.dart';
 import '../../models/remplacement.dart';
@@ -27,10 +28,10 @@ class RemplacementsScreen extends StatelessWidget {
 }
 
 Color couleurStatut(BuildContext context, StatutRemplacement s) => switch (s) {
-      StatutRemplacement.aPourvoir => Colors.orange.shade800,
-      StatutRemplacement.remplace => Colors.green.shade700,
-      StatutRemplacement.etude => Colors.blue.shade700,
-      StatutRemplacement.annule => Theme.of(context).colorScheme.error,
+      StatutRemplacement.aPourvoir => context.etat.attention,
+      StatutRemplacement.remplace => context.etat.succes,
+      StatutRemplacement.etude => context.etat.info,
+      StatutRemplacement.annule => context.etat.danger,
     };
 
 // ============================================================
@@ -84,7 +85,7 @@ class _JourTabState extends ConsumerState<_JourTab> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: ActionChip(
-            avatar: Icon(Icons.warning_amber, color: Colors.orange.shade800),
+            avatar: Icon(Icons.warning_amber, color: context.etat.attention),
             label: Text('${aVenir.length} cours à pourvoir à venir — prochain le '
                 '${formatDate(DateTime.parse((aVenir..sort((a, b) => a.date.compareTo(b.date))).first.date))}'),
             onPressed: () => setState(() => _date = DateTime.parse(aVenir.first.date)),
